@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 
 // Handle routes
-app.use('/', routes);   
+app.use('/api', routes);   
 
 // Setup passport for auth
 app.use(passport.initialize())

@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const config = require('../config/database');
 const mongoose = require('mongoose');
+const jwt = require('jwt-simple');
+const passport = require('passport');
 const User = require('../models/user');
 
 mongoose.connect(config.database);
@@ -29,11 +31,40 @@ router.post('/identify', function(req, res) {
         else {
             user.comparePassword(req.body.password, function(err, match) {
                 if (match && !err) {
-                    res.json({success: true}); // create and return jwt token here
+                    let token = jwt.encode(user, config.secret);
+                    res.json({success: true, token: 'JWT '+token}); // create and return jwt token here
                 } else { res.send({success: false, error: 'Incorrect username or password.'}); }
             });
         }
     })
 });
+
+router.get('/session', passport.authenticate('jwt', {session: false}), function(req, res) {
+    let token = getToken(req.headers);
+    if (token) {
+        // todo, ab pls handle valid token function handling
+    } else {
+        return res.status(403).send({success: false, error: 'No authentication token.'})
+    }
+});
+
+getToken = function(headers) {
+    if (headers && headers.authorization) {
+        let parted = headers.authorization.split(' ');
+        if (parted.length === 2) return parted[1];
+        else return null;
+    } else return null;
+}
+
+validToken = function(token) {
+    let decoded = jwt.decode(token, config.secret);
+    User.findOne({
+        name: decoded.name
+    }, function(err, user) {
+        if (err) throw err;
+        if (!user) return false, 'User not found';
+        else return true, null;
+    });
+}
 
 module.exports = router;
