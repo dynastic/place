@@ -3,7 +3,7 @@
     "Home": "/",
     "About": "/about"
   };
-  const hasUser = typeof user !== 'undefined';
+  if(typeof user === 'undefined') user = null;
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,7 +53,7 @@
         <% }); %>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <% if(hasUser) { %>
+          <% if(user) { %>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{USERNAME} <span class="caret"></span></a>
               <ul class="dropdown-menu">
@@ -63,7 +63,7 @@
               </ul>
             </li>
           <% } else { %>
-            <li><a href="#">Sign in</a></li>
+            <li><a href="/signin">Sign in</a></li>
           <% } %>
         </ul>
         </div><!-- /.navbar-collapse -->
