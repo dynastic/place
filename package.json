@@ -11,10 +11,11 @@
   "dependencies": {
     "bcrypt": "^1.0.2",
     "body-parser": "^1.17.1",
+    "ejs": "^2.5.6",
     "express": "^4.15.2",
     "jwt-simple": "^0.5.1",
     "mongoose": "^4.9.2",
     "morgan": "^1.8.1",
-    "passport": "^0.3.2",
+    "passport": "^0.3.2"
   }
 }

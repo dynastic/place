@@ -8,11 +8,14 @@ const morgan = require('morgan');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+// Set rendering engine
+app.set('view engine', 'ejs');
+
 // Log to console
 app.use(morgan('dev'));
 
 // Handle routes
-app.use('/api', routes);   
+app.use('/api', routes);
 
 // Setup passport for auth
 app.use(passport.initialize())
