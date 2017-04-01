@@ -16,6 +16,5 @@
     "mongoose": "^4.9.2",
     "morgan": "^1.8.1",
     "passport": "^0.3.2",
-    "passport-jwt": "^2.2.1"
   }
 }
