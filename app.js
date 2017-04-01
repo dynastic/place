@@ -3,13 +3,15 @@ const passport = require('passport');
 const routes = require('./routes/index');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+const ejs = require("ejs");
 
 // Get params
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 // Set rendering engine
-app.set('view engine', 'ejs');
+app.set('view engine', 'html');
+app.engine('html', ejs.renderFile);
 
 // Log to console
 app.use(morgan('dev'));
@@ -31,7 +33,9 @@ app.use(function(req, res, next){
     }
 
     // send HTML
-    res.render('404', { url: req.url });
+    res.render('errors/404', {
+        url: req.url
+    });
 });
 
 // Listen on port 3000
