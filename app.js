@@ -18,6 +18,19 @@ app.use('/api', routes);
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.use(function(req, res, next){
+    res.status(404);
+
+    // respond with json
+    if (req.accepts('json')) {
+        res.send({ error: 'Not found' });
+        return;
+    }
+
+    // send HTML
+    res.render('404', { url: req.url });
+});
+
 // Listen on port 3000
 app.listen(3000, () => {
     console.info('Place listening on port 3000');
