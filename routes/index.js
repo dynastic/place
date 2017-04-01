@@ -43,8 +43,9 @@ router.get('/session', passport.authenticate('jwt', {session: false}), function(
     let token = getToken(req.headers);
     if (token) {
         // todo, ab pls handle valid token function handling
+        return res.status(200).send({msg: 'todo daddy'});
     } else {
-        return res.status(403).send({success: false, error: 'No authentication token.'})
+        return res.status(403).send({success: false, error: 'No authentication token.'});
     }
 });
 
