@@ -2,6 +2,7 @@ const router = require('express').Router();
 const config = require('../config/database');
 const mongoose = require('mongoose');
 const jwt = require('jwt-simple');
+const passport = require('passport');
 require('../config/passport')(passport);
 const User = require('../models/user');
 
