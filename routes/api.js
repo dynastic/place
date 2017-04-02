@@ -4,6 +4,7 @@ const jwt = require('jwt-simple');
 const passport = require('passport');
 require('../config/passport')(passport);
 const User = require('../models/user');
+const path = require("path");
 
 router.post('/signup', function(req, res) {
     if (!req.body.username || !req.body.password) return res.json({success: false, error: {message: 'A username and password are required.', code: 'invalid_parameters'}});
@@ -28,6 +29,10 @@ router.get('/session', function(req, res, next) {
         if (!user) return res.status(401).json({success: false, error: info.error || {message: "An unknown error occurred."}});
         return res.send({success: true, user: user.toInfo()});  
     })(req, res, next);
+});
+
+router.get('/board-image', function(req, res, next) {
+    res.sendFile(path.resolve("testing/board.png"))
 });
 
 getToken = function(headers) {
