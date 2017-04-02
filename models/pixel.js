@@ -12,11 +12,23 @@ var PixelSchema = new Schema({
         required: true
     },
     editorID: { 
-        type: Int,
+        type: Schema.ObjectId,
         required: true
     },
-    modificationTime: {
-        type: Time,
+    lastModified: {
+        type: Date,
+        required: true
+    },
+    colorR: {
+        type: String,
+        required: true
+    },
+    colorG: {
+        type: String,
+        required: true
+    },
+    colorB: {
+        type: String,
         required: true
     }
 });
