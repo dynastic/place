@@ -19,16 +19,16 @@ var PixelSchema = new Schema({
         type: Date,
         required: true
     },
-    colorR: {
-        type: String,
+    colourR: {
+        type: Int,
         required: true
     },
-    colorG: {
-        type: String,
+    colourG: {
+        type: Int,
         required: true
     },
-    colorB: {
-        type: String,
+    colourB: {
+        type: Int,
         required: true
     }
 });
@@ -41,10 +41,10 @@ PixelSchema.methods.toInfo = function() {
         },
         editorID: this.editorID,
         modified: this.lastModified,
-        color: {
-            r: this.colorR,
-            g: this.colorG,
-            b: this.colorB
+        colour: {
+            r: this.colourR,
+            g: this.colourG,
+            b: this.colourB
         }
     }
 }
