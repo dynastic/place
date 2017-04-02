@@ -102,6 +102,7 @@ var place = {
         this.zoomedIn = zoomedIn;
         if(zoomedIn) $(this.zoomController).addClass("zoomed");
         else $(this.zoomController).removeClass("zoomed");
+        this.updateDisplayCanvas();
     },
 
     toggleZoom: function() {
