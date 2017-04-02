@@ -36,7 +36,12 @@ function APIRouter(app) {
 
     router.get('/board-image', function(req, res, next) {
         if(!app.paintingHandler.hasImage) return res.status(503).json({success: false, error: {message: "We are not yet ready to take requests.", code: "not_ready"}})
-        res.sendFile(path.resolve("testing/board.png"))
+        app.paintingHandler.getOutputImage().then((image) => {
+            return res.set({'Content-Type': 'image/png'}).send(image);
+        }).catch((err) => {
+            console.error("An error occurred while trying to serve the board image: " + err)
+            return res.status(500).json({success: false, error: {message: "We could not retrieve the current board image.", code: "image_fail"}})
+        });
     });
 
     getToken = function(headers) {
