@@ -32,7 +32,6 @@
 
 #zoom-controller {
     transform-origin: center;
-    transform: scale(4, 4);
     z-index: 1;
     cursor: grab;
     cursor: -moz-grab;
@@ -42,18 +41,10 @@
     transition: translate 250ms ease-out;
 }
 
-#zoom-controller.zoomed {
-    transform: scale(40, 40);
-}
-
 #zoom-controller.grabbing {
     cursor: grabbing;
     cursor: -moz-grabbing;
     cursor: -webkit-grabbing;
-}
-
-#camera-controller {
-    position: relative;
 }
 
 #zoom-button {

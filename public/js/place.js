@@ -44,7 +44,12 @@ var place = {
 
         zoomController.onmousedown = (event) => this.handleMouseDown(event || window.event);
         zoomController.onmouseup = (event) => this.handleMouseUp(event || window.event);
+        zoomController.onmouseout = (event) => this.handleMouseUp(event || window.event);
         zoomController.onmousemove = (event) => { if (this.isMouseDown) this.handleMouseDrag(event || window.event); }
+        zoomController.addEventListener("touchstart", (event) => this.handleMouseDown(event.changedTouches[0]));
+        zoomController.addEventListener("touchmove", (event) => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
+        zoomController.addEventListener("touchend", (event) => this.handleMouseUp(event.changedTouches[0]));
+        zoomController.addEventListener("touchcancel", (event) => this.handleMouseUp(event.changedTouches[0]));
 
         window.onresize = () => this.handleResize();
 
@@ -100,8 +105,6 @@ var place = {
 
     setZoomedIn: function(zoomedIn) {
         this.zoomedIn = zoomedIn;
-        if(zoomedIn) $(this.zoomController).addClass("zoomed");
-        else $(this.zoomController).removeClass("zoomed");
         this.updateDisplayCanvas();
     },
 
@@ -128,6 +131,7 @@ var place = {
         let cam = $(this.cameraController);
         let zoomModifier = this._getZoomMultiplier();
         let x = deltaX / zoomModifier, y = deltaY / zoomModifier;
+        console.log(x);
         cam.css({
             top: `+=${y}px`,
             left: `+=${x}px`
