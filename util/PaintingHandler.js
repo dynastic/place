@@ -1,4 +1,6 @@
 const lwip = require('lwip');
+const Pixel = require('../models/pixel');
+
 const imageSize = 1000;
 
 function PaintingHandler() {
@@ -18,10 +20,17 @@ function PaintingHandler() {
 
         loadImageFromDatabase: function() {
             return new Promise((resolve, reject) => {
-                let image = this.getBlankImage().then((image) => {
-                    this.hasImage = true;
-                    this.image = image;
-                    resolve(image);
+                let image = this.getBlankImage().then(image => {
+                    Pixel.getAllPixels().then(pixels => {
+                        let batch = image.batch();
+                        pixels.forEach(pixel => batch.setPixel(pixel.location.x, pixel.location.y, pixel.colour))
+                        batch.exec((err, image) => {
+                            if(err) return reject(err);
+                            this.hasImage = true;
+                            this.image = image;
+                            resolve(image);
+                        });
+                    }).catch(err => reject(err));
                 }).catch(err => {
                     reject(err);
                 })

@@ -2,14 +2,26 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 
+var colourPieceValidator = function(c) {
+    return Number.isInteger(c) && c >= 0 && c <= 255;
+}
+
 var PixelSchema = new Schema({
     xPos: {
-        type: Int,
-        required: true
+        type: Number,
+        required: true,
+        validate: {
+            validator: Number.isInteger,
+            message: '{VALUE} is not an integer value'
+        }
     },
     yPos: {
-        type: Int,
-        required: true
+        type: Number,
+        required: true,
+        validate: {
+            validator: Number.isInteger,
+            message: '{VALUE} is not an integer value'
+        }
     },
     editorID: { 
         type: Schema.ObjectId,
@@ -20,16 +32,28 @@ var PixelSchema = new Schema({
         required: true
     },
     colourR: {
-        type: Int,
-        required: true
+        type: Number,
+        required: true,
+        validate: {
+            validator: colourPieceValidator,
+            message: '{VALUE} is not a valid colour'
+        }
     },
     colourG: {
-        type: Int,
-        required: true
+        type: Number,
+        required: true,
+        validate: {
+            validator: colourPieceValidator,
+            message: '{VALUE} is not a valid colour'
+        }
     },
     colourB: {
-        type: Int,
-        required: true
+        type: Number,
+        required: true,
+        validate: {
+            validator: colourPieceValidator,
+            message: '{VALUE} is not a valid colour'
+        }
     }
 });
 
@@ -47,6 +71,16 @@ PixelSchema.methods.toInfo = function() {
             b: this.colourB
         }
     }
+}
+
+PixelSchema.statics.getAllPixels = function() {
+    return new Promise((resolve, reject) => {
+        this.find({}, function(err, pixels) {
+            if(!pixels) return reject(err);
+            let info = pixels.map(pixel => pixel.toInfo())
+            resolve(info)
+        });
+    });
 }
 
 module.exports = mongoose.model('Pixel', PixelSchema);
