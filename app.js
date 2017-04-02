@@ -1,17 +1,27 @@
 const express = require('express');
 const passport = require('passport');
-const apiRoutes = require('./routes/api');
-const routes = require('./routes/public');
+const APIRouter = require('./routes/api');
+const PublicRouter = require('./routes/public');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const ejs = require("ejs");
 const responseFactory = require("./util/responseFactory");
 const config = require('./config/database');
 const mongoose = require('mongoose');
-const session = require('cookie-session')
+const session = require('cookie-session');
+const paintingHandler = require("./util/PaintingHandler")
 
 var app = express();
 mongoose.connect(config.database);
+
+// Get image handler
+app.paintingHandler = paintingHandler();
+console.log("Loading image from the database...")
+app.paintingHandler.loadImageFromDatabase().then((image) => {
+    console.log("Successfully loaded image from database.");
+}).catch(err => {
+    console.error("An error occurred while loading the image from the database.\nError: " + err);
+})
 
 // Get params
 app.use(bodyParser.urlencoded({extended: false}));
@@ -37,8 +47,8 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // Handle routes
-app.use('/api', apiRoutes);
-app.use('/', routes);
+app.use('/api', APIRouter(app));
+app.use('/', PublicRouter(app));
 
 app.use(function(req, res, next){
     res.status(404);
