@@ -49,4 +49,17 @@ UserSchema.methods.toInfo = function() {
     }
 }
 
+UserSchema.statics.register = function(username, password, callback) {
+    let newUser = this({
+        name: username,
+        password: password,
+        creationDate: Date()
+    });
+    // Save the user
+    newUser.save(function(err) {
+        if (err) return callback(null, {message: "That username already exists.", code: "username_taken"});
+        return callback(newUser, null)
+    });
+}
+
 module.exports = mongoose.model('User', UserSchema);
