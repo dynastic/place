@@ -1,7 +1,13 @@
 #place-canvas {
-    width: 1000px;
-    height: 1000px;
+    width: 100%;
+    height: 100%;
     background-color: #fff;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+#place-canvas-draw {
+    opacity: 0;
 }
 
 .canvas-container {
@@ -20,7 +26,7 @@
 
 #zoom-controller {
     transform-origin: center;
-    zoom: 400%;
+    transform: scale(4, 4);
     z-index: 1;
     image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
     image-rendering: -moz-crisp-edges;          /* Firefox                        */
@@ -29,23 +35,26 @@
     image-rendering: pixelated; /* Chrome */
     image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
     -ms-interpolation-mode: nearest-neighbor;   /* IE8+    */
-}
-
-#zoom-controller.zoomed {
-    zoom: 4000%;
-}
-
-#camera-controller {
-    transform: translate(0, 0);
     cursor: grab;
     cursor: -moz-grab;
     cursor: -webkit-grab;
+    -webkit-transition: translate 250ms ease-out;
+    -moz-transition: translate 250ms ease-out;
+    transition: translate 250ms ease-out;
 }
 
-#camera-controller.grabbing {
+#zoom-controller.zoomed {
+    transform: scale(40, 40);
+}
+
+#zoom-controller.grabbing {
     cursor: grabbing;
     cursor: -moz-grabbing;
     cursor: -webkit-grabbing;
+}
+
+#camera-controller {
+    position: relative;
 }
 
 #zoom-button {
