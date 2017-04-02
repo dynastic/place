@@ -80,7 +80,6 @@ var place = {
         let zoom = this.getZoomMultiplier();
         let mod = size / 2;
         this.displayCtx.drawImage(this.canvas, dcanvas.width / 2 + (this.panX - mod - 0.5) * zoom, dcanvas.height / 2 + (this.panY - mod - 0.5) * zoom, this.canvas.width * zoom, this.canvas.height * zoom);
-        //bt.drawImage(c.el, yt.width / 2 + (h._panX - mod - .5) * h._zoom, yt.height / 2 + (h._panY - mod - .5) * h._zoom, c.width * h._zoom, c.height * h._zoom)
     },
 
     getZoomMultiplier: function() {
@@ -124,11 +123,15 @@ var place = {
     moveCamera: function(deltaX, deltaY, animated) {
         if(typeof animated === 'undefined') animated = false;
         let cam = $(this.cameraController);
-        let zoomModifier = this.getZoomModifier();
+        let zoomModifier = this.getZoomMultiplier();
+        let x = deltaX / zoomModifier, y = deltaY / zoomModifier;
         cam.css({
-            top: `+=${deltaY / zoomModifier}px`,
-            left: `+=${deltaX / zoomModifier}px`
+            top: `+=${y}px`,
+            left: `+=${x}px`
         });
+        this.panX += x;
+        this.panY += y;
+        this.updateDisplayCanvas();
     },
 
     handleMouseDown: function(event) {
