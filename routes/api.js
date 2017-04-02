@@ -6,7 +6,7 @@ require('../config/passport')(passport);
 const User = require('../models/user');
 
 router.post('/signup', function(req, res) {
-    if (!req.body.username || !req.body.password) return res.json({success: false, error: 'A username and password are required.'});
+    if (!req.body.username || !req.body.password) return res.json({success: false, error: {message: 'A username and password are required.', code: 'invalid_parameters'}});
     User.register(req.body.username, req.body.password, function(user, error) {
         if(user) return res.json({success: true});
         return res.json({success: false, error: error || {message: "An unknown error occurred."}});
