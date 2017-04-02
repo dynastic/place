@@ -35,10 +35,17 @@ var PixelSchema = new Schema({
 
 PixelSchema.methods.toInfo = function() {
     return {
-        x = this.xpos,
-        y = this.ypos,
-        editorID = this.editorID,
-        modified = this.modificationTime
+        point: {
+            x: this.xPos,
+            y: this.yPos
+        },
+        editorID: this.editorID,
+        modified: this.lastModified,
+        color: {
+            r: this.colorR,
+            g: this.colorG,
+            b: this.colorB
+        }
     }
 }
 
