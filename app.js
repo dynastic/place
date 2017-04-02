@@ -8,8 +8,9 @@ const ejs = require("ejs");
 const responseFactory = require("./util/responseFactory");
 const config = require('./config/database');
 const mongoose = require('mongoose');
+const session = require('cookie-session')
 
-const app = express();
+var app = express();
 mongoose.connect(config.database);
 
 // Get params
@@ -29,7 +30,14 @@ app.use(morgan('dev'));
 app.use('/api', apiRoutes);
 app.use('/', routes);
 
+app.set('trust proxy', 1)
+
 // Setup passport for auth
+app.use(session({
+    name: "session",
+    secret: config.secret,
+    maxAge: 24 * 60 * 60 * 1000
+}));
 app.use(passport.initialize())
 app.use(passport.session())
 

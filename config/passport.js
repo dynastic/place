@@ -17,16 +17,27 @@ module.exports = function(passport) {
             done(null, false, {error: {message: "Invalid token.", code: "invalid_token"}});
         });
     }));
+
     passport.use(new LocalStrategy(function(username, password, done) {
         User.findOne({name: username}, function(err, user) {
             if (err) return done(err, false);
             if (user) {
                 return user.comparePassword(password, function(err, match) {
                     if (match && !err) return done(null, user);
-                    done(null, false, {error: {message: "Invalid username or password provided.", code: "invalid_credentials"}});
+                    done(null, false, {error: {message: "Incorrect username or password provided.", code: "invalid_credentials"}});
                 });
             }
-            done(null, false, {error: {message: "Invalid username or password provided.", code: "invalid_credentials"}});
+            done(null, false, {error: {message: "Incorrect username or password provided.", code: "invalid_credentials"}});
         });
     }));
+
+    passport.serializeUser(function (user, done) {
+        done(null, user.id);
+    });
+
+    passport.deserializeUser(function (user, done) {
+        User.findById(id, function (err, user) {
+            done(err, user);
+        });
+    });
 }
