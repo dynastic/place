@@ -1,3 +1,7 @@
+body {
+    font-family: -apple-system-font, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
 body.fixed-navbar {
     padding-top: 64px;
 }

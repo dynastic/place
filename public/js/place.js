@@ -35,12 +35,16 @@ var place = {
     zoomedIn: false,
     zoomButton: null,
     dragStart: null, isMouseDown: false, panX: 0, panY: 0,
+    DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
 
-    start: function(canvas, zoomController, cameraController, displayCanvas) {
+    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement) {
         this.canvas = canvas;
         this.canvasController = createCanvasController(canvas);
         this.displayCanvas = displayCanvas;
         this.setupDisplayCanvas(this.displayCanvas);
+
+        this.colourPaletteElement = colourPaletteElement;
+        this.setupColours();
 
         zoomController.onmousedown = (event) => this.handleMouseDown(event || window.event);
         zoomController.onmouseup = (event) => this.handleMouseUp(event || window.event);
@@ -61,6 +65,12 @@ var place = {
             this.canvasController.drawImage(image);
             this.updateDisplayCanvas();
             this.displayCtx.imageSmoothingEnabled = false;
+        });
+    },
+
+    setupColours: function() {
+        this.DEFAULT_COLOURS.forEach((colour) => {
+            $(this.colourPaletteElement).append("<div class=\"colour-option" + (colour.toLowerCase() == "#ffffff" ? " is-white" : "") + "\" style=\"background-color: " + colour + ";\" data-colour=\"" + colour + "\"></div>")
         });
     },
 
@@ -164,5 +174,5 @@ var place = {
     }
 }
 
-place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0]);
+place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0]);
 place.setZoomButton($("#zoom-button")[0]);
