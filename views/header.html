@@ -4,6 +4,12 @@
     "About": "/about"
   };
   if(typeof user === 'undefined') user = null;
+  var renderNavItem = function(name, itemPath) {
+      let isCurrentPage = itemPath == path;
+      return `<li ${isCurrentPage ? " class=\"active\"" : ""}>` +
+        `<a href="${itemPath}">${name} ${isCurrentPage ? " <span class=\"sr-only\">(current)</span>" : ""}</a>` +
+      "</li>";
+  }
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,6 +22,8 @@
     <!-- Bootstrap -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
+    <link href="/css/global.css" rel="stylesheet">
+
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -23,12 +31,12 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
   </head>
-  <body>
-    <nav class="navbar navbar-default">
-      <div class="container-fluid">
+  <body class="fixed-navbar">
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -38,34 +46,28 @@
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
-        <% Object.keys(navItems).forEach((name) => {
-          let path = navItems[name];
-          let isCurrentPage = path == url;
-        %>
-          <li<% if(isCurrentPage) { %> class="active"<% } %>>
-            <a href="<%= path %>">
-              <%= name %>
-              <% if(isCurrentPage) { %> <span class="sr-only">(current)</span><% } %>
-            </a>
-          </li>
-        <% }); %>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-          <% if(user) { %>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{USERNAME} <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="/account">Account details</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="/signout">Sign out</a></li>
-              </ul>
-            </li>
-          <% } else { %>
-            <li><a href="/signin">Sign in</a></li>
-          <% } %>
-        </ul>
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <% Object.keys(navItems).forEach((name) => {
+              let itemPath = navItems[name];
+              %>
+              <%- renderNavItem(name, itemPath); %>
+            <% }); %>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <% if(user) { %>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{USERNAME} <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <%- renderNavItem("Account details", "/account"); %>
+                  <li role="separator" class="divider"></li>
+                  <%- renderNavItem("Sign out", "/signout"); %>
+                </ul>
+              </li>
+            <% } else { %>
+              <%- renderNavItem("Sign in", "/signin"); %>
+            <% } %>
+          </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
     </nav>

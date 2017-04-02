@@ -1,13 +1,22 @@
-const app = require('express')();
+const express = require('express');
 const passport = require('passport');
-const routes = require('./routes/index');
+const apiRoutes = require('./routes/api');
+const routes = require('./routes/public');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const ejs = require("ejs");
+const responseFactory = require("./util/responseFactory");
+const config = require('./config/database');
+const mongoose = require('mongoose');
+
+const app = express();
+mongoose.connect(config.database);
 
 // Get params
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+app.use(express.static('public'))
 
 // Set rendering engine
 app.set('view engine', 'html');
@@ -17,7 +26,8 @@ app.engine('html', ejs.renderFile);
 app.use(morgan('dev'));
 
 // Handle routes
-app.use('/api', routes);
+app.use('/api', apiRoutes);
+app.use('/', routes);
 
 // Setup passport for auth
 app.use(passport.initialize())
@@ -33,12 +43,10 @@ app.use(function(req, res, next){
     }
 
     // send HTML
-    res.render('errors/404', {
-        url: req.url
-    });
+    responseFactory.sendRenderedResponse("errors/404", req, res);
 });
 
 // Listen on port 3000
 app.listen(3000, () => {
-    console.info('Place listening on port 3000');
+    console.info('Place server listening on port 3000');
 });

@@ -11,6 +11,10 @@ var UserSchema = new Schema({
     password: {
         type: String,
         required: true
+    },
+    creationDate: {
+        type: Date,
+        required: true
     }
 });
 
@@ -35,6 +39,14 @@ UserSchema.methods.comparePassword = function (passwd, cb) {
         if (err) return cb(err);
         cb(null, isMatch);
     });
+}
+
+UserSchema.methods.toInfo = function() {
+    return {
+        id: this.id,
+        username: this.name,
+        creationDate: this.creationDate
+    }
 }
 
 module.exports = mongoose.model('User', UserSchema);
