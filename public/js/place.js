@@ -104,6 +104,8 @@ var place = {
 
     setZoomedIn: function(zoomedIn) {
         this.zoomedIn = zoomedIn;
+        if(zoomedIn) $(this.zoomController).addClass("zoomed");
+        else $(this.zoomController).removeClass("zoomed");
         this.updateDisplayCanvas();
     },
 
@@ -130,6 +132,7 @@ var place = {
         let cam = $(this.cameraController);
         let zoomModifier = this._getZoomMultiplier();
         let x = deltaX / zoomModifier, y = deltaY / zoomModifier;
+        console.log("X: " + (x > 0 ? "Positive" : "Negative"))
         cam.css({
             top: `+=${y}px`,
             left: `+=${x}px`
@@ -154,12 +157,12 @@ var place = {
         this.isMouseDown = false;
         $(this.zoomController).removeClass("grabbing");
         dragStart = null;
+    },
+
+    isSignedIn: function() {
+        return $("body").hasClass("signed-in");
     }
 }
 
 place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0]);
 place.setZoomButton($("#zoom-button")[0]);
-
-function move(x, y) {
-    place.moveCamera(x, y, false);
-}
