@@ -1,13 +1,19 @@
 #place-canvas {
-    width: 100%;
-    height: 100%;
-    background-color: #fff;
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0
 }
 
 #place-canvas-draw {
     opacity: 0;
+    -ms-interpolation-mode: bicubic;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
 }
 
 .canvas-container {
@@ -28,13 +34,6 @@
     transform-origin: center;
     transform: scale(4, 4);
     z-index: 1;
-    image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
-    image-rendering: -moz-crisp-edges;          /* Firefox                        */
-    image-rendering: -o-crisp-edges;            /* Opera                          */
-    image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
-    image-rendering: pixelated; /* Chrome */
-    image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
-    -ms-interpolation-mode: nearest-neighbor;   /* IE8+    */
     cursor: grab;
     cursor: -moz-grab;
     cursor: -webkit-grab;

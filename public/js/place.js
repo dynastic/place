@@ -40,8 +40,7 @@ var place = {
         this.canvas = canvas;
         this.canvasController = createCanvasController(canvas);
         this.displayCanvas = displayCanvas;
-        this.displayCtx = displayCanvas.getContext("2d");
-        this.setupDisplayCanvas();
+        this.setupDisplayCanvas(this.displayCanvas);
 
         zoomController.onmousedown = (event) => this.handleMouseDown(event || window.event);
         zoomController.onmouseup = (event) => this.handleMouseUp(event || window.event);
@@ -56,20 +55,23 @@ var place = {
             this.canvasController.clearCanvas();
             this.canvasController.drawImage(image);
             this.updateDisplayCanvas();
+            this.displayCtx.imageSmoothingEnabled = false;
         });
     },
 
     handleResize: function() {
         this.displayCanvas.height = window.innerHeight;
         this.displayCanvas.width = window.innerWidth;
-        this.updateDisplayCanvas();
-    },
-
-    setupDisplayCanvas: function() {
         this.displayCtx.mozImageSmoothingEnabled = false;
         this.displayCtx.webkitImageSmoothingEnabled = false;
         this.displayCtx.msImageSmoothingEnabled = false;
         this.displayCtx.imageSmoothingEnabled = false;
+        this.updateDisplayCanvas();
+    },
+
+    setupDisplayCanvas: function(canvas) {
+        this.displayCtx = canvas.getContext("2d");
+        console.log("SETUP!!!!");
         this.handleResize();
         this.updateDisplayCanvas();
     },
@@ -77,12 +79,12 @@ var place = {
     updateDisplayCanvas: function() {
         let dcanvas = this.displayCanvas;
         this.displayCtx.clearRect(0, 0, dcanvas.width, dcanvas.height);
-        let zoom = this.getZoomMultiplier();
+        let zoom = this._getZoomMultiplier();
         let mod = size / 2;
         this.displayCtx.drawImage(this.canvas, dcanvas.width / 2 + (this.panX - mod - 0.5) * zoom, dcanvas.height / 2 + (this.panY - mod - 0.5) * zoom, this.canvas.width * zoom, this.canvas.height * zoom);
     },
 
-    getZoomMultiplier: function() {
+    _getZoomMultiplier: function() {
         return this.zoomedIn ? 40 : 4;
     },
 
@@ -123,7 +125,7 @@ var place = {
     moveCamera: function(deltaX, deltaY, animated) {
         if(typeof animated === 'undefined') animated = false;
         let cam = $(this.cameraController);
-        let zoomModifier = this.getZoomMultiplier();
+        let zoomModifier = this._getZoomMultiplier();
         let x = deltaX / zoomModifier, y = deltaY / zoomModifier;
         cam.css({
             top: `+=${y}px`,
