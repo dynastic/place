@@ -1,7 +1,14 @@
 <%- include('../header.html', {
-    compact: true
+    css: ["compact.css", "place.css"]
 }) -%>
-<div class="container">
-    <h1>Home</h1>
+<div class="canvas-container">
+    <div id="zoom-button" class="btn btn-default"></div>
+    <div id="zoom-controller">
+        <div id="camera-controller">
+            <canvas id="place-canvas"></canvas>
+        </div>
+    </div>
 </div>
-<%- include('../footer.html') -%>
+<%- include('../footer.html', {
+    js: ["place.js"]
+}) -%>

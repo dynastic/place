@@ -1,0 +1,50 @@
+#place-canvas {
+    width: 1000px;
+    height: 1000px;
+    background-color: #fff;
+}
+
+.canvas-container {
+    position: fixed;
+    top: 64px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: #ddd;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+}
+
+#zoom-controller {
+    transform-origin: center;
+    transform: scale(4, 4);
+    transition: transform 0.5s ease-out;
+    z-index: 1;
+}
+
+#zoom-controller.zoomed {
+    transform: scale(40, 40);
+}
+
+#camera-controller {
+    transform: translate(0, 0);
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+
+#camera-controller.grabbing {
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+}
+
+#zoom-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 2;
+}

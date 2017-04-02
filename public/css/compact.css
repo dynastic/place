@@ -1,0 +1,8 @@
+body.fixed-navbar {
+    padding-top: 50px;
+    min-height: 100%;
+}
+
+.canvas-container {
+    top: 50px!important;
+}

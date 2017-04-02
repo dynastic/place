@@ -7,8 +7,6 @@ const User = require('../models/user');
 const responseFactory = require("../util/responseFactory");
 
 router.get('/', function(req, res) {
-    console.log(req.user);
-    console.log(req.session);
     return responseFactory.sendRenderedResponse("public/index", req, res);
 })
 
