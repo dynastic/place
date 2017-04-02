@@ -22,8 +22,12 @@ router.post('/identify', function(req, res, next) {
     })(req, res, next);
 });
 
-router.get('/session', passport.authenticate('jwt', {session: false}), function(req, res) {
-    return res.send({success: true, user: req.user.toInfo()});
+router.get('/session', function(req, res, next) {
+    if(req.user) return res.send({success: true, user: req.user.toInfo()});
+    passport.authenticate('jwt', {session: false}, function(err, user, info) {
+        if (!user) return res.status(401).json({success: false, error: info.error || {message: "An unknown error occurred."}});
+        return res.send({success: true, user: user.toInfo()});  
+    })(req, res, next);
 });
 
 getToken = function(headers) {
