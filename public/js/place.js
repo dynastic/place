@@ -76,7 +76,6 @@ var place = {
 
     setupDisplayCanvas: function(canvas) {
         this.displayCtx = canvas.getContext("2d");
-        console.log("SETUP!!!!");
         this.handleResize();
         this.updateDisplayCanvas();
     },
@@ -131,7 +130,6 @@ var place = {
         let cam = $(this.cameraController);
         let zoomModifier = this._getZoomMultiplier();
         let x = deltaX / zoomModifier, y = deltaY / zoomModifier;
-        console.log(x);
         cam.css({
             top: `+=${y}px`,
             left: `+=${x}px`
