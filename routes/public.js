@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const mongoose = require('mongoose');
+const config = require('../config/database');
 const jwt = require('jwt-simple');
 const passport = require('passport');
 require('../config/passport')(passport);
@@ -22,7 +22,10 @@ router.post('/signin', function(req, res, next) {
     if (!req.body.username || !req.body.password) return responseFactory.sendRenderedResponse("public/signin", req, res, {error: {message: "A username and password are required."}, username: req.body.username});
     passport.authenticate('local', function(err, user, info) {
         if (!user) return responseFactory.sendRenderedResponse("public/signin", req, res, {error: info.error || {message: "An unknown error occurred."}, username: req.body.username});
-        res.redirect("/?signedin=1");
+        req.login(user, function(err) {
+            if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, {error: {message: "An unknown error occurred."}, username: req.body.username});
+            return res.redirect("/?signedin=1");
+        });
     })(req, res, next);
 })
 

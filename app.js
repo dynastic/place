@@ -26,35 +26,31 @@ app.engine('html', ejs.renderFile);
 // Log to console
 app.use(morgan('dev'));
 
-// Handle routes
-app.use('/api', apiRoutes);
-app.use('/', routes);
-
 app.set('trust proxy', 1)
 
 // Setup passport for auth
 app.use(session({
-    name: "session",
     secret: config.secret,
-    maxAge: 24 * 60 * 60 * 1000
+    name: "session"
 }));
 app.use(passport.initialize())
 app.use(passport.session())
+
+// Handle routes
+app.use('/api', apiRoutes);
+app.use('/', routes);
 
 app.use(function(req, res, next){
     res.status(404);
 
     // respond with json
-    if (req.accepts('json') && !req.accepts("html")) {
-        res.send({ error: 'Not found' });
-        return;
-    }
+    if (req.accepts('json') && !req.accepts("html")) return res.send({ error: 'Not found' });
 
     // send HTML
     responseFactory.sendRenderedResponse("errors/404", req, res);
 });
 
 // Listen on port 3000
-app.listen(3000, () => {
-    console.info('Place server listening on port 3000');
+app.listen(config.port, () => {
+    console.info(`Place server listening on port ${config.port}`);
 });
