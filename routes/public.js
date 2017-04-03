@@ -40,7 +40,7 @@ function PublicRouter(app) {
         if (!req.body.username || !req.body.password || !req.body.passwordverify) return responseFactory.sendRenderedResponse("public/signup", req, res, {error: {message: "Please fill out all the fields."}, username: req.body.username});
         if (req.body.password != req.body.passwordverify) return responseFactory.sendRenderedResponse("public/signup", req, res, {error: {message: "The passwords you entered did not match."}, username: req.body.username});
         User.register(req.body.username, req.body.password, function(user, error) {
-            if(!user) return res.json({success: false, error: error || {message: "An unknown error occurred.", username: req.body.username}});
+            if(!user) return responseFactory.sendRenderedResponse("public/signup", req, res, {error: error || {message: "An unknown error occurred."}, username: req.body.username});
             req.login(user, function(err) {
                 if (err) return responseFactory.sendRenderedResponse("public/signup", req, res, {error: {message: "An unknown error occurred."}, username: req.body.username});
                 return res.redirect("/?signedup=1");
