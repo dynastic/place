@@ -34,7 +34,10 @@ var createCanvasController = function(canvas) {
 var place = {
     zoomedIn: false,
     zoomButton: null,
-    dragStart: null, isMouseDown: false, panX: 0, panY: 0,
+    dragStart: null,
+    isMouseDown: false,
+    panX: 0,
+    panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement) {
@@ -116,7 +119,7 @@ var place = {
 
     setZoomedIn: function(zoomedIn) {
         this.zoomedIn = zoomedIn;
-        if(zoomedIn) $(this.zoomController).addClass("zoomed");
+        if (zoomedIn) $(this.zoomController).addClass("zoomed");
         else $(this.zoomController).removeClass("zoomed");
         this.updateDisplayCanvas();
     },
@@ -127,7 +130,7 @@ var place = {
     },
 
     _adjustZoomButtonText: function() {
-        if(this.zoomButton) $(this.zoomButton).text(this.zoomedIn ? "Zoom Out" : "Zoom In")
+        if (this.zoomButton) $(this.zoomButton).text(this.zoomedIn ? "Zoom Out" : "Zoom In")
     },
 
     setZoomButton: function(btn) {
@@ -140,10 +143,11 @@ var place = {
     },
 
     moveCamera: function(deltaX, deltaY, animated) {
-        if(typeof animated === 'undefined') animated = false;
+        if (typeof animated === 'undefined') animated = false;
         let cam = $(this.cameraController);
         let zoomModifier = this._getZoomMultiplier();
-        let x = deltaX / zoomModifier, y = deltaY / zoomModifier;
+        let x = deltaX / zoomModifier,
+            y = deltaY / zoomModifier;
         console.log("X: " + (x > 0 ? "Positive" : "Negative"))
         cam.css({
             top: `+=${y}px`,
@@ -157,12 +161,12 @@ var place = {
     handleMouseDown: function(event) {
         this.isMouseDown = true;
         $(this.zoomController).addClass("grabbing");
-        this.dragStart = {x: event.pageX, y: event.pageY};
+        this.dragStart = { x: event.pageX, y: event.pageY };
     },
 
     handleMouseDrag: function(event) {
-        if(this.dragStart) this.moveCamera(event.pageX - this.dragStart.x, event.pageY - this.dragStart.y);
-        this.dragStart = {x: event.pageX, y: event.pageY};
+        if (this.dragStart) this.moveCamera(event.pageX - this.dragStart.x, event.pageY - this.dragStart.y);
+        this.dragStart = { x: event.pageX, y: event.pageY };
     },
 
     handleMouseUp: function(event) {
@@ -180,13 +184,13 @@ var place = {
     },
 
     updatePlaceTimer: function(animated) {
-        if(typeof animated === 'undefined') animated = false;
+        if (typeof animated === 'undefined') animated = false;
         let shouldShow = this.placeTimerShouldShow();
         if (animated) {
-            if(shouldShow) $(this.placeTimer).fadeIn();
+            if (shouldShow) $(this.placeTimer).fadeIn();
             else $(this.placeTimer).fadeOut();
         } else {
-            if(shouldShow) $(this.placeTimer).show();
+            if (shouldShow) $(this.placeTimer).show();
             else $(this.placeTimer).hide();
         }
     }

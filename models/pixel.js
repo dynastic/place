@@ -23,7 +23,7 @@ var PixelSchema = new Schema({
             message: '{VALUE} is not an integer value'
         }
     },
-    editorID: { 
+    editorID: {
         type: Schema.ObjectId,
         required: true
     },
@@ -76,7 +76,7 @@ PixelSchema.methods.toInfo = function() {
 PixelSchema.statics.getAllPixels = function() {
     return new Promise((resolve, reject) => {
         this.find({}, function(err, pixels) {
-            if(!pixels) return reject(err);
+            if (!pixels) return reject(err);
             let info = pixels.map(pixel => pixel.toInfo())
             resolve(info)
         });
