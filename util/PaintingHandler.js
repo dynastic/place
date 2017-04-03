@@ -30,7 +30,7 @@ function PaintingHandler() {
 
         getBlankImage: function() {
             return new Promise((resolve, reject) => {
-                lwip.create(imageSize, imageSize, "white", function(err, image) {
+                lwip.create(imageSize, imageSize, "white", (err, image) => {
                     if (err) return reject(err);
                     resolve(image);
                 });
@@ -47,6 +47,7 @@ function PaintingHandler() {
                             if (err) return reject(err);
                             this.hasImage = true;
                             this.image = image;
+                            this.imageBatch = this.image.batch();
                             resolve(image);
                         });
                     }).catch(err => reject(err));
@@ -67,7 +68,7 @@ function PaintingHandler() {
         generateOutputImage: function() {
             var a = this;
             return new Promise((resolve, reject) => {
-                this.image.toBuffer("png", { compression: "fast", transparency: false }, function(err, buffer) {
+                this.imageBatch.toBuffer("png", { compression: "fast", transparency: false }, (err, buffer) => {
                     if (err) return reject(err);
                     a.outputImage = buffer;
                     a.imageHasChanged = false;
@@ -87,10 +88,10 @@ function PaintingHandler() {
             return new Promise((resolve, reject) => {
                 if(!this.hasImage) return reject({message: "Server not ready", code: "not_ready"});
                 // Add to DB:
-                user.addPixel(colour, x, y, function(pixel, err) {
-                    if(!pixel) return reject(err);
+                user.addPixel(colour, x, y, (pixel, err) => {
+                    if(err) return reject(err);
                     // Paint on live image:
-                    a.image.setPixel(x, y, colour, function(err, image) {
+                    a.imageBatch.setPixel(x, y, colour).exec((err, image) => {
                         if(image) {
                             a.imageHasChanged = true;
                             a.generateOutputImage();

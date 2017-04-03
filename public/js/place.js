@@ -13,7 +13,7 @@ var createCanvasController = function(canvas) {
     ctx.webkitImageSmoothingEnabled = false;
     ctx.msImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
-    // Buffer
+    
     return {
         canvas: canvas,
         ctx: ctx,
@@ -211,7 +211,6 @@ var place = {
         if(this.shouldClick) {
             if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.includes(event.target) || event.target == this.zoomButton || !this.shouldClick) return;
             let zoom = this._getZoomMultiplier();
-            console.log(Math.round((event.pageY - $(this.cameraController).offset().top) / zoom))
             this.canvasClicked(Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), Math.round((event.pageY - $(this.cameraController).offset().top) / zoom))
         }
         this.shouldClick = true;

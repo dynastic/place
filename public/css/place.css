@@ -151,7 +151,7 @@
     cursor: default;
 }
 
-body.signed-in #palette > #sign-in-reminder {
+body.signed-in #palette > #sign-in-reminder, #palette > #placing-modal {
     display: none;
 }
 
