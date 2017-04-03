@@ -49,7 +49,7 @@
     transition: translate 250ms ease-out;
 }
 
-#zoom-controller.zoomed {
+.zoomed > #zoom-controller {
     transform: scale(40, 40);
 }
 
@@ -57,6 +57,14 @@
     cursor: grabbing;
     cursor: -moz-grabbing;
     cursor: -webkit-grabbing;
+}
+
+#zoom-controller.selected {
+    cursor: no-drop;
+}
+
+#zoom-controller.selected > #camera-controller {
+    cursor: pointer;
 }
 
 #camera-controller {
@@ -99,7 +107,7 @@
     position: relative;
 }
 
-#palette > .colour-option {
+.colour-option {
     background: #fff;
     width: 26px;
     height: 26px;
@@ -109,8 +117,20 @@
     cursor: pointer;
 }
 
-#palette > .colour-option.is-white {
+.colour-option.is-white {
     border: 1px solid rgb(200, 200, 200);
+}
+
+.colour-option.hand {
+    position: absolute;
+    top: 0; left: 0;
+    height: 40px;
+    width: 40px;
+    box-sizing: border-box;
+    display: block;
+    margin: 0;
+    z-index: 3;
+    pointer-events: none;
 }
 
 #palette > .overlay {

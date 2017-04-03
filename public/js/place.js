@@ -35,10 +35,11 @@ var place = {
     zoomedIn: false,
     zoomButton: null,
     dragStart: null,
-    isMouseDown: false,
+    isMouseDown: false, shouldClick: true,
     panX: 0,
     panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
+    selectedColour: null, handElement: null,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement) {
         this.canvas = canvas;
@@ -49,16 +50,29 @@ var place = {
         this.colourPaletteElement = colourPaletteElement;
         this.setupColours();
         this.placeTimer = $(this.colourPaletteElement).children("#place-timer");
+        let app = this;
+        $(this.colourPaletteElement).on("click", ".colour-option", function() {
+            let colourID = parseInt($(this).data("colour"));
+            if(colourID) app.selectColour(colourID);
+        });
+        $(this.colourPaletteElement).click(function(e) {
+            if(e.target !== this) return;
+            app.deselectColour();
+        })
         this.updatePlaceTimer();
 
-        zoomController.onmousedown = (event) => this.handleMouseDown(event || window.event);
-        zoomController.onmouseup = (event) => this.handleMouseUp(event || window.event);
-        zoomController.onmouseout = (event) => this.handleMouseUp(event || window.event);
-        zoomController.onmousemove = (event) => { if (this.isMouseDown) this.handleMouseDrag(event || window.event); }
-        zoomController.addEventListener("touchstart", (event) => this.handleMouseDown(event.changedTouches[0]));
-        zoomController.addEventListener("touchmove", (event) => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
-        zoomController.addEventListener("touchend", (event) => this.handleMouseUp(event.changedTouches[0]));
-        zoomController.addEventListener("touchcancel", (event) => this.handleMouseUp(event.changedTouches[0]));
+        let controller = $(zoomController).parent()[0];
+        controller.onmousedown = (event) => this.handleMouseDown(event || window.event);
+        controller.onmouseup = (event) => this.handleMouseUp(event || window.event);
+        controller.onmouseout = (event) => { this.shouldClick = false; this.handleMouseUp(event || window.event) };
+        controller.onmousemove = (event) => {
+            if (this.isMouseDown) this.handleMouseDrag(event || window.event);
+            this.handleMouseMove(event || window.event);
+        }
+        controller.addEventListener("touchstart", (event) => this.handleMouseDown(event.changedTouches[0]));
+        controller.addEventListener("touchmove", (event) => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
+        controller.addEventListener("touchend", (event) => this.handleMouseUp(event.changedTouches[0]));
+        controller.addEventListener("touchcancel", (event) => this.handleMouseUp(event.changedTouches[0]));
 
         window.onresize = () => this.handleResize();
 
@@ -74,8 +88,11 @@ var place = {
     },
 
     setupColours: function() {
-        this.DEFAULT_COLOURS.forEach((colour) => {
-            $(this.colourPaletteElement).append("<div class=\"colour-option" + (colour.toLowerCase() == "#ffffff" ? " is-white" : "") + "\" style=\"background-color: " + colour + ";\" data-colour=\"" + colour + "\"></div>")
+        $(this.colourPaletteElement).remove(".colour-option");
+        this.colourPaletteOptionElements = [];
+        this.DEFAULT_COLOURS.forEach((colour, index) => {
+            let elem = $("<div class=\"colour-option" + (colour.toLowerCase() == "#ffffff" ? " is-white" : "") + "\" style=\"background-color: " + colour + ";\" data-colour=\"" + (index + 1) + "\"></div>").appendTo(this.colourPaletteElement)[0];
+            this.colourPaletteOptionElements.push(elem);
         });
     },
 
@@ -119,14 +136,14 @@ var place = {
 
     setZoomedIn: function(zoomedIn) {
         this.zoomedIn = zoomedIn;
-        if (zoomedIn) $(this.zoomController).addClass("zoomed");
-        else $(this.zoomController).removeClass("zoomed");
+        if (zoomedIn) $(this.zoomController).parent().addClass("zoomed");
+        else $(this.zoomController).parent().removeClass("zoomed");
         this.updateDisplayCanvas();
+        this._adjustZoomButtonText();
     },
 
     toggleZoom: function() {
         this.setZoomedIn(!this.zoomedIn);
-        this._adjustZoomButtonText();
     },
 
     _adjustZoomButtonText: function() {
@@ -135,8 +152,8 @@ var place = {
 
     setZoomButton: function(btn) {
         this.zoomButton = btn;
-        this._adjustZoomButtonText();
         var a = this;
+        this._adjustZoomButtonText();
         $(btn).click(function() {
             a.toggleZoom();
         });
@@ -148,13 +165,28 @@ var place = {
         let zoomModifier = this._getZoomMultiplier();
         let x = deltaX / zoomModifier,
             y = deltaY / zoomModifier;
-        cam.css({
-            top: `+=${y}px`,
-            left: `+=${x}px`
-        });
-        this.panX += x;
-        this.panY += y;
+        this.setCanvasPosition(x, y, true);
         this.updateDisplayCanvas();
+    },
+
+    setCanvasPosition: function(x, y, delta = false) {
+        let deltaStr = delta ? "+=" : ""
+        $(this.cameraController).css({
+            top: `${deltaStr}${y}px`,
+            left: `${deltaStr}${x}px`
+        })
+        if (delta) this.panX += x, this.panY += y;
+        else this.panX = x, this.panY = y;
+    },
+
+    handleMouseMove: function(event) {
+        if(this.handElement) {
+            let elem = $(this.handElement);
+            elem.css({
+                left: event.pageX - (elem.width() / 2),
+                top: event.pageY - (elem.height() / 2),
+            });
+        }
     },
 
     handleMouseDown: function(event) {
@@ -164,11 +196,18 @@ var place = {
     },
 
     handleMouseDrag: function(event) {
+        this.shouldClick = false;
         if (this.dragStart) this.moveCamera(event.pageX - this.dragStart.x, event.pageY - this.dragStart.y);
         this.dragStart = { x: event.pageX, y: event.pageY };
     },
 
     handleMouseUp: function(event) {
+        if(this.shouldClick) {
+            if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.includes(event.target) || event.target == this.zoomButton || !this.shouldClick) return;
+            let zoom = this._getZoomMultiplier();
+            this.canvasClicked((event.pageX - $(this.cameraController).offset().left) / zoom, (event.pageY - $(this.cameraController).offset().top) / zoom)
+        }
+        this.shouldClick = true;
         this.isMouseDown = false;
         $(this.zoomController).removeClass("grabbing");
         dragStart = null;
@@ -192,6 +231,29 @@ var place = {
             if (shouldShow) $(this.placeTimer).show();
             else $(this.placeTimer).hide();
         }
+    },
+
+    selectColour: function(colourID) {
+        this.deselectColour();
+        this.selectedColour = colourID - 1;
+        let elem = this.colourPaletteOptionElements[this.selectedColour];
+        this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
+        $(this.zoomController).addClass("selected");
+    },
+
+    deselectColour: function() {
+        this.selectedColour = null;
+        $(this.handElement).remove();
+        $(this.zoomController).removeClass("selected");
+    },
+
+    zoomIntoPoint: function(x, y) {
+        this.setCanvasPosition(-(x - size / 2), -(y - size / 2));
+        this.setZoomedIn(true);
+    },
+
+    canvasClicked: function(x, y, event) {
+        if(!this.zoomedIn) this.zoomIntoPoint(x, y);
     }
 }
 
