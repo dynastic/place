@@ -18,12 +18,12 @@ var UserSchema = new Schema({
     }
 });
 
-UserSchema.pre('save', function (next) {
+UserSchema.pre('save', function(next) {
     let user = this;
     if (this.isModified('password') || this.isNew) {
-        bcrypt.genSalt(10, function (err, salt) {
+        bcrypt.genSalt(10, function(err, salt) {
             if (err) return next(err);
-            bcrypt.hash(user.password, salt, function (err, hash) {
+            bcrypt.hash(user.password, salt, function(err, hash) {
                 if (err) return next(err);
                 user.password = hash;
                 next();
@@ -34,8 +34,8 @@ UserSchema.pre('save', function (next) {
     }
 });
 
-UserSchema.methods.comparePassword = function (passwd, cb) {
-    bcrypt.compare(passwd, this.password, function (err, isMatch) {
+UserSchema.methods.comparePassword = function(passwd, cb) {
+    bcrypt.compare(passwd, this.password, function(err, isMatch) {
         if (err) return cb(err);
         cb(null, isMatch);
     });
@@ -50,7 +50,7 @@ UserSchema.methods.toInfo = function() {
 }
 
 UserSchema.statics.register = function(username, password, callback) {
-    if(!this.isValidUsername(username)) return callback(null, {message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken"});
+    if (!this.isValidUsername(username)) return callback(null, { message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
     let newUser = this({
         name: username,
         password: password,
@@ -58,7 +58,7 @@ UserSchema.statics.register = function(username, password, callback) {
     });
     // Save the user
     newUser.save(function(err) {
-        if (err) return callback(null, {message: "That username already exists.", code: "username_taken"});
+        if (err) return callback(null, { message: "That username already exists.", code: "username_taken" });
         return callback(newUser, null)
     });
 }

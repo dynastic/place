@@ -5,14 +5,15 @@ const imageSize = 1000;
 
 function PaintingHandler() {
     return {
-        hasImage: false, imageHasChanged: false,
+        hasImage: false,
+        imageHasChanged: false,
         image: null,
         outputImage: null,
 
         getBlankImage: function() {
             return new Promise((resolve, reject) => {
                 lwip.create(imageSize, imageSize, "white", function(err, image) {
-                    if(err) return reject(err);
+                    if (err) return reject(err);
                     resolve(image);
                 });
             });
@@ -25,7 +26,7 @@ function PaintingHandler() {
                         let batch = image.batch();
                         pixels.forEach(pixel => batch.setPixel(pixel.location.x, pixel.location.y, pixel.colour))
                         batch.exec((err, image) => {
-                            if(err) return reject(err);
+                            if (err) return reject(err);
                             this.hasImage = true;
                             this.image = image;
                             resolve(image);
@@ -39,7 +40,7 @@ function PaintingHandler() {
 
         getOutputImage: function() {
             return new Promise((resolve, reject) => {
-                if(this.outputImage && !this.imageHasChanged) return resolve(this.outputImage);
+                if (this.outputImage && !this.imageHasChanged) return resolve(this.outputImage);
                 console.log("Generating new output image!");
                 this.generateOutputImage().then((outputImage) => resolve(outputImage)).catch((err) => reject(err));
             })
@@ -48,13 +49,21 @@ function PaintingHandler() {
         generateOutputImage: function() {
             var a = this;
             return new Promise((resolve, reject) => {
-                this.image.toBuffer("png", {compression: "fast", transparency: false}, function(err, buffer) {
-                    if(err) return reject(err);
+                this.image.toBuffer("png", { compression: "fast", transparency: false }, function(err, buffer) {
+                    if (err) return reject(err);
                     a.outputImage = buffer;
                     a.imageHasChanged = false;
                     resolve(buffer);
                 })
             })
+        },
+
+        colorRGB: function(colorint) {
+            const colors = {
+                1: [0, 0, 0] // black   [R, G, B]
+            }
+            if (!colorint in colors) return null;
+            else return colors.colorint;
         }
     }
 }
