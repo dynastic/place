@@ -21,6 +21,8 @@
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
     image-rendering: pixelated;
+    height: 1000px;
+    width: 1000px;
 }
 
 .canvas-container {
@@ -69,6 +71,8 @@
 
 #camera-controller {
     position: relative;
+    height: 1000px;
+    width: 1000px;
 }
 
 #zoom-button {

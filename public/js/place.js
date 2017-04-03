@@ -27,6 +27,12 @@ var createCanvasController = function(canvas) {
         drawImage: function(image) {
             this.ctx.drawImage(image, 0, 0, size, size);
             this.isDisplayDirty = true;
+        },
+
+        setPixel: function(colour, x, y) {
+            this.ctx.fillStyle = colour;
+            this.ctx.fillRect(x, y, 1, 1);
+            this.isDisplayDirty = true;
         }
     }
 }
@@ -205,7 +211,8 @@ var place = {
         if(this.shouldClick) {
             if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.includes(event.target) || event.target == this.zoomButton || !this.shouldClick) return;
             let zoom = this._getZoomMultiplier();
-            this.canvasClicked((event.pageX - $(this.cameraController).offset().left) / zoom, (event.pageY - $(this.cameraController).offset().top) / zoom)
+            console.log(Math.round((event.pageY - $(this.cameraController).offset().top) / zoom))
+            this.canvasClicked(Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), Math.round((event.pageY - $(this.cameraController).offset().top) / zoom))
         }
         this.shouldClick = true;
         this.isMouseDown = false;
@@ -253,7 +260,29 @@ var place = {
     },
 
     canvasClicked: function(x, y, event) {
+        function failToPost(error) {
+            let defaultError = "An error occurred while trying to place your pixel.";
+            window.alert(!!error ? error.message || defaultError : defaultError);
+        }
         if(!this.zoomedIn) this.zoomIntoPoint(x, y);
+        var a = this;
+        if(this.selectedColour) {
+            $.post("/api/place", {
+                x: x, y: y, colour: this.selectedColour
+            }).done(function(data) {
+                if(data.success) {
+                    a.setPixel(a.DEFAULT_COLOURS[a.selectedColour], x, y);
+                    a.deselectColour();
+                } else failToPost(data.error);
+            }).fail(function(data) {
+                failToPost(data.responseJSON.error);
+            })
+        }
+    },
+
+    setPixel: function(colour, x, y) {
+        this.canvasController.setPixel(colour, x, y);
+        this.updateDisplayCanvas();
     }
 }
 
