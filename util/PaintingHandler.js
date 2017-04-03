@@ -56,6 +56,14 @@ function PaintingHandler() {
                     resolve(buffer);
                 })
             })
+        },
+
+        colorRGB: function(colorint) {
+            const colors = {
+                1: [0, 0, 0] // black   [R, G, B]
+            }
+            if (!colorint in colors) return null;
+            else return colors.colorint;
         }
     }
 }

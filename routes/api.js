@@ -25,7 +25,8 @@ function APIRouter(app) {
     router.get('/session', function(req, res, next) {
         if (req.user) return res.send({ success: true, user: req.user.toInfo() });
         passport.authenticate('jwt', { session: false }, function(err, user, info) {
-            if (!user) return res.status(500).json({ success: false, error: info.error || { message: "An unknown error occurred." } });
+            if (!user && info.error) return res.status(500).json({ success: false, error: info.error });
+            if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
             return res.send({ success: true, user: user.toInfo() });
         })(req, res, next);
     });
@@ -38,6 +39,12 @@ function APIRouter(app) {
             console.error("An error occurred while trying to serve the board image: " + err);
             return res.status(500).json({ success: false, error: { message: "We could not retrieve the current board image.", code: "image_fail" } });
         });
+    });
+
+    router.post('/board', function(req, res, next) {
+        if (!req.body.xpos || !req.body.ypos || !req.body.color) return res.status(500).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
+        //return res.status(500).json({ success: false, error: { message: "Under development", code: "under_dev" } });
+        if (!app.paintingHandler.colorRGB(color)) return res.status(500).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
     });
 
     getToken = function(headers) {

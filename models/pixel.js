@@ -73,6 +73,10 @@ PixelSchema.methods.toInfo = function() {
     }
 }
 
+PixelSchema.statics.addPixel = function(colour, point) {
+    // do stuff
+}
+
 PixelSchema.statics.getAllPixels = function() {
     return new Promise((resolve, reject) => {
         this.find({}, function(err, pixels) {
