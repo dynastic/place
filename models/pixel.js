@@ -91,7 +91,7 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
         upsert: true
     }, function(err, pixel) {
         if (err) return callback(null, { message: "An error occurred while trying to place the pixel." });
-        return callback(pixel);
+        return callback(pixel, null);
     });
 }
 

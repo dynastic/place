@@ -148,7 +148,6 @@ var place = {
         let zoomModifier = this._getZoomMultiplier();
         let x = deltaX / zoomModifier,
             y = deltaY / zoomModifier;
-        console.log("X: " + (x > 0 ? "Positive" : "Negative"))
         cam.css({
             top: `+=${y}px`,
             left: `+=${x}px`

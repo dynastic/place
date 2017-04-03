@@ -1,6 +1,6 @@
 # node/js
 node_modules/
-config/database.js
+config/config.js
 
 ### Linux ###
 *~

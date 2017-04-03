@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 const Pixel = require('./pixel');
+const config = require("../config/config");
 
 var UserSchema = new Schema({
     name: {
@@ -16,6 +17,10 @@ var UserSchema = new Schema({
     creationDate: {
         type: Date,
         required: true
+    },
+    lastPlace: {
+        type: Date,
+        required: false
     }
 });
 
@@ -69,7 +74,32 @@ UserSchema.statics.isValidUsername = function(username) {
 }
 
 UserSchema.methods.addPixel = function(colour, x, y, callback) {
-    Pixel.addPixel(colour, x, y, this.id, callback);
+    var user = this;
+    Pixel.addPixel(colour, x, y, this.id, (pixel, error) => {
+        if(!pixel) return callback(null, error);
+        user.lastPlace = new Date();
+        user.save(function(err) {
+            if(err) return callback(null, {message: "An unknown error occurred while trying to place that pixel."});
+            return callback(pixel, null);
+        })
+    });
+}
+
+UserSchema.methods.getPlaceSecondsRemaining = function() {
+    if(this.lastPlace) {
+        let current = new Date().getTime();
+        let place = this.lastPlace.getTime();
+        // Seconds since last place
+        let diffSeconds = (current - place) / 1000;
+        // Seconds before can place again
+        let remainSeconds = Math.min(config.placeTimeout, Math.max(0, config.placeTimeout - diffSeconds));
+        return Math.ceil(remainSeconds);
+    }
+    return 0;
+}
+
+UserSchema.methods.canPlace = function() {
+    return this.getPlaceSecondsRemaining() <= 0;
 }
 
 module.exports = mongoose.model('User', UserSchema);

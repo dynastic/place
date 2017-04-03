@@ -5,7 +5,7 @@ An opensource place alternative, made by [Dynastic Development](https://dynastic
 ## Getting started
 
 * Install mongodb
-* Rename config/database.example.js to config/database.js
+* Rename config/config.example.js to config/config.js
     * You'll need a strong secret
 * Run `npm i` to install deps
 * Finally, `node app.js`

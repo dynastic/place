@@ -1,5 +1,5 @@
 const express = require('express');
-const config = require('../config/database');
+const config = require('../config/config');
 const jwt = require('jwt-simple');
 const passport = require('passport');
 require('../config/passport')(passport);
