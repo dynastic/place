@@ -45,6 +45,8 @@ var place = {
 
         this.colourPaletteElement = colourPaletteElement;
         this.setupColours();
+        this.placeTimer = $(this.colourPaletteElement).children("#place-timer");
+        this.updatePlaceTimer();
 
         zoomController.onmousedown = (event) => this.handleMouseDown(event || window.event);
         zoomController.onmouseup = (event) => this.handleMouseUp(event || window.event);
@@ -171,6 +173,22 @@ var place = {
 
     isSignedIn: function() {
         return $("body").hasClass("signed-in");
+    },
+
+    placeTimerShouldShow: function() {
+        return this.isSignedIn();
+    },
+
+    updatePlaceTimer: function(animated) {
+        if(typeof animated === 'undefined') animated = false;
+        let shouldShow = this.placeTimerShouldShow();
+        if (animated) {
+            if(shouldShow) $(this.placeTimer).fadeIn();
+            else $(this.placeTimer).fadeOut();
+        } else {
+            if(shouldShow) $(this.placeTimer).show();
+            else $(this.placeTimer).hide();
+        }
     }
 }
 

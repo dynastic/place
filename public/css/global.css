@@ -5,3 +5,10 @@ body {
 body.fixed-navbar {
     padding-top: 64px;
 }
+
+.beta-label {
+    font-size: 60%;
+    text-transform: uppercase;
+    position: relative;
+    top: -2px;
+}

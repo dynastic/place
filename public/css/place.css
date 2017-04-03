@@ -90,20 +90,21 @@
     z-index: 2;
     padding: 10px;
     border: 1px solid rgb(200, 200, 200);
-    height: 30px;
+    height: 34px;
     box-sizing: content-box;
     overflow-x: scroll;
     overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
     white-space: nowrap;
     position: relative;
 }
 
 #palette > .colour-option {
     background: #fff;
-    width: 30px;
-    height: 30px;
+    width: 26px;
+    height: 26px;
     border-radius: 5px;
-    margin: 0 5px;
+    margin: 4px;
     display: inline-block;
     cursor: pointer;
 }
@@ -112,7 +113,8 @@
     border: 1px solid rgb(200, 200, 200);
 }
 
-#palette > .sign-in-reminder {
+#palette > .overlay {
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.95);
     font-size: 16px;
     font-weight: 300;
@@ -122,9 +124,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: default;
 }
 
-body.signed-in #palette > .sign-in-reminder {
+body.signed-in #palette > #sign-in-reminder {
     display: none;
 }
 
@@ -136,7 +139,7 @@ body.signed-in #palette > .sign-in-reminder {
         -webkit-backdrop-filter: blur(12px);
     }
 
-    #palette > .sign-in-reminder {
+    #palette > .overlay {
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(6px);
         -webkit-backdrop-filter: blur(6px);

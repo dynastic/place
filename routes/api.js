@@ -10,17 +10,13 @@ function APIRouter(app) {
     let router = express.Router();
 
     router.post('/signup', function(req, res) {
-        if (!req.body.username || !req.body.password) return res.json({success: false, error: {message: 'A username and password are required.', code: 'invalid_parameters'}});
-        User.register(req.body.username, req.body.password, function(user, error) {
-            if(user) return res.json({success: true});
-            return res.json({success: false, error: error || {message: "An unknown error occurred."}});
-        });
+        return res.status(503).json({success: false, error: {message: "API signup is no longer available.", code: "unavailable"}});
     });
 
     router.post('/identify', function(req, res, next) {
-        if (!req.body.username || !req.body.password) return res.json({success: false, error: {message: 'A username and password are required.', code: 'invalid_parameters'}});
+        if (!req.body.username || !req.body.password) return res.status(403).json({success: false, error: {message: 'A username and password are required.', code: 'invalid_parameters'}});
         passport.authenticate('local', {session: false}, function(err, user, info) {
-            if (!user) return res.status(401).json({success: false, error: info.error || {message: "An unknown error occurred."}});
+            if (!user) return res.status(500).json({success: false, error: info.error || {message: "An unknown error occurred."}});
             let token = jwt.encode(user, config.secret);
             res.json({success: true, token: 'JWT '+token}); // create and return jwt token here        
         })(req, res, next);
@@ -29,7 +25,7 @@ function APIRouter(app) {
     router.get('/session', function(req, res, next) {
         if(req.user) return res.send({success: true, user: req.user.toInfo()});
         passport.authenticate('jwt', {session: false}, function(err, user, info) {
-            if (!user) return res.status(401).json({success: false, error: info.error || {message: "An unknown error occurred."}});
+            if (!user) return res.status(500).json({success: false, error: info.error || {message: "An unknown error occurred."}});
             return res.send({success: true, user: user.toInfo()});  
         })(req, res, next);
     });

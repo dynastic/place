@@ -50,6 +50,7 @@ UserSchema.methods.toInfo = function() {
 }
 
 UserSchema.statics.register = function(username, password, callback) {
+    if(!this.isValidUsername(username)) return callback(null, {message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken"});
     let newUser = this({
         name: username,
         password: password,
@@ -60,6 +61,10 @@ UserSchema.statics.register = function(username, password, callback) {
         if (err) return callback(null, {message: "That username already exists.", code: "username_taken"});
         return callback(newUser, null)
     });
+}
+
+UserSchema.statics.isValidUsername = function(username) {
+    return /^[a-zA-Z0-9-_]{3,20}$/.test(username);
 }
 
 module.exports = mongoose.model('User', UserSchema);
