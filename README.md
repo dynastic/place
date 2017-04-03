@@ -1,6 +1,6 @@
 # Place 2.0
 
-An opensource place alternative, made by [Dynastic Development](https://dynastic.co). Join our [discord](https://discord.gg/CgC8FTg)
+An opensource place alternative, made by [Dynastic Development](https://dynastic.co). Join our [discord](https://discord.gg/CgC8FTg). I'm aware of other clones, but this is going to be much better than the original :).
 
 ## Getting started
 
