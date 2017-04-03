@@ -73,8 +73,26 @@ PixelSchema.methods.toInfo = function() {
     }
 }
 
-PixelSchema.statics.addPixel = function(colour, point) {
-    // do stuff
+PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
+    // Maybe do some validation
+    this.findOneAndUpdate({
+        xPos: x,
+        yPos: y
+    }, {
+        xPos: x,
+        yPos: y,
+        editorID: userID,
+        colourR: colour.r,
+        colourG: colour.g,
+        colourB: colour.b,
+        lastModified: Date()
+    }, {
+        new: true,
+        upsert: true
+    }, function(err, pixel) {
+        if (err) return callback(null, { message: "An error occurred while trying to place the pixel." });
+        return callback(pixel);
+    });
 }
 
 PixelSchema.statics.getAllPixels = function() {

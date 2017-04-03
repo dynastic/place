@@ -9,6 +9,9 @@ function PaintingHandler() {
         imageHasChanged: false,
         image: null,
         outputImage: null,
+        colours: [
+            {r: 0, g: 0, b: 0},
+        ],
 
         getBlankImage: function() {
             return new Promise((resolve, reject) => {
@@ -24,7 +27,7 @@ function PaintingHandler() {
                 let image = this.getBlankImage().then(image => {
                     Pixel.getAllPixels().then(pixels => {
                         let batch = image.batch();
-                        pixels.forEach(pixel => batch.setPixel(pixel.location.x, pixel.location.y, pixel.colour))
+                        pixels.forEach(pixel => batch.setPixel(pixel.point.x, pixel.point.y, pixel.colour))
                         batch.exec((err, image) => {
                             if (err) return reject(err);
                             this.hasImage = true;
@@ -58,12 +61,29 @@ function PaintingHandler() {
             })
         },
 
-        colorRGB: function(colorint) {
-            const colors = {
-                1: [0, 0, 0] // black   [R, G, B]
-            }
-            if (!colorint in colors) return null;
-            else return colors.colorint;
+        getColourRGB: function(colourID) {
+            let colour = this.colours[colourID];
+            if (!colour) return false;
+            return colour;
+        },
+
+        doPaint: function(colour, x, y, user) {
+            var a = this;
+            return new Promise((resolve, reject) => {
+                if(!this.hasImage) return reject({message: "Server not ready", code: "not_ready"});
+                // Add to DB:
+                user.addPixel(colour, x, y, function(pixel, err) {
+                    if(!pixel) return reject(err);
+                    // Paint on live image:
+                    a.image.setPixel(x, y, colour, function(err, image) {
+                        if(image) {
+                            a.imageHasChanged = true;
+                            a.generateOutputImage();
+                        }
+                    });
+                    resolve();
+                });
+            });
         }
     }
 }

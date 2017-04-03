@@ -41,13 +41,34 @@ function APIRouter(app) {
         });
     });
 
-    router.post('/board', function(req, res, next) {
-        if (!req.body.xpos || !req.body.ypos || !req.body.color) return res.status(500).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
-        //return res.status(500).json({ success: false, error: { message: "Under development", code: "under_dev" } });
-        let rgb = app.paintingHandler.colorRGB(color);
-        if (!rgb) return res.status(500).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
-
+    router.post('/place', function(req, res, next) {
+        function paintWithUser(user) {
+            if (!req.body.x || !req.body.y || !req.body.colour) return res.status(401).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
+            let rgb = app.paintingHandler.getColourRGB(req.body.colour);
+            if (!rgb) return res.status(500).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
+            app.paintingHandler.doPaint(rgb, req.body.x, req.body.y, user).then((pixel) => {
+                return res.json({success: true})
+            }).catch(err => res.status(500).json({ success: false, fuck: true, error: err }));
+        }
+        if (req.user) return paintWithUser(req.user);
+        passport.authenticate('jwt', { session: false }, function(err, user, info) {
+            if (!user && info.error) return res.status(500).json({ success: false, error: info.error });
+            if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
+            return paintWithUser(user);
+        })(req, res, next);
     });
+
+    router.get('/timer', function(req, res, next) {
+        function getTimerPayload(user) {
+            return {success: true};
+        }
+        if (req.user) return res.send(getTimerPayload(req.user));
+        passport.authenticate('jwt', { session: false }, function(err, user, info) {
+            if (!user && info.error) return res.status(500).json({ success: false, error: info.error });
+            if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
+            return res.send(getTimerPayload(user));
+        })(req, res, next);
+    })
 
     getToken = function(headers) {
         if (headers && headers.authorization) {

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
+const Pixel = require('./pixel');
 
 var UserSchema = new Schema({
     name: {
@@ -65,6 +66,10 @@ UserSchema.statics.register = function(username, password, callback) {
 
 UserSchema.statics.isValidUsername = function(username) {
     return /^[a-zA-Z0-9-_]{3,20}$/.test(username);
+}
+
+UserSchema.methods.addPixel = function(colour, x, y, callback) {
+    Pixel.addPixel(colour, x, y, this.id, callback);
 }
 
 module.exports = mongoose.model('User', UserSchema);
