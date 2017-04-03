@@ -44,7 +44,9 @@ function APIRouter(app) {
     router.post('/board', function(req, res, next) {
         if (!req.body.xpos || !req.body.ypos || !req.body.color) return res.status(500).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
         //return res.status(500).json({ success: false, error: { message: "Under development", code: "under_dev" } });
-        if (!app.paintingHandler.colorRGB(color)) return res.status(500).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
+        let rgb = app.paintingHandler.colorRGB(color);
+        if (!rgb) return res.status(500).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
+
     });
 
     getToken = function(headers) {
