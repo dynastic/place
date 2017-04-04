@@ -174,6 +174,7 @@ var place = {
         let spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
         $(this.coordinateElement).show();
+        $(this.userCountElement).show();
 
         this.loadImage().then(image => {
             this.canvasController.clearCanvas();
@@ -182,7 +183,24 @@ var place = {
             this.displayCtx.imageSmoothingEnabled = false;
         });
 
+        this.changeUserCount(null);
+        this.loadUserCount().then(online => {
+            this.userCountChanged(online);
+        }).catch(err => {
+            console.log(err);
+            $(this.userCountElement).hide();
+        })
+
         this.socket = this.startSocketConnection()
+    },
+
+    loadUserCount: function() {
+        return new Promise((resolve, reject) => {
+            $.get("/api/online").done(data => {
+                if(data.success && !!data.online) return resolve(data.online);
+                reject();
+            }).fail(err => reject(err));
+        });
     },
 
     getSpawnPoint: function() {
@@ -214,7 +232,8 @@ var place = {
         socket.on("error", e => console.log("Socket error: " + e));
         socket.on("connect", () => console.log("Socket successfully connected"));
 
-        socket.on("tile_placed", this.liveUpdateTile.bind(this))
+        socket.on("tile_placed", this.liveUpdateTile.bind(this));
+        socket.on("user_change", this.userCountChanged.bind(this));
         return socket;
     },
 
@@ -226,7 +245,11 @@ var place = {
     },
 
     liveUpdateTile: function (data) {
-        this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y)
+        this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y);
+    },
+
+    userCountChanged: function (data) {
+        if(data) this.changeUserCount(data.count.toLocaleString());
     },
 
     setupColours: function() {
@@ -465,6 +488,21 @@ var place = {
     handleNotifyMeClick: function() {
         if(!this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission()) return this.notificationHandler.requestPermission(success => this.checkSecondsTimer());
         this.checkSecondsTimer();
+    },
+
+    changeUserCount: function(newContent) {
+        let elem = $(this.userCountElement);
+        elem.show();
+        let notch = elem.find(".loading");
+        let text = elem.find(".count");
+        let num = parseInt(newContent);
+        if(num === null || isNaN(num)) {
+            notch.show();
+            text.text("");
+        } else {
+            notch.hide();
+            text.text(num);
+        }
     },
 
     changePlaceTimerVisibility: function(visible) {

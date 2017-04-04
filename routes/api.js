@@ -70,7 +70,11 @@ function APIRouter(app) {
             if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
             return res.send(getTimerPayload(user));
         })(req, res, next);
-    })
+    });
+
+    router.get('/online', function(req, res, next) {
+        return res.json({ success: true, online: { count: 9999 } });
+    });
 
     getToken = function(headers) {
         if (headers && headers.authorization) {
@@ -78,7 +82,7 @@ function APIRouter(app) {
             if (parted.length === 2) return parted[1];
             else return null;
         } else return null;
-    }
+    };
 
     return router;
 }
