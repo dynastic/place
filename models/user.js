@@ -23,7 +23,7 @@ var UserSchema = new Schema({
         required: false
     },
     admin: {
-        type: boolean,
+        type: Boolean,
         required: true
     }
 });
