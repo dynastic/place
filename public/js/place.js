@@ -37,6 +37,42 @@ var createCanvasController = function(canvas) {
     }
 }
 
+var notificationHandler = {
+    notificationsSupported: "Notification" in window,
+
+    canNotify: function() {
+        console.log(this.currenr)
+        return Notification.permission == "granted";
+    },
+
+    isAbleToRequestPermission: function() {
+        if(!this.notificationsSupported) return false;
+        return Notification.permission !== 'denied' || Notification.permission === "default";
+    },
+
+    requestPermission: function(callback) {
+        if(!this.isAbleToRequestPermission || !this.notificationsSupported) return callback(false);
+        Notification.requestPermission(permission => {
+            callback(permission === "granted");
+        })
+    },
+
+    sendNotification: function(title, message, requesting = false) {
+        if(!this.notificationsSupported) return;
+        let canSend = this.canNotify;
+        if(!canSend && !requesting) return;
+        if(!canSend) {
+            return this.requestPermission(granted => {
+                if (granted) this.sendNotification(message, requesting);
+            });
+        }
+        let notification = new Notification(title, {
+            //icon: "/favicon.ico",
+            body: message
+        });
+    }
+}
+
 var place = {
     zooming: {
         zoomedIn: false,
@@ -57,6 +93,7 @@ var place = {
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null,
+    notificationHandler: notificationHandler,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement) {
         this.canvas = canvas;
@@ -68,6 +105,7 @@ var place = {
         this.setupColours();
         this.placingOverlay = $(this.colourPaletteElement).children("#placing-modal");
         this.placeTimer = $(this.colourPaletteElement).children("#place-timer");
+        $(this.placeTimer).on("click", "#notify-me", () => this.handleNotifyMeClick());
         let app = this;
         $(this.colourPaletteElement).on("click", ".colour-option", function() {
             let colourID = parseInt($(this).data("colour"));
@@ -112,16 +150,11 @@ var place = {
 
     startSocketConnection() {
         var socket = io();
-        socket.on('error', function(e) {
-            console.log('socket error: ' + e)
-        })
-
-        socket.on('connect', function() {
-            console.log("socket successfully connected")
-        })
+        socket.on('error', e => console.log('socket error: ' + e));
+        socket.on('connect', () => console.log("socket successfully connected"));
 
         socket.on('tile_placed', this.liveUpdateTile.bind(this))
-        return socket
+        return socket;
     },
 
     getRandomSpawnPoint: function() {
@@ -332,12 +365,21 @@ var place = {
             if(time > 0) {
                 let minutes = ~~(time / 60), seconds = time - minutes * 60;
                 let formattedTime = `${minutes}:${seconds.toString().padLeft("0", 2)}`;
-                $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>.");
+                let shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
+                $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
+            } else {
+                this.notificationHandler.sendNotification("Place 2.0", "You may now place!")
             }
         }
         if(this.secondTimer) clearInterval(this.secondTimer);
+        this.secondTimer = null, this.unlockTime = null;
         this.changePlaceTimerVisibility(false);
+    },
+
+    handleNotifyMeClick: function() {
+        if(!this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission()) return this.notificationHandler.requestPermission(success => this.checkSecondsTimer());
+        this.checkSecondsTimer();
     },
 
     changePlaceTimerVisibility: function(visible) {

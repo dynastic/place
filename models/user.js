@@ -25,6 +25,20 @@ var UserSchema = new Schema({
     admin: {
         type: Boolean,
         required: true
+    },
+    placeCount: {
+        type: Number,
+        required: true,
+        validate: {
+            validator: Number.isInteger,
+            message: '{VALUE} is not a valid integer'
+        },
+        default: 0
+    },
+    banned: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 });
 
@@ -55,7 +69,10 @@ UserSchema.methods.toInfo = function() {
     return {
         id: this.id,
         username: this.name,
-        creationDate: this.creationDate
+        creationDate: this.creationDate,
+        statistics: {
+            totalPlaces: this.placeCount
+        }
     }
 }
 
@@ -83,6 +100,7 @@ UserSchema.methods.addPixel = function(colour, x, y, callback) {
     Pixel.addPixel(colour, x, y, this.id, (pixel, error) => {
         if (!pixel) return callback(null, error);
         user.lastPlace = new Date();
+        user.placeCount++;
         user.save(function(err) {
             if (err) return callback(null, { message: "An unknown error occurred while trying to place that pixel." });
             return callback(pixel, null);

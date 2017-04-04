@@ -2,7 +2,7 @@ const express = require('express');
 const config = require('../config/config');
 const jwt = require('jwt-simple');
 const passport = require('passport');
-require('../config/passport')(passport);
+require('../util/passport')(passport);
 const User = require('../models/user');
 const responseFactory = require("../util/ResponseFactory");
 
