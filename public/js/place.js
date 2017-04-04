@@ -230,26 +230,24 @@ var place = {
         this.zooming.zoomTime += 1
         this.updateDisplayCanvas()
 
-        this.panX = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime)
-        this.panY = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime)
-        this.setCanvasPosition(this.panX, this.panY)
+        let x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
+        let y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
+        this.setCanvasPosition(x, y)
 
         if (this.zooming.zoomTime >= 100) {
             this.zooming.zooming = false
-            //this.zooming.panFromX = this.panX
-            //this.zooming.panFromY = this.panY
+            this.zooming.panToX = null, this.zooming.panToY = null;
             clearInterval(this.zooming.zoomHandle)
             return
         }
     },
 
     setZoomedIn: function(zoomedIn) {
-        if(!this.zooming.zoomedIn) {
-            this.zooming.panFromX = this.panX;
-            this.zooming.panFromY = this.panY;
-            this.zooming.panToX = this.panX;
-            this.zooming.panToY = this.panY;
-        }
+        if(zoomedIn == this.zooming.zoomedIn) return;
+        this.zooming.panFromX = this.panX;
+        this.zooming.panFromY = this.panY;
+        if(this.zooming.panToX === null) this.zooming.panToX = this.panX;
+        if(this.zooming.panToY === null) this.zooming.panToY = this.panY;
         this.zooming.zoomFrom = this._getCurrentZoom()
         this.zooming.zoomTime = 0
         this.zooming.zooming = true
@@ -407,13 +405,14 @@ var place = {
     },
 
     zoomIntoPoint: function(x, y) {
+
+        //this.setCanvasPosition(-(x - size / 2), -(y - size / 2));
+
+        this.zooming.panToX = -(x - size / 2);
+        this.zooming.panToY = -(y - size / 2);
+
         this.zooming.panFromX = this.panX
         this.zooming.panFromY = this.panY
-
-        this.setCanvasPosition(-(x - size / 2), -(y - size / 2));
-
-        this.zooming.panToX = this.panX
-        this.zooming.panToY = this.panY
         
         this.setZoomedIn(true);
     },
