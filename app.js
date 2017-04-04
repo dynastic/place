@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 const session = require('cookie-session');
 const paintingHandler = require("./util/PaintingHandler");
 const recaptcha = require('express-recaptcha');
+const ws = require("nodejs-websocket")
 
 var app = express();
 mongoose.connect(config.database);
@@ -66,5 +67,18 @@ app.use(function(req, res, next){
 
 // Listen on port 3000
 app.listen(config.port, () => {
-    console.info(`Place server listening on port ${config.port}`);
+    console.info(`Place HTTP server listening on port ${config.port}`);
+});
+var server = ws.createServer(function (conn) {
+	/*console.log("New connection")
+	conn.on("text", function (str) {
+		console.log("Received "+str)
+		conn.sendText(str.toUpperCase()+"!!!")
+	})
+	conn.on("close", function (code, reason) {
+		console.log("Connection closed")
+	})*/
+}).listen(config.websocketPort)
+server.on("listening", () => {
+    console.info(`Place web socket server listening on port ${config.websocketPort}`)
 });

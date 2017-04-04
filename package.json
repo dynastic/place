@@ -19,6 +19,7 @@
     "lwip": "0.0.9",
     "mongoose": "^4.9.2",
     "morgan": "^1.8.1",
+    "nodejs-websocket": "^1.7.1",
     "passport": "^0.3.2",
     "passport-jwt": "^2.2.1",
     "passport-local": "^1.0.0"
