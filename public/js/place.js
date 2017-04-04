@@ -405,9 +405,6 @@ var place = {
     },
 
     zoomIntoPoint: function(x, y) {
-
-        //this.setCanvasPosition(-(x - size / 2), -(y - size / 2));
-
         this.zooming.panToX = -(x - size / 2);
         this.zooming.panToY = -(y - size / 2);
 
@@ -426,7 +423,8 @@ var place = {
         // Don't even try if it's out of bounds
         if (x < 0 || y < 0 || x > this.canvas.width - 1 || y > this.canvas.height - 1) return;
 
-        if(!this.zooming.zoomedIn) return this.zoomIntoPoint(x, y); // Make the user zoom in before placing pixel
+        // Make the user zoom in before placing pixel
+        if(!this.zooming.zoomedIn) return this.zoomIntoPoint(x, y);
 
         var a = this;
         if(this.selectedColour !== null && !this.placing) {
