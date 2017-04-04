@@ -388,7 +388,7 @@ var place = {
         }
 
         // Don't even try if it's out of bounds
-        if (x < 0 || y < 0 || x > this.canvas.width || y > this.canvas.height) return;
+        if (x < 0 || y < 0 || x > this.canvas.width - 1 || y > this.canvas.height - 1) return;
 
         var a = this;
         if(this.selectedColour !== null && !this.placing) {
