@@ -104,7 +104,7 @@
     border: 1px solid rgb(200, 200, 200);
     height: 34px;
     box-sizing: content-box;
-    overflow-x: scroll;
+    overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
