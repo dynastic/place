@@ -21,6 +21,7 @@
     "morgan": "^1.8.1",
     "passport": "^0.3.2",
     "passport-jwt": "^2.2.1",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "socket.io": "^1.7.3"
   }
 }
