@@ -194,16 +194,14 @@ var place = {
     },
 
     animateZoom: function() {
-<<<<<<< HEAD
-        this.updateDisplayCanvas()
         this.zooming.zoomTime += 1
+        this.updateDisplayCanvas()
+
         this.panX = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime)
         this.panY = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime)
         this.setCanvasPosition(this.panX, this.panY)
-=======
         this.zooming.zoomTime += 0.05
         this.updateDisplayCanvas()
->>>>>>> 53296b260a5bfc5cd942a96e7652dada23b4a8cb
 
         if (this.zooming.zoomTime >= 100) {
             this.zooming.zooming = false
