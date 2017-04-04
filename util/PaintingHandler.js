@@ -98,6 +98,7 @@ function PaintingHandler() {
                         }
                     });
                     resolve();
+                    // TODO: Notify websockets of pixel updates here
                 });
             });
         }
