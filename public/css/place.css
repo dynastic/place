@@ -98,25 +98,44 @@ body.debug #place-canvas {
     z-index: 2;
     margin: 0;
     padding: 0;
+}
+
+#palette-ctn > .ctn-row {
+    display: block;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 2px 0;
 }
 
-#palette {
+#palette-ctn > .ctn-row > div {
     background: #fff;
     width: auto;
     border-radius: 10px;
     z-index: 2;
     padding: 10px;
     border: 1px solid rgb(200, 200, 200);
-    height: 34px;
     box-sizing: content-box;
+    margin: 0 1px;
+}
+
+#palette-ctn > .ctn-row > div.compact {
+    border-radius: 5px;
+    padding: 5px 8px;
+}
+
+#palette {
+    height: 34px;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
     position: relative;
+}
+
+#coordinates > span {
+    font-weight: 600;
 }
 
 .colour-option {
@@ -168,7 +187,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 @supports (backdrop-filter:none) or (-webkit-backdrop-filter:none) {
-    #palette {
+    #palette-ctn > .ctn-row > div {
         background: rgba(255, 255, 255, 0.8);
         border: 1px solid rgba(0, 0, 0, 0.15);
         backdrop-filter: blur(12px);

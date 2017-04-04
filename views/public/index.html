@@ -4,14 +4,20 @@
 <div class="canvas-container">
     <div id="zoom-button" class="control btn btn-default"></div>
     <div id="palette-ctn">
-        <div id="palette">
-            <div class="overlay" id="sign-in-reminder">
-                <span><a href="/signin">Sign in</a> or <a href="/signup">sign up</a> to start placing!</span>
+        <!--<div class="ctn-row">
+            <div id="user-count" class="compact"><i class="fa fa-user"></i> 2</div>
+            <div id="coordinates" class="compact"><i class="fa fa-map-marker"></i> (<span>302</span>, <span>269</span>)</div>
+        </div>-->
+        <div class="ctn-row">
+            <div id="palette">
+                <div class="overlay" id="sign-in-reminder">
+                    <span><a href="/signin">Sign in</a> or <a href="/signup">sign up</a> to start placing!</span>
+                </div>
+                <div class="overlay" id="placing-modal">
+                    <span>Placing…<span>
+                </div>
+                <div class="overlay" id="place-timer"><span></span></div>
             </div>
-            <div class="overlay" id="placing-modal">
-                <span>Placing…<span>
-            </div>
-            <div class="overlay" id="place-timer"><span></span></div>
         </div>
     </div>
     <canvas id="place-canvas" height="100%" width="100%"></canvas>

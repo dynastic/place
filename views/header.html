@@ -1,17 +1,12 @@
 <%
-  const navItems = {
-    "Home": "/",
-    "Official Subreddit": "https://www.reddit.com/r/place20",
-    "Chat on Discord": "https://discord.gg/CgC8FTg",
-    "Donate": "https://www.paypal.me/AppleBetasPay"
-  };
   if(typeof user === 'undefined') user = null;
   if(typeof css === 'undefined') css = [];
   if(typeof pageTitle === 'undefined') pageTitle = null;
-  var renderNavItem = function(name, itemPath) {
+  var renderNavItem = function(name, itemPath, icon = null) {
       let isCurrentPage = itemPath == path;
+      let iconPrefix = icon ? `<i class="fa fa-${icon}"></i> ` : "";
       return `<li ${isCurrentPage ? " class=\"active\"" : ""}>` +
-        `<a href="${itemPath}">${name} ${isCurrentPage ? " <span class=\"sr-only\">(current)</span>" : ""}</a>` +
+        `<a href="${itemPath}">${iconPrefix}${name} ${isCurrentPage ? " <span class=\"sr-only\">(current)</span>" : ""}</a>` +
       "</li>";
   }
 %>
@@ -29,6 +24,7 @@
     <meta property="twitter:title" content="Place 2.0">
 
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
     <link href="/css/global.css" rel="stylesheet">
 
@@ -57,25 +53,24 @@
 
         <div class="collapse navbar-collapse" id="navbar-collapse">
           <ul class="nav navbar-nav">
-            <% Object.keys(navItems).forEach((name) => {
-              let itemPath = navItems[name];
-              %>
-              <%- renderNavItem(name, itemPath); %>
-            <% }); %>
+            <%- renderNavItem("Home", "/", "home"); %>
+            <%- renderNavItem("Official Subreddit", "https://www.reddit.com/r/place20", "reddit-alien"); %>
+            <%- renderNavItem("Chat on Discord", "https://discord.gg/CgC8FTg", "comments"); %>
+            <%- renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money"); %>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <% if(user) { %>
               <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><%= user.name %> <span class="caret"></span></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user"></i> <%= user.name %> <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                  <%- renderNavItem("Account details", "/account"); %>
+                  <%- renderNavItem("Account details", "/account", "pencil-square-o"); %>
                   <li role="separator" class="divider"></li>
-                  <%- renderNavItem("Sign out", "/signout"); %>
+                  <%- renderNavItem("Sign out", "/signout", "sign-out"); %>
                 </ul>
               </li>
             <% } else { %>
-              <%- renderNavItem("Sign in", "/signin"); %>
-              <%- renderNavItem("Sign up", "/signup"); %>
+              <%- renderNavItem("Sign in", "/signin", "sign-in"); %>
+              <%- renderNavItem("Sign up", "/signup", "user-plus"); %>
             <% } %>
           </ul>
         </div>

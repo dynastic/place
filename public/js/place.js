@@ -236,6 +236,7 @@ var place = {
 
         if (this.zooming.zoomTime >= 100) {
             this.zooming.zooming = false
+            this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
             this.zooming.panToX = null, this.zooming.panToY = null;
             clearInterval(this.zooming.zoomHandle)
             return
@@ -266,7 +267,8 @@ var place = {
     },
 
     _adjustZoomButtonText: function() {
-        if (this.zoomButton) $(this.zoomButton).text(this.zooming.zoomedIn ? "Zoom Out" : "Zoom In")
+        let zoomIcon = `<i class="fa fa-search-${this.zooming.zoomedIn ? "minus" : "plus"}"></i> `;
+        if (this.zoomButton) $(this.zoomButton).html(zoomIcon + (this.zooming.zoomedIn ? "Zoom Out" : "Zoom In"))
     },
 
     setZoomButton: function(btn) {
