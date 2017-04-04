@@ -73,6 +73,47 @@ var notificationHandler = {
     }
 }
 
+var hashHandler = {
+    getHash: function() {
+        return this.decodeHash(window.location.hash);
+    },
+
+    setHash: function(hash) {
+        window.location.hash = this.encodeHash(hash);
+    },
+
+    modifyHash: function(newHash) {
+        var hash = this.getHash();
+        Object.keys(newHash).forEach(function(key) {
+            let value = newHash[key];
+            hash[key] = value;
+        });
+        this.setHash(hash);
+    },
+
+    decodeHash: function(hashString) {
+        if(hashString.indexOf("#") === 0) hashString = hashString.substring(1);
+        if (hashString.length <= 0) return {};
+        let arguments = hashString.split("&");
+        var decoded = {};
+        arguments.forEach(function(hashArg) {
+            let parts = hashArg.split("=");
+            let key = parts[0], value = parts[1];
+            if(key) decoded[key] = value;
+        });
+        return decoded;
+    },
+
+    encodeHash: function(hash) {
+        var parts = [];
+        Object.keys(hash).forEach(function(key) {
+            let value = hash[key];
+            parts.push(`${key}=${value}`);
+        })
+        return parts.join("&");
+    }
+}
+
 var place = {
     zooming: {
         zoomedIn: false,
@@ -91,13 +132,16 @@ var place = {
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null,
-    notificationHandler: notificationHandler,
+    notificationHandler: notificationHandler, hashHandler: hashHandler,
 
-    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement) {
+    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement) {
         this.canvas = canvas;
         this.canvasController = createCanvasController(canvas);
         this.displayCanvas = displayCanvas;
         this.setupDisplayCanvas(this.displayCanvas);
+
+        this.coordinateElement = coordinateElement;
+        this.userCountElement = userCountElement;
 
         this.colourPaletteElement = colourPaletteElement;
         this.setupColours();
@@ -129,11 +173,12 @@ var place = {
         controller.addEventListener("touchcancel", (event) => this.handleMouseUp(event.changedTouches[0]));
 
         window.onresize = () => this.handleResize();
+        window.onhashchange = () => this.handleHashChange();
 
         this.zoomController = zoomController;
         this.cameraController = cameraController;
 
-        let spawnPoint = this.getRandomSpawnPoint()
+        let spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
 
         this.loadImage().then((image) => {
@@ -144,6 +189,26 @@ var place = {
         });
 
         this.socket = this.startSocketConnection()
+    },
+
+    getSpawnPoint: function() {
+        let point = this.getHashPoint();
+        if (point) return point;
+        return this.getRandomSpawnPoint();
+    },
+
+    getHashPoint: function() {
+        let hash = this.hashHandler.getHash();
+        if(typeof hash.x !== "undefined" && typeof hash.y !== "undefined") {
+            let x = parseInt(hash.x), y = parseInt(hash.y);
+            if(x !== null && y !== null && !isNaN(x) && !isNaN(y)) return {x: -x + 500, y: -y + 500};
+        }
+        return null;
+    },
+
+    handleHashChange: function() {
+        let point = this.getHashPoint();
+        if (point) this.setCanvasPosition(point.x, point.y);
     },
 
     startSocketConnection() {
@@ -206,7 +271,6 @@ var place = {
 
     _getCurrentZoom: function() {
         if (!this.zooming.zooming) return this._getZoomMultiplier()
-
         return this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime)
     },
 
@@ -226,7 +290,6 @@ var place = {
 
     animateZoom: function() {
         this.zooming.zoomTime += 1
-        this.updateDisplayCanvas()
 
         let x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
         let y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
@@ -288,7 +351,19 @@ var place = {
         let x = deltaX / zoomModifier,
             y = deltaY / zoomModifier;
         this.setCanvasPosition(x, y, true);
-        this.updateDisplayCanvas();
+    },
+
+    updateCoordinates: function() {
+        let coord = this.getCoordinates();
+        let spans = $(this.coordinateElement).find("span");
+        spans.first().text(coord.x);
+        spans.last().text(coord.y);
+        this.hashHandler.modifyHash(coord);
+    },
+
+    getCoordinates: function() {
+        let dcanvas = this.canvasController.canvas;
+        return {x: Math.round(-this.panX) + dcanvas.width / 2, y: Math.round(-this.panY) + dcanvas.height / 2};
     },
 
     setCanvasPosition: function(x, y, delta = false) {
@@ -299,6 +374,8 @@ var place = {
         })
         if (delta) this.panX += x, this.panY += y;
         else this.panX = x, this.panY = y;
+        this.updateCoordinates();
+        this.updateDisplayCanvas();
     },
 
     handleMouseMove: function(event) {
@@ -359,11 +436,14 @@ var place = {
     },
 
     checkSecondsTimer: function() {
+        function padLeft(str, pad, length) {
+            return (new Array(length + 1).join(pad) + str).slice(-length);
+        }
         if(this.unlockTime && this.secondTimer) {
             let time = Math.round(this.unlockTime - new Date().getTime() / 1000);
             if(time > 0) {
                 let minutes = ~~(time / 60), seconds = time - minutes * 60;
-                let formattedTime = `${minutes}:${seconds.toString().padLeft("0", 2)}`;
+                let formattedTime = `${minutes}:${padLeft(seconds.toString(), "0", 2)}`;
                 let shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
@@ -452,9 +532,5 @@ var place = {
     }
 }
 
-String.prototype.padLeft = function(pad, length) {
-    return (new Array(length + 1).join(pad) + this).slice(-length);
-}
-
-place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0]);
+place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0]);
 place.setZoomButton($("#zoom-button")[0]);
