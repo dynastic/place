@@ -46,6 +46,7 @@ var place = {
         zoomTime: 0,
         zoomHandle: null
     },
+    socket: null,
     zoomButton: null,
     dragStart: null,
     isMouseDown: false, shouldClick: true,
@@ -98,6 +99,25 @@ var place = {
             this.updateDisplayCanvas();
             this.displayCtx.imageSmoothingEnabled = false;
         });
+
+        this.socket = this.startSocketConnection()
+    },
+
+    startSocketConnection() {
+        var socket = io();
+        socket.on('error', function(e) {
+            console.log('socket error: ' + e)
+        })
+
+        socket.on('connect', function() {
+            console.log("socket successfully connected")
+        })
+
+        socket.on('update_tile', this.liveUpdateTile.bind(this))
+    },
+
+    liveUpdateTile: function (data) {
+        this.canvasController.setPixel(data.colour, data.x, data.y)
     },
 
     setupColours: function() {
