@@ -82,18 +82,23 @@ var hashHandler = {
 
     setHash: function(hash) {
         window.location.hash = this.encodeHash(hash);
+        this.currentHash = hash;
     },
 
     modifyHash: function(newHash) {
         Object.assign(this.getHash(), newHash);
-        this.setHash(this.currentHash);
+        this.setHash(newHash);
     },
 
     decodeHash: function(hashString) {
         if(hashString.indexOf("#") === 0) hashString = hashString.substring(1);
         if (hashString.length <= 0) return {};
         var params = hashString.substring(1)
-        return JSON.parse('{"' + decodeURI(params).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
+        try {
+            return JSON.parse('{"' + decodeURI(params).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
+        } catch (e) {
+            return {};
+        }
     },
 
     encodeHash: function(hash) {
@@ -170,10 +175,7 @@ var place = {
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
         $(this.coordinateElement).show();
 
-        console.log(this.loadImage());
         this.loadImage().then(image => {
-            console.log("LOADED");
-            console.log(this);
             this.canvasController.clearCanvas();
             this.canvasController.drawImage(image);
             this.updateDisplayCanvas();
