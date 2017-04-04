@@ -5,9 +5,20 @@ const paintingHandler = require("./util/PaintingHandler");
 const recaptcha = require('express-recaptcha');
 const HTTPServer = require("./util/HTTPServer.js");
 const WebsocketServer = require("./util/WebsocketServer.js");
+const gulp = require('gulp');
+const uglify = require('gulp-uglify');
+const babel = require('gulp-babel');
+const del = require('del');
+const pump = require('pump');
+
+let paths = {
+    scripts: {
+        built: "public/js/build",
+        src: "client/js/*.js"
+    }
+}
 
 var app = {};
-
 app.config = config;
 
 // Get image handler
@@ -30,5 +41,31 @@ app.server = require('http').createServer(app.httpServer.server);
 app.websocketServer = new WebsocketServer(app, app.server);
 
 mongoose.connect(config.database);
+
+// Clean existing built JS
+gulp.task('clean', function() {
+    return del(['public/js/build']);
+});
+
+// Process JavaScript
+gulp.task('scripts', ['clean'], (cb) => {
+    console.log("Processing JavaScript...")
+    return pump([
+        gulp.src(paths.scripts.src),
+        babel({
+            presets: ['es2015']
+        }),
+        //uglify(),
+        gulp.dest(paths.scripts.built)
+    ]);
+});
+
+// Rerun the task when a file changes 
+gulp.task('watch', () => {
+    gulp.watch(paths.scripts.src, ['scripts']);
+});
+
+gulp.task('default', ['watch', 'scripts']);
+gulp.start(['watch', 'scripts'])
 
 app.server.listen(config.port, config.onlyListenLocal ? "127.0.0.1" : null);

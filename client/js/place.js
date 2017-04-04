@@ -4,50 +4,48 @@
 //  Written by AppleBetas and nullpixel. Inspired by Reddit's /r/place.
 //
 
-const size = 1000;
+var size = 1000;
 
-var createCanvasController = function(canvas) {
-    let ctx = canvas.getContext("2d");
-    // Disable image smoothing
-    ctx.mozImageSmoothingEnabled = false;
-    ctx.webkitImageSmoothingEnabled = false;
-    ctx.msImageSmoothingEnabled = false;
-    ctx.imageSmoothingEnabled = false;
-    
-    return {
-        canvas: canvas,
-        ctx: ctx,
-        isDisplayDirty: false,
+var canvasController = {
+    isDisplayDirty: false,
 
-        clearCanvas: function() {
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.isDisplayDirty = true;
-        },
+    init: function(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+        // Disable image smoothing
+        this.ctx.mozImageSmoothingEnabled = false;
+        this.ctx.webkitImageSmoothingEnabled = false;
+        this.ctx.msImageSmoothingEnabled = false;
+        this.ctx.imageSmoothingEnabled = false;
+    },
 
-        drawImage: function(image) {
-            this.ctx.drawImage(image, 0, 0, size, size);
-            this.isDisplayDirty = true;
-        },
+    clearCanvas: function() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.isDisplayDirty = true;
+    },
 
-        setPixel: function(colour, x, y) {
-            this.ctx.fillStyle = colour;
-            this.ctx.fillRect(x, y, 1, 1);
-            this.isDisplayDirty = true;
-        }
+    drawImage: function(image) {
+        this.ctx.drawImage(image, 0, 0, this.canvas.width, this.canvas.height);
+        this.isDisplayDirty = true;
+    },
+
+    setPixel: function(colour, x, y) {
+        this.ctx.fillStyle = colour;
+        this.ctx.fillRect(x, y, 1, 1);
+        this.isDisplayDirty = true;
     }
-}
+};
 
 var notificationHandler = {
     notificationsSupported: "Notification" in window,
 
     canNotify: function() {
-        console.log(this.currenr)
         return Notification.permission == "granted";
     },
 
     isAbleToRequestPermission: function() {
         if(!this.notificationsSupported) return false;
-        return Notification.permission !== 'denied' || Notification.permission === "default";
+        return Notification.permission !== "denied" || Notification.permission === "default";
     },
 
     requestPermission: function(callback) {
@@ -67,7 +65,6 @@ var notificationHandler = {
             });
         }
         let notification = new Notification(title, {
-            //icon: "/favicon.ico",
             body: message
         });
     }
@@ -94,9 +91,9 @@ var hashHandler = {
     decodeHash: function(hashString) {
         if(hashString.indexOf("#") === 0) hashString = hashString.substring(1);
         if (hashString.length <= 0) return {};
-        let arguments = hashString.split("&");
+        let hashArguments = hashString.split("&");
         var decoded = {};
-        arguments.forEach(function(hashArg) {
+        hashArguments.forEach(function(hashArg) {
             let parts = hashArg.split("=");
             let key = parts[0], value = parts[1];
             if(key) decoded[key] = value;
@@ -136,7 +133,8 @@ var place = {
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement) {
         this.canvas = canvas;
-        this.canvasController = createCanvasController(canvas);
+        this.canvasController = canvasController;
+        this.canvasController.init(canvas);
         this.displayCanvas = displayCanvas;
         this.setupDisplayCanvas(this.displayCanvas);
 
@@ -166,8 +164,7 @@ var place = {
         controller.onmousemove = (event) => {
             if (this.isMouseDown) this.handleMouseDrag(event || window.event);
             this.handleMouseMove(event || window.event);
-        };
-        controller.addEventListener('contextmenu', (event) => this.handleContextMenu(event));
+        }
         controller.addEventListener("touchstart", (event) => this.handleMouseDown(event.changedTouches[0]));
         controller.addEventListener("touchmove", (event) => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
         controller.addEventListener("touchend", (event) => this.handleMouseUp(event.changedTouches[0]));
@@ -183,7 +180,10 @@ var place = {
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
         $(this.coordinateElement).show();
 
-        this.loadImage().then((image) => {
+        console.log(this.loadImage());
+        this.loadImage().then(image => {
+            console.log("LOADED");
+            console.log(this);
             this.canvasController.clearCanvas();
             this.canvasController.drawImage(image);
             this.updateDisplayCanvas();
@@ -219,10 +219,10 @@ var place = {
 
     startSocketConnection() {
         var socket = io();
-        socket.on('error', e => console.log('socket error: ' + e));
-        socket.on('connect', () => console.log("socket successfully connected"));
+        socket.on("error", e => console.log("socket error: " + e));
+        socket.on("connect", () => console.log("socket successfully connected"));
 
-        socket.on('tile_placed', this.liveUpdateTile.bind(this))
+        socket.on("tile_placed", this.liveUpdateTile.bind(this))
         return socket;
     },
 
@@ -286,7 +286,7 @@ var place = {
 
     loadImage: function() {
         return new Promise((resolve, reject) => {
-            image = new Image();
+            var image = new Image();
             image.src = "/api/board-image";
             image.onload = () => {
                 resolve(image);
@@ -351,7 +351,7 @@ var place = {
     },
 
     moveCamera: function(deltaX, deltaY, animated) {
-        if (typeof animated === 'undefined') animated = false;
+        if (typeof animated === "undefined") animated = false;
         let cam = $(this.cameraController);
         let zoomModifier = this._getCurrentZoom();
         let x = deltaX / zoomModifier,
@@ -422,20 +422,7 @@ var place = {
         this.shouldClick = true;
         this.isMouseDown = false;
         $(this.zoomController).removeClass("grabbing");
-        dragStart = null;
-    },
-
-    handleContextMenu: function(event) {
-
-        if (this.shouldClick) {
-            if (event.target === this.colourPaletteElement ||
-              this.colourPaletteOptionElements.includes(event.target) ||
-              event.target === this.zoomButton || !this.shouldClick) return;
-            event.preventDefault();
-            this.shouldClick = false;
-            this.toggleZoom();
-        }
-
+        this.dragStart = null;
     },
 
     isSignedIn: function() {
@@ -515,9 +502,9 @@ var place = {
         this.zooming.panToX = -(x - size / 2);
         this.zooming.panToY = -(y - size / 2);
 
-        this.zooming.panFromX = this.panX
-        this.zooming.panFromY = this.panY
-        
+        this.zooming.panFromX = this.panX;
+        this.zooming.panFromY = this.panY;
+
         this.setZoomedIn(true);
     },
 
