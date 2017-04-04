@@ -381,7 +381,10 @@ var place = {
             let defaultError = "An error occurred while trying to place your pixel.";
             window.alert(!!error ? error.message || defaultError : defaultError);
         }
-        if(!this.zooming.zoomedIn) this.zoomIntoPoint(x, y);
+        if(!this.zooming.zoomedIn) {
+            this.zoomIntoPoint(x, y); 
+            return; // Make the user zoom in before placing pixel
+        }
         var a = this;
         if(this.selectedColour !== null && !this.placing) {
         this.changePlacingModalVisibility(true);
