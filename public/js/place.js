@@ -205,6 +205,8 @@ var place = {
 
         if (this.zooming.zoomTime >= 100) {
             this.zooming.zooming = false
+            this.zooming.panFromX = this.panX
+            this.zooming.panFromY = this.panY
             clearInterval(this.zooming.zoomHandle)
             return
         }
