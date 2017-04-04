@@ -211,7 +211,7 @@ var place = {
     },
 
     setZoomedIn: function(zoomedIn) {
-        if(!zoomedIn) {
+        if(!this.zooming.zoomedIn) {
             this.zooming.panFromX = this.panX;
             this.zooming.panFromY = this.panY;
             this.zooming.panToX = this.panX;
