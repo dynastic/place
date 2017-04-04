@@ -75,6 +75,9 @@ var place = {
         })
         this.updatePlaceTimer();
 
+        let spawnPoint = this.getRandomSpawnPoint()
+        this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
+
         let controller = $(zoomController).parent()[0];
         controller.onmousedown = (event) => this.handleMouseDown(event || window.event);
         controller.onmouseup = (event) => this.handleMouseUp(event || window.event);
@@ -118,14 +121,13 @@ var place = {
 
     getRandomSpawnPoint: function() {
         function getRandomTileNumber() {
-            return Math.random() * (size - 1);
+            return Math.random() * size - (size / 2);
         }
         return {x: getRandomTileNumber(), y: getRandomTileNumber()};
     },
 
     liveUpdateTile: function (data) {
-        this.canvasController.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y)
-        this.updateDisplayCanvas();
+        this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y)
     },
 
     setupColours: function() {
