@@ -40,6 +40,10 @@ var createCanvasController = function(canvas) {
 var place = {
     zooming: {
         zoomedIn: false,
+        panFromX: 0,
+        panFromY: 0,
+        panToX: 0,
+        panToY: 0,
         zooming: false,
         zoomFrom: 0,
         zoomTo: 0,
@@ -117,6 +121,7 @@ var place = {
         })
 
         socket.on('tile_placed', this.liveUpdateTile.bind(this))
+        return socket
     },
 
     getRandomSpawnPoint: function() {
@@ -163,14 +168,15 @@ var place = {
         this.displayCtx.drawImage(this.canvas, dcanvas.width / 2 + (this.panX - mod - 0.5) * zoom, dcanvas.height / 2 + (this.panY - mod - 0.5) * zoom, this.canvas.width * zoom, this.canvas.height * zoom);
     },
 
-    _zoomLerp: function(from, to, time) {
-        return from + time * (to - from)
+    _lerp: function(from, to, time) {
+        if (time > 100) time = 100
+        return from + (time / 100) * (to - from)
     },
 
     _getCurrentZoom: function() {
         if (!this.zooming.zooming) return this._getZoomMultiplier()
 
-        return this._zoomLerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime)
+        return this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime)
     },
 
     _getZoomMultiplier: function() {
@@ -188,10 +194,16 @@ var place = {
     },
 
     animateZoom: function() {
+        this.zooming.zoomTime += 1
+        this.updateDisplayCanvas()
+
+        this.panX = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime)
+        this.panY = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime)
+        this.setCanvasPosition(this.panX, this.panY)
         this.zooming.zoomTime += 0.05
         this.updateDisplayCanvas()
 
-        if (this.zooming.zoomTime >= 1) {
+        if (this.zooming.zoomTime >= 100) {
             this.zooming.zooming = false
             clearInterval(this.zooming.zoomHandle)
             return
@@ -204,7 +216,7 @@ var place = {
         this.zooming.zooming = true
         this.zooming.zoomedIn = zoomedIn;
         this.zooming.zoomTo = this._getZoomMultiplier()
-        this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this), 10)
+        this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this), 1)
 
         if (zoomedIn) $(this.zoomController).parent().addClass("zoomed");
         else $(this.zoomController).parent().removeClass("zoomed");
@@ -222,17 +234,19 @@ var place = {
 
     setZoomButton: function(btn) {
         this.zoomButton = btn;
-        var a = this;
         this._adjustZoomButtonText();
-        $(btn).click(function() {
-            a.toggleZoom();
-        });
+        $(btn).click(this.handleZoomButtonClick.bind(this));
+    },
+
+    handleZoomButtonClick: function() {
+        this.toggleZoom();
+        this.isMouseDown = false;
     },
 
     moveCamera: function(deltaX, deltaY, animated) {
         if (typeof animated === 'undefined') animated = false;
         let cam = $(this.cameraController);
-        let zoomModifier = this._getZoomMultiplier();
+        let zoomModifier = this._getCurrentZoom();
         let x = deltaX / zoomModifier,
             y = deltaY / zoomModifier;
         this.setCanvasPosition(x, y, true);
@@ -345,7 +359,14 @@ var place = {
     },
 
     zoomIntoPoint: function(x, y) {
+        this.zooming.panFromX = this.panX
+        this.zooming.panFromY = this.panY
+
         this.setCanvasPosition(-(x - size / 2), -(y - size / 2));
+
+        this.zooming.panToX = this.panX
+        this.zooming.panToY = this.panY
+        
         this.setZoomedIn(true);
     },
 
