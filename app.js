@@ -10,10 +10,6 @@ var app = {};
 
 app.config = config;
 
-app.httpServer = new HTTPServer(app);
-app.websocketServer = new WebsocketServer(app);
-mongoose.connect(config.database);
-
 // Get image handler
 app.paintingHandler = paintingHandler();
 console.log("Loading image from the database...")
@@ -27,5 +23,8 @@ app.paintingHandler.loadImageFromDatabase().then((image) => {
 recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
 app.recaptcha = recaptcha;
 
+app.httpServer = new HTTPServer(app);
+app.websocketServer = new WebsocketServer(app, app.httpServer);
+mongoose.connect(config.database);
+
 app.httpServer.start();
-app.websocketServer.start();

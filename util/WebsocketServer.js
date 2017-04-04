@@ -1,11 +1,13 @@
-// const ws = require("nodejs-websocket");
+const socketIO = require("socket.io");
 
-function WebsocketServer(app) {
+function WebsocketServer(app, httpServer) {
+    var server = socketIO(httpServer);
+
     return {
-        server: null,
+        server: server,
 
-        start: function() {
-            // TODO: Fix websockets
+        broadcast: function(name, payload) {
+            this.server.sockets.emit(name, payload);
         }
     }
 }
