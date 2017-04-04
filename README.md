@@ -4,15 +4,15 @@ An opensource place alternative, made by [Dynastic Development](https://dynastic
 
 ## Getting started
 
-* Install mongodb
+* Install MongoDB
 * Rename config/config.example.js to config/config.js
     * You'll need a strong secret
-* Run `npm i` to install deps
-* Finally, `node app.js`
+* Run `npm i` to install dependencies
+* Finally, run `node app.js`
 
 ## Contributing 
 
-Please make a [Pull Request](/https://github.com/nullpixel1/place/pulls). Please follow the coding styles throughout the project.
+Please make a [pull request](/https://github.com/dynasticdevelop/place/pulls). Please follow the coding styles throughout the project.
 
 ### Roadmap
 
@@ -20,9 +20,9 @@ Please check the issues for this project.
 
 ## Core maintainers
 
-* [Apple Betas](https://applebetas.co)
+* [AppleBetas](https://applebetas.co)
 * [nullpixel](https://nullpixel.uk)
 
 ## License
 
-Please obey the license and terms listed within.
+Place 2.0 is licensed under the [APGL-3.0 license](https://github.com/dynasticdevelop/place/blob/master/LICENSE). Please obey the license and terms listed within.
