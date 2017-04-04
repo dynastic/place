@@ -166,7 +166,8 @@ var place = {
         controller.onmousemove = (event) => {
             if (this.isMouseDown) this.handleMouseDrag(event || window.event);
             this.handleMouseMove(event || window.event);
-        }
+        };
+        controller.addEventListener('contextmenu', (event) => this.handleContextMenu(event));
         controller.addEventListener("touchstart", (event) => this.handleMouseDown(event.changedTouches[0]));
         controller.addEventListener("touchmove", (event) => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
         controller.addEventListener("touchend", (event) => this.handleMouseUp(event.changedTouches[0]));
@@ -422,6 +423,19 @@ var place = {
         this.isMouseDown = false;
         $(this.zoomController).removeClass("grabbing");
         dragStart = null;
+    },
+
+    handleContextMenu: function(event) {
+
+        if (this.shouldClick) {
+            if (event.target === this.colourPaletteElement ||
+              this.colourPaletteOptionElements.includes(event.target) ||
+              event.target === this.zoomButton || !this.shouldClick) return;
+            event.preventDefault();
+            this.shouldClick = false;
+            this.toggleZoom();
+        }
+
     },
 
     isSignedIn: function() {
