@@ -42,7 +42,12 @@ function PaintingHandler(app) {
                 let image = this.getBlankImage().then(image => {
                     Pixel.getAllPixels().then(pixels => {
                         let batch = image.batch();
-                        pixels.forEach(pixel => batch.setPixel(pixel.point.x, pixel.point.y, pixel.colour))
+                        pixels.forEach(pixel => {
+                            let x = pixel.point.x, y = pixel.point.y;
+                            if(x <= 0 || y <= 0 || x > 1000 || y > 1000) {
+                                batch.setPixel(x, y, pixel.colour)
+                            }
+                        })
                         batch.exec((err, image) => {
                             if (err) return reject(err);
                             this.hasImage = true;
