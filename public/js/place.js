@@ -116,6 +116,13 @@ var place = {
         socket.on('tile_placed', this.liveUpdateTile.bind(this))
     },
 
+    getRandomSpawnPoint: function() {
+        function getRandomTileNumber() {
+            return Math.random() * (size - 1);
+        }
+        return {x: getRandomTileNumber(), y: getRandomTileNumber()};
+    },
+
     liveUpdateTile: function (data) {
         this.canvasController.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y)
         this.updateDisplayCanvas();
@@ -179,8 +186,8 @@ var place = {
     },
 
     animateZoom: function() {
-        this.updateDisplayCanvas()
         this.zooming.zoomTime += 0.05
+        this.updateDisplayCanvas()
 
         if (this.zooming.zoomTime >= 1) {
             this.zooming.zooming = false
