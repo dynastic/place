@@ -151,8 +151,12 @@
     cursor: default;
 }
 
-body.signed-in #palette > #sign-in-reminder, #palette > #placing-modal {
+body.signed-in #palette > #sign-in-reminder, #palette > #placing-modal, body.signed-in #palette > #place-timer {
     display: none;
+}
+
+body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place-timer.shown {
+    display: flex;
 }
 
 @supports (backdrop-filter:none) or (-webkit-backdrop-filter:none) {

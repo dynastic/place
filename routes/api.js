@@ -43,7 +43,7 @@ function APIRouter(app) {
 
     router.post('/place', function(req, res, next) {
         function paintWithUser(user) {
-            //if(!user.canPlace()) return res.status(403).json({ success: false, error: { message: "You cannot place yet.", code: "slow_down" }});
+            if(!user.canPlace()) return res.status(403).json({ success: false, error: { message: "You cannot place yet.", code: "slow_down" }});
             if (!req.body.x || !req.body.y || !req.body.colour) return res.status(401).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
             let rgb = app.paintingHandler.getColourRGB(req.body.colour);
             if (!rgb) return res.status(500).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
@@ -62,7 +62,7 @@ function APIRouter(app) {
     router.get('/timer', function(req, res, next) {
         function getTimerPayload(user) {
             let seconds = user.getPlaceSecondsRemaining();
-            return {success: true, timer: {canPlace: seconds <= 0, secondsBeforePlace: seconds}};
+            return {success: true, timer: {canPlace: seconds <= 0, seconds: seconds}};
         }
         if (req.user) return res.send(getTimerPayload(req.user));
         passport.authenticate('jwt', { session: false }, function(err, user, info) {

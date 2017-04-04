@@ -42,10 +42,9 @@ var place = {
     zoomButton: null,
     dragStart: null,
     isMouseDown: false, shouldClick: true,
-    panX: 0,
-    panY: 0,
+    panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
-    selectedColour: null, handElement: null,
+    selectedColour: null, handElement: null, unlockTime: null, secondTimer: null,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement) {
         this.canvas = canvas;
@@ -55,6 +54,7 @@ var place = {
 
         this.colourPaletteElement = colourPaletteElement;
         this.setupColours();
+        this.placingOverlay = $(this.colourPaletteElement).children("#placing-modal");
         this.placeTimer = $(this.colourPaletteElement).children("#place-timer");
         let app = this;
         $(this.colourPaletteElement).on("click", ".colour-option", function() {
@@ -223,20 +223,47 @@ var place = {
         return $("body").hasClass("signed-in");
     },
 
-    placeTimerShouldShow: function() {
-        return this.isSignedIn();
+    updatePlaceTimer: function() {
+        if(this.isSignedIn) {
+            this.changePlaceTimerVisibility(true);
+            $(this.placeTimer).children("span").text("Loading…");
+            var a = this;
+            return $.get("/api/timer").done(data => {
+                if(data.success) {
+                    if(data.timer.canPlace) this.changePlaceTimerVisibility(false);
+                    else {
+                        a.unlockTime = (new Date().getTime() / 1000) + data.timer.seconds;
+                        a.secondTimer = setInterval(() => a.checkSecondsTimer(), 1000);
+                        a.checkSecondsTimer();
+                    }
+                } else failToPost(data.error);
+            }).fail(() => this.changePlaceTimerVisibility(false));
+        }
+        this.changePlaceTimerVisibility(false);
     },
 
-    updatePlaceTimer: function(animated) {
-        if (typeof animated === 'undefined') animated = false;
-        let shouldShow = this.placeTimerShouldShow();
-        if (animated) {
-            if (shouldShow) $(this.placeTimer).fadeIn();
-            else $(this.placeTimer).fadeOut();
-        } else {
-            if (shouldShow) $(this.placeTimer).show();
-            else $(this.placeTimer).hide();
+    checkSecondsTimer: function() {
+        if(this.unlockTime && this.secondTimer) {
+            let time = Math.round(this.unlockTime - new Date().getTime() / 1000);
+            if(time > 0) {
+                let minutes = ~~(time / 60), seconds = time - minutes * 60;
+                let formattedTime = `${minutes}:${seconds.toString().padLeft("0", 2)}`;
+                $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>.");
+                return;
+            }
         }
+        if(this.secondTimer) clearInterval(this.secondTimer);
+        this.changePlaceTimerVisibility(false);
+    },
+
+    changePlaceTimerVisibility: function(visible) {
+        if(visible) $(this.placeTimer).addClass("shown");
+        else $(this.placeTimer).removeClass("shown");
+    },
+
+    changePlacingModalVisibility: function(visible) {
+        if(visible) $(this.placingOverlay).addClass("shown");
+        else $(this.placingOverlay).removeClass("shown");
     },
 
     selectColour: function(colourID) {
@@ -266,16 +293,16 @@ var place = {
         if(!this.zoomedIn) this.zoomIntoPoint(x, y);
         var a = this;
         if(this.selectedColour) {
+        this.changePlacingModalVisibility(true);
             $.post("/api/place", {
                 x: x, y: y, colour: this.selectedColour
-            }).done(function(data) {
+            }).done(data => {
                 if(data.success) {
                     a.setPixel(a.DEFAULT_COLOURS[a.selectedColour], x, y);
                     a.deselectColour();
+                    a.updatePlaceTimer();
                 } else failToPost(data.error);
-            }).fail(function(data) {
-                failToPost(data.responseJSON.error);
-            })
+            }).fail(data => failToPost(data.responseJSON.error)).always(() => this.changePlacingModalVisibility(false));
         }
     },
 
@@ -283,6 +310,10 @@ var place = {
         this.canvasController.setPixel(colour, x, y);
         this.updateDisplayCanvas();
     }
+}
+
+String.prototype.padLeft = function(pad, length) {
+    return (new Array(length + 1).join(pad) + this).slice(-length);
 }
 
 place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0]);
