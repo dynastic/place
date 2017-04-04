@@ -423,13 +423,10 @@ var place = {
             window.alert(!!error ? error.message || defaultError : defaultError);
         }
 
-        if(!this.zooming.zoomedIn) {
-            this.zoomIntoPoint(x, y); 
-            return; // Make the user zoom in before placing pixel
-        }
-
         // Don't even try if it's out of bounds
         if (x < 0 || y < 0 || x > this.canvas.width - 1 || y > this.canvas.height - 1) return;
+
+        if(!this.zooming.zoomedIn) return this.zoomIntoPoint(x, y); // Make the user zoom in before placing pixel
 
         var a = this;
         if(this.selectedColour !== null && !this.placing) {
