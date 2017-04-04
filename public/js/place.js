@@ -113,11 +113,12 @@ var place = {
             console.log("socket successfully connected")
         })
 
-        socket.on('update_tile', this.liveUpdateTile.bind(this))
+        socket.on('tile_placed', this.liveUpdateTile.bind(this))
     },
 
     liveUpdateTile: function (data) {
-        this.canvasController.setPixel(data.colour, data.x, data.y)
+        this.canvasController.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y)
+        this.updateDisplayCanvas();
     },
 
     setupColours: function() {

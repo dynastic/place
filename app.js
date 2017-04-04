@@ -26,7 +26,9 @@ recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
 app.recaptcha = recaptcha;
 
 app.httpServer = new HTTPServer(app);
-app.websocketServer = new WebsocketServer(app, app.httpServer);
+app.server = require('http').createServer(app.httpServer.server);
+app.websocketServer = new WebsocketServer(app, app.server);
+
 mongoose.connect(config.database);
 
-app.httpServer.start();
+app.server.listen(config.port);

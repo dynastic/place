@@ -97,6 +97,7 @@ function PaintingHandler(app) {
                             a.generateOutputImage();
                         }
                     });
+                    // Send notice to all clients:
                     app.websocketServer.broadcast("tile_placed", {x: x, y: y, colour: colour});
                     resolve();
                 });

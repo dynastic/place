@@ -91,6 +91,7 @@ UserSchema.methods.addPixel = function(colour, x, y, callback) {
 }
 
 UserSchema.methods.getPlaceSecondsRemaining = function() {
+    if (this.admin) return 0;
     if (this.lastPlace) {
         let current = new Date().getTime();
         let place = this.lastPlace.getTime();
