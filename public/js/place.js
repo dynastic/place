@@ -266,7 +266,7 @@ var place = {
     },
 
     _adjustZoomButtonText: function() {
-        let zoomIcon = `<i class="fa fa-search-${this.zooming.zoomedIn ? "minus" : "plus"}"></i> `;
+        let zoomIcon = `<i class="fa fa-fw fa-search-${this.zooming.zoomedIn ? "minus" : "plus"}"></i>`;
         if (this.zoomButton) $(this.zoomButton).html(zoomIcon + (this.zooming.zoomedIn ? "Zoom Out" : "Zoom In"))
     },
 
