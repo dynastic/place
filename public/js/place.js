@@ -128,7 +128,7 @@ var place = {
     socket: null,
     zoomButton: null,
     dragStart: null,
-    isMouseDown: false, shouldClick: true, placing: false,
+    isMouseDown: false, shouldClick: true, placing: false, didSetHash: false,
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null,
@@ -207,6 +207,10 @@ var place = {
     },
 
     handleHashChange: function() {
+        if(this.didSetHash) {
+            this.didSetHash = false;
+            return;
+        }
         let point = this.getHashPoint();
         if (point) this.setCanvasPosition(point.x, point.y);
     },
@@ -355,10 +359,14 @@ var place = {
 
     updateCoordinates: function() {
         let coord = this.getCoordinates();
-        let spans = $(this.coordinateElement).find("span");
-        spans.first().text(coord.x);
-        spans.last().text(coord.y);
+        let coordElem = $(this.coordinateElement)
+        setTimeout(function() {
+            let spans = coordElem.find("span");
+            spans.first().text(coord.x);
+            spans.last().text(coord.y);
+        }, 0);
         this.hashHandler.modifyHash(coord);
+        this.didSetHash = true;
     },
 
     getCoordinates: function() {
