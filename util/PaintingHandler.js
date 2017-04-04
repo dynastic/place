@@ -44,6 +44,7 @@ function PaintingHandler(app) {
                         let batch = image.batch();
                         pixels.forEach(pixel => {
                             let x = pixel.point.x, y = pixel.point.y;
+                            console.log(pixel.point);
                             if(x >= 0 || y >= 0 || x < 1000 || y < 1000) {
                                 batch.setPixel(x, y, pixel.colour)
                             }
