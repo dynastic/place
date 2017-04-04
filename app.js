@@ -1,4 +1,4 @@
-const responseFactory = require("./util/responseFactory");
+const responseFactory = require("./util/ResponseFactory");
 const config = require('./config/config');
 const mongoose = require('mongoose');
 const paintingHandler = require("./util/PaintingHandler");

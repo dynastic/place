@@ -4,7 +4,7 @@ const jwt = require('jwt-simple');
 const passport = require('passport');
 require('../config/passport')(passport);
 const User = require('../models/user');
-const responseFactory = require("../util/responseFactory");
+const responseFactory = require("../util/ResponseFactory");
 
 function PublicRouter(app) {
     let router = express.Router()
