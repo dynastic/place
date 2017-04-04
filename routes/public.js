@@ -35,6 +35,11 @@ function PublicRouter(app) {
         return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.recaptcha.render() });
     })
 
+    router.get('/account', function(req, res) {
+        if (!req.user) return res.redirect("/signin");
+        return responseFactory.sendRenderedResponse("public/account", req, res);
+    })
+
     router.post('/signup', function(req, res, next) {
         function renderResponse(errorMsg) {
             return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.recaptcha.render(), error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
