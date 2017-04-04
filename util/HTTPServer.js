@@ -46,7 +46,7 @@ function HTTPServer(app) {
         if (req.accepts('json') && !req.accepts("html")) return res.send({ error: 'Not found' });
 
         // send HTML
-        responseFactory.sendRenderedResponse("errors/404", req, res);
+        app.responseFactory.sendRenderedResponse("errors/404", req, res);
     });
 
     return {

@@ -19,6 +19,8 @@ app.paintingHandler.loadImageFromDatabase().then((image) => {
     console.error("An error occurred while loading the image from the database.\nError: " + err);
 })
 
+app.responseFactory = responseFactory;
+
 // Set up reCaptcha
 recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
 app.recaptcha = recaptcha;
