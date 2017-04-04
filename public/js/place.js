@@ -211,6 +211,12 @@ var place = {
     },
 
     setZoomedIn: function(zoomedIn) {
+        if(!zoomedIn) {
+            this.zooming.panFromX = this.panX;
+            this.zooming.panFromY = this.panY;
+            this.zooming.panToX = this.panX;
+            this.zooming.panToY = this.panY;
+        }
         this.zooming.zoomFrom = this._getCurrentZoom()
         this.zooming.zoomTime = 0
         this.zooming.zooming = true
