@@ -9,7 +9,8 @@ const responseFactory = require("./util/responseFactory");
 const config = require('./config/config');
 const mongoose = require('mongoose');
 const session = require('cookie-session');
-const paintingHandler = require("./util/PaintingHandler")
+const paintingHandler = require("./util/PaintingHandler");
+const recaptcha = require('express-recaptcha');
 
 var app = express();
 mongoose.connect(config.database);
@@ -22,6 +23,9 @@ app.paintingHandler.loadImageFromDatabase().then((image) => {
 }).catch(err => {
     console.error("An error occurred while loading the image from the database.\nError: " + err);
 })
+
+recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
+app.recaptcha = recaptcha;
 
 // Get params
 app.use(bodyParser.urlencoded({extended: false}));
