@@ -5,6 +5,7 @@ const passport = require('passport');
 require('../config/passport')(passport);
 const User = require('../models/user');
 const responseFactory = require("../util/responseFactory");
+const recaptcha = require('express-recaptcha');
 
 function PublicRouter(app) {
     let router = express.Router()
@@ -32,17 +33,17 @@ function PublicRouter(app) {
 
     router.get('/signup', function(req, res) {
         if (req.user) return res.redirect("/");
-        return responseFactory.sendRenderedResponse("public/signup", req, res);
+        return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: recaptcha.render() });
     })
 
     router.post('/signup', function(req, res, next) {
         if (req.user) return res.redirect("/");
-        if (!req.body.username || !req.body.password || !req.body.passwordverify) return responseFactory.sendRenderedResponse("public/signup", req, res, { error: { message: "Please fill out all the fields." }, username: req.body.username });
-        if (req.body.password != req.body.passwordverify) return responseFactory.sendRenderedResponse("public/signup", req, res, { error: { message: "The passwords you entered did not match." }, username: req.body.username });
+        if (!req.body.username || !req.body.password || !req.body.passwordverify) return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: recaptcha.render(), error: { message: "Please fill out all the fields." }, username: req.body.username });
+        if (req.body.password != req.body.passwordverify) return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: recaptcha.render(), error: { message: "The passwords you entered did not match." }, username: req.body.username });
         User.register(req.body.username, req.body.password, function(user, error) {
-            if(!user) return responseFactory.sendRenderedResponse("public/signup", req, res, {error: error || {message: "An unknown error occurred."}, username: req.body.username});
+            if(!user) return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: recaptcha.render(), error: error || {message: "An unknown error occurred."}, username: req.body.username });
             req.login(user, function(err) {
-                if (err) return responseFactory.sendRenderedResponse("public/signup", req, res, { error: { message: "An unknown error occurred." }, username: req.body.username });
+                if (err) return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: recaptcha.render(), error: { message: "An unknown error occurred." }, username: req.body.username });
                 return res.redirect("/?signedup=1");
             });
         });
