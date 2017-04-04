@@ -71,8 +71,13 @@ var notificationHandler = {
 }
 
 var hashHandler = {
+    currentHash: null,
+    
     getHash: function() {
-        return this.decodeHash(window.location.hash);
+        if (this.currentHash === null) {
+            this.currentHash = this.decodeHash(window.location.hash);
+        }
+        return this.currentHash;
     },
 
     setHash: function(hash) {
@@ -80,34 +85,19 @@ var hashHandler = {
     },
 
     modifyHash: function(newHash) {
-        var hash = this.getHash();
-        Object.keys(newHash).forEach(function(key) {
-            let value = newHash[key];
-            hash[key] = value;
-        });
-        this.setHash(hash);
+        Object.assign(this.getHash(), newHash);
+        this.setHash(this.currentHash);
     },
 
     decodeHash: function(hashString) {
         if(hashString.indexOf("#") === 0) hashString = hashString.substring(1);
         if (hashString.length <= 0) return {};
-        let hashArguments = hashString.split("&");
-        var decoded = {};
-        hashArguments.forEach(function(hashArg) {
-            let parts = hashArg.split("=");
-            let key = parts[0], value = parts[1];
-            if(key) decoded[key] = value;
-        });
-        return decoded;
+        var params = hashString.substring(1)
+        return JSON.parse('{"' + decodeURI(params).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
     },
 
     encodeHash: function(hash) {
-        var parts = [];
-        Object.keys(hash).forEach(function(key) {
-            let value = hash[key];
-            parts.push(`${key}=${value}`);
-        })
-        return parts.join("&");
+        return $.param(hash);
     }
 }
 
@@ -368,8 +358,6 @@ var place = {
                 spans.first().text(coord.x);
                 spans.last().text(coord.y);
             }, 0);
-            this.hashHandler.modifyHash(coord);
-            this.didSetHash = true;
         }
         this.lastUpdatedCoordinates = coord;
     },
@@ -423,6 +411,8 @@ var place = {
         this.isMouseDown = false;
         $(this.zoomController).removeClass("grabbing");
         this.dragStart = null;
+        this.hashHandler.modifyHash(coord);
+        this.didSetHash = true;
     },
 
     isSignedIn: function() {
