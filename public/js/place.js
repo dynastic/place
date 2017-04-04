@@ -200,11 +200,11 @@ var place = {
         this.panX = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime)
         this.panY = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime)
         this.setCanvasPosition(this.panX, this.panY)
-        this.zooming.zoomTime += 0.05
-        this.updateDisplayCanvas()
 
         if (this.zooming.zoomTime >= 100) {
             this.zooming.zooming = false
+            this.zooming.panFromX = this.panX
+            this.zooming.panFromY = this.panY
             clearInterval(this.zooming.zoomHandle)
             return
         }
