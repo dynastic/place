@@ -31,4 +31,4 @@ app.websocketServer = new WebsocketServer(app, app.server);
 
 mongoose.connect(config.database);
 
-app.server.listen(config.port);
+app.server.listen(config.port, config.onlyListenLocal ? "127.0.0.1" : null);
