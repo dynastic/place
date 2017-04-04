@@ -76,10 +76,8 @@ var notificationHandler = {
 var place = {
     zooming: {
         zoomedIn: false,
-        panFromX: 0,
-        panFromY: 0,
-        panToX: 0,
-        panToY: 0,
+        panFromX: 0, panFromY: 0,
+        panToX: null, panToY: null,
         zooming: false,
         zoomFrom: 0,
         zoomTo: 0,
@@ -238,17 +236,18 @@ var place = {
             this.zooming.zooming = false
             this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
             this.zooming.panToX = null, this.zooming.panToY = null;
-            clearInterval(this.zooming.zoomHandle)
+            clearInterval(this.zooming.zoomHandle);
+            this.zooming.zoomHandle = null;
             return
         }
     },
 
     setZoomedIn: function(zoomedIn) {
-        if(zoomedIn == this.zooming.zoomedIn) return;
+        if(zoomedIn == this.zooming.zoomedIn || this.zooming.zoomHandle !== null) return;
         this.zooming.panFromX = this.panX;
         this.zooming.panFromY = this.panY;
-        if(this.zooming.panToX === null) this.zooming.panToX = this.panX;
-        if(this.zooming.panToY === null) this.zooming.panToY = this.panY;
+        if(this.zooming.panToX == null) this.zooming.panToX = this.panX;
+        if(this.zooming.panToY == null) this.zooming.panToY = this.panY;
         this.zooming.zoomFrom = this._getCurrentZoom()
         this.zooming.zoomTime = 0
         this.zooming.zooming = true
