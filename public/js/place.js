@@ -335,6 +335,19 @@ var place = {
         dragStart = null;
     },
 
+    handleContextMenu: function(event) {
+
+        if (this.shouldClick) {
+            if (event.target === this.colourPaletteElement ||
+              this.colourPaletteOptionElements.includes(event.target) ||
+              event.target === this.zoomButton || !this.shouldClick) return;
+            event.preventDefault();
+            this.shouldClick = false;
+            this.toggleZoom();
+        }
+
+    },
+
     isSignedIn: function() {
         return $("body").hasClass("signed-in");
     },
