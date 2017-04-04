@@ -180,6 +180,7 @@ var place = {
 
         let spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
+        $(this.coordinateElement).show();
 
         this.loadImage().then((image) => {
             this.canvasController.clearCanvas();
