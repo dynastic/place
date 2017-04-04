@@ -2,6 +2,7 @@ const socketIO = require("socket.io");
 
 function WebsocketServer(app, httpServer) {
     var server = socketIO(httpServer);
+    console.log("Websocket server attached to HTTP server.");
 
     return {
         server: server,

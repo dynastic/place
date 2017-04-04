@@ -11,7 +11,7 @@ var app = {};
 app.config = config;
 
 // Get image handler
-app.paintingHandler = paintingHandler();
+app.paintingHandler = paintingHandler(app);
 console.log("Loading image from the database...")
 app.paintingHandler.loadImageFromDatabase().then((image) => {
     console.log("Successfully loaded image from database.");

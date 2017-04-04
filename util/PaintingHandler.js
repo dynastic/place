@@ -3,7 +3,7 @@ const Pixel = require('../models/pixel');
 
 const imageSize = 1000;
 
-function PaintingHandler() {
+function PaintingHandler(app) {
     return {
         hasImage: false,
         imageHasChanged: false,
@@ -98,7 +98,7 @@ function PaintingHandler() {
                         }
                     });
                     resolve();
-                    // TODO: Notify websockets of pixel updates here
+                    app.websocketServer.broadcast("tile_placed", {x: x, y: y, colour: colour});
                 });
             });
         }
