@@ -131,7 +131,7 @@ var place = {
     isMouseDown: false, shouldClick: true, placing: false, didSetHash: false,
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
-    selectedColour: null, handElement: null, unlockTime: null, secondTimer: null,
+    selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null},
     notificationHandler: notificationHandler, hashHandler: hashHandler,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement) {
@@ -360,14 +360,17 @@ var place = {
 
     updateCoordinates: function() {
         let coord = this.getCoordinates();
-        let coordElem = $(this.coordinateElement)
-        setTimeout(function() {
-            let spans = coordElem.find("span");
-            spans.first().text(coord.x);
-            spans.last().text(coord.y);
-        }, 0);
-        this.hashHandler.modifyHash(coord);
-        this.didSetHash = true;
+        if(coord != this.lastUpdatedCoordinates) {
+            let coordElem = $(this.coordinateElement);
+            setTimeout(function() {
+                let spans = coordElem.find("span");
+                spans.first().text(coord.x);
+                spans.last().text(coord.y);
+            }, 0);
+            this.hashHandler.modifyHash(coord);
+            this.didSetHash = true;
+        }
+        this.lastUpdatedCoordinates = coord;
     },
 
     getCoordinates: function() {
