@@ -225,7 +225,6 @@ var place = {
 
     updatePlaceTimer: function() {
         if(this.isSignedIn()) {
-            console.log("SIGNED IN!");
             this.changePlaceTimerVisibility(true);
             $(this.placeTimer).children("span").text("Loading…");
             var a = this;
@@ -240,7 +239,6 @@ var place = {
                 } else failToPost(data.error);
             }).fail(() => this.changePlaceTimerVisibility(false));
         }
-        console.log("HIDE!");
         this.changePlaceTimerVisibility(false);
     },
 
