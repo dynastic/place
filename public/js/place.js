@@ -79,6 +79,9 @@ var place = {
         })
         this.updatePlaceTimer();
 
+        let spawnPoint = this.getRandomSpawnPoint()
+        this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
+
         let controller = $(zoomController).parent()[0];
         controller.onmousedown = (event) => this.handleMouseDown(event || window.event);
         controller.onmouseup = (event) => this.handleMouseUp(event || window.event);
@@ -117,12 +120,19 @@ var place = {
             console.log("socket successfully connected")
         })
 
-        socket.on('update_tile', this.liveUpdateTile.bind(this))
+        socket.on('tile_placed', this.liveUpdateTile.bind(this))
         return socket
     },
 
+    getRandomSpawnPoint: function() {
+        function getRandomTileNumber() {
+            return Math.random() * size - (size / 2);
+        }
+        return {x: getRandomTileNumber(), y: getRandomTileNumber()};
+    },
+
     liveUpdateTile: function (data) {
-        this.canvasController.setPixel(data.colour, data.x, data.y)
+        this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y)
     },
 
     setupColours: function() {
@@ -184,11 +194,16 @@ var place = {
     },
 
     animateZoom: function() {
+<<<<<<< HEAD
         this.updateDisplayCanvas()
         this.zooming.zoomTime += 1
         this.panX = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime)
         this.panY = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime)
         this.setCanvasPosition(this.panX, this.panY)
+=======
+        this.zooming.zoomTime += 0.05
+        this.updateDisplayCanvas()
+>>>>>>> 53296b260a5bfc5cd942a96e7652dada23b4a8cb
 
         if (this.zooming.zoomTime >= 100) {
             this.zooming.zooming = false

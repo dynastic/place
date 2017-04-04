@@ -9,6 +9,7 @@ const session = require('cookie-session');
 
 function HTTPServer(app) {
     var server = express();
+    var httpServer = require("http").createServer(server);
 
     // Setup for parameters and bodies
     server.use(bodyParser.urlencoded({extended: false}));
@@ -51,10 +52,7 @@ function HTTPServer(app) {
 
     return {
         server: server,
-
-        start: function() {
-            this.server.listen(app.config.port, () => console.info(`Place HTTP server listening on port ${app.config.port}`))
-        }
+        httpServer: httpServer
     }
 }
 
