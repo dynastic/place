@@ -97,8 +97,8 @@ function PaintingHandler(app) {
                             a.generateOutputImage();
                         }
                     });
-                    resolve();
                     app.websocketServer.broadcast("tile_placed", {x: x, y: y, colour: colour});
+                    resolve();
                 });
             });
         }
