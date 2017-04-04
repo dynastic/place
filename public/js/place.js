@@ -53,7 +53,7 @@ var place = {
     socket: null,
     zoomButton: null,
     dragStart: null,
-    isMouseDown: false, shouldClick: true,
+    isMouseDown: false, shouldClick: true, placing: false,
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null,
@@ -383,8 +383,9 @@ var place = {
         }
         if(!this.zooming.zoomedIn) this.zoomIntoPoint(x, y);
         var a = this;
-        if(this.selectedColour) {
+        if(this.selectedColour && !this.placing) {
         this.changePlacingModalVisibility(true);
+        this.placing = true;
             $.post("/api/place", {
                 x: x, y: y, colour: this.selectedColour
             }).done(data => {
@@ -393,7 +394,10 @@ var place = {
                     a.deselectColour();
                     a.updatePlaceTimer();
                 } else failToPost(data.error);
-            }).fail(data => failToPost(data.responseJSON.error)).always(() => this.changePlacingModalVisibility(false));
+            }).fail(data => failToPost(data.responseJSON.error)).always(() => {
+                this.changePlacingModalVisibility(false);
+                this.placing = false;
+            });
         }
     },
 
