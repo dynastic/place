@@ -383,7 +383,7 @@ var place = {
         }
         if(!this.zooming.zoomedIn) this.zoomIntoPoint(x, y);
         var a = this;
-        if(this.selectedColour && !this.placing) {
+        if(this.selectedColour !== null && !this.placing) {
         this.changePlacingModalVisibility(true);
         this.placing = true;
             $.post("/api/place", {
