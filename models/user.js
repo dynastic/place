@@ -21,6 +21,10 @@ var UserSchema = new Schema({
     lastPlace: {
         type: Date,
         required: false
+    },
+    admin: {
+        type: Boolean,
+        required: true
     }
 });
 
@@ -60,7 +64,8 @@ UserSchema.statics.register = function(username, password, callback) {
     let newUser = this({
         name: username,
         password: password,
-        creationDate: Date()
+        creationDate: Date(),
+        admin: false
     });
     // Save the user
     newUser.save(function(err) {
@@ -76,17 +81,17 @@ UserSchema.statics.isValidUsername = function(username) {
 UserSchema.methods.addPixel = function(colour, x, y, callback) {
     var user = this;
     Pixel.addPixel(colour, x, y, this.id, (pixel, error) => {
-        if(!pixel) return callback(null, error);
+        if (!pixel) return callback(null, error);
         user.lastPlace = new Date();
         user.save(function(err) {
-            if(err) return callback(null, {message: "An unknown error occurred while trying to place that pixel."});
+            if (err) return callback(null, { message: "An unknown error occurred while trying to place that pixel." });
             return callback(pixel, null);
         })
     });
 }
 
 UserSchema.methods.getPlaceSecondsRemaining = function() {
-    if(this.lastPlace) {
+    if (this.lastPlace) {
         let current = new Date().getTime();
         let place = this.lastPlace.getTime();
         // Seconds since last place
