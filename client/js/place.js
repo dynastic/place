@@ -211,8 +211,8 @@ var place = {
 
     startSocketConnection() {
         var socket = io();
-        socket.on("error", e => console.log("socket error: " + e));
-        socket.on("connect", () => console.log("socket successfully connected"));
+        socket.on("error", e => console.log("Socket error: " + e));
+        socket.on("connect", () => console.log("Socket successfully connected"));
 
         socket.on("tile_placed", this.liveUpdateTile.bind(this))
         return socket;
