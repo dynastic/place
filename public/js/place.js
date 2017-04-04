@@ -38,7 +38,14 @@ var createCanvasController = function(canvas) {
 }
 
 var place = {
-    zoomedIn: false,
+    zooming: {
+        zoomedIn: false,
+        zooming: false,
+        zoomFrom: 0,
+        zoomTo: 0,
+        zoomTime: 0,
+        zoomHandle: null
+    },
     zoomButton: null,
     dragStart: null,
     isMouseDown: false, shouldClick: true,
@@ -121,13 +128,23 @@ var place = {
     updateDisplayCanvas: function() {
         let dcanvas = this.displayCanvas;
         this.displayCtx.clearRect(0, 0, dcanvas.width, dcanvas.height);
-        let zoom = this._getZoomMultiplier();
+        let zoom = this._getCurrentZoom();
         let mod = size / 2;
         this.displayCtx.drawImage(this.canvas, dcanvas.width / 2 + (this.panX - mod - 0.5) * zoom, dcanvas.height / 2 + (this.panY - mod - 0.5) * zoom, this.canvas.width * zoom, this.canvas.height * zoom);
     },
 
+    _zoomLerp: function(from, to, time) {
+        return from + time * (to - from)
+    },
+
+    _getCurrentZoom: function() {
+        if (!this.zooming.zooming) return this._getZoomMultiplier()
+
+        return this._zoomLerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime)
+    },
+
     _getZoomMultiplier: function() {
-        return this.zoomedIn ? 40 : 4;
+        return this.zooming.zoomedIn ? 40 : 4;
     },
 
     loadImage: function() {
@@ -140,8 +157,25 @@ var place = {
         });
     },
 
+    animateZoom: function() {
+        this.updateDisplayCanvas()
+        this.zooming.zoomTime += 0.05
+
+        if (this.zooming.zoomTime >= 1) {
+            this.zooming.zooming = false
+            clearInterval(this.zooming.zoomHandle)
+            return
+        }
+    },
+
     setZoomedIn: function(zoomedIn) {
-        this.zoomedIn = zoomedIn;
+        this.zooming.zoomFrom = this._getCurrentZoom()
+        this.zooming.zoomTime = 0
+        this.zooming.zooming = true
+        this.zooming.zoomedIn = zoomedIn;
+        this.zooming.zoomTo = this._getZoomMultiplier()
+        this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this), 10)
+
         if (zoomedIn) $(this.zoomController).parent().addClass("zoomed");
         else $(this.zoomController).parent().removeClass("zoomed");
         this.updateDisplayCanvas();
@@ -149,11 +183,11 @@ var place = {
     },
 
     toggleZoom: function() {
-        this.setZoomedIn(!this.zoomedIn);
+        this.setZoomedIn(!this.zooming.zoomedIn);
     },
 
     _adjustZoomButtonText: function() {
-        if (this.zoomButton) $(this.zoomButton).text(this.zoomedIn ? "Zoom Out" : "Zoom In")
+        if (this.zoomButton) $(this.zoomButton).text(this.zooming.zoomedIn ? "Zoom Out" : "Zoom In")
     },
 
     setZoomButton: function(btn) {
@@ -292,7 +326,7 @@ var place = {
             let defaultError = "An error occurred while trying to place your pixel.";
             window.alert(!!error ? error.message || defaultError : defaultError);
         }
-        if(!this.zoomedIn) this.zoomIntoPoint(x, y);
+        if(!this.zooming.zoomedIn) this.zoomIntoPoint(x, y);
         var a = this;
         if(this.selectedColour) {
         this.changePlacingModalVisibility(true);
