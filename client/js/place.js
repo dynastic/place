@@ -411,6 +411,7 @@ var place = {
         this.isMouseDown = false;
         $(this.zoomController).removeClass("grabbing");
         this.dragStart = null;
+        let coord = this.getCoordinates();
         this.hashHandler.modifyHash(coord);
         this.didSetHash = true;
     },
