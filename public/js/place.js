@@ -211,7 +211,7 @@ var place = {
     },
 
     setZoomedIn: function(zoomedIn) {
-        if(!zoomedIn) {
+        if(!this.zooming.zoomedIn) {
             this.zooming.panFromX = this.panX;
             this.zooming.panFromY = this.panY;
             this.zooming.panToX = this.panX;
@@ -381,9 +381,17 @@ var place = {
             let defaultError = "An error occurred while trying to place your pixel.";
             window.alert(!!error ? error.message || defaultError : defaultError);
         }
-        if(!this.zooming.zoomedIn) this.zoomIntoPoint(x, y);
+
+        if(!this.zooming.zoomedIn) {
+            this.zoomIntoPoint(x, y); 
+            return; // Make the user zoom in before placing pixel
+        }
+
+        // Don't even try if it's out of bounds
+        if (x < 0 || y < 0 || x > this.canvas.width - 1 || y > this.canvas.height - 1) return;
+
         var a = this;
-        if(this.selectedColour && !this.placing) {
+        if(this.selectedColour !== null && !this.placing) {
         this.changePlacingModalVisibility(true);
         this.placing = true;
             $.post("/api/place", {
