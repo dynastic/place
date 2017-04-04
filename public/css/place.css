@@ -25,6 +25,14 @@
     width: 1000px;
 }
 
+body.debug #place-canvas-draw {
+    opacity: 1;
+}
+
+body.debug #place-canvas {
+    opacity: 0;
+}
+
 .canvas-container {
     position: fixed;
     top: 64px;

@@ -79,9 +79,6 @@ var place = {
         })
         this.updatePlaceTimer();
 
-        let spawnPoint = this.getRandomSpawnPoint()
-        this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
-
         let controller = $(zoomController).parent()[0];
         controller.onmousedown = (event) => this.handleMouseDown(event || window.event);
         controller.onmouseup = (event) => this.handleMouseUp(event || window.event);
@@ -99,6 +96,9 @@ var place = {
 
         this.zoomController = zoomController;
         this.cameraController = cameraController;
+
+        let spawnPoint = this.getRandomSpawnPoint()
+        this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
 
         this.loadImage().then((image) => {
             this.canvasController.clearCanvas();
@@ -203,8 +203,8 @@ var place = {
 
         if (this.zooming.zoomTime >= 100) {
             this.zooming.zooming = false
-            this.zooming.panFromX = this.panX
-            this.zooming.panFromY = this.panY
+            //this.zooming.panFromX = this.panX
+            //this.zooming.panFromY = this.panY
             clearInterval(this.zooming.zoomHandle)
             return
         }
