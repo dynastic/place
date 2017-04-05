@@ -200,3 +200,19 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
         -webkit-backdrop-filter: blur(6px);
     }
 }
+
+#grid-hint {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+}
+
+.zoomed > #grid-hint {
+    height: 40px;
+    width: 40px;
+    display: none;
+    z-index: 1;
+}

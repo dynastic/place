@@ -127,7 +127,7 @@ var place = {
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null},
     notificationHandler: notificationHandler, hashHandler: hashHandler,
 
-    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement) {
+    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint) {
         this.canvas = canvas;
         this.canvasController = canvasController;
         this.canvasController.init(canvas);
@@ -136,6 +136,7 @@ var place = {
 
         this.coordinateElement = coordinateElement;
         this.userCountElement = userCountElement;
+        this.gridHint = gridHint;
 
         this.colourPaletteElement = colourPaletteElement;
         this.setupColours();
@@ -209,7 +210,6 @@ var place = {
 
     getHashPoint: function() {
         let hash = this.hashHandler.getHash();
-        console.log(hash);
         if(typeof hash.x !== "undefined" && typeof hash.y !== "undefined") {
             let x = parseInt(hash.x), y = parseInt(hash.y);
             if(x !== null && y !== null && !isNaN(x) && !isNaN(y)) return {x: -x + 500, y: -y + 500};
@@ -404,6 +404,18 @@ var place = {
     },
 
     handleMouseMove: function(event) {
+        if(this.gridHint) {
+            let zoom = this._getCurrentZoom();
+            // Hover position in grid multiplied by zoom
+            let x = Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), y = Math.round((event.pageY - $(this.cameraController).offset().top) / zoom);
+            let elem = $(this.gridHint);
+            let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
+            let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
+            elem.css({
+                left: posX * zoom,
+                top: posY * zoom,
+            });
+        }
         if(this.handElement) {
             let elem = $(this.handElement);
             elem.css({
@@ -520,12 +532,14 @@ var place = {
         let elem = this.colourPaletteOptionElements[this.selectedColour];
         this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
         $(this.zoomController).addClass("selected");
+        $(this.gridHint).show();
     },
 
     deselectColour: function() {
         this.selectedColour = null;
         $(this.handElement).remove();
         $(this.zoomController).removeClass("selected");
+        $(this.gridHint).hide();
     },
 
     zoomIntoPoint: function(x, y) {
@@ -576,5 +590,5 @@ var place = {
     }
 }
 
-place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0]);
+place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0]);
 place.setZoomButton($("#zoom-button")[0]);
