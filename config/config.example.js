@@ -4,6 +4,7 @@ module.exports = {
     'port': 3000,
     'onlyListenLocal': true,
     'debug': false,
+    'googleAnalyticsTrackingID': "", // UA-XXXXXXXX-XX
     'host': 'https://place.dynastic.co', // the publicly accessible URL of the site
     'placeTimeout': 300,
     'recaptcha': {
