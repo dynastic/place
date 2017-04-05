@@ -472,7 +472,6 @@ var place = {
     },
 
     doTimer: function(data) {
-        console.log(this);
         this.changePlaceTimerVisibility(true);
         if(data.canPlace) return this.changePlaceTimerVisibility(false);
         this.unlockTime = (new Date().getTime() / 1000) + data.seconds;
@@ -481,8 +480,6 @@ var place = {
     },
 
     checkSecondsTimer: function() {
-        console.log("CHECKING!!!");
-        console.log(this.placeTimer);
         function padLeft(str, pad, length) {
             return (new Array(length + 1).join(pad) + str).slice(-length);
         }
