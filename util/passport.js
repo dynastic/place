@@ -36,26 +36,28 @@ module.exports = function(passport) {
         });
     }));
 
-    passport.use(new GoogleStrategy({
-        clientID: config.google.clientID,
-        clientSecret: config.google.clientSecret,
-        callbackURL: config.baseURL + "/auth/google/callback"
-    }, function(req, accessToken, refreshToken, profile, done) {
-        function renderResponse(errorMsg) {
-            return responseFactory.sendRenderedResponse("public/signup", req, req.res, { captcha: app.recaptcha.render(), error: { message: errorMsg || "An unknown error occurred" }, username: "" });
-        }
-        User.findOne({ name: "google_" + profile.id }, function(err, user) {
+    // Called by all OAuth providers. Logs user in and creates account in the database if it doesn't exist already
+    function OAuthLogin(prefix, name, id, done) {
+        User.findOne({ name: prefix + "_" + id }, function(err, user) {
             if(err) return done(err, false);
             if(user) {
                 if(user.isOauth !== true) return done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
                 return done(null, user);
             }
             // Even though we don't use the password field, it's better to set it to *SOMETHING* unique
-            User.register("google_" + profile.id, "google_" + profile.id, function(user, error) {
+            User.register(prefix + "_" + id, prefix + "_" + id, function(user, error) {
                 if(!user) return done(null, false, error);
                 done(null, user);
-            }, profile.displayName);
+            }, name);
         });
+    }
+
+    passport.use(new GoogleStrategy({
+        clientID: config.google.clientID,
+        clientSecret: config.google.clientSecret,
+        callbackURL: config.baseURL + "/auth/google/callback"
+    }, function(req, accessToken, refreshToken, profile, done) {
+        OAuthLogin("google", profile.displayName, profile.id, done);
     }));
 
     passport.use(new RedditStrategy({
@@ -63,21 +65,7 @@ module.exports = function(passport) {
         clientSecret: config.reddit.clientSecret,
         callbackURL: "http://localhost:3000/auth/reddit/callback"
     }, function(accessToken, refreshToken, profile, done) {
-        function renderResponse(errorMsg) {
-            return responseFactory.sendRenderedResponse("public/signup", req, req.res, { captcha: app.recaptcha.render(), error: { message: errorMsg || "An unknown error occurred" }, username: "" });
-        }
-        User.findOne({ name: "reddit_" + profile.id }, function(err, user) {
-            if(err) return done(err, false);
-            if(user) {
-                if(user.isOauth !== true) return done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
-                return done(null, user);
-            }
-            // Even though we don't use the password field, it's better to set it to *SOMETHING* unique
-            User.register("reddit_" + profile.id, "reddit_" + profile.id, function(user, error) {
-                if(!user) return done(null, false, error);
-                done(null, user);
-            }, profile.name);
-        });
+        OAuthLogin("reddit", profile.name, profile.id, done);
     }));
 
     passport.use(new DiscordStrategy({
@@ -86,21 +74,7 @@ module.exports = function(passport) {
         callbackURL: "http://localhost:3000/auth/discord/callback",
         scope: ["identify"]
     }, function(accessToken, refreshToken, profile, done) {
-        function renderResponse(errorMsg) {
-            return responseFactory.sendRenderedResponse("public/signup", req, req.res, { captcha: app.recaptcha.render(), error: { message: errorMsg || "An unknown error occurred" }, username: "" });
-        }
-        User.findOne({ name: "discord_" + profile.id }, function(err, user) {
-            if(err) return done(err, false);
-            if(user) {
-                if(user.isOauth !== true) return done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
-                return done(null, user);
-            }
-            // Even though we don't use the password field, it's better to set it to *SOMETHING* unique
-            User.register("discord_" + profile.id, "discord_" + profile.id, function(user, error) {
-                if(!user) return done(null, false, error);
-                done(null, user);
-            }, profile.username);
-        });
+        OAuthLogin("discord", profile.username, profile.id, done);
     }));
 
     passport.serializeUser(function(user, done) {
