@@ -552,8 +552,8 @@ var place = {
 
         var a = this;
         if(this.selectedColour !== null && !this.placing) {
-        this.changePlacingModalVisibility(true);
-        this.placing = true;
+            this.changePlacingModalVisibility(true);
+            this.placing = true;
             $.post("/api/place", {
                 x: x, y: y, colour: this.selectedColour
             }).done(data => {
@@ -564,6 +564,7 @@ var place = {
                 } else failToPost(data.error);
             }).fail(data => failToPost(data.responseJSON.error)).always(() => {
                 this.changePlacingModalVisibility(false);
+            }).always(() => {
                 this.placing = false;
             });
         }
