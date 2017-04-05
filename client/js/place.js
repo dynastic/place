@@ -40,6 +40,7 @@ var notificationHandler = {
     notificationsSupported: "Notification" in window,
 
     canNotify: function() {
+        if (!this.notificationsSupported) return false;
         return Notification.permission == "granted";
     },
 
