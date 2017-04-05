@@ -63,7 +63,7 @@ module.exports = function(passport) {
     passport.use(new RedditStrategy({
         clientID: config.reddit.clientID,
         clientSecret: config.reddit.clientSecret,
-        callbackURL: "http://localhost:3000/auth/reddit/callback"
+        callbackURL: config.baseURL + "/auth/reddit/callback"
     }, function(accessToken, refreshToken, profile, done) {
         OAuthLogin("reddit", profile.name, profile.id, done);
     }));
@@ -71,7 +71,7 @@ module.exports = function(passport) {
     passport.use(new DiscordStrategy({
         clientID: config.discord.clientID,
         clientSecret: config.discord.clientSecret,
-        callbackURL: "http://localhost:3000/auth/discord/callback",
+        callbackURL: config.baseURL + "/auth/discord/callback",
         scope: ["identify"]
     }, function(accessToken, refreshToken, profile, done) {
         OAuthLogin("discord", profile.username, profile.id, done);
