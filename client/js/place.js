@@ -77,6 +77,7 @@ var hashHandler = {
     getHash: function() {
         if (this.currentHash === null) {
             this.currentHash = this.decodeHash(window.location.hash);
+            return this.currentHash;
         }
         return this.currentHash;
     },
@@ -94,12 +95,14 @@ var hashHandler = {
     decodeHash: function(hashString) {
         if(hashString.indexOf("#") === 0) hashString = hashString.substring(1);
         if (hashString.length <= 0) return {};
-        var params = hashString.substring(1)
-        try {
-            return JSON.parse('{"' + decodeURI(params).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
-        } catch (e) {
-            return {};
-        }
+        let hashArguments = hashString.split("&");
+        var decoded = {};
+        hashArguments.forEach(function(hashArg) {
+            let parts = hashArg.split("=");
+            let key = parts[0], value = parts[1];
+            if(key) decoded[key] = value;
+        });
+        return decoded;
     },
 
     encodeHash: function(hash) {
@@ -212,6 +215,7 @@ var place = {
 
     getHashPoint: function() {
         let hash = this.hashHandler.getHash();
+        console.log(hash);
         if(typeof hash.x !== "undefined" && typeof hash.y !== "undefined") {
             let x = parseInt(hash.x), y = parseInt(hash.y);
             if(x !== null && y !== null && !isNaN(x) && !isNaN(y)) return {x: -x + 500, y: -y + 500};
