@@ -17,6 +17,23 @@ if(typeof error === 'undefined') error = null;
         <input type="password" id="inputPassword2" class="form-control" placeholder="Password (again)" name="passwordverify" required>
         <%- captcha %><br>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
+        <div class="social-buttons">
+            <a href="/auth/google" class="btn btn-block btn-social btn-google">
+                <span class="fa fa-google"></span> Sign in with Google
+            </a>
+            <a href="/auth/reddit" class="btn btn-block btn-social btn-reddit">
+                <span class="fa fa-reddit"></span> Sign in with Reddit
+            </a>
+            <a href="/auth/discord" class="btn btn-block btn-social btn-discord">
+                <img src="https://discordapp.com/assets/28174a34e77bb5e5310ced9f95cb480b.png"> Sign in with Discord
+            </a>
+            <a href="/auth/twitter" class="btn btn-block btn-social btn-twitter">
+                <span class="fa fa-twitter"></span> Sign in with Twitter
+            </a>
+            <a href="/auth/github" class="btn btn-block btn-social btn-github">
+                <span class="fa fa-github"></span> Sign in with Github
+            </a>
+        </div>
         <a href="/signin" class="form-signin-link">I already have an account &raquo;</a>
         <% if(error) { %>
             <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %> Please try again.</div>
