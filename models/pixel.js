@@ -104,6 +104,7 @@ PixelSchema.methods.getInfo = function() {
         require("./user").findById(this.editorID).then(user => {
             let info = this.toInfo();
             info.editor = user.toInfo();
+            delete info.editorID;
             resolve(info);
         }).catch(err => reject(err));
     })
