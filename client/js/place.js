@@ -40,6 +40,7 @@ var notificationHandler = {
     notificationsSupported: "Notification" in window,
 
     canNotify: function() {
+        if (!this.notificationsSupported) return false;
         return Notification.permission == "granted";
     },
 
@@ -74,9 +75,7 @@ var hashHandler = {
     currentHash: null,
     
     getHash: function() {
-        if (this.currentHash === null) {
-            this.currentHash = this.decodeHash(window.location.hash);
-        }
+        if (this.currentHash === null) this.currentHash = this.decodeHash(window.location.hash);
         return this.currentHash;
     },
 
@@ -93,12 +92,14 @@ var hashHandler = {
     decodeHash: function(hashString) {
         if(hashString.indexOf("#") === 0) hashString = hashString.substring(1);
         if (hashString.length <= 0) return {};
-        var params = hashString.substring(1)
-        try {
-            return JSON.parse('{"' + decodeURI(params).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
-        } catch (e) {
-            return {};
-        }
+        let hashArguments = hashString.split("&");
+        var decoded = {};
+        hashArguments.forEach(function(hashArg) {
+            let parts = hashArg.split("=");
+            let key = parts[0], value = parts[1];
+            if(key) decoded[key] = value;
+        });
+        return decoded;
     },
 
     encodeHash: function(hash) {
@@ -174,6 +175,7 @@ var place = {
         let spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
         $(this.coordinateElement).show();
+        $(this.userCountElement).show();
 
         this.loadImage().then(image => {
             this.canvasController.clearCanvas();
@@ -182,7 +184,21 @@ var place = {
             this.displayCtx.imageSmoothingEnabled = false;
         });
 
+        this.changeUserCount(null);
+        this.loadUserCount().then(online => {
+            this.userCountChanged(online);
+        }).catch(err => $(this.userCountElement).hide())
+
         this.socket = this.startSocketConnection()
+    },
+
+    loadUserCount: function() {
+        return new Promise((resolve, reject) => {
+            $.get("/api/online").done(data => {
+                if(data.success && !!data.online) return resolve(data.online);
+                reject();
+            }).fail(err => reject(err));
+        });
     },
 
     getSpawnPoint: function() {
@@ -193,6 +209,7 @@ var place = {
 
     getHashPoint: function() {
         let hash = this.hashHandler.getHash();
+        console.log(hash);
         if(typeof hash.x !== "undefined" && typeof hash.y !== "undefined") {
             let x = parseInt(hash.x), y = parseInt(hash.y);
             if(x !== null && y !== null && !isNaN(x) && !isNaN(y)) return {x: -x + 500, y: -y + 500};
@@ -211,10 +228,11 @@ var place = {
 
     startSocketConnection() {
         var socket = io();
-        socket.on("error", e => console.log("socket error: " + e));
-        socket.on("connect", () => console.log("socket successfully connected"));
+        socket.on("error", e => console.log("Socket error: " + e));
+        socket.on("connect", () => console.log("Socket successfully connected"));
 
-        socket.on("tile_placed", this.liveUpdateTile.bind(this))
+        socket.on("tile_placed", this.liveUpdateTile.bind(this));
+        socket.on("user_change", this.userCountChanged.bind(this));
         return socket;
     },
 
@@ -226,7 +244,11 @@ var place = {
     },
 
     liveUpdateTile: function (data) {
-        this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y)
+        this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y);
+    },
+
+    userCountChanged: function (data) {
+        if(data) this.changeUserCount(data.count);
     },
 
     setupColours: function() {
@@ -304,7 +326,7 @@ var place = {
     },
 
     setZoomedIn: function(zoomedIn) {
-        if(zoomedIn == this.zooming.zoomedIn || this.zooming.zoomHandle !== null) return;
+        if(this.zooming.zoomHandle !== null) return;
         this.zooming.panFromX = this.panX;
         this.zooming.panFromY = this.panY;
         if(this.zooming.panToX == null) this.zooming.panToX = this.panX;
@@ -467,6 +489,21 @@ var place = {
         this.checkSecondsTimer();
     },
 
+    changeUserCount: function(newContent) {
+        let elem = $(this.userCountElement);
+        elem.show();
+        let notch = elem.find(".loading");
+        let text = elem.find(".count");
+        let num = parseInt(newContent);
+        if(num === null || isNaN(num)) {
+            notch.show();
+            text.text("");
+        } else {
+            notch.hide();
+            text.text(num.toLocaleString());
+        }
+    },
+
     changePlaceTimerVisibility: function(visible) {
         if(visible) $(this.placeTimer).addClass("shown");
         else $(this.placeTimer).removeClass("shown");
@@ -511,12 +548,12 @@ var place = {
         if (x < 0 || y < 0 || x > this.canvas.width - 1 || y > this.canvas.height - 1) return;
 
         // Make the user zoom in before placing pixel
-        if(!this.zooming.zoomedIn) return this.zoomIntoPoint(x, y);
+        if(!this.zooming.zoomedIn || this.selectedColour === null) return this.zoomIntoPoint(x, y);
 
         var a = this;
         if(this.selectedColour !== null && !this.placing) {
-        this.changePlacingModalVisibility(true);
-        this.placing = true;
+            this.changePlacingModalVisibility(true);
+            this.placing = true;
             $.post("/api/place", {
                 x: x, y: y, colour: this.selectedColour
             }).done(data => {
@@ -527,6 +564,7 @@ var place = {
                 } else failToPost(data.error);
             }).fail(data => failToPost(data.responseJSON.error)).always(() => {
                 this.changePlacingModalVisibility(false);
+            }).always(() => {
                 this.placing = false;
             });
         }
