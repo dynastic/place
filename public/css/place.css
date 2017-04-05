@@ -7,9 +7,9 @@
 }
 
 #canvas-draggable {
-    padding: 250px;
     font-size: 0px;
     line-height: 0;
+    display: inline-block;
 }
 
 #place-canvas {
@@ -36,9 +36,6 @@ body.debug #place-canvas {
     right: 0;
     width: 100%;
     background-color: #ddd;
-    align-items: center;
-    display: flex;
-    justify-content: center;
     overflow: hidden;
 }
 

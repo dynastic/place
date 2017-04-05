@@ -10,6 +10,11 @@ const size = 1000
 var createInteractionController = function (canvasDraggable, canvas) {
     let desiredZoom = 1;
 
+    let desiredX = 1;
+    let desiredY = 1;
+
+    let animatePanning = false;
+
     // Handles panning
     let dragListener = (moveEvent) => {
         // Grab the last x and y from the element
@@ -63,8 +68,15 @@ var createInteractionController = function (canvasDraggable, canvas) {
 
     let animateZoom = () => {
         let currentZoom = (parseFloat(canvasDraggable.getAttribute('data-scale')) || 1)
-        if (Math.abs(desiredZoom - currentZoom) > 0.1) {
+        let currentX = (parseFloat(canvasDraggable.getAttribute('data-x')) || 0)
+        let currentY = (parseFloat(canvasDraggable.getAttribute('data-y')) || 0)
+
+        if (Math.abs(desiredZoom - currentZoom) > 0.001 || Math.abs(desiredX - currentX) > 5 || Math.abs(desiredY - currentY) > 5) {
             canvasDraggable.setAttribute('data-scale', currentZoom += (desiredZoom - currentZoom) / 10);
+
+            canvasDraggable.setAttribute('data-x', currentX += (desiredX - currentX) / 10);
+            canvasDraggable.setAttribute('data-y', currentY += (desiredY - currentY) / 10);
+            
             let mockEvent = {dx: 0, dy: 0, ds: 0}
             gestureListener(mockEvent);
             window.requestAnimationFrame(animateZoom);
@@ -73,23 +85,38 @@ var createInteractionController = function (canvasDraggable, canvas) {
 
     let doubleTapListener = (tapEvent) => {
         let currentZoom = (parseFloat(canvasDraggable.getAttribute('data-scale')) || 1)
-        desiredZoom = (currentZoom < 4) ? 8 : 1
+        desiredZoom = (currentZoom < 3) ? 4 : 1
 
         let rect = canvas.getBoundingClientRect();
 
         // Get absolute canvas positions (a pixel coord on the canvas)
-        let currentCanvasX = Math.abs(rect.left - tapEvent.clientX)
-        let currentCanvasY = Math.abs(rect.top - tapEvent.clientY)
+        //let currentCanvasX = 
+        //let currentCanvasY = Math.abs(rect.top - tapEvent.clientY)
 
-        let desiredCanvasX = Math.abs(currentCanvasX) + (size/2 * desiredZoom)
-        let desiredCanvasY = Math.abs(currentCanvasY) + (size/2 * desiredZoom)
+        //let currentCanvasX = (parseFloat(canvasDraggable.getAttribute('data-x')) || 0);
+        //let currentCanvasY = (parseFloat(canvasDraggable.getAttribute('data-y')) || 0);
 
-        if (currentCanvasX > size / 2) desiredCanvasX = -desiredCanvasX
-        if (currentCanvasY > size / 2) desiredCanvasY = -desiredCanvasY
+        let originX, originY;
 
+        if (desiredZoom > desiredZoom) {
+            originX = Math.abs(rect.left - tapEvent.clientX)
+            originY = Math.abs(rect.top - tapEvent.clientY)
+        } else {
+            originX = rect.width / 2;
+            originY = rect.height / 2;
+        }
 
-        canvasDraggable.setAttribute('data-x', desiredCanvasX)
-        canvasDraggable.setAttribute('data-y', desiredCanvasY)
+        let centerX = tapEvent.clientX - (window.innerWidth / 2)
+        let centerY = tapEvent.clientY - (window.innerHeight / 2)
+
+        let newX = (parseFloat(canvasDraggable.getAttribute('data-x')) || 0) - rect.width /2 + ((rect.width * desiredZoom) /  2) - (originX * desiredZoom) + originX - centerX
+        let newY = (parseFloat(canvasDraggable.getAttribute('data-y')) || 0) - rect.height /2 + ((rect.height * desiredZoom) /  2) - (originY * desiredZoom) + originY - centerY
+
+        desiredX = newX;
+        desiredY = newY;
+
+        //canvasDraggable.setAttribute('data-x', newX)
+        //canvasDraggable.setAttribute('data-y', newY)
 
         window.requestAnimationFrame(animateZoom)
     }
@@ -105,8 +132,8 @@ var createInteractionController = function (canvasDraggable, canvas) {
 
 var createCanvasController = function(canvas) {
     let ctx = canvas.getContext("2d");
-    canvas.width = size
-    canvas.height = size
+    canvas.width = 1000
+    canvas.height = 1000
 
     // Disable image smoothing
     ctx.mozImageSmoothingEnabled = false;
