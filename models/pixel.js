@@ -77,7 +77,7 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
     x = parseInt(x), y = parseInt(y);
     if(isNaN(x) || isNaN(y)) return callback(null, { message: "Invalid positions provided." });
     // TODO: Get actual position below:
-    if(x <= 0 || y <= 0 || x > 999 || y > 999) return callback(null, { message: "Position is out of bounds." });
+    if(x < 0 || y < 0 || x >= 1000 || y >= 1000) return callback(null, { message: "Position is out of bounds." });
     this.findOneAndUpdate({
         xPos: x,
         yPos: y
