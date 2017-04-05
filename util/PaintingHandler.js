@@ -100,7 +100,7 @@ function PaintingHandler(app) {
             return new Promise((resolve, reject) => {
                 if(!this.hasImage) return reject({message: "Server not ready", code: "not_ready"});
                 // Add to DB:
-                user.addPixel(colour, x, y, (pixel, err) => {
+                user.addPixel(colour, x, y, (changed, err) => {
                     if(err) return reject(err);
                     // Paint on live image:
                     a.imageBatch.setPixel(x, y, colour).exec((err, image) => {
