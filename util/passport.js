@@ -14,7 +14,7 @@ module.exports = function(passport) {
         User.findOne({ _id: jwt_payload._id }, function(err, user) {
             if (err) return done(err, false);
             if (user) {
-                if (user.loginError()) done(null, false, { error: user.loginError() });                
+                if (user.loginError()) return done(null, false, { error: user.loginError() });                
                 return done(null, user);
             }
             done(null, false, { error: { message: "Invalid token.", code: "invalid_token" } });
@@ -25,7 +25,7 @@ module.exports = function(passport) {
         User.findOne({ name: username }, function(err, user) {
             if (err) return done(err, false);
             if (user) {
-                if (user.loginError()) done(null, false, { error: user.loginError() });
+                if (user.loginError()) return done(null, false, { error: user.loginError() });
                 return user.comparePassword(password, function(err, match) {
                     if (match && !err) return done(null, user);
                     done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
