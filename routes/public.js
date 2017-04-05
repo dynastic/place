@@ -15,7 +15,7 @@ function PublicRouter(app) {
 
     router.get('/sitemap.xml', function(req, res, next) {
         if(typeof config.host === undefined) return next();
-        return responseFactory.sendRenderedResponse("public/sitemap", req, res, null, "text/xml");
+        return responseFactory.sendRenderedResponse("public/sitemap.xml.html", req, res, null, "text/xml");
     })
 
     router.get('/signin', function(req, res) {
