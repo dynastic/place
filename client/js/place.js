@@ -248,7 +248,7 @@ var place = {
     },
 
     userCountChanged: function (data) {
-        if(data) this.changeUserCount(data.count.toLocaleString());
+        if(data) this.changeUserCount(data.count);
     },
 
     setupColours: function() {
@@ -500,7 +500,7 @@ var place = {
             text.text("");
         } else {
             notch.hide();
-            text.text(num);
+            text.text(num.toLocaleString());
         }
     },
 

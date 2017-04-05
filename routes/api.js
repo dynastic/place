@@ -73,7 +73,7 @@ function APIRouter(app) {
     });
 
     router.get('/online', function(req, res, next) {
-        return res.json({ success: true, online: { count: 9999 } });
+        return res.json({ success: true, online: { count: app.websocketServer.connectedClients } });
     });
 
     getToken = function(headers) {
