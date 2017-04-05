@@ -21,5 +21,13 @@ module.exports = {
     'discord': {
         'clientID': '',
         'clientSecret': ''
+    },
+    'twitter': {
+        'clientID': '',
+        'clientSecret': ''
+    },
+    'github': {
+        'clientID': '',
+        'clientSecret': ''
     }
 }

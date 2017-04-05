@@ -39,8 +39,7 @@ button.btn {
   margin-bottom: 10px;
 }
 a.btn-discord img {
-  padding-left: 0.1em;
-  padding-top: 0.1em;
+  padding: 0.1em 0.1em 0.1em 0.1em;
 }
 a.btn-discord {
   background-color: #7289DA;

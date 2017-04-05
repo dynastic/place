@@ -26,7 +26,16 @@ var UserSchema = new Schema({
         type: Boolean,
         required: false
     },
-    realName: {
+    usernameSet: {
+        type: Boolean,
+        required: false,
+        default: true
+    },
+    OAuthID: {
+        type: String,
+        required: false
+    },
+    OAuthName: {
         type: String,
         required: false
     },
@@ -84,15 +93,29 @@ UserSchema.methods.toInfo = function() {
     }
 }
 
-UserSchema.statics.register = function(username, password, callback, oauthRealName) {
-    if (!oauthRealName && !this.isValidUsername(username)) return callback(null, { message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
+UserSchema.methods.setUserName = function(username, callback, usernameSet) {
+    if(!UserSchema.statics.isValidUsername(username)) return callback({ message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
+    this.name = username;
+    this.userNameSet = true;
+    this.save(function(err) {
+        console.log(err);
+        if(err) return callback({ message: "That username already exists.", code: "username_taken" });
+        console.log("Saved(?)");
+        return callback();
+    });
+}
+
+UserSchema.statics.register = function(username, password, callback, OAuthID, OAuthName) {
+    if (!OAuthID && !this.isValidUsername(username)) return callback(null, { message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
     let newUser = this({
         name: username,
+        usernameSet: !OAuthID, // Opposite of OAuth will give us false which is what we need
         password: password,
         creationDate: Date(),
         admin: false,
-        isOauth: !!oauthRealName,
-        realName: oauthRealName
+        isOauth: !!OAuthID,
+        OAuthID: OAuthID,
+        OAuthName: OAuthName
     });
     // Save the user
     newUser.save(function(err) {
