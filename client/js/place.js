@@ -320,6 +320,8 @@ var place = {
             this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
             this.zooming.panToX = null, this.zooming.panToY = null;
             clearInterval(this.zooming.zoomHandle);
+            let coord = this.getCoordinates();
+            this.hashHandler.modifyHash(coord);
             this.zooming.zoomHandle = null;
             return
         }
