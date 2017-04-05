@@ -5,6 +5,7 @@ const PublicRouter = require('../routes/public');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const ejs = require("ejs");
+const User = require("../models/user");
 const session = require('cookie-session');
 
 function HTTPServer(app) {
@@ -32,15 +33,33 @@ function HTTPServer(app) {
         secret: app.config.secret,
         name: "session"
     }));
-    server.use(passport.initialize())
-    server.use(passport.session())
+    server.use(passport.initialize());
+    server.use((req, res, next) => {
+        var userID = null;
+        if(req.session) if(req.session.passport) userID = req.session.passport.user;
+        if(userID) {
+            User.findById(userID).then(user => {
+                if(user.loginError()) {
+                    res.session.passport = null;
+                    res.redirect("/signin?loginerror=1");
+                }
+                req.user = user;
+                next();
+            }).catch(err => {
+                console.error("Error validating user session: " + err)
+                next();
+            });
+            return;
+        }
+        next();
+    });
 
     // Handle routes
     server.use('/api', APIRouter(app));
     server.use('/', PublicRouter(app));
 
     // 404 pages
-    server.use(function(req, res, next){
+    server.use((req, res, next) => {
         res.status(404);
 
         // respond with json

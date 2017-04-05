@@ -16,7 +16,10 @@ module.exports = function(passport) {
     passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
         User.findOne({ _id: jwt_payload._id }, function(err, user) {
             if (err) return done(err, false);
-            if (user) return done(null, user);
+            if (user) {
+                if (user.loginError()) return done(null, false, { error: user.loginError() });                
+                return done(null, user);
+            }
             done(null, false, { error: { message: "Invalid token.", code: "invalid_token" } });
         });
     }));
@@ -27,6 +30,8 @@ module.exports = function(passport) {
             if (user) {
                 // Don't allow Oauth logins from normal login area.
                 if(user.isOauth === true) return done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
+                if (user.loginError()) return done(null, false, { error: user.loginError() });
+              
                 return user.comparePassword(password, function(err, match) {
                     if (match && !err) return done(null, user);
                     done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
@@ -82,8 +87,6 @@ module.exports = function(passport) {
     });
 
     passport.deserializeUser(function(user, done) {
-        User.findById(user, function(err, user) {
-            done(err, user);
-        });
+        User.findById(user, (err, user) => done(err, user));
     });
 }

@@ -9,6 +9,7 @@ function PaintingHandler(app) {
         imageHasChanged: false,
         image: null,
         outputImage: null,
+        waitingForImages: [],
         colours: [
             {r: 255, g: 255, b: 255},
             {r: 228, g: 228, b: 228},
@@ -71,12 +72,20 @@ function PaintingHandler(app) {
         generateOutputImage: function() {
             var a = this;
             return new Promise((resolve, reject) => {
-                this.imageBatch.toBuffer("png", { compression: "fast", transparency: false }, (err, buffer) => {
+                this.waitingForImages.push((err, buffer) => {
                     if (err) return reject(err);
-                    a.outputImage = buffer;
-                    a.imageHasChanged = false;
                     resolve(buffer);
                 })
+                if(this.waitingForImages.length == 1) {
+                    this.imageBatch.toBuffer("png", { compression: "fast", transparency: false }, (err, buffer) => {
+                        a.outputImage = buffer;
+                        a.imageHasChanged = false;
+                        a.waitingForImages.forEach(callback => {
+                            callback(err, buffer);
+                        })
+                        a.waitingForImages = [];
+                    })
+                }
             })
         },
 
