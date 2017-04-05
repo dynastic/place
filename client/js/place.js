@@ -75,10 +75,7 @@ var hashHandler = {
     currentHash: null,
     
     getHash: function() {
-        if (this.currentHash === null) {
-            this.currentHash = this.decodeHash(window.location.hash);
-            return this.currentHash;
-        }
+        if (this.currentHash === null) this.currentHash = this.decodeHash(window.location.hash);
         return this.currentHash;
     },
 
