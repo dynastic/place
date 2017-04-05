@@ -93,6 +93,10 @@ UserSchema.methods.toInfo = function() {
     }
 }
 
+UserSchema.methods.loginError = function() {
+    if(this.banned === true) return { message: "You are banned from using this service due to violations of the rules.", code: "banned" }
+}
+    return null;
 UserSchema.methods.setUserName = function(username, callback, usernameSet) {
     if(!UserSchema.statics.isValidUsername(username)) return callback({ message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
     this.name = username;
