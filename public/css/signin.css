@@ -45,3 +45,6 @@ a.btn-discord {
   background-color: #7289DA;
   color: #FFFFFF;
 }
+a.btn-discord:hover {
+  color: #FFFFFF !important;
+}
