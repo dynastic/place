@@ -49,13 +49,14 @@ gulp.task('clean', function() {
 
 // Process JavaScript
 gulp.task('scripts', ['clean'], (cb) => {
-    console.log("Processing JavaScript...")
+    console.log("Processing JavaScript...");
     let t = gulp.src(paths.scripts.src)
     t = t.pipe(babel({
         presets: ['es2015']
     }))
     if(!config.debug) t = t.pipe(uglify());
-    t.pipe(gulp.dest(paths.scripts.built))
+    t.pipe(gulp.dest(paths.scripts.built));
+    return t;
 });
 
 // Rerun the task when a file changes 
