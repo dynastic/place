@@ -22,6 +22,14 @@ var UserSchema = new Schema({
         type: Date,
         required: false
     },
+    isOauth: {
+        type: Boolean,
+        required: false
+    },
+    realName: {
+        type: String,
+        required: false
+    },
     admin: {
         type: Boolean,
         required: true
@@ -76,13 +84,15 @@ UserSchema.methods.toInfo = function() {
     }
 }
 
-UserSchema.statics.register = function(username, password, callback) {
-    if (!this.isValidUsername(username)) return callback(null, { message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
+UserSchema.statics.register = function(username, password, callback, oauthRealName) {
+    if (!oauthRealName && !this.isValidUsername(username)) return callback(null, { message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
     let newUser = this({
         name: username,
         password: password,
         creationDate: Date(),
-        admin: false
+        admin: false,
+        isOauth: !!oauthRealName,
+        realName: oauthRealName
     });
     // Save the user
     newUser.save(function(err) {

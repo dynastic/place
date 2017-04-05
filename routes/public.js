@@ -59,6 +59,47 @@ function PublicRouter(app) {
         });
     })
 
+    router.get('/auth/google', function(req, res, next) {
+        passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }, function(err, user, info) {
+            if (!user) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: info.error || { message: "An unknown error occurred." }, username: req.body.username });
+            req.login(user, function(err) {
+                if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: { message: "An unknown error occurred." }, username: req.body.username });
+                return res.redirect("/?signedin=1");
+            });
+        })(req, res, next);
+    })
+
+    router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), function(req, res) {
+        res.redirect('/?signedin=1');
+    })
+
+    router.get('/auth/discord', passport.authenticate('discord'));
+    router.get('/auth/discord/callback', passport.authenticate('discord', {
+        failureRedirect: '/signup',
+        successRedirect: '/?signedin=1'
+    }), function(req, res) {
+        res.redirect('/?signedin=1') // Successful auth 
+    });
+
+    router.get('/auth/reddit', function(req, res, next){
+        req.session.state = Math.floor(Math.random() * 10000).toString(2);
+        passport.authenticate('reddit', {
+            state: req.session.state
+        })(req, res, next);
+    })
+
+    router.get('/auth/reddit/callback', function(req, res, next){
+        // Check for origin via state token
+        if (req.query.state == req.session.state){
+            passport.authenticate('reddit', {
+                successRedirect: '/?signedin=1',
+                failureRedirect: '/signup'
+            })(req, res, next);
+        } else {
+            next( new Error(403) );
+        }
+    });
+
     router.get('/signout', function(req, res) {
         req.logout();
         res.redirect("/?signedout=1");

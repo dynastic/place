@@ -26,8 +26,11 @@
     "mongoose": "^4.9.2",
     "morgan": "^1.8.1",
     "passport": "^0.3.2",
+    "passport-discord": "^0.1.2",
+    "passport-google-oauth20": "^1.0.0",
     "passport-jwt": "^2.2.1",
     "passport-local": "^1.0.0",
+    "passport-reddit": "^0.2.4",
     "pump": "^1.0.2",
     "socket.io": "^1.7.3"
   }
