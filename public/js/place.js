@@ -4,10 +4,110 @@
 //  Written by AppleBetas and nullpixel. Inspired by Reddit's /r/place.
 //
 
-const size = 1000;
+const size = 1000
+
+// Controller that looks after panning and zooming
+var createInteractionController = function (canvasDraggable, canvas) {
+    let desiredZoom = 1;
+
+    // Handles panning
+    let dragListener = (moveEvent) => {
+        // Grab the last x and y from the element
+        let x = (parseFloat(canvasDraggable.getAttribute('data-x')) || 0) + moveEvent.dx;
+        let y = (parseFloat(canvasDraggable.getAttribute('data-y')) || 0) + moveEvent.dy;
+        
+        // Translate the element
+        $("#canvas-draggable")[0].style.webkitTransform = $("#canvas-draggable")[0].style.transform = `translate(${x}px, ${y}px)`;
+
+        // Save the new coords
+        canvasDraggable.setAttribute('data-x', x);
+        canvasDraggable.setAttribute('data-y', y);
+    }
+
+    // Handles pinch-to-zoom
+    let gestureListener = (gestureEvent) => {
+        // Grab the current scale from element
+        let scale = (parseFloat(canvasDraggable.getAttribute('data-scale')) || 1) * (1 + gestureEvent.ds);
+        canvas.style.webkitTransform =
+        canvas.style.transform = 'scale(' + scale + ')';
+        canvasDraggable.setAttribute('data-scale', scale);
+        dragListener(gestureEvent);
+
+        // TODO: Figure out how to zoom in where we are pinching
+
+        /*
+        var scaledBox = {
+            x: -scaleElement.getBoundingClientRect().left + (event.box.x / scale),
+            y: -scaleElement.getBoundingClientRect().top + (event.box.y / scale), 
+            width: event.box.width / scale,
+            height: event.box.height / scale
+        }
+
+        var origin = {
+            x: scaledBox.x + (scaledBox.width / 2),
+            y: scaledBox.y + (scaledBox.height / 2)
+        }
+        
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.fillStyle = "#FFFFFF"
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.fillStyle = 'black'
+        ctx.fillRect(origin.x, origin.y, 10, 10)
+        ctx.strokeRect(scaledBox.x, scaledBox.y, scaledBox.width, scaledBox.height)
+        //alert("left: " + scaleElement.getBoundingClientRect().top + ", middle: " + event.box.y + (event.box.height / 2))
+       // alert(JSON.stringify(origin))
+       */
+         //scaleElement.style['-webkit-transform-origin'] = `${origin.x}px ${origin.y}px`
+    }
+
+    let animateZoom = () => {
+        let currentZoom = (parseFloat(canvasDraggable.getAttribute('data-scale')) || 1)
+        if (Math.abs(desiredZoom - currentZoom) > 0.1) {
+            canvasDraggable.setAttribute('data-scale', currentZoom += (desiredZoom - currentZoom) / 10);
+            let mockEvent = {dx: 0, dy: 0, ds: 0}
+            gestureListener(mockEvent);
+            window.requestAnimationFrame(animateZoom);
+        }
+    }
+
+    let doubleTapListener = (tapEvent) => {
+        let currentZoom = (parseFloat(canvasDraggable.getAttribute('data-scale')) || 1)
+        desiredZoom = (currentZoom < 4) ? 8 : 1
+
+        let rect = canvas.getBoundingClientRect();
+
+        // Get absolute canvas positions (a pixel coord on the canvas)
+        let currentCanvasX = Math.abs(rect.left - tapEvent.clientX)
+        let currentCanvasY = Math.abs(rect.top - tapEvent.clientY)
+
+        let desiredCanvasX = Math.abs(currentCanvasX) + (size/2 * desiredZoom)
+        let desiredCanvasY = Math.abs(currentCanvasY) + (size/2 * desiredZoom)
+
+        if (currentCanvasX > size / 2) desiredCanvasX = -desiredCanvasX
+        if (currentCanvasY > size / 2) desiredCanvasY = -desiredCanvasY
+
+
+        canvasDraggable.setAttribute('data-x', desiredCanvasX)
+        canvasDraggable.setAttribute('data-y', desiredCanvasY)
+
+        window.requestAnimationFrame(animateZoom)
+    }
+
+    // Use interact.js to allow the canvas to be dragged
+    interact(canvasDraggable).draggable({
+        inertia: true, // Makes it throwable
+        onmove: dragListener
+    }).gesturable({ // Enables gestures for pinch to zoom
+        onmove: gestureListener
+    }).on('doubletap', doubleTapListener.bind(this))
+}
 
 var createCanvasController = function(canvas) {
     let ctx = canvas.getContext("2d");
+    canvas.width = size
+    canvas.height = size
+
     // Disable image smoothing
     ctx.mozImageSmoothingEnabled = false;
     ctx.webkitImageSmoothingEnabled = false;
@@ -25,6 +125,7 @@ var createCanvasController = function(canvas) {
         },
 
         drawImage: function(image) {
+            //this.ctx.fillRect(0, 0, 100, 100)
             this.ctx.drawImage(image, 0, 0, size, size);
             this.isDisplayDirty = true;
         },
@@ -74,31 +175,18 @@ var notificationHandler = {
 }
 
 var place = {
-    zooming: {
-        zoomedIn: false,
-        panFromX: 0, panFromY: 0,
-        panToX: null, panToY: null,
-        zooming: false,
-        zoomFrom: 0,
-        zoomTo: 0,
-        zoomTime: 0,
-        zoomHandle: null
-    },
     socket: null,
     zoomButton: null,
     dragStart: null,
-    isMouseDown: false, shouldClick: true, placing: false,
-    panX: 0, panY: 0,
+    touches: [],
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null,
     notificationHandler: notificationHandler,
 
-    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement) {
+    start: function(canvas, canvasDraggable, cameraController, colourPaletteElement) {
         this.canvas = canvas;
         this.canvasController = createCanvasController(canvas);
-        this.displayCanvas = displayCanvas;
-        this.setupDisplayCanvas(this.displayCanvas);
-
+        this.interactionController = createInteractionController(canvasDraggable, canvas)
         this.colourPaletteElement = colourPaletteElement;
         this.setupColours();
         this.placingOverlay = $(this.colourPaletteElement).children("#placing-modal");
@@ -115,32 +203,14 @@ var place = {
         })
         this.updatePlaceTimer();
 
-        let controller = $(zoomController).parent()[0];
-        controller.onmousedown = (event) => this.handleMouseDown(event || window.event);
-        controller.onmouseup = (event) => this.handleMouseUp(event || window.event);
-        controller.onmouseout = (event) => { this.shouldClick = false; this.handleMouseUp(event || window.event) };
-        controller.onmousemove = (event) => {
-            if (this.isMouseDown) this.handleMouseDrag(event || window.event);
-            this.handleMouseMove(event || window.event);
-        }
-        controller.addEventListener("touchstart", (event) => this.handleMouseDown(event.changedTouches[0]));
-        controller.addEventListener("touchmove", (event) => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
-        controller.addEventListener("touchend", (event) => this.handleMouseUp(event.changedTouches[0]));
-        controller.addEventListener("touchcancel", (event) => this.handleMouseUp(event.changedTouches[0]));
-
-        window.onresize = () => this.handleResize();
-
-        this.zoomController = zoomController;
         this.cameraController = cameraController;
 
         let spawnPoint = this.getRandomSpawnPoint()
-        this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
+        //this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
 
         this.loadImage().then((image) => {
             this.canvasController.clearCanvas();
             this.canvasController.drawImage(image);
-            this.updateDisplayCanvas();
-            this.displayCtx.imageSmoothingEnabled = false;
         });
 
         this.socket = this.startSocketConnection()
@@ -175,45 +245,6 @@ var place = {
         });
     },
 
-    handleResize: function() {
-        this.displayCanvas.height = window.innerHeight;
-        this.displayCanvas.width = window.innerWidth;
-        this.displayCtx.mozImageSmoothingEnabled = false;
-        this.displayCtx.webkitImageSmoothingEnabled = false;
-        this.displayCtx.msImageSmoothingEnabled = false;
-        this.displayCtx.imageSmoothingEnabled = false;
-        this.updateDisplayCanvas();
-    },
-
-    setupDisplayCanvas: function(canvas) {
-        this.displayCtx = canvas.getContext("2d");
-        this.handleResize();
-        this.updateDisplayCanvas();
-    },
-
-    updateDisplayCanvas: function() {
-        let dcanvas = this.displayCanvas;
-        this.displayCtx.clearRect(0, 0, dcanvas.width, dcanvas.height);
-        let zoom = this._getCurrentZoom();
-        let mod = size / 2;
-        this.displayCtx.drawImage(this.canvas, dcanvas.width / 2 + (this.panX - mod - 0.5) * zoom, dcanvas.height / 2 + (this.panY - mod - 0.5) * zoom, this.canvas.width * zoom, this.canvas.height * zoom);
-    },
-
-    _lerp: function(from, to, time) {
-        if (time > 100) time = 100
-        return from + (time / 100) * (to - from)
-    },
-
-    _getCurrentZoom: function() {
-        if (!this.zooming.zooming) return this._getZoomMultiplier()
-
-        return this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime)
-    },
-
-    _getZoomMultiplier: function() {
-        return this.zooming.zoomedIn ? 40 : 4;
-    },
-
     loadImage: function() {
         return new Promise((resolve, reject) => {
             image = new Image();
@@ -224,47 +255,6 @@ var place = {
         });
     },
 
-    animateZoom: function() {
-        this.zooming.zoomTime += 1
-        this.updateDisplayCanvas()
-
-        let x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
-        let y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
-        this.setCanvasPosition(x, y)
-
-        if (this.zooming.zoomTime >= 100) {
-            this.zooming.zooming = false
-            this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
-            this.zooming.panToX = null, this.zooming.panToY = null;
-            clearInterval(this.zooming.zoomHandle);
-            this.zooming.zoomHandle = null;
-            return
-        }
-    },
-
-    setZoomedIn: function(zoomedIn) {
-        if(zoomedIn == this.zooming.zoomedIn || this.zooming.zoomHandle !== null) return;
-        this.zooming.panFromX = this.panX;
-        this.zooming.panFromY = this.panY;
-        if(this.zooming.panToX == null) this.zooming.panToX = this.panX;
-        if(this.zooming.panToY == null) this.zooming.panToY = this.panY;
-        this.zooming.zoomFrom = this._getCurrentZoom()
-        this.zooming.zoomTime = 0
-        this.zooming.zooming = true
-        this.zooming.zoomedIn = zoomedIn;
-        this.zooming.zoomTo = this._getZoomMultiplier()
-        this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this), 1)
-
-        if (zoomedIn) $(this.zoomController).parent().addClass("zoomed");
-        else $(this.zoomController).parent().removeClass("zoomed");
-        this.updateDisplayCanvas();
-        this._adjustZoomButtonText();
-    },
-
-    toggleZoom: function() {
-        this.setZoomedIn(!this.zooming.zoomedIn);
-    },
-
     _adjustZoomButtonText: function() {
         let zoomIcon = `<i class="fa fa-fw fa-search-${this.zooming.zoomedIn ? "minus" : "plus"}"></i>`;
         if (this.zoomButton) $(this.zoomButton).html(zoomIcon + (this.zooming.zoomedIn ? "Zoom Out" : "Zoom In"))
@@ -272,67 +262,7 @@ var place = {
 
     setZoomButton: function(btn) {
         this.zoomButton = btn;
-        this._adjustZoomButtonText();
-        $(btn).click(this.handleZoomButtonClick.bind(this));
-    },
-
-    handleZoomButtonClick: function() {
-        this.toggleZoom();
-        this.isMouseDown = false;
-    },
-
-    moveCamera: function(deltaX, deltaY, animated) {
-        if (typeof animated === 'undefined') animated = false;
-        let cam = $(this.cameraController);
-        let zoomModifier = this._getCurrentZoom();
-        let x = deltaX / zoomModifier,
-            y = deltaY / zoomModifier;
-        this.setCanvasPosition(x, y, true);
-        this.updateDisplayCanvas();
-    },
-
-    setCanvasPosition: function(x, y, delta = false) {
-        let deltaStr = delta ? "+=" : ""
-        $(this.cameraController).css({
-            top: `${deltaStr}${y}px`,
-            left: `${deltaStr}${x}px`
-        })
-        if (delta) this.panX += x, this.panY += y;
-        else this.panX = x, this.panY = y;
-    },
-
-    handleMouseMove: function(event) {
-        if(this.handElement) {
-            let elem = $(this.handElement);
-            elem.css({
-                left: event.pageX - (elem.width() / 2),
-                top: event.pageY - (elem.height() / 2),
-            });
-        }
-    },
-
-    handleMouseDown: function(event) {
-        this.isMouseDown = true;
-        $(this.zoomController).addClass("grabbing");
-        this.dragStart = { x: event.pageX, y: event.pageY };
-    },
-
-    handleMouseDrag: function(event) {
-        this.shouldClick = false;
-        if (this.dragStart) this.moveCamera(event.pageX - this.dragStart.x, event.pageY - this.dragStart.y);
-        this.dragStart = { x: event.pageX, y: event.pageY };
-    },
-
-    handleMouseUp: function(event) {
-        if(this.shouldClick) {
-            if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.includes(event.target) || event.target == this.zoomButton || !this.shouldClick) return;
-            let zoom = this._getZoomMultiplier();
-            this.canvasClicked(Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), Math.round((event.pageY - $(this.cameraController).offset().top) / zoom))
-        }
-        this.shouldClick = true;
-        this.isMouseDown = false;
-        $(this.zoomController).removeClass("grabbing");
-        dragStart = null;
+        //this._adjustZoomButtonText();
     },
 
     isSignedIn: function() {
@@ -395,24 +325,12 @@ var place = {
         this.deselectColour();
         this.selectedColour = colourID - 1;
         let elem = this.colourPaletteOptionElements[this.selectedColour];
-        this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
-        $(this.zoomController).addClass("selected");
+        //this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
     },
 
     deselectColour: function() {
         this.selectedColour = null;
         $(this.handElement).remove();
-        $(this.zoomController).removeClass("selected");
-    },
-
-    zoomIntoPoint: function(x, y) {
-        this.zooming.panToX = -(x - size / 2);
-        this.zooming.panToY = -(y - size / 2);
-
-        this.zooming.panFromX = this.panX
-        this.zooming.panFromY = this.panY
-        
-        this.setZoomedIn(true);
     },
 
     canvasClicked: function(x, y, event) {
@@ -448,7 +366,6 @@ var place = {
 
     setPixel: function(colour, x, y) {
         this.canvasController.setPixel(colour, x, y);
-        this.updateDisplayCanvas();
     }
 }
 
@@ -456,5 +373,5 @@ String.prototype.padLeft = function(pad, length) {
     return (new Array(length + 1).join(pad) + this).slice(-length);
 }
 
-place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0]);
+place.start($("canvas#place-canvas")[0], $("#canvas-draggable")[0], $("#camera-controller")[0], $("#palette")[0]);
 place.setZoomButton($("#zoom-button")[0]);

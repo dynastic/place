@@ -3,26 +3,21 @@
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    touch-action: none;
+}
+
+#canvas-draggable {
+    padding: 250px;
+    font-size: 0px;
+    line-height: 0;
 }
 
 #place-canvas {
-    position: absolute;
-    pointer-events: none;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-}
-
-#place-canvas-draw {
-    opacity: 0;
     -ms-interpolation-mode: bicubic;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
     image-rendering: pixelated;
-    height: 1000px;
-    width: 1000px;
 }
 
 body.debug #place-canvas-draw {
