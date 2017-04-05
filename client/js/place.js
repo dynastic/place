@@ -462,20 +462,25 @@ var place = {
             $(this.placeTimer).children("span").text("Loading…");
             var a = this;
             return $.get("/api/timer").done(data => {
-                if(data.success) {
-                    if(data.timer.canPlace) this.changePlaceTimerVisibility(false);
-                    else {
-                        a.unlockTime = (new Date().getTime() / 1000) + data.timer.seconds;
-                        a.secondTimer = setInterval(() => a.checkSecondsTimer(), 1000);
-                        a.checkSecondsTimer();
-                    }
-                } else failToPost(data.error);
+                if(data.success) return a.doTimer(data.timer);
+                failToPost(data.error);
             }).fail(() => this.changePlaceTimerVisibility(false));
         }
         this.changePlaceTimerVisibility(false);
     },
 
+    doTimer: function(data) {
+        console.log(this);
+        this.changePlaceTimerVisibility(true);
+        if(data.canPlace) return this.changePlaceTimerVisibility(false);
+        this.unlockTime = (new Date().getTime() / 1000) + data.seconds;
+        this.secondTimer = setInterval(() => this.checkSecondsTimer(), 1000);
+        this.checkSecondsTimer();
+    },
+
     checkSecondsTimer: function() {
+        console.log("CHECKING!!!");
+        console.log(this.placeTimer);
         function padLeft(str, pad, length) {
             return (new Array(length + 1).join(pad) + str).slice(-length);
         }
@@ -488,7 +493,7 @@ var place = {
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
             } else {
-                this.notificationHandler.sendNotification("Place 2.0", "You may now place!")
+                this.notificationHandler.sendNotification("Place 2.0", "You may now place!");
             }
         }
         if(this.secondTimer) clearInterval(this.secondTimer);
@@ -574,7 +579,8 @@ var place = {
                 if(data.success) {
                     a.setPixel(a.DEFAULT_COLOURS[a.selectedColour], x, y);
                     a.deselectColour();
-                    a.updatePlaceTimer();
+                    if(data.timer) a.doTimer(data.timer);
+                    else a.updatePlaceTimer();
                 } else failToPost(data.error);
             }).fail(data => failToPost(data.responseJSON.error)).always(() => {
                 this.changePlacingModalVisibility(false);
