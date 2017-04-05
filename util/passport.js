@@ -45,19 +45,14 @@ module.exports = function(passport) {
 
     // Called by all OAuth providers. Logs user in and creates account in the database if it doesn't exist already
     function OAuthLogin(prefix, name, id, done) {
-        console.log("OAUTH START");
         User.findOne({ OAuthID: prefix + "_" + id }, function(err, user) {
-            console.log("Found searched", err);
             if(err) return done(err, false);
-            console.log("No errors");
             if(user) {
-                console.log("Found user");
                 if(user.isOauth !== true) return done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
                 return done(null, user);
             }
             // Even though we don't use the password field, it's better to set it to *SOMETHING* unique
             User.register(prefix + "_" + id + "-" + Math.floor(Math.random() * 1000000), prefix + "_" + id, function(user, error) {
-                console.log("Registered", error);
                 if(!user) return done(null, false, error);
                 done(null, user);
             }, prefix + "_" + id, name);
