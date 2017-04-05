@@ -74,11 +74,10 @@ PixelSchema.methods.toInfo = function() {
 }
 
 PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
-    // Maybe do some validation
     x = parseInt(x), y = parseInt(y);
     if(isNaN(x) || isNaN(y)) return callback(null, { message: "Invalid positions provided." });
     // TODO: Get actual position below:
-    if(x < 0 || y < 0 || x > 999 || y > 999) return callback(null, { message: "Position is out of bounds." });
+    if(x <= 0 || y <= 0 || x > 999 || y > 999) return callback(null, { message: "Position is out of bounds." });
     this.findOneAndUpdate({
         xPos: x,
         yPos: y
@@ -97,6 +96,16 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
         if (err) return callback(null, { message: "An error occurred while trying to place the pixel." });
         return callback(pixel, null);
     });
+}
+
+PixelSchema.methods.getInfo = function() {
+    return new Promise((resolve, reject) => {
+        require("./user").findById(this.editorID).then(user => {
+            let info = this.toInfo();
+            info.editor = user.toInfo();
+            resolve(info);
+        }).catch(err => reject(err));
+    })
 }
 
 PixelSchema.statics.getAllPixels = function() {

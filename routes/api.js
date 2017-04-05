@@ -4,6 +4,7 @@ const jwt = require('jwt-simple');
 const passport = require('passport');
 require('../util/passport')(passport);
 const User = require('../models/user');
+const Pixel = require('../models/pixel');
 const path = require("path");
 
 function APIRouter(app) {
@@ -44,7 +45,7 @@ function APIRouter(app) {
     router.post('/place', function(req, res, next) {
         function paintWithUser(user) {
             if (!user.canPlace()) return res.status(429).json({ success: false, error: { message: "You cannot place yet.", code: "slow_down" } });
-            if (!req.body.x || !req.body.y || !req.body.colour) return res.status(401).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
+            if (!req.body.x || !req.body.y || !req.body.colour) return res.status(400).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
             let rgb = app.paintingHandler.getColourRGB(req.body.colour);
             if (!rgb) return res.status(500).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
             app.paintingHandler.doPaint(rgb, req.body.x, req.body.y, user).then((pixel) => {
@@ -74,6 +75,18 @@ function APIRouter(app) {
 
     router.get('/online', function(req, res, next) {
         return res.json({ success: true, online: { count: app.websocketServer.connectedClients } });
+    });
+
+    router.get('/pixel', function(req, res, next) {
+        function fail(err) {
+            console.error("Pixel data retrieve error: " + err);
+            return res.status(500).json({ success: false, error: { message: "An error occurred while trying to look up information about that pixel." } })
+        }
+        if(!req.query.x || !req.query.y) return res.status(400).json( { success: false, error: { message: "You did not specify the coordinates of the pixel to look up.", code: "bad_request" } });
+        Pixel.find({xPos: req.query.x, yPos: req.query.y}).then(pixels => {
+            if (pixels.length <= 0) return res.json( {success: true, pixel: null });
+            pixels[0].getInfo().then(info => res.json({ success: true, pixel: info })).catch(err => fail(err));
+        }).catch(err => fail(err));
     });
 
     getToken = function(headers) {
