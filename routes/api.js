@@ -49,7 +49,11 @@ function APIRouter(app) {
             let rgb = app.paintingHandler.getColourRGB(req.body.colour);
             if (!rgb) return res.status(500).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
             app.paintingHandler.doPaint(rgb, req.body.x, req.body.y, user).then((pixel) => {
-                return res.json({ success: true })
+                return User.findById(user.id).then(user => {
+                    let seconds = user.getPlaceSecondsRemaining();
+                    let countData = { canPlace: seconds <= 0, seconds: seconds };
+                    return res.json({ success: true, timer: countData })
+                }).catch(err => res.json({ success: true }));
             }).catch(err => res.status(500).json({ success: false, error: err }));
         }
         if (req.user) return paintWithUser(req.user);
@@ -63,7 +67,8 @@ function APIRouter(app) {
     router.get('/timer', function(req, res, next) {
         function getTimerPayload(user) {
             let seconds = user.getPlaceSecondsRemaining();
-            return { success: true, timer: { canPlace: seconds <= 0, seconds: seconds } };
+            let countData = { canPlace: seconds <= 0, seconds: seconds };
+            return { success: true, timer: countData };
         }
         if (req.user) return res.send(getTimerPayload(req.user));
         passport.authenticate('jwt', { session: false }, function(err, user, info) {
