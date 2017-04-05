@@ -20,6 +20,9 @@ function HTTPServer(app) {
     server.set('view engine', 'html');
     server.engine('html', ejs.renderFile);
 
+    server.set('view engine', 'xml');
+    server.engine('xml', ejs.renderFile);
+
     // Use public folder for resources
     server.use(express.static('public'));
 

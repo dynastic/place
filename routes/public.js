@@ -13,6 +13,11 @@ function PublicRouter(app) {
         return responseFactory.sendRenderedResponse("public/index", req, res);
     })
 
+    router.get('/sitemap.xml', function(req, res, next) {
+        //return next();
+        return responseFactory.sendRenderedResponse("public/sitemap", req, res, null, "text/xml");
+    })
+
     router.get('/signin', function(req, res) {
         if (req.user) return res.redirect("/");
         return responseFactory.sendRenderedResponse("public/signin", req, res);
