@@ -1,3 +1,5 @@
+@import url("https://lipis.github.io/bootstrap-social/bootstrap-social.css");
+
 body {
   padding-top: 40px;
   padding-bottom: 40px;
@@ -32,4 +34,17 @@ body {
 }
 .form-signin input {
   margin-bottom: 10px;
+}
+button.btn {
+  margin-bottom: 10px;
+}
+a.btn-discord img {
+  padding: 0.1em 0.1em 0.1em 0.1em;
+}
+a.btn-discord {
+  background-color: #7289DA;
+  color: #FFFFFF;
+}
+a.btn-discord:hover {
+  color: #FFFFFF !important;
 }
