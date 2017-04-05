@@ -9,33 +9,6 @@ const responseFactory = require("../util/ResponseFactory");
 function PublicRouter(app) {
     let router = express.Router()
 
-    router.use(function(req, res, next) { // Force user to pick a username
-        if(req.url == "/signout") return next(); // Allow the user to log out
-        if(req.url == "/pick-username") return next(); // Allow the user to POST their new username
-        if(req.user && !req.user.usernameSet) { // If the user has no username...
-            return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), username: req.user.OAuthName.replace(/\s/g, "-")}); // Send the username picker
-        }
-        next(); // Otherwise, carry on...
-    })
-
-    router.post('/pick-username', function(req, res) {
-        if(!req.user) res.redirect("/signup");
-        if(req.user.usernameSet) res.redirect("/");
-        let user = req.user;
-        user.name = req.body.username;
-        app.recaptcha.verify(req, error => {
-            if(error) return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), error: {message: "Please prove your humanity"}, user: {name: ""}, username: req.body.username});
-            
-            user.setUserName(user.name, function(err) {
-                if(err) return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), error: err, username: req.body.name, user: {name: ""}});
-                req.login(user, function(err) {
-                    if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, {captcha: app.recaptcha.render(), error: { message: "An unknown error occurred." }, username: req.body.username});
-                    res.redirect("/?signedin=1");
-                });
-            });
-        });
-    })
-
     router.get('/', function(req, res) {
         return responseFactory.sendRenderedResponse("public/index", req, res);
     })
@@ -90,61 +63,6 @@ function PublicRouter(app) {
             });
         });
     })
-
-    router.get('/auth/google', function(req, res, next) {
-        passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }, function(err, user, info) {
-            if (!user) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: info.error || { message: "An unknown error occurred." }, username: req.body.username });
-            req.login(user, function(err) {
-                if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: { message: "An unknown error occurred." }, username: req.body.username });
-                return res.redirect("/?signedin=1");
-            });
-        })(req, res, next);
-    })
-
-    router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), function(req, res) {
-        res.redirect('/?signedin=1');
-    })
-
-    router.get('/auth/discord', passport.authenticate('discord'));
-    router.get('/auth/discord/callback', passport.authenticate('discord', {
-        failureRedirect: '/signup',
-        successRedirect: '/?signedin=1'
-    }), function(req, res) {
-        res.redirect('/?signedin=1') // Successful auth 
-    });
-
-    router.get('/auth/github', passport.authenticate('github'));
-    router.get('/auth/github/callback', passport.authenticate('github', {
-        failureRedirect: '/signup',
-        successRedirect: '/?signedin=1'
-    }), function(req, res) {
-        res.redirect('/?signedin=1') // Successful auth 
-    });
-
-    router.get('/auth/reddit', function(req, res, next){
-        req.session.state = Math.floor(Math.random() * 10000).toString(2);
-        passport.authenticate('reddit', {
-            state: req.session.state
-        })(req, res, next);
-    })
-
-    router.get('/auth/reddit/callback', function(req, res, next){
-        // Check for origin via state token
-        if (req.query.state == req.session.state){
-            passport.authenticate('reddit', {
-                successRedirect: '/?signedin=1',
-                failureRedirect: '/signup'
-            })(req, res, next);
-        } else {
-            next( new Error(403) );
-        }
-    });
-
-    router.get('/auth/twitter', passport.authenticate('twitter'));
-
-    router.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/signup' }), function(req, res) {
-        res.redirect('/?signedin=1');
-    });
 
     router.get('/signout', function(req, res) {
         req.logout();
