@@ -406,24 +406,26 @@ var place = {
     },
 
     handleMouseMove: function(event) {
-        if(this.gridHint) {
-            let zoom = this._getCurrentZoom();
-            // Hover position in grid multiplied by zoom
-            let x = Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), y = Math.round((event.pageY - $(this.cameraController).offset().top) / zoom);
-            let elem = $(this.gridHint);
-            let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
-            let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
-            elem.css({
-                left: posX * zoom,
-                top: posY * zoom,
-            });
-        }
-        if(this.handElement) {
-            let elem = $(this.handElement);
-            elem.css({
-                left: event.pageX - (elem.width() / 2),
-                top: event.pageY - (elem.height() / 2),
-            });
+        if(!this.placing) {
+            if(this.gridHint) {
+                let zoom = this._getCurrentZoom();
+                // Hover position in grid multiplied by zoom
+                let x = Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), y = Math.round((event.pageY - $(this.cameraController).offset().top) / zoom);
+                let elem = $(this.gridHint);
+                let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
+                let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
+                elem.css({
+                    left: posX * zoom,
+                    top: posY * zoom,
+                });
+            }
+            if(this.handElement) {
+                let elem = $(this.handElement);
+                elem.css({
+                    left: event.pageX - (elem.width() / 2),
+                    top: event.pageY - (elem.height() / 2),
+                });
+            }
         }
     },
 
