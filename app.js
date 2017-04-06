@@ -3,8 +3,9 @@ const config = require('./config/config');
 const mongoose = require('mongoose');
 const paintingHandler = require("./util/PaintingHandler");
 const recaptcha = require('express-recaptcha');
-const HTTPServer = require("./util/HTTPServer.js");
-const WebsocketServer = require("./util/WebsocketServer.js");
+const HTTPServer = require("./util/HTTPServer");
+const WebsocketServer = require("./util/WebsocketServer");
+const TemporaryUserInfo = require("./util/TemporaryUserInfo");
 const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
@@ -20,6 +21,7 @@ let paths = {
 
 var app = {};
 app.config = config;
+app.temporaryUserInfo = TemporaryUserInfo;
 
 // Get image handler
 app.paintingHandler = paintingHandler(app);
