@@ -18,5 +18,10 @@
 </script>
   <% } 
 }%>
+<% if(typeof config.secret !== "undefined") {
+  if(config.secret !== null && config.secret != "") { %>
+  <%- include("footer-s.html") -%>
+  <% } 
+}%>
   </body>
 </html>

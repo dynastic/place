@@ -17,6 +17,7 @@
     "del": "^2.2.2",
     "ejs": "^2.5.6",
     "express": "^4.15.2",
+    "express-brute-mongoose": "0.0.7",
     "express-recaptcha": "^2.1.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",

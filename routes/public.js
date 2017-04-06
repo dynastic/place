@@ -1,4 +1,6 @@
 const express = require('express');
+const Ratelimit = require('express-brute');
+const ratelimitStore = require('../util/ratelimit-store');
 const config = require('../config/config');
 const jwt = require('jwt-simple');
 const passport = require('passport');
@@ -8,6 +10,28 @@ const responseFactory = require("../util/ResponseFactory");
 
 function PublicRouter(app) {
     let router = express.Router()
+
+        const ratelimitCallback = function (req, res, next, nextValidRequestDate) {
+         function renderResponse(errorMsg) {
+             return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.recaptcha.render(), error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
+         }
+         res.status(429);
+         return renderResponse("You're doing that too fast.");
+     }
+ 
+     const handleStoreError = function (error) {
+         log.error(error);
+     }
+ 
+     const signupRatelimit = new Ratelimit(ratelimitStore, {
+         freeRetries: 3, // 3 signups per hour
+         attachResetToRequest: false,
+         refreshTimeoutOnRequest: false,
+         minWait: 60*60*1000, // 1 hour
+         maxWait: 60*60*1000, // 1 hour, 
+         failCallback: ratelimitCallback,
+         handleStoreError: handleStoreError
+     });
 
     router.get('/', function(req, res) {
         return responseFactory.sendRenderedResponse("public/index", req, res);
@@ -45,7 +69,7 @@ function PublicRouter(app) {
         return responseFactory.sendRenderedResponse("public/account", req, res);
     })
 
-    router.post('/signup', function(req, res, next) {
+    router.post('/signup', signupRatelimit.prevent, function(req, res, next) {
         function renderResponse(errorMsg) {
             return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.recaptcha.render(), error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
         }

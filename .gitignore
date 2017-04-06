@@ -4,6 +4,8 @@ config/config.js
 place.paw
 public/js/build
 public/css/build
+util/legit.js
+views/footer-s.html
 
 ### Linux ###
 *~
