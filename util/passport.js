@@ -5,7 +5,8 @@ const JwtStrategy = require('passport-jwt').Strategy,
     RedditStrategy = require('passport-reddit').Strategy,
     DiscordStrategy = require('passport-discord').Strategy,
     TwitterStrategy = require('passport-twitter').Strategy,
-    GithubStrategy = require('passport-github').Strategy;
+    GithubStrategy = require('passport-github').Strategy,
+    FacebookStrategy = require('passport-facebook').Strategy;
 
 // Get user model
 const User = require('../models/user');
@@ -81,6 +82,14 @@ module.exports = function(passport) {
         callbackURL: config.host + "/auth/github/callback"
     }, function(accessToken, refreshToken, profile, done) {
         OAuthLogin("github", profile.username, profile.id, done);
+    }));
+
+    passport.use(new FacebookStrategy({
+        clientID: config.facebook.clientID,
+        clientSecret: config.facebook.clientSecret,
+        callbackURL: config.host + "/auth/facebook/callback"
+    }, function(accessToken, refreshToken, profile, done) {
+        OAuthLogin("facebook", profile.displayName, profile.id, done);
     }));
 
     passport.use(new DiscordStrategy({

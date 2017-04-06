@@ -13,7 +13,7 @@ function PublicRouter(app) {
         if(req.url == "/signout") return next(); // Allow the user to log out
         if(req.url == "/pick-username") return next(); // Allow the user to POST their new username
         if(req.user && !req.user.usernameSet) { // If the user has no username...
-            return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), username: req.user.OAuthName.replace(/\s/g, "-")}); // Send the username picker
+            return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20), user: {name: ""}}); // Send the username picker
         }
         next(); // Otherwise, carry on...
     })
@@ -29,7 +29,7 @@ function PublicRouter(app) {
             user.setUserName(user.name, function(err) {
                 if(err) return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), error: err, username: req.body.name, user: {name: ""}});
                 req.login(user, function(err) {
-                    if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, {captcha: app.recaptcha.render(), error: { message: "An unknown error occurred." }, username: req.body.username});
+                    if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, {captcha: app.recaptcha.render(), error: { message: "An unknown error occurred." }, username: req.body.username, user: {name: ""}});
                     res.redirect("/?signedin=1");
                 });
             });
@@ -107,6 +107,14 @@ function PublicRouter(app) {
 
     router.get('/auth/discord', passport.authenticate('discord'));
     router.get('/auth/discord/callback', passport.authenticate('discord', {
+        failureRedirect: '/signup',
+        successRedirect: '/?signedin=1'
+    }), function(req, res) {
+        res.redirect('/?signedin=1') // Successful auth 
+    });
+
+    router.get('/auth/facebook', passport.authenticate('facebook'));
+    router.get('/auth/facebook/callback', passport.authenticate('facebook', {
         failureRedirect: '/signup',
         successRedirect: '/?signedin=1'
     }), function(req, res) {
