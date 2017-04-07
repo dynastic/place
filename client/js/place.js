@@ -474,7 +474,8 @@ var place = {
 
     contextMenu: function(event) {
         event.preventDefault();
-        if(this.selectedColour) this.deselectColour();
+        if(this.selectedColour) return this.deselectColour();
+        if(this.zooming.zoomedIn) this.setZoomedIn(false);
     },
 
     getPixel: function(x, y, callback) {
