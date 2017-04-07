@@ -54,8 +54,13 @@
         <div class="collapse navbar-collapse" id="navbar-collapse">
           <ul class="nav navbar-nav">
             <%- renderNavItem("Home", "/", "home"); %>
-            <%- renderNavItem("Official Subreddit", "https://www.reddit.com/r/place20", "reddit-alien"); %>
-            <%- renderNavItem("Chat on Discord", "https://discord.gg/CgC8FTg", "comments"); %>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-users fa-fw"></i>Community <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <%- renderNavItem("Official Subreddit", "https://www.reddit.com/r/place20", "reddit-alien"); %>
+                <%- renderNavItem("Chat on Discord", "https://discord.gg/CgC8FTg", "comments"); %>
+              </ul>
+            </li>
             <%- renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money"); %>
           </ul>
           <ul class="nav navbar-nav navbar-right">
