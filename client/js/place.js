@@ -162,11 +162,11 @@ var place = {
             if (this.isMouseDown) this.handleMouseDrag(event || window.event);
             this.handleMouseMove(event || window.event);
         }
-        controller.addEventListener("touchstart", (event) => this.handleMouseDown(event.changedTouches[0]));
-        controller.addEventListener("touchmove", (event) => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
-        controller.addEventListener("touchend", (event) => this.handleMouseUp(event.changedTouches[0]));
-        controller.addEventListener("touchcancel", (event) => this.handleMouseUp(event.changedTouches[0]));
-        canvas.addEventListener("contextmenu", (event) => this.contextMenu(event));
+        controller.addEventListener("touchstart", event => this.handleMouseDown(event.changedTouches[0]));
+        controller.addEventListener("touchmove", event => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
+        controller.addEventListener("touchend", event => this.handleMouseUp(event.changedTouches[0]));
+        controller.addEventListener("touchcancel", event => this.handleMouseUp(event.changedTouches[0]));
+        canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
         window.onresize = () => this.handleResize();
         window.onhashchange = () => this.handleHashChange();
