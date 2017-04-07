@@ -15,12 +15,13 @@ function APIRouter(app) {
     });
 
     router.post('/identify', function(req, res, next) {
-        if (!req.body.username || !req.body.password) return res.status(403).json({ success: false, error: { message: 'A username and password are required.', code: 'invalid_parameters' } });
+        return res.status(503).json({ success: false, error: { message: "API identification is no longer available.", code: "unavailable" } });
+        /*if (!req.body.username || !req.body.password) return res.status(403).json({ success: false, error: { message: 'A username and password are required.', code: 'invalid_parameters' } });
         passport.authenticate('local', { session: false }, function(err, user, info) {
             if (!user) return res.status(500).json({ success: false, error: info.error || { message: "An unknown error occurred." } });
             let token = jwt.encode(user, config.secret);
             res.json({ success: true, token: 'JWT ' + token }); // create and return jwt token here        
-        })(req, res, next);
+        })(req, res, next);*/
     });
 
     router.get('/session', function(req, res, next) {
