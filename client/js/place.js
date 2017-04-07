@@ -166,6 +166,7 @@ var place = {
         controller.addEventListener("touchmove", (event) => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
         controller.addEventListener("touchend", (event) => this.handleMouseUp(event.changedTouches[0]));
         controller.addEventListener("touchcancel", (event) => this.handleMouseUp(event.changedTouches[0]));
+        canvas.addEventListener("contextmenu", this.contextMenu);
 
         window.onresize = () => this.handleResize();
         window.onhashchange = () => this.handleHashChange();
@@ -454,6 +455,34 @@ var place = {
         let coord = this.getCoordinates();
         this.hashHandler.modifyHash(coord);
         this.didSetHash = true;
+    },
+
+    contextMenu: function(event) {
+        event.preventDefault();
+        let zoom = place._getZoomMultiplier();
+        let x = Math.round((event.pageX - $(place.cameraController).offset().left) / zoom)
+        let y = Math.round((event.pageY - $(place.cameraController).offset().top) / zoom)
+        return $.get(`/api/pixel?x=${x}&y=${y}`).done(data => {
+            if(data.pixel == null) data.pixel = { // No pixel was clicked... For simplicity we just change the response
+                editor: {
+                    username: "Nobody!",
+                    statistics: {
+                        totalPlaces: 0
+                    }
+                },
+                modified: 0
+            };
+            if(!data.success) return failToPost(data.error);
+            $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > b > #owner").text(()=>{return data.pixel.editor.username});
+            $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > #x-coordinate").text(x);
+            $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > #y-coordinate").text(y);
+            let t = new Date(data.pixel.modified);
+            $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > b > #modified-date").text(`${t.getHours() == 0 ? "12" : t.getHours() > 12 ? t.getHours() - 12 : t.getHours()}:${t.getMinutes() < 10 ? "0" + t.getMinutes() : t.getMinutes()} ${t.getHours() > 12 ? "AM" : "PM"} on ${t.getMonth() + 1}/${t.getDate()}/${t.getFullYear()}`);
+            $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > b > #places").text(data.pixel.editor.statistics.totalPlaces);
+            $("#coordinate-modal").modal();
+        }).fail(function(err) {
+            failToPost(err);
+        });
     },
 
     isSignedIn: function() {
