@@ -23,3 +23,7 @@ body.fixed-navbar {
 .canvas-container .control {
     margin-top: 50px;
 }
+
+.footer {
+    display: none;
+}
