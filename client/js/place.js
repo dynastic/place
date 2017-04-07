@@ -387,8 +387,8 @@ var place = {
             let coordElem = $(this.coordinateElement);
             setTimeout(function() {
                 let spans = coordElem.find("span");
-                spans.first().text(coord.x);
-                spans.last().text(coord.y);
+                spans.first().text(coord.x.toLocaleString());
+                spans.last().text(coord.y.toLocaleString());
             }, 0);
         }
         this.lastUpdatedCoordinates = coord;
