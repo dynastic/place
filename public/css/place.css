@@ -216,3 +216,148 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     display: none;
     z-index: 1;
 }
+
+#pixel-data-ctn {
+    position: absolute;
+    display: none;
+    z-index: 3;
+    top: 50%;
+    left: 50%;
+    margin-top: -40px;
+    margin-left: 25px;
+}
+
+.pixel-data {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #d3d3d3;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.1);
+    min-width: 275px;
+    max-width: 500px;
+	position: relative;
+}
+
+.pixel-data:after, .pixel-data:before {
+	right: 100%;
+	top: 40px;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.pixel-data:after {
+	border-color: rgba(255, 255, 255, 0);
+	border-right-color: #ffffff;
+	border-width: 10px;
+	margin-top: -10px;
+}
+.pixel-data:before {
+	border-color: rgba(211, 211, 211, 0);
+	border-right-color: #d3d3d3;
+	border-width: 11px;
+	margin-top: -11px;
+}
+
+@media screen and (max-width: 750px) {
+    .pixel-data:after, .pixel-data:before {
+        bottom: 100%;
+        left: 50%;
+        right: initial; top: initial;
+    }
+
+    .pixel-data:after {
+        border-right-color: transparent;
+        border-bottom-color: #ffffff;
+        margin-top: initial;
+        margin-left: -10px;
+    }
+    .pixel-data:before {
+        border-right-color: transparent;
+        border-bottom-color: #d3d3d3;
+        margin-top: initial;
+        margin-left: -11px;
+    }
+
+    #pixel-data-ctn {
+        margin-left: 0;
+        transform: translateX(-50%);
+        margin-top: 25px;
+    }
+    .pixel-data {
+        width: 100%;
+    }
+}
+
+.pixel-data .field {
+    font-size: 15px;
+    font-weight: 300;
+}
+
+.pixel-data .field::after, .pixel-data > .summary::after {
+    content: '';
+    display: block;
+    clear: both;
+}
+
+.pixel-data .field > .title {
+    font-weight: 600;
+    float: left;
+}
+
+.pixel-data .field > .value {
+    float: right;
+    margin-left: 15px;
+}
+
+.pixel-data > .summary {
+    border-bottom: 1px solid #eaeaea;
+    padding: 14px 24px;
+}
+
+.pixel-data > .summary > .contents > .user-summary {
+    float: left;
+    margin-right: 20px;
+}
+
+.pixel-data > .summary > .contents > .pixel-coordinates {
+    float: right;
+}
+
+.pixel-data > .summary > .intro {
+    font-size: 12px;
+    margin-bottom: -1px;
+    display: block;
+}
+
+.pixel-data > .summary > .contents > .user-summary > .username {
+    font-size: 24px;
+    display: block;
+    font-weight: 300;
+    line-height: 1.1;
+}
+
+.pixel-data > .summary > .contents > .user-summary > .username.deleted-account {
+    font-style: italic;
+}
+
+.pixel-data > .summary > .contents > .user-summary > time {
+    font-size: 13px;
+    display: block;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #777;
+    margin-top: 3px;
+}
+
+.pixel-data > .user-info {
+    padding: 14px 24px;
+    background: #FAFAF7;
+    border-radius: 0 0 8px 8px;
+}
+
+.pixel-data > .user-info > .field {
+    width: 100%;
+}

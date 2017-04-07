@@ -101,12 +101,11 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
 
 PixelSchema.methods.getInfo = function() {
     return new Promise((resolve, reject) => {
+        let info = this.toInfo();
         require("./user").findById(this.editorID).then(user => {
-            let info = this.toInfo();
             info.editor = user.toInfo();
-            delete info.editorID;
             resolve(info);
-        }).catch(err => reject(err));
+        }).catch(err => resolve(info));
     })
 }
 

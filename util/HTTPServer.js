@@ -39,7 +39,7 @@ function HTTPServer(app) {
         if(req.session) if(req.session.passport) userID = req.session.passport.user;
         if(userID) {
             User.findById(userID).then(user => {
-                if(user.loginError()) {
+                if(user && user.loginError()) {
                     res.session.passport = null;
                     res.redirect("/signin?loginerror=1");
                 }

@@ -71,7 +71,8 @@ UserSchema.methods.toInfo = function() {
         username: this.name,
         creationDate: this.creationDate,
         statistics: {
-            totalPlaces: this.placeCount
+            totalPlaces: this.placeCount,
+            lastPlace: this.lastPlace
         }
     }
 }
