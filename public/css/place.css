@@ -98,6 +98,7 @@ body.debug #place-canvas {
     z-index: 2;
     margin: 0;
     padding: 0;
+    pointer-events: none;
 }
 
 #palette-ctn > .ctn-row {
@@ -118,6 +119,7 @@ body.debug #place-canvas {
     border: 1px solid rgb(200, 200, 200);
     box-sizing: content-box;
     margin: 0 1px;
+    pointer-events: all;
 }
 
 #palette-ctn > .ctn-row > div.compact {
