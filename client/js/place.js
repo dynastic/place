@@ -238,6 +238,7 @@ var place = {
 
         socket.on("tile_placed", this.liveUpdateTile.bind(this));
         socket.on("user_change", this.userCountChanged.bind(this));
+        socket.on("reload_client", window.location.reload());
         return socket;
     },
 
