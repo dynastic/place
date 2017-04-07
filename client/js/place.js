@@ -159,7 +159,7 @@ var place = {
         let controller = $(zoomController).parent()[0];
         controller.onmousedown = (event) => { if(enableSuperSecretDebugMode) {console.log("Mouse down event listener fired"); console.log(event)} this.handleMouseDown(event || window.event) };
         controller.onmouseup = (event) => this.handleMouseUp(event || window.event);
-        controller.onmouseout = (event) => { console.log("Mouse moved out"); this.shouldClick = false; this.handleMouseUp(event || window.event) };
+        controller.onmouseout = (event) => { if(enableSuperSecretDebugMode) {console.log("Mouse moved out");} this.shouldClick = false; this.handleMouseUp(event || window.event) };
         controller.onmousemove = (event) => {
             if (this.isMouseDown) this.handleMouseDrag(event || window.event);
             this.handleMouseMove(event || window.event);
