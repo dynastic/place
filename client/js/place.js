@@ -159,7 +159,7 @@ var place = {
         let controller = $(zoomController).parent()[0];
         controller.onmousedown = (event) => { if(enableSuperSecretDebugMode) {console.log("Mouse down event listener fired"); console.log(event)} this.handleMouseDown(event || window.event) };
         controller.onmouseup = (event) => this.handleMouseUp(event || window.event);
-        controller.onmouseout = (event) => { if(enableSuperSecretDebugMode) {console.log("Mouse moved out");} this.shouldClick = false; this.handleMouseUp(event || window.event) };
+        controller.onmouseout = (event) => { console.log("Mouse moved out"); this.shouldClick = false; this.handleMouseUp(event || window.event) };
         controller.onmousemove = (event) => {
             if (this.isMouseDown) this.handleMouseDrag(event || window.event);
             this.handleMouseMove(event || window.event);
@@ -445,9 +445,11 @@ var place = {
     },
 
     handleMouseDrag: function(event) {
-        this.shouldClick = false;
-        if (this.dragStart) this.moveCamera(event.pageX - this.dragStart.x, event.pageY - this.dragStart.y);
-        this.dragStart = { x: event.pageX, y: event.pageY };
+        if (event.pageX !== this.dragStart.x || event.pageY !== this.dragStart.y) {
+            this.shouldClick = false;
+            if (this.dragStart) this.moveCamera(event.pageX - this.dragStart.x, event.pageY - this.dragStart.y);
+            this.dragStart = { x: event.pageX, y: event.pageY };
+        }
     },
 
     handleMouseUp: function(event) {
@@ -655,8 +657,6 @@ var place = {
             }).fail(data => failToPost(data.responseJSON.error)).always(() => {
                 if(enableSuperSecretDebugMode) console.log("Request completed");
                 this.changePlacingModalVisibility(false);
-            }).always(() => {
-                // this could be the culprit (two always)
                 this.placing = false;
             });
         }
