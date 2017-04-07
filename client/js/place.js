@@ -81,7 +81,9 @@ var hashHandler = {
     },
 
     setHash: function(hash) {
-        window.location.hash = this.encodeHash(hash);
+        let encodedHash = this.encodeHash(hash);
+        if("history" in window) window.history.replaceState(null, null, "#" + encodedHash);
+        else window.location.hash = encodedHash;
         this.currentHash = hash;
     },
 
