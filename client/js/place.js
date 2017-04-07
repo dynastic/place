@@ -159,17 +159,17 @@ var place = {
         this.updatePlaceTimer();
 
         let controller = $(zoomController).parent()[0];
-        controller.onmousedown = (event) => { if(enableSuperSecretDebugMode) {console.log("Mouse down event listener fired"); console.log(event)} this.handleMouseDown(event || window.event) };
-        controller.onmouseup = (event) => this.handleMouseUp(event || window.event);
-        controller.onmouseout = (event) => { console.log("Mouse moved out"); this.shouldClick = false; this.handleMouseUp(event || window.event) };
-        controller.onmousemove = (event) => {
+        canvas.onmousedown = (event) => { if(enableSuperSecretDebugMode) {console.log("Mouse down event listener fired"); console.log(event)} this.handleMouseDown(event || window.event) };
+        canvas.onmouseup = (event) => this.handleMouseUp(event || window.event);
+        canvas.onmouseout = (event) => { console.log("Mouse moved out"); this.shouldClick = false; this.handleMouseUp(event || window.event) };
+        canvas.onmousemove = (event) => {
             if (this.isMouseDown) this.handleMouseDrag(event || window.event);
             this.handleMouseMove(event || window.event);
         }
-        controller.addEventListener("touchstart", event => this.handleMouseDown(event.changedTouches[0]));
-        controller.addEventListener("touchmove", event => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
-        controller.addEventListener("touchend", event => this.handleMouseUp(event.changedTouches[0]));
-        controller.addEventListener("touchcancel", event => this.handleMouseUp(event.changedTouches[0]));
+        canvas.addEventListener("touchstart", event => this.handleMouseDown(event.changedTouches[0]));
+        canvas.addEventListener("touchmove", event => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
+        canvas.addEventListener("touchend", event => this.handleMouseUp(event.changedTouches[0]));
+        canvas.addEventListener("touchcancel", event => this.handleMouseUp(event.changedTouches[0]));
         //canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
         window.onresize = () => this.handleResize();
@@ -238,7 +238,7 @@ var place = {
 
         socket.on("tile_placed", this.liveUpdateTile.bind(this));
         socket.on("user_change", this.userCountChanged.bind(this));
-        socket.on("reload_client", window.location.reload());
+        socket.on("reload_client", () => window.location.reload());
         return socket;
     },
 
