@@ -467,8 +467,8 @@ var place = {
             $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > b > #owner").text(()=>{return data.pixel.editor.username});
             $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > #x-coordinate").text(x);
             $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > #y-coordinate").text(y);
-            let t = new Date(data.pixel.modified);
-            $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > b > #modified-date").text(`${t.getHours() == 0 ? "12" : t.getHours() > 12 ? t.getHours() - 12 : t.getHours()}:${t.getMinutes() < 10 ? "0" + t.getMinutes() : t.getMinutes()} ${t.getHours() > 12 ? "AM" : "PM"} on ${t.getMonth() + 1}/${t.getDate()}/${t.getFullYear()}`);
+            let t = new Date(data.pixel.modified).toISOString();
+            $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > b > #modified-date").text(jQuery.timeago(t));
             $("#coordinate-modal > .modal-dialog > .modal-content > .modal-body > b > #places").text(data.pixel.editor.statistics.totalPlaces);
             $("#coordinate-modal").modal();
         });
