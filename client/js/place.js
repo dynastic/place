@@ -159,9 +159,9 @@ var place = {
         this.updatePlaceTimer();
 
         let controller = $(zoomController).parent()[0];
-        canvas.onmousedown = (event) => { if(enableSuperSecretDebugMode) {console.log("Mouse down event listener fired"); console.log(event)} this.handleMouseDown(event || window.event) };
-        canvas.onmouseup = (event) => this.handleMouseUp(event || window.event);
-        canvas.onmouseout = (event) => { console.log("Mouse moved out"); this.shouldClick = false; this.handleMouseUp(event || window.event) };
+        canvas.onmousedown = (event) => { if(event.which == 1) this.handleMouseDown(event || window.event) };
+        canvas.onmouseup = (event) => { if(event.which == 1) this.handleMouseUp(event || window.event) };
+        canvas.onmouseout = (event) => { if(event.which == 1) { this.shouldClick = false; this.handleMouseUp(event || window.event) } };
         canvas.onmousemove = (event) => {
             if (this.isMouseDown) this.handleMouseDrag(event || window.event);
             this.handleMouseMove(event || window.event);
@@ -170,7 +170,7 @@ var place = {
         canvas.addEventListener("touchmove", event => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
         canvas.addEventListener("touchend", event => this.handleMouseUp(event.changedTouches[0]));
         canvas.addEventListener("touchcancel", event => this.handleMouseUp(event.changedTouches[0]));
-        //canvas.addEventListener("contextmenu", event => this.contextMenu(event));
+        canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
         window.onresize = () => this.handleResize();
         window.onhashchange = () => this.handleHashChange();
@@ -472,9 +472,10 @@ var place = {
         this.didSetHash = true;
     },
 
-    /*contextMenu: function(event) {
+    contextMenu: function(event) {
         event.preventDefault();
-    },*/
+        if(this.selectedColour) this.deselectColour();
+    },
 
     getPixel: function(x, y, callback) {
         function failToPost(error) {
