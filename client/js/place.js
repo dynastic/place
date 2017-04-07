@@ -450,7 +450,7 @@ var place = {
 
     handleMouseUp: function(event) {
         if(this.shouldClick) {
-            if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.includes(event.target) || event.target == this.zoomButton || !this.shouldClick) return;
+            if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.indexOf(event.target) >= 0 || event.target == this.zoomButton || !this.shouldClick) return;
             let zoom = this._getZoomMultiplier();
             this.canvasClicked(Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), Math.round((event.pageY - $(this.cameraController).offset().top) / zoom))
         }
