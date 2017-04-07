@@ -233,6 +233,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     border: 1px solid #d3d3d3;
     box-shadow: 0 2px 4px 0 rgba(0,0,0,0.1);
     min-width: 275px;
+    max-width: 500px;
 	position: relative;
 }
 
@@ -258,6 +259,36 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 	border-right-color: #d3d3d3;
 	border-width: 11px;
 	margin-top: -11px;
+}
+
+@media screen and (max-width: 750px) {
+    .pixel-data:after, .pixel-data:before {
+        bottom: 100%;
+        left: 50%;
+        right: initial; top: initial;
+    }
+
+    .pixel-data:after {
+        border-right-color: transparent;
+        border-bottom-color: #ffffff;
+        margin-top: initial;
+        margin-left: -10px;
+    }
+    .pixel-data:before {
+        border-right-color: transparent;
+        border-bottom-color: #d3d3d3;
+        margin-top: initial;
+        margin-left: -11px;
+    }
+
+    #pixel-data-ctn {
+        margin-left: 0;
+        transform: translateX(-50%);
+        margin-top: 25px;
+    }
+    .pixel-data {
+        width: 100%;
+    }
 }
 
 .pixel-data .field {
