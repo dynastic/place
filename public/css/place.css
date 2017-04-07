@@ -221,8 +221,10 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     position: absolute;
     display: none;
     z-index: 3;
-    top: 65px;
-    left: 175px;
+    top: 50%;
+    left: 50%;
+    margin-top: -40px;
+    margin-left: 25px;
 }
 
 .pixel-data {

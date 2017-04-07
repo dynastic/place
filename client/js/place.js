@@ -597,7 +597,6 @@ var place = {
 
         if(this.selectedColour === null) {
             this.zoomIntoPoint(x, y);
-            $(this.pixelDataPopover).css({marginTop: x, marginLeft: y});
             return this.getPixel(x, y, (err, data) => {
                 if(err || !data.pixel) return;
                 let popover = $(this.pixelDataPopover);
