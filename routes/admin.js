@@ -14,27 +14,27 @@ function AdminRouter(app) {
     });
 
     router.get('/actions', app.adminMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/dashboard", req, res);
+        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
     router.get('/stats', app.adminMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/dashboard", req, res);
+        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
     router.get('/log', app.adminMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/dashboard", req, res);
+        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
     router.get('/pending', app.adminMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/dashboard", req, res);
+        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
     router.get('/users', app.adminMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/dashboard", req, res);
+        return responseFactory.sendRenderedResponse("admin/users", req, res);
     });
 
     router.get('/pixels', app.adminMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/dashboard", req, res);
+        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
     return router;

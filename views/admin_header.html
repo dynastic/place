@@ -17,7 +17,6 @@ var renderNavItem = function(name, itemPath) {
         <div class="col-sm-3 col-md-2 sidebar">
             <ul class="nav nav-sidebar">
                 <%- renderNavItem("Dashboard", "/admin/"); %>
-                <%- renderNavItem("Statistics", "/admin/stats"); %>
                 <%- renderNavItem("Recent Actions", "/admin/actions"); %>
                 <%- renderNavItem("Moderator Log", "/admin/log"); %>
                 <%- renderNavItem("Pending Mod Actions", "/admin/pending"); %>
@@ -27,3 +26,4 @@ var renderNavItem = function(name, itemPath) {
                 <%- renderNavItem("Pixels", "/admin/pixels"); %>
             </ul>
         </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

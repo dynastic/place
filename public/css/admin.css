@@ -123,3 +123,24 @@ body {
     margin-top: 30px;
     float: right;
 }
+
+.admin-stat {
+  border-radius: 50%;
+  height: 200px;
+  width: 200px;
+  color: #fff;
+  font-size: 64px;
+  text-align: center;
+  background: #dddddd;
+  margin: 0 auto;
+  font-weight: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-stat > span {
+  display: inline-block;
+  line-height: 1;
+  margin: 0;
+}
