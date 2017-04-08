@@ -60,54 +60,66 @@ module.exports = function(passport) {
         });
     }
 
-    passport.use(new GoogleStrategy({
-        clientID: config.google.clientID,
-        clientSecret: config.google.clientSecret,
-        callbackURL: config.host + "/auth/google/callback"
-    }, function(req, accessToken, refreshToken, profile, done) {
-        OAuthLogin("google", profile.displayName, profile.id, done);
-    }));
+    if (config.oauth.google.enabled) {
+        passport.use(new GoogleStrategy({
+            clientID: config.oauth.google.clientID,
+            clientSecret: config.oauth.google.clientSecret,
+            callbackURL: config.host + "/auth/google/callback"
+        }, function(req, accessToken, refreshToken, profile, done) {
+            OAuthLogin("google", profile.displayName, profile.id, done);
+        }));
+    }
 
-    passport.use(new RedditStrategy({
-        clientID: config.reddit.clientID,
-        clientSecret: config.reddit.clientSecret,
-        callbackURL: config.host + "/auth/reddit/callback"
-    }, function(accessToken, refreshToken, profile, done) {
-        OAuthLogin("reddit", profile.name, profile.id, done);
-    }));
+    if (config.oauth.reddit.enabled) {
+        passport.use(new RedditStrategy({
+            clientID: config.oauth.reddit.clientID,
+            clientSecret: config.oauth.reddit.clientSecret,
+            callbackURL: config.host + "/auth/reddit/callback"
+        }, function(accessToken, refreshToken, profile, done) {
+            OAuthLogin("reddit", profile.name, profile.id, done);
+        }));
+    }
 
-    passport.use(new GithubStrategy({
-        clientID: config.github.clientID,
-        clientSecret: config.github.clientSecret,
-        callbackURL: config.host + "/auth/github/callback"
-    }, function(accessToken, refreshToken, profile, done) {
-        OAuthLogin("github", profile.username, profile.id, done);
-    }));
+    if (config.oauth.github.enabled) {
+        passport.use(new GithubStrategy({
+            clientID: config.oauth.github.clientID,
+            clientSecret: config.oauth.github.clientSecret,
+            callbackURL: config.host + "/auth/github/callback"
+        }, function(accessToken, refreshToken, profile, done) {
+            OAuthLogin("github", profile.username, profile.id, done);
+        }));
+    }
 
-    passport.use(new FacebookStrategy({
-        clientID: config.facebook.clientID,
-        clientSecret: config.facebook.clientSecret,
-        callbackURL: config.host + "/auth/facebook/callback"
-    }, function(accessToken, refreshToken, profile, done) {
-        OAuthLogin("facebook", profile.displayName, profile.id, done);
-    }));
+    if (config.oauth.facebook.enabled) {
+        passport.use(new FacebookStrategy({
+            clientID: config.oauth.facebook.clientID,
+            clientSecret: config.oauth.facebook.clientSecret,
+            callbackURL: config.host + "/auth/facebook/callback"
+        }, function(accessToken, refreshToken, profile, done) {
+            OAuthLogin("facebook", profile.displayName, profile.id, done);
+        }));
+    }
 
-    passport.use(new DiscordStrategy({
-        clientID: config.discord.clientID,
-        clientSecret: config.discord.clientSecret,
-        callbackURL: config.host + "/auth/discord/callback",
-        scope: ["identify"]
-    }, function(accessToken, refreshToken, profile, done) {
-        OAuthLogin("discord", profile.username, profile.id, done);
-    }));
+    if (config.oauth.discord.enabled) {
+        passport.use(new DiscordStrategy({
+            clientID: config.oauth.discord.clientID,
+            clientSecret: config.oauth.discord.clientSecret,
+            callbackURL: config.host + "/auth/discord/callback",
+            scope: ["identify"]
+        }, function(accessToken, refreshToken, profile, done) {
+            OAuthLogin("discord", profile.username, profile.id, done);
+        }));
+    }
 
-    passport.use(new TwitterStrategy({
-        consumerKey: config.twitter.clientID,
-        consumerSecret: config.twitter.clientSecret,
-        callbackURL: config.host + "/auth/twitter/callback"
-    }, function(token, tokenSecret, profile, done) {
-        OAuthLogin("twitter", profile.username, profile.id, done);
-    }));
+    if (config.oauth.twitter.enabled) {
+        passport.use(new TwitterStrategy({
+            consumerKey: config.oauth.twitter.clientID,
+            consumerSecret: config.oauth.twitter.clientSecret,
+            callbackURL: config.host + "/auth/twitter/callback"
+        }, function(token, tokenSecret, profile, done) {
+            OAuthLogin("twitter", profile.username, profile.id, done);
+        }));
+    }
 
     passport.serializeUser(function(user, done) {
         done(null, user.id);

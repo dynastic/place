@@ -6,30 +6,44 @@ module.exports = {
     'trustProxyDepth': 1, // How many levels of proxy to trust for IP
     'debug': false,
     'googleAnalyticsTrackingID': "", // UA-XXXXXXXX-XX
-    'host': 'https://place.dynastic.co', // the publicly accessible URL of the site
+    'host': 'http://place.dynastic.co', // the publicly accessible URL of the site
     'placeTimeout': 300,
     'recaptcha': {
         'siteKey': "",
         'secretKey': ""
     },
-    'google': {
-        'clientID': '',
-        'clientSecret': ''
-    },
-    'reddit': {
-        'clientID': '',
-        'clientSecret': ''
-    },
-    'discord': {
-        'clientID': '',
-        'clientSecret': ''
-    },
-    'twitter': {
-        'clientID': '',
-        'clientSecret': ''
-    },
-    'github': {
-        'clientID': '',
-        'clientSecret': ''
+    'oauth': {
+        // No field here is required.
+        // To use an oauth option, set enabled to true, and drop your keys in.
+        'google': {
+            'enabled': false,
+            'clientID': '',
+            'clientSecret': ''
+        },
+        'reddit': {
+            'enabled': false,
+            'clientID': '',
+            'clientSecret': ''
+        },
+        'discord': {
+            'enabled': false,
+            'clientID': '',
+            'clientSecret': ''
+        },
+        'twitter': {
+            'enabled': false,
+            'clientID': '',
+            'clientSecret': ''
+        },
+        'github': {
+            'enabled': false,
+            'clientID': '',
+            'clientSecret': ''
+        },
+        'facebook': {
+            'enabled': false,
+            'clientID': '',
+            'clientSecret': ''
+        }
     }
 }
