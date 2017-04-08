@@ -614,6 +614,9 @@ var place = {
                 popover.find("#pixel-data-username").text(hasUser ? data.pixel.editor.username : "Deleted account");
                 if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account")
                 else popover.find("#pixel-data-username").addClass("deleted-account");
+                if (data.pixel.editor.admin) popover.find("#pixel-badge").show().text("Admin");
+                else if (data.pixel.editor.moderator) popover.find("#pixel-badge").show().text("Moderator");
+                else popover.find("#pixel-badge").hide();
                 popover.find("#pixel-data-time").text($.timeago(data.pixel.modified));
                 popover.find("#pixel-data-time").attr("datetime", data.pixel.modified);
                 popover.find("#pixel-data-time").attr("title", new Date(data.pixel.modified).toLocaleString());
