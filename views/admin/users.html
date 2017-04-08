@@ -5,6 +5,7 @@
 <table class="table table-striped" id="users">
     <thead>
     <tr>
+        <th><input id="select-all" value="1" type="checkbox"></th>
         <th>Username</th>
         <th>Account Created</th>
         <th>Last Place</th>
@@ -12,6 +13,7 @@
     </tr>
     </thead>
     <tbody>
+        <th></th>
         <th>Username</th>
         <th>Account Created</th>
         <th>Last Place</th>
@@ -19,5 +21,5 @@
     </tbody>
 </table>
 <%- include('../admin_footer.html', {
-    js: ["https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js", "https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js", "/js/build/admin_users.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"]
+    js: ["https://cdn.datatables.net/1.10.13/js/jquery.dataTables.js", "https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js", "/js/build/admin_users.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"]
 }) -%>
