@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 const Pixel = require('./pixel');
+const Access = require('./access');
 const config = require("../config/config");
 
 var UserSchema = new Schema({
@@ -80,6 +81,10 @@ UserSchema.methods.toInfo = function() {
 UserSchema.methods.loginError = function() {
     if(this.banned === true) return { message: "You are banned from using this service due to violations of the rules.", code: "banned" }
     return null;
+}
+
+UserSchema.methods.recordAccess = function(userAgent, ipAddress) {
+    return Access.recordAccess(this.id, userAgent, ipAddress)
 }
 
 UserSchema.statics.register = function(username, password, callback) {

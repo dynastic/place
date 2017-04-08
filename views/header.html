@@ -2,8 +2,9 @@
   if(typeof user === 'undefined') user = null;
   if(typeof css === 'undefined') css = [];
   if(typeof pageTitle === 'undefined') pageTitle = null;
+  if(typeof isAdmin === 'undefined') isAdmin = false;
   var renderNavItem = function(name, itemPath, icon = null) {
-      let isCurrentPage = itemPath == path;
+      let isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
       let iconPrefix = icon ? `<i class="fa fa-${icon} fa-fw"></i>` : "";
       return `<li ${isCurrentPage ? " class=\"active\"" : ""}>` +
         `<a href="${itemPath}">${iconPrefix}${name} ${isCurrentPage ? " <span class=\"sr-only\">(current)</span>" : ""}</a>` +
@@ -38,7 +39,7 @@
     <![endif]-->
   </head>
   <body class="fixed-navbar<% if(user) { %> signed-in<% } %>">
-    <nav class="navbar navbar-default navbar-fixed-top">
+    <nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %>">
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -62,6 +63,7 @@
               </ul>
             </li>
             <%- renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money"); %>
+            <% if(user && user.admin) { %><%- renderNavItem("Admin", "/admin", "gavel"); %><% } %>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <% if(user) { %>

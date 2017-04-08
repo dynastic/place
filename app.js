@@ -1,4 +1,4 @@
-const responseFactory = require("./util/ResponseFactory");
+const responseFactory = require("./util/ResponseFactory")();
 const config = require('./config/config');
 const mongoose = require('mongoose');
 const paintingHandler = require("./util/PaintingHandler");
@@ -37,6 +37,11 @@ app.responseFactory = responseFactory;
 // Set up reCaptcha
 recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
 app.recaptcha = recaptcha;
+
+app.adminMiddleware = (req, res, next) => {
+    if(!req.user || !req.user.admin) return res.status(403).redirect("/?admindenied=1");
+    next();
+};
 
 app.httpServer = new HTTPServer(app);
 app.server = require('http').createServer(app.httpServer.server);

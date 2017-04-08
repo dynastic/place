@@ -1,0 +1,29 @@
+<%
+if(typeof pageTitle === 'undefined') pageTitle = null;
+var renderNavItem = function(name, itemPath) {
+    let isCurrentPage = itemPath == path;
+    return `<li ${isCurrentPage ? " class=\"active\"" : ""}>` +
+    `<a href="${itemPath}">${name} ${isCurrentPage ? " <span class=\"sr-only\">(current)</span>" : ""}</a>` +
+    "</li>";
+}
+%>
+<%- include('header.html', {
+    pageTitle: !!pageTitle ? pageTitle + " &middot; Admin" : "Admin",
+    css: ["admin.css"],
+    isAdmin: true
+}) -%>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <%- renderNavItem("Dashboard", "/admin/"); %>
+                <%- renderNavItem("Statistics", "/admin/stats"); %>
+                <%- renderNavItem("Recent Actions", "/admin/actions"); %>
+                <%- renderNavItem("Moderator Log", "/admin/log"); %>
+                <%- renderNavItem("Pending Mod Actions", "/admin/pending"); %>
+            </ul>
+            <ul class="nav nav-sidebar">
+                <%- renderNavItem("Users", "/admin/users"); %>
+                <%- renderNavItem("Pixels", "/admin/pixels"); %>
+            </ul>
+        </div>
