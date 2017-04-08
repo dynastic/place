@@ -39,7 +39,7 @@ AccessSchema.statics.recordAccess = function(userID, userAgent, ipAddress) {
         userAgent: userAgent,
         ipAddress: ipAddress
     }, { upsert: true }, (err, access) => {
-        console.error("Couldn't record access attempt: " + err);
+        if(err) console.error("Couldn't record access attempt: " + err);
     });
 }
 
