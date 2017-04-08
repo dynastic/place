@@ -44,8 +44,7 @@ function HTTPServer(app) {
                     res.session.passport = null;
                     res.redirect("/signin?loginerror=1");
                 }
-                console.log(req.get("User-Agent"));
-                console.log(req.get('X-Forwarded-For') || req.connection.remoteAddress);
+                console.log(req.connection.remoteAddress);
                 if(user) user.recordAccess(req.get("User-Agent"), req.get('X-Forwarded-For') || req.connection.remoteAddress);
                 req.user = user;
                 next();
