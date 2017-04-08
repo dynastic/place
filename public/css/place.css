@@ -334,14 +334,17 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     display: block;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username {
+.pixel-data > .summary > .contents > .user-summary > .username-container {
+    display: inline-block;
+}
+
+.pixel-data > .summary > .contents > .user-summary > .username-container > .username {
     font-size: 24px;
-    display: block;
     font-weight: 300;
     line-height: 1.1;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username.deleted-account {
+.pixel-data > .summary > .contents > .user-summary > .username-container > .username.deleted-account {
     font-style: italic;
 }
 
