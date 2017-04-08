@@ -30,7 +30,8 @@ function PublicRouter(app) {
         minWait: 60*60*1000, // 1 hour
         maxWait: 60*60*1000, // 1 hour, 
         failCallback: ratelimitCallback,
-        handleStoreError: handleStoreError
+        handleStoreError: handleStoreError,
+        proxyDepth: config.trustProxyDepth
     });
 
     router.get('/', function(req, res) {
