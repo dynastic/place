@@ -2,7 +2,7 @@ $(document).ready(function() {
     $('#users').DataTable({
         processing: true,
         serverSide: true,
-        order: [[1, "desc"]],
+        aaSorting: [[2, "desc"]],
         ajax: { url: "/api/admin/users", type: "POST", contentType: "application/json", data: d => JSON.stringify(d) },
         columns: [
             { data: "active", orderable: false },
