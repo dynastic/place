@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const Pixel = require('./pixel');
 const Access = require('./access');
 const config = require("../config/config");
+const dataTables = require("mongoose-datatables");
 
 var UserSchema = new Schema({
     name: {
@@ -136,5 +137,9 @@ UserSchema.methods.getPlaceSecondsRemaining = function() {
 UserSchema.methods.canPlace = function() {
     return this.getPlaceSecondsRemaining() <= 0;
 }
+
+UserSchema.plugin(dataTables, {
+    totalKey: 'recordsFiltered',
+});
 
 module.exports = mongoose.model('User', UserSchema);

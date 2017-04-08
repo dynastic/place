@@ -25,6 +25,7 @@
     "jwt-simple": "^0.5.1",
     "lwip": "0.0.9",
     "mongoose": "^4.9.2",
+    "mongoose-datatables": "^3.0.0",
     "morgan": "^1.8.1",
     "passport": "^0.3.2",
     "passport-jwt": "^2.2.1",

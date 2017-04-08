@@ -144,3 +144,22 @@ body {
   line-height: 1;
   margin: 0;
 }
+
+.search_param_label {
+  margin-right: 5px;
+}
+
+table.filters select, table.filters .bootstrap-select, table.filters input {
+  width: 220px;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+table.filters .remove {
+  color: #777;
+  font-size: 14px;
+}
+
+table.filters {
+  margin-bottom: 0;
+}

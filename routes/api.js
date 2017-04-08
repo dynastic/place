@@ -137,6 +137,26 @@ function APIRouter(app) {
         res.json({success: true});
     });
 
+    router.post("/admin/users", app.adminMiddleware, function(req, res, next) {
+        let searchValue = req.body["search[value]"] || "";
+        User.dataTables({
+            limit: req.body.length || 10,
+            skip: req.body.start || 0,
+            select: ["id", "name", "creationDate", "admin", "banned", "lastPlace", "placeCount"],
+            search: {
+                value: searchValue,
+                fields: ['name']
+            }, sort: {
+                name: 1
+            }
+        }, (err, table) => {
+            User.find().count().then(c => {
+                if(err) return res.status(500).json({success: false});
+                res.json(Object.assign({success: true, recordsTotal: c}, table));
+            }).catch(err => res.status(500).json({success: false}));
+        });
+    });
+
     return router;
 }
 
