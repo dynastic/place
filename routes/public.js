@@ -25,10 +25,10 @@ function PublicRouter(app) {
         let user = req.user;
         user.name = req.body.username;
         app.recaptcha.verify(req, error => {
-            if(error) return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), error: {message: "Please fill in the captcha properly."}, user: {name: ""}, username: req.body.username});
+            if(error) return responseFactory.sendRenderedResponse("public/pick-username", req, res, {captcha: app.recaptcha.render(), error: {message: "Please fill in the captcha properly."}, user: {name: ""}, username: req.body.username});
             
             user.setUserName(user.name, function(err) {
-                if(err) return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), error: err, username: req.body.name, user: {name: ""}});
+                if(err) return responseFactory.sendRenderedResponse("public/pick-username", req, res, {captcha: app.recaptcha.render(), error: err, username: req.body.name, user: {name: ""}});
                 req.login(user, function(err) {
                     if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, {captcha: app.recaptcha.render(), error: { message: "An unknown error occurred." }, username: req.body.username, user: {name: ""}});
                     res.redirect("/?signedin=1");
