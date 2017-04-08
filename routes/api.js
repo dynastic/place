@@ -134,6 +134,7 @@ function APIRouter(app) {
 
     router.get("/admin/refresh_clients", app.adminMiddleware, function(req, res, next) {
         app.websocketServer.broadcast("reload_client");
+        res.json({success: true});
     });
 
     return router;
