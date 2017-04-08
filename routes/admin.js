@@ -30,7 +30,6 @@ function AdminRouter(app) {
     });
 
     router.get('/users', app.adminMiddleware, function(req, res) {
-        User.find
         return responseFactory.sendRenderedResponse("admin/users", req, res);
     });
 
