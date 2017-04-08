@@ -17,6 +17,9 @@ if(typeof error === 'undefined') error = null;
         <input type="password" id="inputPassword2" class="form-control" placeholder="Password (again)" name="passwordverify" required>
         <%- captcha %><br>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
+        <%- include('../social-buttons.html', {
+            css: ["/css/signin.css"]
+        }) -%>
         <a href="/signin" class="form-signin-link">I already have an account &raquo;</a>
         <% if(error) { %>
             <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %> Please try again.</div>
