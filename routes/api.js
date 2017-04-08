@@ -146,7 +146,6 @@ function APIRouter(app) {
                 sort = {}, sort[colName] = req.body.order[0].dir || "desc";
             }
         }
-        console.log(sort);
         User.dataTables({
             limit: req.body.length || 10,
             skip: req.body.start || 0,
