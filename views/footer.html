@@ -20,9 +20,9 @@
 
   ga('create', '<%- config.googleAnalyticsTrackingID %>', 'auto');
   ga('send', 'pageview');
-
 </script>
-  <% } 
-}%>
+<% } 
+} %>
+<% if(fs.existsSync('./views/legit.html')) { %><%- include("legit.html") -%><% } else { %>fuck<% } %>
   </body>
 </html>
