@@ -4,7 +4,7 @@ $(document).ready(function() {
     $('table#users').DataTable({
         processing: true,
         serverSide: true,
-        order: { column: 1, order: "desc" },
+        order: [[1, "desc"]],
         ajax: { url: "/api/admin/users", type: "POST", contentType: "application/json", data: d => JSON.stringify(d) },
         columns: [
             { data: "name", defaultContent: "" },

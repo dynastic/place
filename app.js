@@ -43,6 +43,11 @@ app.adminMiddleware = (req, res, next) => {
     next();
 };
 
+app.modMiddleware = (req, res, next) => {
+    if(!req.user || !(req.user.admin || req.user.moderator)) return res.status(403).redirect("/?moddenied=1");
+    next();
+};
+
 app.httpServer = new HTTPServer(app);
 app.server = require('http').createServer(app.httpServer.server);
 app.websocketServer = new WebsocketServer(app, app.server);

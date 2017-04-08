@@ -104,7 +104,7 @@ function APIRouter(app) {
 
     // Admin APIs
 
-    router.get("/admin/stats", app.adminMiddleware, function(req, res, next) {
+    router.get("/admin/stats", app.modMiddleware, function(req, res, next) {
         var signups24h = null, pixelsPlaced24h = null, pixelsPerMin = null;
         let dateBack24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
         let dateBack20m = new Date(new Date().getTime() - (20 * 60 * 1000));
@@ -137,17 +137,20 @@ function APIRouter(app) {
         res.json({success: true});
     });
 
-    router.post("/admin/users", app.adminMiddleware, function(req, res, next) {
+    router.post("/admin/users", app.modMiddleware, function(req, res, next) {
         let searchValue = req.body.search ? req.body.search.value || "" : "";
         var sort = { creationDate: "desc" };
-        if(req.body.order && req.body.order.length > 0 && req.body.columns && req.body.columns.length > req.body.order[0].column || 1) {
-            let colName = req.body.columns[req.body.order[0].column].data;
-            sort = {}, sort[colName] = req.body.order[0].dir || "desc";
+        if(req.body.order && req.body.order.length > 0 && req.body.columns) {
+            if(req.body.columns.length > req.body.order[0].column || 1) {
+                let colName = req.body.columns[req.body.order[0].column].data;
+                sort = {}, sort[colName] = req.body.order[0].dir || "desc";
+            }
         }
+        console.log(sort);
         User.dataTables({
             limit: req.body.length || 10,
             skip: req.body.start || 0,
-            select: ["id", "name", "creationDate", "admin", "banned", "lastPlace", "placeCount"],
+            select: ["id", "name", "creationDate", "admin", "moderator", "banned", "lastPlace", "placeCount"],
             search: {
                 value: searchValue,
                 fields: ['name']

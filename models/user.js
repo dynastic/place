@@ -26,7 +26,13 @@ var UserSchema = new Schema({
     },
     admin: {
         type: Boolean,
-        required: true
+        required: true,
+        default: false
+    },
+    moderator: {
+        type: Boolean,
+        required: true,
+        default: false
     },
     placeCount: {
         type: Number,
