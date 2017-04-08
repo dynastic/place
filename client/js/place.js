@@ -158,17 +158,17 @@ var place = {
         this.updatePlaceTimer();
 
         let controller = $(zoomController).parent()[0];
-        controller.onmousedown = (event) => { if(event.which == 1) this.handleMouseDown(event || window.event) };
-        controller.onmouseup = (event) => { if(event.which == 1) this.handleMouseUp(event || window.event) };
-        controller.onmouseout = (event) => { if(event.which == 1) { this.shouldClick = false; this.handleMouseUp(event || window.event) } };
-        controller.onmousemove = (event) => {
+        canvas.onmousedown = (event) => { if(event.which == 1) this.handleMouseDown(event || window.event) };
+        canvas.onmouseup = (event) => { if(event.which == 1) this.handleMouseUp(event || window.event) };
+        canvas.onmouseout = (event) => { if(event.which == 1) { this.shouldClick = false; this.handleMouseUp(event || window.event) } };
+        canvas.onmousemove = (event) => {
             if (this.isMouseDown) this.handleMouseDrag(event || window.event);
             this.handleMouseMove(event || window.event);
         }
-        controller.addEventListener("touchstart", event => this.handleMouseDown(event.changedTouches[0]));
-        controller.addEventListener("touchmove", event => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
-        controller.addEventListener("touchend", event => this.handleMouseUp(event.changedTouches[0]));
-        controller.addEventListener("touchcancel", event => this.handleMouseUp(event.changedTouches[0]));
+        canvas.addEventListener("touchstart", event => this.handleMouseDown(event.changedTouches[0]));
+        canvas.addEventListener("touchmove", event => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
+        canvas.addEventListener("touchend", event => this.handleMouseUp(event.changedTouches[0]));
+        canvas.addEventListener("touchcancel", event => this.handleMouseUp(event.changedTouches[0]));
         canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
         window.onresize = () => this.handleResize();
@@ -454,7 +454,7 @@ var place = {
     },
 
     handleMouseUp: function(event) {
-        if(this.shouldClick) {
+        if(this.shouldClick && this.isMouseDown) {
             if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.indexOf(event.target) >= 0 || event.target == this.zoomButton || !this.shouldClick) return;
             let zoom = this._getZoomMultiplier();
             this.canvasClicked(Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), Math.round((event.pageY - $(this.cameraController).offset().top) / zoom))
