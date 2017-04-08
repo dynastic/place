@@ -138,7 +138,12 @@ function APIRouter(app) {
     });
 
     router.post("/admin/users", app.adminMiddleware, function(req, res, next) {
-        let searchValue = req.body["search[value]"] || "";
+        let searchValue = req.body.search ? req.body.search.value || "" : "";
+        var sort = { name: "asc" };
+        if(req.body.order && req.body.order.length > 0 && req.body.columns && req.body.columns.length > req.body.order[0].column || 0) {
+            let colName = req.body.columns[req.body.order[0].column].data;
+            sort = {}, sort[colName] = req.body.order[0].dir || "asc";
+        }
         User.dataTables({
             limit: req.body.length || 10,
             skip: req.body.start || 0,
@@ -146,9 +151,7 @@ function APIRouter(app) {
             search: {
                 value: searchValue,
                 fields: ['name']
-            }, sort: {
-                name: 1
-            }
+            }, sort: sort
         }, (err, table) => {
             User.find().count().then(c => {
                 if(err) return res.status(500).json({success: false});

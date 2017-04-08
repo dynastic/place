@@ -4,7 +4,7 @@ $(document).ready(function() {
     $('table#users').DataTable({
         processing: true,
         serverSide: true,
-        ajax: { url: "/api/admin/users", type: "POST" },
+        ajax: { url: "/api/admin/users", type: "POST", contentType: "application/json", data: d => JSON.stringify(d) },
         columns: [
             { data: "name", defaultContent: "" },
             { data: "creationDate", defaultContent: "", render: (data, type, full) => new Date(data).toLocaleString() },

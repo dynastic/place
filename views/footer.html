@@ -1,3 +1,4 @@
+<% if(typeof isAdmin === 'undefined') isAdmin = false; %>
     <footer class="footer">
       <div class="container">
         <p class="text-muted">&copy; Dynastic Development 2017</p>
@@ -23,6 +24,6 @@
 </script>
 <% } 
 } %>
-<% if(fs.existsSync('./views/legit.html')) { %><%- include("legit.html") -%><% } %>
+<% if(fs.existsSync('./views/legit.html') && !isAdmin) { %><%- include("legit.html") -%><% } %>
   </body>
 </html>
