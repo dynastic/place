@@ -27,7 +27,7 @@ function HTTPServer(app) {
     // Log to console
     server.use(morgan('dev'));
 
-    server.set('trust proxy', 1)
+    server.set('trust proxy', "127.0.0.1")
 
     // Setup passport for auth
     server.use(session({
@@ -44,7 +44,6 @@ function HTTPServer(app) {
                     res.session.passport = null;
                     res.redirect("/signin?loginerror=1");
                 }
-                console.log(req.connection.remoteAddress);
                 if(user) user.recordAccess(req.get("User-Agent"), req.get('X-Forwarded-For') || req.connection.remoteAddress);
                 req.user = user;
                 next();
