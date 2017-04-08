@@ -30,3 +30,9 @@ body.fixed-navbar {
     position: relative;
     top: -2px;
 }
+
+.badge-label {
+    text-transform: uppercase;
+    position: relative;
+    top: -2px;
+}

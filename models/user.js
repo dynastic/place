@@ -95,6 +95,8 @@ UserSchema.methods.toInfo = function() {
         id: this.id,
         username: this.name,
         creationDate: this.creationDate,
+        admin: this.admin,
+        moderator: this.moderator,
         statistics: {
             totalPlaces: this.placeCount,
             lastPlace: this.lastPlace
