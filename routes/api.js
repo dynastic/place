@@ -139,10 +139,10 @@ function APIRouter(app) {
 
     router.post("/admin/users", app.adminMiddleware, function(req, res, next) {
         let searchValue = req.body.search ? req.body.search.value || "" : "";
-        var sort = { name: "asc" };
-        if(req.body.order && req.body.order.length > 0 && req.body.columns && req.body.columns.length > req.body.order[0].column || 0) {
+        var sort = { creationDate: "desc" };
+        if(req.body.order && req.body.order.length > 0 && req.body.columns && req.body.columns.length > req.body.order[0].column || 1) {
             let colName = req.body.columns[req.body.order[0].column].data;
-            sort = {}, sort[colName] = req.body.order[0].dir || "asc";
+            sort = {}, sort[colName] = req.body.order[0].dir || "desc";
         }
         User.dataTables({
             limit: req.body.length || 10,
