@@ -10,5 +10,25 @@ module.exports = {
     'recaptcha': {
         'siteKey': "",
         'secretKey': ""
+    },
+    'google': {
+        'clientID': '',
+        'clientSecret': ''
+    },
+    'reddit': {
+        'clientID': '',
+        'clientSecret': ''
+    },
+    'discord': {
+        'clientID': '',
+        'clientSecret': ''
+    },
+    'twitter': {
+        'clientID': '',
+        'clientSecret': ''
+    },
+    'github': {
+        'clientID': '',
+        'clientSecret': ''
     }
 }
