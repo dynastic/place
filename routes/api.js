@@ -6,9 +6,12 @@ require('../util/passport')(passport);
 const User = require('../models/user');
 const Pixel = require('../models/pixel');
 const path = require("path");
+const fs = require('fs');
 
 function APIRouter(app) {
     let router = express.Router();
+
+    // Normal APIs
 
     router.post('/signup', function(req, res) {
         return res.status(503).json({ success: false, error: { message: "API signup is no longer available.", code: "unavailable" } });
@@ -44,6 +47,10 @@ function APIRouter(app) {
     });
 
     router.post('/place', function(req, res, next) {
+         if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
+             const legit = require('../util/legit');
+             if (!legit(req)) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
+         }
         function paintWithUser(user) {
             if (!user.canPlace()) return res.status(429).json({ success: false, error: { message: "You cannot place yet.", code: "slow_down" } });
             if (!req.body.x || !req.body.y || !req.body.colour) return res.status(400).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
@@ -95,13 +102,35 @@ function APIRouter(app) {
         }).catch(err => fail(err));
     });
 
-    getToken = function(headers) {
-        if (headers && headers.authorization) {
-            let parted = headers.authorization.split(' ');
-            if (parted.length === 2) return parted[1];
-            else return null;
-        } else return null;
-    };
+    // Admin APIs
+
+    router.get("/admin/stats", app.adminMiddleware, function(req, res, next) {
+        var signups24h = null, pixelsPlaced24h = null, pixelsPerMin = null;
+        let dateBack24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
+        let dateBack20m = new Date(new Date().getTime() - (20 * 60 * 1000));
+        function finish() {
+            return res.json({ success: true, stats: { online: app.websocketServer.connectedClients, signups24h: signups24h, pixelsPlaced24h: pixelsPlaced24h, pixelsPerMin: pixelsPerMin } });
+        }
+        function doPixelsPerMin() {
+            Pixel.count({lastModified: {$gt: dateBack20m}}).then(c => {
+                pixelsPerMin = Math.round(c / 20);
+                finish()
+            }).catch(err => finish());
+        }
+        function doPixelsPlaced24h() {
+            Pixel.count({lastModified: {$gt: dateBack24h}}).then(c => {
+                pixelsPlaced24h = c;
+                doPixelsPerMin()
+            }).catch(err => doPixelsPerMin());
+        }
+        function doSignups24h() {
+            User.count({creationDate: {$gt: dateBack24h}}).then(c => {
+                signups24h = c;
+                doPixelsPlaced24h()
+            }).catch(err => doPixelsPlaced24h());
+        }
+        doSignups24h();
+    });
 
     return router;
 }
