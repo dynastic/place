@@ -3,6 +3,7 @@ module.exports = {
     'database': 'mongodb://localhost/place',
     'port': 3000,
     'onlyListenLocal': true,
+    'trustProxy': 1, // http://expressjs.com/en/guide/behind-proxies.html
     'debug': false,
     'googleAnalyticsTrackingID': "", // UA-XXXXXXXX-XX
     'host': 'https://place.dynastic.co', // the publicly accessible URL of the site

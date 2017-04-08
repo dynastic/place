@@ -27,7 +27,7 @@ function HTTPServer(app) {
     // Log to console
     server.use(morgan('dev'));
 
-    server.set('trust proxy', "127.0.0.1")
+    server.set('trust proxy', app.config.trustProxy || false)
 
     // Setup passport for auth
     server.use(session({
