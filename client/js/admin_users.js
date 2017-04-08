@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $('#users').DataTable({
+    var table = $('#users').DataTable({
         processing: true,
         serverSide: true,
         aaSorting: [[2, "desc"]],
@@ -32,35 +32,33 @@ $(document).ready(function() {
             }
         });
     });
-});
 
-function updateSelectAllBox() {
-    var checkedBoxes = $('#users tbody input[type="checkbox"]:checked');
-    var allBoxes = $('#users tbody input[type="checkbox"]');
-    var selectAll = $("#select-all")[0];
+    function updateSelectAllBox() {
+        var checkedBoxes = $('#users tbody input[type="checkbox"]:checked');
+        var allBoxes = $('#users tbody input[type="checkbox"]');
+        var selectAll = $("#select-all")[0];
 
-    if(checkedBoxes.length === 0) {
-        selectAll.checked = false;
-        if("indeterminate" in selectAll) selectAll.indeterminate = false;
-    } else if (checkedBoxes.length === allBoxes.length) {
-        selectAll.checked = true;
-        if("indeterminate" in selectAll) selectAll.indeterminate = false;
-    } else {
-        selectAll.checked = true;
-        if("indeterminate" in selectAll) selectAll.indeterminate = true;
+        if(checkedBoxes.length === 0) {
+            selectAll.checked = false;
+            if("indeterminate" in selectAll) selectAll.indeterminate = false;
+        } else if (checkedBoxes.length === allBoxes.length) {
+            selectAll.checked = true;
+            if("indeterminate" in selectAll) selectAll.indeterminate = false;
+        } else {
+            selectAll.checked = true;
+            if("indeterminate" in selectAll) selectAll.indeterminate = true;
+        }
     }
-}
 
-$('#select-all').click(function(e) {
-    e.stopPropagation();
-    $(`#users tbody input[type="checkbox"]:${this.checked ? "not(:": ""}checked${this.checked ? ")": ""}`).trigger('click');
-});
+    $('#select-all').click(function(e) {
+        e.stopPropagation();
+        $(`#users tbody input[type="checkbox"]:${this.checked ? "not(:": ""}checked${this.checked ? ")": ""}`).trigger('click');
+    });
 
-$("#users").on('draw', () => {
-    updateSelectAllBox();
-});
+    table.on('draw', () => updateSelectAllBox());
 
-$('#users tbody').on('click', 'input[type="checkbox"]', e => {
-    e.stopPropagation();
-    updateSelectAllBox();
+    $('#users tbody').on('click', 'input[type="checkbox"]', e => {
+        e.stopPropagation();
+        updateSelectAllBox();
+    });
 });
