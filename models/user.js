@@ -30,7 +30,7 @@ var UserSchema = new Schema({
     },
     usernameSet: {
         type: Boolean,
-        required: false,
+        required: true,
         default: true
     },
     OAuthID: {

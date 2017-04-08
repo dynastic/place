@@ -14,10 +14,8 @@ if(typeof error === 'undefined') error = null;
         <label for="inputPassword" class="sr-only">Password</label>
         <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required><br>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-        <%- include('../social-buttons.html', {
-            css: ["/css/signin.css"]
-        }) -%>
         <a href="/signup" class="form-signin-link">I need an account &raquo;</a>
+        <%- include('views/social-buttons.html') -%>
         <% if(error) { %>
             <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %></div>
         <% } %>

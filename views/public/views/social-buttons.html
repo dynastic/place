@@ -1,3 +1,8 @@
+<% if(typeof config.oauth !== 'undefined') { %>
+<div class="separator-text">
+    <div class="text">Or use</div>
+    <div class="separator"></div>
+</div>
 <div class="social-buttons">
     <% if (config.oauth.google.enabled) { %>
     <a href="/auth/google" class="btn btn-block btn-social btn-google">
@@ -30,3 +35,4 @@
     </a>
     <% } %>
 </div>
+<% } %>

@@ -1,6 +1,6 @@
-<%- include('header.html', {
+<%- include('../header.html', {
     pageTitle: "Pick a Username",
-    css: ["signin.css"]
+    css: ["/css/signin.css"]
 }) -%>
 <%
 if(typeof username === 'undefined') username = "";
@@ -14,8 +14,8 @@ if(typeof error === 'undefined') error = null;
         <%- captcha %><br>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Save</button>
         <% if(error) { %>
-            <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %> Please try again.</div>
+            <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %></div>
         <% } %>
     </form>
 </div> <!-- /container -->
-<%- include('footer.html') -%>
+<%- include('../footer.html') -%>
