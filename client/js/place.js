@@ -5,7 +5,6 @@
 //
 
 var size = 1000;
-var enableSuperSecretDebugMode = false;
 
 var canvasController = {
     isDisplayDirty: false,
@@ -441,7 +440,6 @@ var place = {
     },
 
     handleMouseDown: function(event) {
-        if(enableSuperSecretDebugMode) console.log("Mouse down response triggered");
         this.isMouseDown = true;
         $(this.zoomController).addClass("grabbing");
         this.dragStart = { x: event.pageX, y: event.pageY };
@@ -456,13 +454,11 @@ var place = {
     },
 
     handleMouseUp: function(event) {
-        if(enableSuperSecretDebugMode) console.log("Mouse up response triggered")
         if(this.shouldClick) {
-            if(enableSuperSecretDebugMode) console.log("Should click on mouse up")
             if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.indexOf(event.target) >= 0 || event.target == this.zoomButton || !this.shouldClick) return;
             let zoom = this._getZoomMultiplier();
             this.canvasClicked(Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), Math.round((event.pageY - $(this.cameraController).offset().top) / zoom))
-        } else if(enableSuperSecretDebugMode) console.log("Was told not to click");
+        }
         this.shouldClick = true;
         this.isMouseDown = false;
         $(this.zoomController).removeClass("grabbing");
@@ -593,7 +589,6 @@ var place = {
     },
 
     canvasClicked: function(x, y, event) {
-        if(enableSuperSecretDebugMode) console.log("Canvas clicked function called");
         $(this.pixelDataPopover).hide();
         function failToPost(error) {
             let defaultError = "An error occurred while trying to place your pixel.";
@@ -605,11 +600,9 @@ var place = {
 
         // Make the user zoom in before placing pixel
         let wasZoomedOut = !this.zooming.zoomedIn;
-        if(wasZoomedOut && enableSuperSecretDebugMode) console.log("user was zoomed out, not trying to place")
         if(wasZoomedOut) this.zoomIntoPoint(x, y);
 
         if(this.selectedColour === null) {
-            if(enableSuperSecretDebugMode) console.log("No colour selected, get popover")
             this.zoomIntoPoint(x, y);
             return this.getPixel(x, y, (err, data) => {
                 if(err || !data.pixel) return;
@@ -643,16 +636,12 @@ var place = {
         if(wasZoomedOut) return;
 
         var a = this;
-        if(enableSuperSecretDebugMode) console.log("Got past stage one checks")
         if(this.selectedColour !== null && !this.placing) {
-            if(enableSuperSecretDebugMode) console.log("We have a colour and are not currently requesting a tile place, making request now");
             this.changePlacingModalVisibility(true);
             this.placing = true;
             $.post("/api/place", {
                 x: x, y: y, colour: this.selectedColour
             }).done(data => {
-                if(enableSuperSecretDebugMode) console.log("Retrieved place data back from server:");
-                if(enableSuperSecretDebugMode) console.log(data);
                 if(data.success) {
                     a.setPixel(a.DEFAULT_COLOURS[a.selectedColour], x, y);
                     a.deselectColour();
@@ -660,7 +649,6 @@ var place = {
                     else a.updatePlaceTimer();
                 } else failToPost(data.error);
             }).fail(data => failToPost(data.responseJSON.error)).always(() => {
-                if(enableSuperSecretDebugMode) console.log("Request completed");
                 this.changePlacingModalVisibility(false);
                 this.placing = false;
             });
