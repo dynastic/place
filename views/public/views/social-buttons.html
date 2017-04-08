@@ -1,5 +1,5 @@
 <% if(typeof config.oauth !== 'undefined') { %>
-<% if(config.oauth.google.enabled || config.oauth.reddit.enabled || config.oauth.discord.enabled || config.oauth.twitter.enabled || config.oauth.github.enabled || config.oauth.facebook.enabled) { %>
+<% if (Object.keys(config.oauth).find(key => config.oauth[key].enabled)) { %>
 <div class="separator-text">
     <div class="text">Or use</div>
     <div class="separator"></div>
