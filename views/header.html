@@ -2,8 +2,9 @@
   if(typeof user === 'undefined') user = null;
   if(typeof css === 'undefined') css = [];
   if(typeof pageTitle === 'undefined') pageTitle = null;
+  if(typeof isAdmin === 'undefined') isAdmin = false;
   var renderNavItem = function(name, itemPath, icon = null) {
-      let isCurrentPage = itemPath == path;
+      let isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
       let iconPrefix = icon ? `<i class="fa fa-${icon} fa-fw"></i>` : "";
       return `<li ${isCurrentPage ? " class=\"active\"" : ""}>` +
         `<a href="${itemPath}">${iconPrefix}${name} ${isCurrentPage ? " <span class=\"sr-only\">(current)</span>" : ""}</a>` +
@@ -29,7 +30,7 @@
     <link href="/css/global.css" rel="stylesheet">
 
     <% css.forEach(function(cssFilename) { %>
-      <link href="/css/<%= cssFilename %>" rel="stylesheet">
+      <link href="<%= cssFilename %>" rel="stylesheet">
     <% }) %>
 
     <!--[if lt IE 9]>
@@ -38,7 +39,7 @@
     <![endif]-->
   </head>
   <body class="fixed-navbar<% if(user) { %> signed-in<% } %>">
-    <nav class="navbar navbar-default navbar-fixed-top">
+    <nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %>">
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -54,9 +55,15 @@
         <div class="collapse navbar-collapse" id="navbar-collapse">
           <ul class="nav navbar-nav">
             <%- renderNavItem("Home", "/", "home"); %>
-            <%- renderNavItem("Official Subreddit", "https://www.reddit.com/r/place20", "reddit-alien"); %>
-            <%- renderNavItem("Chat on Discord", "https://discord.gg/CgC8FTg", "comments"); %>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-users fa-fw"></i>Community <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <%- renderNavItem("Official Subreddit", "https://www.reddit.com/r/place20", "reddit-alien"); %>
+                <%- renderNavItem("Chat on Discord", "https://discord.gg/CgC8FTg", "comments"); %>
+              </ul>
+            </li>
             <%- renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money"); %>
+            <% if(user && user.admin) { %><%- renderNavItem("Admin", "/admin", "gavel"); %><% } %>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <% if(user) { %>

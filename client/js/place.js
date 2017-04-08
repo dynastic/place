@@ -80,7 +80,9 @@ var hashHandler = {
     },
 
     setHash: function(hash) {
-        window.location.hash = this.encodeHash(hash);
+        let encodedHash = this.encodeHash(hash);
+        if("history" in window) window.history.replaceState(null, null, "#" + encodedHash);
+        else window.location.hash = encodedHash;
         this.currentHash = hash;
     },
 
@@ -121,13 +123,13 @@ var place = {
     socket: null,
     zoomButton: null,
     dragStart: null,
-    isMouseDown: false, shouldClick: true, placing: false, didSetHash: false,
+    isMouseDown: false, shouldClick: true, placing: false, didSetHash: false, shouldShowPopover: false,
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null},
     notificationHandler: notificationHandler, hashHandler: hashHandler,
 
-    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint) {
+    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover) {
         this.canvas = canvas;
         this.canvasController = canvasController;
         this.canvasController.init(canvas);
@@ -137,6 +139,7 @@ var place = {
         this.coordinateElement = coordinateElement;
         this.userCountElement = userCountElement;
         this.gridHint = gridHint;
+        this.pixelDataPopover = pixelDataPopover;
 
         this.colourPaletteElement = colourPaletteElement;
         this.setupColours();
@@ -155,17 +158,18 @@ var place = {
         this.updatePlaceTimer();
 
         let controller = $(zoomController).parent()[0];
-        controller.onmousedown = (event) => this.handleMouseDown(event || window.event);
-        controller.onmouseup = (event) => this.handleMouseUp(event || window.event);
-        controller.onmouseout = (event) => { this.shouldClick = false; this.handleMouseUp(event || window.event) };
-        controller.onmousemove = (event) => {
+        canvas.onmousedown = (event) => { if(event.which == 1) this.handleMouseDown(event || window.event) };
+        canvas.onmouseup = (event) => { if(event.which == 1) this.handleMouseUp(event || window.event) };
+        canvas.onmouseout = (event) => { if(event.which == 1) { this.shouldClick = false; this.handleMouseUp(event || window.event) } };
+        canvas.onmousemove = (event) => {
             if (this.isMouseDown) this.handleMouseDrag(event || window.event);
             this.handleMouseMove(event || window.event);
         }
-        controller.addEventListener("touchstart", (event) => this.handleMouseDown(event.changedTouches[0]));
-        controller.addEventListener("touchmove", (event) => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
-        controller.addEventListener("touchend", (event) => this.handleMouseUp(event.changedTouches[0]));
-        controller.addEventListener("touchcancel", (event) => this.handleMouseUp(event.changedTouches[0]));
+        canvas.addEventListener("touchstart", event => this.handleMouseDown(event.changedTouches[0]));
+        canvas.addEventListener("touchmove", event => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
+        canvas.addEventListener("touchend", event => this.handleMouseUp(event.changedTouches[0]));
+        canvas.addEventListener("touchcancel", event => this.handleMouseUp(event.changedTouches[0]));
+        canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
         window.onresize = () => this.handleResize();
         window.onhashchange = () => this.handleHashChange();
@@ -233,6 +237,7 @@ var place = {
 
         socket.on("tile_placed", this.liveUpdateTile.bind(this));
         socket.on("user_change", this.userCountChanged.bind(this));
+        socket.on("reload_client", () => window.location.reload());
         return socket;
     },
 
@@ -323,6 +328,10 @@ var place = {
             let coord = this.getCoordinates();
             this.hashHandler.modifyHash(coord);
             this.zooming.zoomHandle = null;
+            if(this.shouldShowPopover) {
+                $(this.pixelDataPopover).fadeIn(250);
+                this.shouldShowPopover = false;
+            }
             return
         }
     },
@@ -381,8 +390,8 @@ var place = {
             let coordElem = $(this.coordinateElement);
             setTimeout(function() {
                 let spans = coordElem.find("span");
-                spans.first().text(coord.x);
-                spans.last().text(coord.y);
+                spans.first().text(coord.x.toLocaleString());
+                spans.last().text(coord.y.toLocaleString());
             }, 0);
         }
         this.lastUpdatedCoordinates = coord;
@@ -394,6 +403,7 @@ var place = {
     },
 
     setCanvasPosition: function(x, y, delta = false) {
+        $(this.pixelDataPopover).hide();
         let deltaStr = delta ? "+=" : ""
         $(this.cameraController).css({
             top: `${deltaStr}${y}px`,
@@ -406,24 +416,26 @@ var place = {
     },
 
     handleMouseMove: function(event) {
-        if(this.gridHint) {
-            let zoom = this._getCurrentZoom();
-            // Hover position in grid multiplied by zoom
-            let x = Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), y = Math.round((event.pageY - $(this.cameraController).offset().top) / zoom);
-            let elem = $(this.gridHint);
-            let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
-            let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
-            elem.css({
-                left: posX * zoom,
-                top: posY * zoom,
-            });
-        }
-        if(this.handElement) {
-            let elem = $(this.handElement);
-            elem.css({
-                left: event.pageX - (elem.width() / 2),
-                top: event.pageY - (elem.height() / 2),
-            });
+        if(!this.placing) {
+            if(this.gridHint) {
+                let zoom = this._getCurrentZoom();
+                // Hover position in grid multiplied by zoom
+                let x = Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), y = Math.round((event.pageY - $(this.cameraController).offset().top) / zoom);
+                let elem = $(this.gridHint);
+                let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
+                let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
+                elem.css({
+                    left: posX * zoom,
+                    top: posY * zoom,
+                });
+            }
+            if(this.handElement) {
+                let elem = $(this.handElement);
+                elem.css({
+                    left: event.pageX - (elem.width() / 2),
+                    top: event.pageY - (elem.height() / 2),
+                });
+            }
         }
     },
 
@@ -434,14 +446,16 @@ var place = {
     },
 
     handleMouseDrag: function(event) {
-        this.shouldClick = false;
-        if (this.dragStart) this.moveCamera(event.pageX - this.dragStart.x, event.pageY - this.dragStart.y);
-        this.dragStart = { x: event.pageX, y: event.pageY };
+        if (event.pageX !== this.dragStart.x || event.pageY !== this.dragStart.y) {
+            this.shouldClick = false;
+            if (this.dragStart) this.moveCamera(event.pageX - this.dragStart.x, event.pageY - this.dragStart.y);
+            this.dragStart = { x: event.pageX, y: event.pageY };
+        }
     },
 
     handleMouseUp: function(event) {
-        if(this.shouldClick) {
-            if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.includes(event.target) || event.target == this.zoomButton || !this.shouldClick) return;
+        if(this.shouldClick && this.isMouseDown) {
+            if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.indexOf(event.target) >= 0 || event.target == this.zoomButton || !this.shouldClick) return;
             let zoom = this._getZoomMultiplier();
             this.canvasClicked(Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), Math.round((event.pageY - $(this.cameraController).offset().top) / zoom))
         }
@@ -452,6 +466,24 @@ var place = {
         let coord = this.getCoordinates();
         this.hashHandler.modifyHash(coord);
         this.didSetHash = true;
+    },
+
+    contextMenu: function(event) {
+        event.preventDefault();
+        if(this.selectedColour) return this.deselectColour();
+        if(this.zooming.zoomedIn) this.setZoomedIn(false);
+    },
+
+    getPixel: function(x, y, callback) {
+        function failToPost(error) {
+            let defaultError = "An error occurred while trying to retrieve data about that pixel.";
+            window.alert(!!error ? error.message || defaultError : defaultError);
+            callback(error);
+        }
+        return $.get(`/api/pixel?x=${x}&y=${y}`).done(data => {
+            if(!data.success) return failToPost(data.error);
+            callback(null, data);
+        }).fail(err => failToPost(err));
     },
 
     isSignedIn: function() {
@@ -557,6 +589,7 @@ var place = {
     },
 
     canvasClicked: function(x, y, event) {
+        $(this.pixelDataPopover).hide();
         function failToPost(error) {
             let defaultError = "An error occurred while trying to place your pixel.";
             window.alert(!!error ? error.message || defaultError : defaultError);
@@ -566,7 +599,41 @@ var place = {
         if (x < 0 || y < 0 || x > this.canvas.width - 1 || y > this.canvas.height - 1) return;
 
         // Make the user zoom in before placing pixel
-        if(!this.zooming.zoomedIn || this.selectedColour === null) return this.zoomIntoPoint(x, y);
+        let wasZoomedOut = !this.zooming.zoomedIn;
+        if(wasZoomedOut) this.zoomIntoPoint(x, y);
+
+        if(this.selectedColour === null) {
+            this.zoomIntoPoint(x, y);
+            return this.getPixel(x, y, (err, data) => {
+                if(err || !data.pixel) return;
+                let popover = $(this.pixelDataPopover);
+                if(this.zooming.zooming) this.shouldShowPopover = true;
+                else popover.fadeIn(250);
+                // TODO: account for deleted users
+                let hasUser = !!data.pixel.editor;
+                popover.find("#pixel-data-username").text(hasUser ? data.pixel.editor.username : "Deleted account");
+                if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account")
+                else popover.find("#pixel-data-username").addClass("deleted-account");
+                popover.find("#pixel-data-time").text($.timeago(data.pixel.modified));
+                popover.find("#pixel-data-time").attr("datetime", data.pixel.modified);
+                popover.find("#pixel-data-time").attr("title", new Date(data.pixel.modified).toLocaleString());
+                popover.find("#pixel-data-x").text(x.toLocaleString());
+                popover.find("#pixel-data-y").text(y.toLocaleString());
+                if(hasUser) {
+                    popover.find(".user-info").show();
+                    popover.find("#pixel-data-user-tile-count").text(data.pixel.editor.statistics.totalPlaces.toLocaleString());
+                    popover.find("#pixel-data-user-account-date").text($.timeago(data.pixel.editor.creationDate));
+                    popover.find("#pixel-data-user-account-date").attr("datetime", data.pixel.editor.creationDate);
+                    popover.find("#pixel-data-user-account-date").attr("title", new Date(data.pixel.editor.creationDate).toLocaleString());
+                    popover.find("#pixel-data-user-last-place").text($.timeago(data.pixel.editor.statistics.lastPlace));
+                    popover.find("#pixel-data-user-last-place").attr("datetime", data.pixel.editor.statistics.lastPlace);
+                    popover.find("#pixel-data-user-last-place").attr("title", new Date(data.pixel.editor.statistics.lastPlace).toLocaleString());
+                } else {
+                    popover.find(".user-info").hide();
+                }
+            });
+        }
+        if(wasZoomedOut) return;
 
         var a = this;
         if(this.selectedColour !== null && !this.placing) {
@@ -583,7 +650,6 @@ var place = {
                 } else failToPost(data.error);
             }).fail(data => failToPost(data.responseJSON.error)).always(() => {
                 this.changePlacingModalVisibility(false);
-            }).always(() => {
                 this.placing = false;
             });
         }
@@ -595,5 +661,5 @@ var place = {
     }
 }
 
-place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0]);
+place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0]);
 place.setZoomButton($("#zoom-button")[0]);

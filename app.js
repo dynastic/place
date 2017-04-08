@@ -1,10 +1,11 @@
-const responseFactory = require("./util/ResponseFactory");
+const responseFactory = require("./util/ResponseFactory")();
 const config = require('./config/config');
 const mongoose = require('mongoose');
 const paintingHandler = require("./util/PaintingHandler");
 const recaptcha = require('express-recaptcha');
-const HTTPServer = require("./util/HTTPServer.js");
-const WebsocketServer = require("./util/WebsocketServer.js");
+const HTTPServer = require("./util/HTTPServer");
+const WebsocketServer = require("./util/WebsocketServer");
+const TemporaryUserInfo = require("./util/TemporaryUserInfo");
 const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
@@ -20,6 +21,7 @@ let paths = {
 
 var app = {};
 app.config = config;
+app.temporaryUserInfo = TemporaryUserInfo;
 
 // Get image handler
 app.paintingHandler = paintingHandler(app);
@@ -35,6 +37,16 @@ app.responseFactory = responseFactory;
 // Set up reCaptcha
 recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
 app.recaptcha = recaptcha;
+
+app.adminMiddleware = (req, res, next) => {
+    if(!req.user || !req.user.admin) return res.status(403).redirect("/?admindenied=1");
+    next();
+};
+
+app.modMiddleware = (req, res, next) => {
+    if(!req.user || !(req.user.admin || req.user.moderator)) return res.status(403).redirect("/?moddenied=1");
+    next();
+};
 
 app.httpServer = new HTTPServer(app);
 app.server = require('http').createServer(app.httpServer.server);

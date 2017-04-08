@@ -25,4 +25,4 @@ Please check the issues for this project.
 
 ## License
 
-Place 2.0 is licensed under the [APGL-3.0 license](https://github.com/dynasticdevelop/place/blob/master/LICENSE). Please obey the license and terms listed within.
+Place 2.0 is licensed under the [APGL-3.0 license](https://github.com/dynasticdevelop/place/blob/master/LICENSE). Please obey the license and terms listed within.# place-discord-bot

@@ -96,11 +96,14 @@ function PaintingHandler(app) {
         },
 
         doPaint: function(colour, x, y, user) {
+            if(app.temporaryUserInfo.isUserPlacing(user)) return reject({message: "You cannot place more than one tile at once.", code: "attempted_overload"});
             var a = this;
             return new Promise((resolve, reject) => {
                 if(!this.hasImage) return reject({message: "Server not ready", code: "not_ready"});
+                app.temporaryUserInfo.setUserPlacing(user, true);
                 // Add to DB:
                 user.addPixel(colour, x, y, (changed, err) => {
+                    app.temporaryUserInfo.setUserPlacing(user, false);
                     if(err) return reject(err);
                     // Paint on live image:
                     a.imageBatch.setPixel(x, y, colour).exec((err, image) => {

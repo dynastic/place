@@ -2,6 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const APIRouter = require('../routes/api');
 const PublicRouter = require('../routes/public');
+const AdminRouter = require('../routes/admin');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const ejs = require("ejs");
@@ -26,7 +27,7 @@ function HTTPServer(app) {
     // Log to console
     server.use(morgan('dev'));
 
-    server.set('trust proxy', 1)
+    server.set('trust proxy', typeof app.config.trustProxyDepth === "number" ? app.config.trustProxyDepth : 0);
 
     // Setup passport for auth
     server.use(session({
@@ -39,10 +40,11 @@ function HTTPServer(app) {
         if(req.session) if(req.session.passport) userID = req.session.passport.user;
         if(userID) {
             User.findById(userID).then(user => {
-                if(user.loginError()) {
+                if(user && user.loginError()) {
                     res.session.passport = null;
                     res.redirect("/signin?loginerror=1");
                 }
+                if(user) user.recordAccess(req.get("User-Agent"), req.get('X-Forwarded-For') || req.connection.remoteAddress);
                 req.user = user;
                 next();
             }).catch(err => {
@@ -56,6 +58,7 @@ function HTTPServer(app) {
 
     // Handle routes
     server.use('/api', APIRouter(app));
+    server.use('/admin', AdminRouter(app));
     server.use('/', PublicRouter(app));
 
     // 404 pages

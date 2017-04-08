@@ -6,21 +6,25 @@ require('../util/passport')(passport);
 const User = require('../models/user');
 const Pixel = require('../models/pixel');
 const path = require("path");
+const fs = require('fs');
 
 function APIRouter(app) {
     let router = express.Router();
+
+    // Normal APIs
 
     router.post('/signup', function(req, res) {
         return res.status(503).json({ success: false, error: { message: "API signup is no longer available.", code: "unavailable" } });
     });
 
     router.post('/identify', function(req, res, next) {
-        if (!req.body.username || !req.body.password) return res.status(403).json({ success: false, error: { message: 'A username and password are required.', code: 'invalid_parameters' } });
+        return res.status(503).json({ success: false, error: { message: "API identification is no longer available.", code: "unavailable" } });
+        /*if (!req.body.username || !req.body.password) return res.status(403).json({ success: false, error: { message: 'A username and password are required.', code: 'invalid_parameters' } });
         passport.authenticate('local', { session: false }, function(err, user, info) {
             if (!user) return res.status(500).json({ success: false, error: info.error || { message: "An unknown error occurred." } });
             let token = jwt.encode(user, config.secret);
             res.json({ success: true, token: 'JWT ' + token }); // create and return jwt token here        
-        })(req, res, next);
+        })(req, res, next);*/
     });
 
     router.get('/session', function(req, res, next) {
@@ -43,6 +47,10 @@ function APIRouter(app) {
     });
 
     router.post('/place', function(req, res, next) {
+         if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
+             const legit = require('../util/legit');
+             if (!legit(req)) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
+         }
         function paintWithUser(user) {
             if (!user.canPlace()) return res.status(429).json({ success: false, error: { message: "You cannot place yet.", code: "slow_down" } });
             if (!req.body.x || !req.body.y || !req.body.colour) return res.status(400).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
@@ -94,13 +102,65 @@ function APIRouter(app) {
         }).catch(err => fail(err));
     });
 
-    getToken = function(headers) {
-        if (headers && headers.authorization) {
-            let parted = headers.authorization.split(' ');
-            if (parted.length === 2) return parted[1];
-            else return null;
-        } else return null;
-    };
+    // Admin APIs
+
+    router.get("/admin/stats", app.modMiddleware, function(req, res, next) {
+        var signups24h = null, pixelsPlaced24h = null, pixelsPerMin = null;
+        let dateBack24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
+        let dateBack20m = new Date(new Date().getTime() - (20 * 60 * 1000));
+        function finish() {
+            return res.json({ success: true, stats: { online: app.websocketServer.connectedClients, signups24h: signups24h, pixelsPlaced24h: pixelsPlaced24h, pixelsPerMin: pixelsPerMin } });
+        }
+        function doPixelsPerMin() {
+            Pixel.count({lastModified: {$gt: dateBack20m}}).then(c => {
+                pixelsPerMin = Math.round(c / 20);
+                finish()
+            }).catch(err => finish());
+        }
+        function doPixelsPlaced24h() {
+            Pixel.count({lastModified: {$gt: dateBack24h}}).then(c => {
+                pixelsPlaced24h = c;
+                doPixelsPerMin()
+            }).catch(err => doPixelsPerMin());
+        }
+        function doSignups24h() {
+            User.count({creationDate: {$gt: dateBack24h}}).then(c => {
+                signups24h = c;
+                doPixelsPlaced24h()
+            }).catch(err => doPixelsPlaced24h());
+        }
+        doSignups24h();
+    });
+
+    router.get("/admin/refresh_clients", app.adminMiddleware, function(req, res, next) {
+        app.websocketServer.broadcast("reload_client");
+        res.json({success: true});
+    });
+
+    router.post("/admin/users", app.modMiddleware, function(req, res, next) {
+        let searchValue = req.body.search ? req.body.search.value || "" : "";
+        var sort = { creationDate: "desc" };
+        if(req.body.order && req.body.order.length > 0 && req.body.columns) {
+            if(req.body.columns.length > req.body.order[0].column || 1) {
+                let colName = req.body.columns[req.body.order[0].column].data;
+                sort = {}, sort[colName] = req.body.order[0].dir || "desc";
+            }
+        }
+        User.dataTables({
+            limit: req.body.length || 25,
+            skip: req.body.start || 0,
+            select: ["id", "name", "creationDate", "admin", "moderator", "banned", "lastPlace", "placeCount"],
+            search: {
+                value: searchValue,
+                fields: ['name']
+            }, sort: sort
+        }, (err, table) => {
+            User.find().count().then(c => {
+                if(err) return res.status(500).json({success: false});
+                res.json(Object.assign({success: true, recordsTotal: c}, table));
+            }).catch(err => res.status(500).json({success: false}));
+        });
+    });
 
     return router;
 }

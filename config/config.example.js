@@ -3,6 +3,7 @@ module.exports = {
     'database': 'mongodb://localhost/place',
     'port': 3000,
     'onlyListenLocal': true,
+    'trustProxyDepth': 1, // How many levels of proxy to trust for IP
     'debug': false,
     'googleAnalyticsTrackingID': "", // UA-XXXXXXXX-XX
     'host': 'https://place.dynastic.co', // the publicly accessible URL of the site
