@@ -38,7 +38,9 @@ AccessSchema.statics.recordAccess = function(userID, userAgent, ipAddress) {
         date: Date(),
         userAgent: userAgent,
         ipAddress: ipAddress
-    }, { upsert: true });
+    }, { upsert: true }, (err, access) => {
+        console.error("Couldn't record access attempt: " + err);
+    });
 }
 
 module.exports = mongoose.model('Access', AccessSchema);
