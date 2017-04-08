@@ -132,6 +132,10 @@ function APIRouter(app) {
         doSignups24h();
     });
 
+    router.get("/admin/refresh_clients", app.adminMiddleware, function(req, res, next) {
+        app.websocketServer.broadcast("reload_client");
+    });
+
     return router;
 }
 
