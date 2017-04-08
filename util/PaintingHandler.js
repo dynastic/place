@@ -1,4 +1,4 @@
-const lwip = require('lwip');
+const lwip = require('pajk-lwip');
 const Pixel = require('../models/pixel');
 
 const imageSize = 1000;
