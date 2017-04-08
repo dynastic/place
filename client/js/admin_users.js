@@ -3,6 +3,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         aaSorting: [[2, "desc"]],
+        pageLength: 25,
         ajax: { url: "/api/admin/users", type: "POST", contentType: "application/json", data: d => JSON.stringify(d) },
         columns: [
             { data: "active", orderable: false },

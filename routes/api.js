@@ -147,7 +147,7 @@ function APIRouter(app) {
             }
         }
         User.dataTables({
-            limit: req.body.length || 10,
+            limit: req.body.length || 25,
             skip: req.body.start || 0,
             select: ["id", "name", "creationDate", "admin", "moderator", "banned", "lastPlace", "placeCount"],
             search: {
