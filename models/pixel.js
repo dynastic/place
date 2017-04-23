@@ -102,9 +102,16 @@ PixelSchema.methods.getInfo = function() {
     return new Promise((resolve, reject) => {
         let info = this.toInfo();
         require("./user").findById(this.editorID).then(user => {
-            info.editor = user.toInfo();
+            if(user.banned) {
+                info.userError = "ban";
+            } else {
+                info.editor = user.toInfo();
+            }
             resolve(info);
-        }).catch(err => resolve(info));
+        }).catch(err => {
+            info.userError = "delete";
+            resolve(info);
+        });
     })
 }
 
