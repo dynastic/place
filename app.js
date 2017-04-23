@@ -1,4 +1,4 @@
-const responseFactory = require("./util/ResponseFactory")();
+const ResponseFactory = require("./util/ResponseFactory");
 const config = require('./config/config');
 const mongoose = require('mongoose');
 const paintingHandler = require("./util/PaintingHandler");
@@ -32,11 +32,19 @@ app.paintingHandler.loadImageFromDatabase().then((image) => {
     console.error("An error occurred while loading the image from the database.\nError: " + err);
 })
 
-app.responseFactory = responseFactory;
+app.responseFactory = ResponseFactory(app);
 
-// Set up reCaptcha
-recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
-app.recaptcha = recaptcha;
+app.enableCaptcha = false;
+if(typeof app.config.recaptcha !== 'undefined') {
+    if(typeof app.config.recaptcha.siteKey !== 'undefined' && typeof app.config.recaptcha.secretKey !== 'undefined') {
+        app.enableCaptcha = app.config.recaptcha.siteKey != "" && app.config.recaptcha.secretKey != "";
+    }
+}
+if(app.enableCaptcha) {
+    // Set up reCaptcha
+    recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
+    app.recaptcha = recaptcha;
+}
 
 app.adminMiddleware = (req, res, next) => {
     if(!req.user || !req.user.admin) return res.status(403).redirect("/?admindenied=1");
@@ -55,26 +63,28 @@ app.websocketServer = new WebsocketServer(app, app.server);
 mongoose.connect(config.database);
 
 // Clean existing built JS
-gulp.task('clean', function() {
-    return del(['public/js/build']);
-});
+gulp.task('clean', () => del(['public/js/build']));
+
+function swallowError(error) {
+    console.error("An error occurred while trying to process JavaScript: " + error);
+    this.emit("end");
+}
 
 // Process JavaScript
 gulp.task('scripts', ['clean'], (cb) => {
     console.log("Processing JavaScript...");
     let t = gulp.src(paths.scripts.src)
-    t = t.pipe(babel({
-        presets: ['es2015']
-    }))
+    t = t.pipe(babel({ presets: ['es2015'] }));
+    t = t.on("error", swallowError);
     if(!config.debug) t = t.pipe(uglify());
-    t.pipe(gulp.dest(paths.scripts.built));
+    t = t.on("error", swallowError);
+    t = t.pipe(gulp.dest(paths.scripts.built));
+    t = t.on("end", () => console.log("Finished processing JavaScript."));
     return t;
 });
 
 // Rerun the task when a file changes 
-gulp.task('watch', () => {
-    gulp.watch(paths.scripts.src, ['scripts']);
-});
+gulp.task('watch', () => gulp.watch(paths.scripts.src, ['scripts']));
 
 gulp.task('default', ['watch', 'scripts']);
 gulp.start(['watch', 'scripts'])

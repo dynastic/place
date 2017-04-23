@@ -4,9 +4,10 @@ const jwt = require('jwt-simple');
 const passport = require('passport');
 require('../util/passport')(passport);
 const User = require('../models/user');
-const responseFactory = require("../util/ResponseFactory")("/admin");
 
 function AdminRouter(app) {
+    const responseFactory = require("../util/ResponseFactory")(app, "/admin");
+
     let router = express.Router()
 
     router.get('/', app.adminMiddleware, function(req, res) {

@@ -6,15 +6,16 @@ const jwt = require('jwt-simple');
 const passport = require('passport');
 require('../util/passport')(passport);
 const User = require('../models/user');
-const responseFactory = require("../util/ResponseFactory")();
 
 function PublicRouter(app) {
+    const responseFactory = require("../util/ResponseFactory")(app);
+
     let router = express.Router()
 
     router.use(function(req, res, next) { // Force user to pick a username
         if(req.url == "/signout" || req.url == "/pick-username") return next(); // Allow the user to sign out or POST their new username
         if(req.user && !req.user.usernameSet && req.user.OAuthName) { // If the user has no username...
-            return responseFactory.sendRenderedResponse("public/pick-username", req, res, {captcha: app.recaptcha.render(), username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20), user: {name: ""}}); // Send the username picker
+            return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20), user: {name: ""}}); // Send the username picker
         }
         next(); // Otherwise, carry on...
     });
@@ -25,12 +26,12 @@ function PublicRouter(app) {
         let user = req.user;
         user.name = req.body.username;
         app.recaptcha.verify(req, error => {
-            if(error) return responseFactory.sendRenderedResponse("public/pick-username", req, res, {captcha: app.recaptcha.render(), error: {message: "Please fill in the captcha properly."}, user: {name: ""}, username: req.body.username});
+            if(error) return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, error: {message: "Please fill in the captcha properly."}, user: {name: ""}, username: req.body.username});
             
             user.setUserName(user.name, function(err) {
-                if(err) return responseFactory.sendRenderedResponse("public/pick-username", req, res, {captcha: app.recaptcha.render(), error: err, username: req.body.name, user: {name: ""}});
+                if(err) return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, error: err, username: req.body.name, user: {name: ""}});
                 req.login(user, function(err) {
-                    if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, {captcha: app.recaptcha.render(), error: { message: "An unknown error occurred." }, username: req.body.username, user: {name: ""}});
+                    if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, { captcha: app.enableCaptcha, error: { message: "An unknown error occurred." }, username: req.body.username, user: {name: ""}});
                     res.redirect("/?signedin=1");
                 });
             });
@@ -39,14 +40,10 @@ function PublicRouter(app) {
 
     const ratelimitCallback = function (req, res, next, nextValidRequestDate) {
         function renderResponse(errorMsg) {
-            return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.recaptcha.render(), error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
+            return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
         }
         res.status(429);
         return renderResponse("You're doing that too fast.");
-    }
-
-    const handleStoreError = function (error) {
-        console.error(error);
     }
 
     const signupRatelimit = new Ratelimit(ratelimitStore, {
@@ -56,7 +53,7 @@ function PublicRouter(app) {
         minWait: 60*60*1000, // 1 hour
         maxWait: 60*60*1000, // 1 hour, 
         failCallback: ratelimitCallback,
-        handleStoreError: handleStoreError,
+        handleStoreError: error => console.error(error),
         proxyDepth: config.trustProxyDepth
     });
 
@@ -88,7 +85,7 @@ function PublicRouter(app) {
 
     router.get('/signup', function(req, res) {
         if (req.user) return res.redirect("/");
-        return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.recaptcha.render() });
+        return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha });
     });
 
     router.get('/account', function(req, res) {
@@ -96,23 +93,32 @@ function PublicRouter(app) {
         return responseFactory.sendRenderedResponse("public/account", req, res);
     });
 
-    router.post('/signup', signupRatelimit.prevent, function(req, res, next) {
+    router.post('/signup'/*, signupRatelimit.prevent*/, function(req, res, next) {
         function renderResponse(errorMsg) {
-            return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.recaptcha.render(), error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
+            return responseFactory.sendRenderedResponse("public/signup", req, res, { ccaptcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
         }
-        if (req.user) return res.redirect("/");
-        if (!req.body.username || !req.body.password || !req.body.passwordverify) return renderResponse("Please fill out all the fields.")
-        if (req.body.password != req.body.passwordverify) return renderResponse("The passwords you entered did not match.")
-        app.recaptcha.verify(req, error => {
-            if(error) return renderResponse("Please fill in the captcha properly.")
+        console.log("SUIGNUP POST!!!");
+        function doSignup() {
+            console.log("TEST");
             User.register(req.body.username, req.body.password, function(user, error) {
                 if(!user) return renderResponse(error.message);
                 req.login(user, function(err) {
                     if (err) return renderResponse(null);
+                    console.log("DONE");
                     return res.redirect("/?signedup=1");
                 });
             });
-        });
+        }
+        if (req.user) return res.redirect("/");
+        if (!req.body.username || !req.body.password || !req.body.passwordverify) return renderResponse("Please fill out all the fields.")
+        if (req.body.password != req.body.passwordverify) return renderResponse("The passwords you entered did not match.");
+        console.log("MADE IT TO SIGN UP PART");
+        if(app.enableCaptcha) {
+            app.recaptcha.verify(req, error => {
+                if(error) return renderResponse("Please fill in the captcha properly.");
+                doSignup();
+            });
+        } else doSignup();
     });
 
     if(typeof config.oauth !== 'undefined') {

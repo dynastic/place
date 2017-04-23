@@ -15,13 +15,13 @@ if(typeof error === 'undefined') error = null;
         <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
         <label for="inputPassword2" class="sr-only">Password (again)</label>
         <input type="password" id="inputPassword2" class="form-control" placeholder="Password (again)" name="passwordverify" required>
-        <%- captcha %><br>
+        <% if(captcha) { %><%- renderCaptcha() %><br><% } %>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
         <a href="/signin" class="form-signin-link">I already have an account &raquo;</a>
-        <%- include('views/social-buttons.html') -%>
         <% if(error) { %>
             <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %></div>
         <% } %>
+        <%- include('views/social-buttons.html') -%>
     </form>
 </div> <!-- /container -->
 <%- include('../footer.html') -%>
