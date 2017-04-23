@@ -73,7 +73,7 @@ var notificationHandler = {
 
 var hashHandler = {
     currentHash: null,
-    
+
     getHash: function() {
         if (this.currentHash === null) this.currentHash = this.decodeHash(window.location.hash);
         return this.currentHash;
@@ -555,6 +555,7 @@ var place = {
     changePlaceTimerVisibility: function(visible) {
         if(visible) $(this.placeTimer).addClass("shown");
         else $(this.placeTimer).removeClass("shown");
+        this.changeSelectorVisibility(!visible);
     },
 
     changePlacingModalVisibility: function(visible) {
@@ -576,6 +577,20 @@ var place = {
         $(this.handElement).remove();
         $(this.zoomController).removeClass("selected");
         $(this.gridHint).hide();
+    },
+
+    changeSelectorVisibility: function(visible) {
+        if(this.selectedColour == null) return;
+        if(visible) {
+          let elem = this.colourPaletteOptionElements[this.selectedColour];
+          $(this.handElement).show();
+          $(this.zoomController).addClass("selected");
+          $(this.gridHint).show();
+        } else {
+          $(this.handElement).hide();
+          $(this.zoomController).removeClass("selected");
+          $(this.gridHint).hide();
+        }
     },
 
     zoomIntoPoint: function(x, y) {
@@ -652,7 +667,7 @@ var place = {
             }).done(data => {
                 if(data.success) {
                     a.setPixel(a.DEFAULT_COLOURS[a.selectedColour], x, y);
-                    a.deselectColour();
+                    a.changeSelectorVisibility(false);
                     if(data.timer) a.doTimer(data.timer);
                     else a.updatePlaceTimer();
                 } else failToPost(data.error);
