@@ -8,7 +8,7 @@ module.exports = {
     'googleAnalyticsTrackingID': "", // UA-XXXXXXXX-XX
     'host': 'http://place.dynastic.co', // the publicly accessible URL of the site
     'placeTimeout': 300,
-    'recaptcha': {
+    'recaptcha': { // Leave blank to disable
         'siteKey': "",
         'secretKey': ""
     },

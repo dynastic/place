@@ -1,4 +1,4 @@
-const responseFactory = require("./util/ResponseFactory")();
+const ResponseFactory = require("./util/ResponseFactory");
 const config = require('./config/config');
 const mongoose = require('mongoose');
 const paintingHandler = require("./util/PaintingHandler");
@@ -22,12 +22,6 @@ let paths = {
 var app = {};
 app.config = config;
 app.temporaryUserInfo = TemporaryUserInfo;
-app.enableCaptcha = false;
-if(typeof app.config.recaptcha !== 'undefined') {
-    if(typeof app.config.recaptcha.siteKey !== 'undefined' && typeof app.config.recaptcha.secretKey !== 'undefined') {
-        app.enableCaptcha = app.config.recaptcha.siteKey != "" && app.config.recaptcha.secretKey != "";
-    }
-}
 
 // Get image handler
 app.paintingHandler = paintingHandler(app);
@@ -38,11 +32,19 @@ app.paintingHandler.loadImageFromDatabase().then((image) => {
     console.error("An error occurred while loading the image from the database.\nError: " + err);
 })
 
-app.responseFactory = responseFactory;
+app.responseFactory = ResponseFactory(app);
 
-// Set up reCaptcha
-recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
-app.recaptcha = recaptcha;
+app.enableCaptcha = false;
+if(typeof app.config.recaptcha !== 'undefined') {
+    if(typeof app.config.recaptcha.siteKey !== 'undefined' && typeof app.config.recaptcha.secretKey !== 'undefined') {
+        app.enableCaptcha = app.config.recaptcha.siteKey != "" && app.config.recaptcha.secretKey != "";
+    }
+}
+if(app.enableCaptcha) {
+    // Set up reCaptcha
+    recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
+    app.recaptcha = recaptcha;
+}
 
 app.adminMiddleware = (req, res, next) => {
     if(!req.user || !req.user.admin) return res.status(403).redirect("/?admindenied=1");
