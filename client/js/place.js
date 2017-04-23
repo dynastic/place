@@ -73,7 +73,7 @@ var notificationHandler = {
 
 var hashHandler = {
     currentHash: null,
-    
+
     getHash: function() {
         if (this.currentHash === null) this.currentHash = this.decodeHash(window.location.hash);
         return this.currentHash;
@@ -583,11 +583,11 @@ var place = {
         if(this.selectedColour == null) return;
         if(visible) {
           let elem = this.colourPaletteOptionElements[this.selectedColour];
-          this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
+          $(this.handElement).show();
           $(this.zoomController).addClass("selected");
           $(this.gridHint).show();
         } else {
-          $(this.handElement).remove();
+          $(this.handElement).hide();
           $(this.zoomController).removeClass("selected");
           $(this.gridHint).hide();
         }
