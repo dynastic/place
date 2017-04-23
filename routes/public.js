@@ -96,9 +96,9 @@ function PublicRouter(app) {
         return responseFactory.sendRenderedResponse("public/account", req, res);
     });
 
-    router.post('/signup'/*, signupRatelimit.prevent*/, function(req, res, next) {
+    router.post('/signup', signupRatelimit.prevent, function(req, res, next) {
         function renderResponse(errorMsg) {
-            return responseFactory.sendRenderedResponse("public/signup", req, res, { ccaptcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
+            return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
         }
         function doSignup() {
             User.register(req.body.username, req.body.password, function(user, error) {
