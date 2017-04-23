@@ -35,16 +35,67 @@ body {
 .form-signin input {
   margin-bottom: 10px;
 }
-button.btn {
-  margin-bottom: 10px;
-}
+
 a.btn-discord img {
-  padding: 0.1em 0.1em 0.1em 0.1em;
+  padding: 0.15em 0.1em 0.1em 0.1em;
 }
 a.btn-discord {
-  background-color: #7289DA;
+  background-color: #7289da;
   color: #FFFFFF;
 }
 a.btn-discord:hover {
   color: #FFFFFF !important;
+  background-color: #6178e9;
+}
+
+.btn-reddit {
+  color: #fff;
+  background-color: #ff4500;
+}
+
+.btn-reddit:hover {
+  background-color: #ee3400;
+  color: #fff;
+}
+
+.btn-social {
+  font-size: 14px;
+  padding: 8px 12px;
+  padding-left: 38px;
+}
+
+.btn-social>:first-child {
+  border-right: none;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: 32px;
+}
+
+.separator-text {
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #888;
+  font-size: 15px;
+  margin: 15px 0;
+  position: relative;
+}
+
+.separator-text > .text {
+  background: #fff;
+  margin: 0 auto;
+  display: inline-block;
+  padding: 0 10px;
+  z-index: 2;
+  position: relative;
+}
+
+.separator-text > .separator {
+  border-top: 1px solid #bdbdbd;
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  right: 10px;
+  z-index: 1;
 }

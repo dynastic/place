@@ -12,13 +12,12 @@ function PublicRouter(app) {
     let router = express.Router()
 
     router.use(function(req, res, next) { // Force user to pick a username
-        if(req.url == "/signout") return next(); // Allow the user to log out
-        if(req.url == "/pick-username") return next(); // Allow the user to POST their new username
-        if(req.user && !req.user.usernameSet) { // If the user has no username...
-            return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20), user: {name: ""}}); // Send the username picker
+        if(req.url == "/signout" || req.url == "/pick-username") return next(); // Allow the user to sign out or POST their new username
+        if(req.user && !req.user.usernameSet && req.user.OAuthName) { // If the user has no username...
+            return responseFactory.sendRenderedResponse("public/pick-username", req, res, {captcha: app.recaptcha.render(), username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20), user: {name: ""}}); // Send the username picker
         }
         next(); // Otherwise, carry on...
-    })
+    });
 
     router.post('/pick-username', function(req, res) {
         if(!req.user) res.redirect("/signup");
@@ -26,17 +25,17 @@ function PublicRouter(app) {
         let user = req.user;
         user.name = req.body.username;
         app.recaptcha.verify(req, error => {
-            if(error) return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), error: {message: "Please prove your humanity"}, user: {name: ""}, username: req.body.username});
+            if(error) return responseFactory.sendRenderedResponse("public/pick-username", req, res, {captcha: app.recaptcha.render(), error: {message: "Please fill in the captcha properly."}, user: {name: ""}, username: req.body.username});
             
             user.setUserName(user.name, function(err) {
-                if(err) return responseFactory.sendRenderedResponse("pick-username", req, res, {captcha: app.recaptcha.render(), error: err, username: req.body.name, user: {name: ""}});
+                if(err) return responseFactory.sendRenderedResponse("public/pick-username", req, res, {captcha: app.recaptcha.render(), error: err, username: req.body.name, user: {name: ""}});
                 req.login(user, function(err) {
                     if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, {captcha: app.recaptcha.render(), error: { message: "An unknown error occurred." }, username: req.body.username, user: {name: ""}});
                     res.redirect("/?signedin=1");
                 });
             });
         });
-    })
+    });
 
     const ratelimitCallback = function (req, res, next, nextValidRequestDate) {
         function renderResponse(errorMsg) {
@@ -63,17 +62,17 @@ function PublicRouter(app) {
 
     router.get('/', function(req, res) {
         return responseFactory.sendRenderedResponse("public/index", req, res);
-    })
+    });
 
     router.get('/sitemap.xml', function(req, res, next) {
         if(typeof config.host === undefined) return next();
         return responseFactory.sendRenderedResponse("public/sitemap.xml.html", req, res, null, "text/xml");
-    })
+    });
 
     router.get('/signin', function(req, res) {
         if (req.user) return res.redirect("/");
         return responseFactory.sendRenderedResponse("public/signin", req, res);
-    })
+    });
 
     router.post('/signin', function(req, res, next) {
         if (req.user) return res.redirect("/");
@@ -85,17 +84,17 @@ function PublicRouter(app) {
                 return res.redirect("/?signedin=1");
             });
         })(req, res, next);
-    })
+    });
 
     router.get('/signup', function(req, res) {
         if (req.user) return res.redirect("/");
         return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.recaptcha.render() });
-    })
+    });
 
     router.get('/account', function(req, res) {
         if (!req.user) return res.redirect("/signin");
         return responseFactory.sendRenderedResponse("public/account", req, res);
-    })
+    });
 
     router.post('/signup', signupRatelimit.prevent, function(req, res, next) {
         function renderResponse(errorMsg) {
@@ -114,87 +113,89 @@ function PublicRouter(app) {
                 });
             });
         });
-    })
+    });
 
-    router.get('/auth/google', function(req, res, next) {
-        passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }, function(err, user, info) {
-            if (!user) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: info.error || { message: "An unknown error occurred." }, username: req.body.username });
-            req.login(user, function(err) {
-                if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: { message: "An unknown error occurred." }, username: req.body.username });
-                return res.redirect("/?signedin=1");
-            });
-        })(req, res, next);
-    })
-
-    if (config.oauth.google.enabled) {
-        router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), function(req, res) {
-            res.redirect('/?signedin=1');
-        });
-    }
-
-    if (config.oauth.discord.enabled) {
-        router.get('/auth/discord', passport.authenticate('discord'));
-        router.get('/auth/discord/callback', passport.authenticate('discord', {
-            failureRedirect: '/signup',
-            successRedirect: '/?signedin=1'
-        }), function(req, res) {
-            res.redirect('/?signedin=1') // Successful auth 
-        });
-    }
-
-    if (config.oauth.facebook.enabled) {
-        router.get('/auth/facebook', passport.authenticate('facebook'));
-        router.get('/auth/facebook/callback', passport.authenticate('facebook', {
-            failureRedirect: '/signup',
-            successRedirect: '/?signedin=1'
-        }), function(req, res) {
-            res.redirect('/?signedin=1') // Successful auth 
-        });
-    }
-
-    if (config.oauth.github.enabled) {
-        router.get('/auth/github', passport.authenticate('github'));
-        router.get('/auth/github/callback', passport.authenticate('github', {
-            failureRedirect: '/signup',
-            successRedirect: '/?signedin=1'
-        }), function(req, res) {
-            res.redirect('/?signedin=1') // Successful auth 
-        });
-    }
-
-    if (config.oauth.reddit.enabled) {
-        router.get('/auth/reddit', function(req, res, next){
-            req.session.state = Math.floor(Math.random() * 10000).toString(2);
-            passport.authenticate('reddit', {
-                state: req.session.state
+    if(typeof config.oauth !== 'undefined') {
+        router.get('/auth/google', function(req, res, next) {
+            passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }, function(err, user, info) {
+                if (!user) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: info.error || { message: "An unknown error occurred." }, username: req.body.username });
+                req.login(user, function(err) {
+                    if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: { message: "An unknown error occurred." }, username: req.body.username });
+                    return res.redirect("/?signedin=1");
+                });
             })(req, res, next);
-        });
+        })
 
-        router.get('/auth/reddit/callback', function(req, res, next){
-            // Check for origin via state token
-            if (req.query.state == req.session.state){
+        if (config.oauth.google.enabled) {
+            router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), function(req, res) {
+                res.redirect('/?signedin=1');
+            });
+        }
+
+        if (config.oauth.discord.enabled) {
+            router.get('/auth/discord', passport.authenticate('discord'));
+            router.get('/auth/discord/callback', passport.authenticate('discord', {
+                failureRedirect: '/signup',
+                successRedirect: '/?signedin=1'
+            }), function(req, res) {
+                res.redirect('/?signedin=1') // Successful auth 
+            });
+        }
+
+        if (config.oauth.facebook.enabled) {
+            router.get('/auth/facebook', passport.authenticate('facebook'));
+            router.get('/auth/facebook/callback', passport.authenticate('facebook', {
+                failureRedirect: '/signup',
+                successRedirect: '/?signedin=1'
+            }), function(req, res) {
+                res.redirect('/?signedin=1') // Successful auth 
+            });
+        }
+
+        if (config.oauth.github.enabled) {
+            router.get('/auth/github', passport.authenticate('github'));
+            router.get('/auth/github/callback', passport.authenticate('github', {
+                failureRedirect: '/signup',
+                successRedirect: '/?signedin=1'
+            }), function(req, res) {
+                res.redirect('/?signedin=1') // Successful auth 
+            });
+        }
+
+        if (config.oauth.reddit.enabled) {
+            router.get('/auth/reddit', function(req, res, next){
+                req.session.state = Math.floor(Math.random() * 10000).toString(2);
                 passport.authenticate('reddit', {
-                    successRedirect: '/?signedin=1',
-                    failureRedirect: '/signup'
+                    state: req.session.state
                 })(req, res, next);
-            } else {
-                next( new Error(403) );
-            }
+            });
+
+            router.get('/auth/reddit/callback', function(req, res, next){
+                // Check for origin via state token
+                if (req.query.state == req.session.state){
+                    passport.authenticate('reddit', {
+                        successRedirect: '/?signedin=1',
+                        failureRedirect: '/signup'
+                    })(req, res, next);
+                } else {
+                    next( new Error(403) );
+                }
+            });
+        }
+
+        if (config.oauth.twitter.enabled) {
+            router.get('/auth/twitter', passport.authenticate('twitter'));
+
+            router.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/signup' }), function(req, res) {
+                res.redirect('/?signedin=1');
+            });
+        }
+        
+        router.get('/signout', function(req, res) {
+            req.logout();
+            res.redirect("/?signedout=1");
         });
     }
-
-    if (config.oauth.twitter.enabled) {
-        router.get('/auth/twitter', passport.authenticate('twitter'));
-
-        router.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/signup' }), function(req, res) {
-            res.redirect('/?signedin=1');
-        });
-    }
-    
-    router.get('/signout', function(req, res) {
-        req.logout();
-        res.redirect("/?signedout=1");
-    })
 
     return router;
 }

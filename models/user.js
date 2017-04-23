@@ -30,7 +30,7 @@ var UserSchema = new Schema({
     },
     usernameSet: {
         type: Boolean,
-        required: false,
+        required: true,
         default: true
     },
     OAuthID: {
@@ -117,8 +117,8 @@ UserSchema.methods.setUserName = function(username, callback, usernameSet) {
         return callback();
     });
 }
-UserSchema.methods.recordAccess = function(userAgent, ipAddress) {
-    return Access.recordAccess(this.id, userAgent, ipAddress)
+UserSchema.methods.recordAccess = function(userAgent, ipAddress, key) {
+    return Access.recordAccess(this.id, userAgent, ipAddress, key)
 }
 
 UserSchema.statics.register = function(username, password, callback, OAuthID, OAuthName) {

@@ -23,7 +23,7 @@
     "gulp-babel": "^6.1.2",
     "gulp-uglify": "^2.1.2",
     "jwt-simple": "^0.5.1",
-    "lwip": "0.0.9",
+    "pajk-lwip": "0.2.0",
     "mongoose": "^4.9.2",
     "mongoose-datatables": "^3.0.0",
     "morgan": "^1.8.1",

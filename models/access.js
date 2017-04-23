@@ -16,6 +16,10 @@ var AccessSchema = new Schema({
     },
     ipAddress: {
         type: String
+    },
+    key: {
+        type: String,
+        required: false
     }
 });
 
@@ -28,16 +32,18 @@ AccessSchema.methods.toInfo = function() {
     }
 }
 
-AccessSchema.statics.recordAccess = function(userID, userAgent, ipAddress) {
+AccessSchema.statics.recordAccess = function(userID, userAgent, ipAddress, key) {
     this.findOneAndUpdate({
         userID: userID,
         userAgent: userAgent,
-        ipAddress: ipAddress
+        ipAddress: ipAddress,
+        key: key
     }, {
         userID: userID,
         date: Date(),
         userAgent: userAgent,
-        ipAddress: ipAddress
+        ipAddress: ipAddress,
+        key: key
     }, { upsert: true }, (err, access) => {
         if(err) console.error("Couldn't record access attempt: " + err);
     });

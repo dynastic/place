@@ -48,7 +48,7 @@ function APIRouter(app) {
     router.post('/place', function(req, res, next) {
          if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
              const legit = require('../util/legit');
-             if (!legit(req)) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
+             if (!legit.verify(req)) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
          }
         function paintWithUser(user) {
             if (!user.canPlace()) return res.status(429).json({ success: false, error: { message: "You cannot place yet.", code: "slow_down" } });
@@ -97,7 +97,9 @@ function APIRouter(app) {
         if(!req.query.x || !req.query.y) return res.status(400).json( { success: false, error: { message: "You did not specify the coordinates of the pixel to look up.", code: "bad_request" } });
         Pixel.find({xPos: req.query.x, yPos: req.query.y}).then(pixels => {
             if (pixels.length <= 0) return res.json( {success: true, pixel: null });
-            pixels[0].getInfo().then(info => res.json({ success: true, pixel: info })).catch(err => fail(err));
+            pixels[0].getInfo().then(info => {
+                res.json({ success: true, pixel: info })
+            }).catch(err => fail(err));
         }).catch(err => fail(err));
     });
 

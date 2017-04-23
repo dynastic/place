@@ -603,20 +603,21 @@ var place = {
         if(wasZoomedOut) this.zoomIntoPoint(x, y);
 
         if(this.selectedColour === null) {
+            function getUserStateText(userState) {
+                if(userState == "ban") return "Banned user";
+                return "Deleted account";
+            }
             this.zoomIntoPoint(x, y);
             return this.getPixel(x, y, (err, data) => {
                 if(err || !data.pixel) return;
                 let popover = $(this.pixelDataPopover);
                 if(this.zooming.zooming) this.shouldShowPopover = true;
                 else popover.fadeIn(250);
-                // TODO: account for deleted users
                 let hasUser = !!data.pixel.editor;
-                popover.find("#pixel-data-username").text(hasUser ? data.pixel.editor.username : "Deleted account");
+                if(typeof data.pixel.userError === 'undefined') data.pixel.userError = null;
+                popover.find("#pixel-data-username").text(hasUser ? data.pixel.editor.username : getUserStateText(data.pixel.userError));
                 if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account")
                 else popover.find("#pixel-data-username").addClass("deleted-account");
-                if (data.pixel.editor.admin) popover.find("#pixel-badge").show().text("Admin");
-                else if (data.pixel.editor.moderator) popover.find("#pixel-badge").show().text("Moderator");
-                else popover.find("#pixel-badge").hide();
                 popover.find("#pixel-data-time").text($.timeago(data.pixel.modified));
                 popover.find("#pixel-data-time").attr("datetime", data.pixel.modified);
                 popover.find("#pixel-data-time").attr("title", new Date(data.pixel.modified).toLocaleString());
@@ -631,8 +632,12 @@ var place = {
                     popover.find("#pixel-data-user-last-place").text($.timeago(data.pixel.editor.statistics.lastPlace));
                     popover.find("#pixel-data-user-last-place").attr("datetime", data.pixel.editor.statistics.lastPlace);
                     popover.find("#pixel-data-user-last-place").attr("title", new Date(data.pixel.editor.statistics.lastPlace).toLocaleString());
+                    if (data.pixel.editor.admin) popover.find("#pixel-badge").show().text("Admin");
+                    else if (data.pixel.editor.moderator) popover.find("#pixel-badge").show().text("Moderator");
+                    else popover.find("#pixel-badge").hide();
                 } else {
                     popover.find(".user-info").hide();
+                    popover.find("#pixel-badge").hide();
                 }
             });
         }

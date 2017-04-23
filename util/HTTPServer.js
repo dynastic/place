@@ -8,6 +8,8 @@ const morgan = require('morgan');
 const ejs = require("ejs");
 const User = require("../models/user");
 const session = require('cookie-session');
+const fs = require("fs");
+const path = require("path");
 
 function HTTPServer(app) {
     var server = express();
@@ -34,6 +36,12 @@ function HTTPServer(app) {
         secret: app.config.secret,
         name: "session"
     }));
+
+    if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
+        const legit = require('../util/legit');
+        server.use(legit.keyMiddleware);
+    }
+
     server.use(passport.initialize());
     server.use((req, res, next) => {
         var userID = null;
@@ -44,7 +52,7 @@ function HTTPServer(app) {
                     res.session.passport = null;
                     res.redirect("/signin?loginerror=1");
                 }
-                if(user) user.recordAccess(req.get("User-Agent"), req.get('X-Forwarded-For') || req.connection.remoteAddress);
+                if(user) user.recordAccess(req.get("User-Agent"), req.get('X-Forwarded-For') || req.connection.remoteAddress, (typeof req.key !== 'undefined' ? req.key : null));
                 req.user = user;
                 next();
             }).catch(err => {
