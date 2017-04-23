@@ -45,10 +45,6 @@ function PublicRouter(app) {
         return renderResponse("You're doing that too fast.");
     }
 
-    const handleStoreError = function (error) {
-        console.error(error);
-    }
-
     const signupRatelimit = new Ratelimit(ratelimitStore, {
         freeRetries: 3, // 3 signups per hour
         attachResetToRequest: false,
@@ -56,7 +52,7 @@ function PublicRouter(app) {
         minWait: 60*60*1000, // 1 hour
         maxWait: 60*60*1000, // 1 hour, 
         failCallback: ratelimitCallback,
-        handleStoreError: handleStoreError,
+        handleStoreError: function(error) { console.error(error); },
         proxyDepth: config.trustProxyDepth
     });
 
