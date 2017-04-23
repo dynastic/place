@@ -3,6 +3,7 @@
   if(typeof css === 'undefined') css = [];
   if(typeof pageTitle === 'undefined') pageTitle = null;
   if(typeof isAdmin === 'undefined') isAdmin = false;
+  var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
   var renderNavItem = function(name, itemPath, icon = null) {
       let isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
       let iconPrefix = icon ? `<i class="fa fa-${icon} fa-fw"></i>` : "";
@@ -38,7 +39,7 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
   </head>
-  <body class="fixed-navbar<% if(user) { %> signed-in<% } %>">
+  <body class="fixed-navbar<% if(user) { %> signed-in<% } %>" data-user-is-mod="<%= userMod %>" data-user-is-admin="<%= userAdmin %>">
     <nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %>">
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
