@@ -31,7 +31,10 @@ function PublicRouter(app) {
             user.setUserName(user.name, function(err) {
                 if(err) return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, error: err, username: req.body.name, user: {name: ""}});
                 req.login(user, function(err) {
-                    if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, { captcha: app.enableCaptcha, error: { message: "An unknown error occurred." }, username: req.body.username, user: {name: ""}});
+                    if (err) {
+                        app.reportError("Unknown user login error.");
+                        return responseFactory.sendRenderedResponse("public/signin", req, res, { captcha: app.enableCaptcha, error: { message: "An unknown error occurred." }, username: req.body.username, user: {name: ""}});
+                    }
                     res.redirect("/?signedin=1");
                 });
             });
@@ -53,7 +56,7 @@ function PublicRouter(app) {
         minWait: 60*60*1000, // 1 hour
         maxWait: 60*60*1000, // 1 hour, 
         failCallback: ratelimitCallback,
-        handleStoreError: error => console.error(error),
+        handleStoreError: error => app.reportError("Rate limit store error: " + error),
         proxyDepth: config.trustProxyDepth
     });
 

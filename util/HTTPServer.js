@@ -52,11 +52,11 @@ function HTTPServer(app) {
                     res.session.passport = null;
                     res.redirect("/signin?loginerror=1");
                 }
-                if(user) user.recordAccess(req.get("User-Agent"), req.get('X-Forwarded-For') || req.connection.remoteAddress, (typeof req.key !== 'undefined' ? req.key : null));
+                if(user) user.recordAccess(app, req.get("User-Agent"), req.get('X-Forwarded-For') || req.connection.remoteAddress, (typeof req.key !== 'undefined' ? req.key : null));
                 req.user = user;
                 next();
             }).catch(err => {
-                console.error("Error validating user session: " + err)
+                app.reportError("Error validating user session: " + err)
                 next();
             });
             return;

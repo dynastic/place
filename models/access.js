@@ -32,7 +32,7 @@ AccessSchema.methods.toInfo = function() {
     }
 }
 
-AccessSchema.statics.recordAccess = function(userID, userAgent, ipAddress, key) {
+AccessSchema.statics.recordAccess = function(app, userID, userAgent, ipAddress, key) {
     this.findOneAndUpdate({
         userID: userID,
         userAgent: userAgent,
@@ -45,7 +45,7 @@ AccessSchema.statics.recordAccess = function(userID, userAgent, ipAddress, key) 
         ipAddress: ipAddress,
         key: key
     }, { upsert: true }, (err, access) => {
-        if(err) console.error("Couldn't record access attempt: " + err);
+        if(err) app.reportError("Couldn't record access attempt: " + err);
     });
 }
 

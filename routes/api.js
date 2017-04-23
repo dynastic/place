@@ -29,7 +29,10 @@ function APIRouter(app) {
     router.get('/session', function(req, res, next) {
         if (req.user) return res.send({ success: true, user: req.user.toInfo() });
         passport.authenticate('jwt', { session: false }, function(err, user, info) {
-            if (!user && info.error) return res.status(500).json({ success: false, error: info.error });
+            if (!user && info.error) {
+                app.reportError("Session auth error: " + info.error);
+                return res.status(500).json({ success: false, error: info.error });
+            }
             if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
             return res.send({ success: true, user: user.toInfo() });
         })(req, res, next);
@@ -40,7 +43,7 @@ function APIRouter(app) {
         app.paintingHandler.getOutputImage().then((image) => {
             return res.set({ 'Content-Type': 'image/png' }).send(image);
         }).catch((err) => {
-            console.error("An error occurred while trying to serve the board image: " + err);
+            app.reportError("Error while serving board image: " + err);
             return res.status(500).json({ success: false, error: { message: "We could not retrieve the current board image.", code: "image_fail" } });
         });
     });
@@ -54,7 +57,7 @@ function APIRouter(app) {
             if (!user.canPlace()) return res.status(429).json({ success: false, error: { message: "You cannot place yet.", code: "slow_down" } });
             if (!req.body.x || !req.body.y || !req.body.colour) return res.status(400).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
             let rgb = app.paintingHandler.getColourRGB(req.body.colour);
-            if (!rgb) return res.status(500).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
+            if (!rgb) return res.status(400).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
             app.paintingHandler.doPaint(rgb, req.body.x, req.body.y, user).then((pixel) => {
                 return User.findById(user.id).then(user => {
                     let seconds = user.getPlaceSecondsRemaining();
@@ -65,7 +68,10 @@ function APIRouter(app) {
         }
         if (req.user) return paintWithUser(req.user);
         passport.authenticate('jwt', { session: false }, function(err, user, info) {
-            if (!user && info.error) return res.status(500).json({ success: false, error: info.error });
+            if (!user && info.error) {
+                app.reportError("Session auth error: " + info.error);
+                return res.status(500).json({ success: false, error: info.error });
+            }
             if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
             return paintWithUser(user);
         })(req, res, next);
@@ -91,7 +97,7 @@ function APIRouter(app) {
 
     router.get('/pixel', function(req, res, next) {
         function fail(err) {
-            console.error("Pixel data retrieve error: " + err);
+            app.reportError("Pixel data retrieve error: " + err);
             return res.status(500).json({ success: false, error: { message: "An error occurred while trying to look up information about that pixel." } })
         }
         if(!req.query.x || !req.query.y) return res.status(400).json( { success: false, error: { message: "You did not specify the coordinates of the pixel to look up.", code: "bad_request" } });
@@ -156,10 +162,14 @@ function APIRouter(app) {
                 fields: ['name']
             }, sort: sort
         }, (err, table) => {
-            User.find().count().then(c => {
-                if(err) return res.status(500).json({success: false});
-                res.json(Object.assign({success: true, recordsTotal: c}, table));
-            }).catch(err => res.status(500).json({success: false}));
+            if(err) {
+                app.reportError("Error trying to receive admin user table data.");
+                return res.status(500).json({success: false});
+            }
+            User.find().count().then(c => res.json(Object.assign({success: true, recordsTotal: c}, table))).catch(err => {
+                app.reportError("Error trying to receive user count for admin user table.");
+                res.status(500).json({success: false});
+            });
         });
     });
 
@@ -168,8 +178,14 @@ function APIRouter(app) {
         if(req.query.id == req.user.id) return res.status(400).json({success: false, error: {message: "You may not change your own moderator status.", code: "cant_modify_self"}});
         User.findById(req.query.id).then(user => {
             user.moderator = !user.moderator;
-            user.save().then(user => res.json({success: true, banned: user.banned})).catch(err => res.status(500).json({success: false}));
-        }).catch(err => res.status(500).json({success: false}));
+            user.save().then(user => res.json({success: true, banned: user.banned})).catch(err => {
+                app.reportError("Error trying to save moderator status on user.");
+                res.status(500).json({success: false});
+            });
+        }).catch(err => {
+            app.reportError("Error trying to get user to set moderator status on.");
+            res.status(500).json({success: false})
+        });
     });
 
     // Mod APIs
@@ -179,9 +195,30 @@ function APIRouter(app) {
         if(req.query.id == req.user.id) return res.status(400).json({success: false, error: {message: "You may not ban yourself.", code: "cant_modify_self"}});
         User.findById(req.query.id).then(user => {
             user.banned = !user.banned;
-            user.save().then(user => res.json({success: true, banned: user.banned})).catch(err => res.status(500).json({success: false}));
-        }).catch(err => res.status(500).json({success: false}));
+            user.save().then(user => res.json({success: true, banned: user.banned})).catch(err => {
+                app.reportError("Error trying to save banned status on user.");
+                res.status(500).json({success: false})
+            });
+        }).catch(err => {
+            app.reportError("Error trying to get user to set banned status on.");
+            res.status(500).json({success: false});
+        });
     });
+
+    // Debug APIs
+
+    if(config.debug) {
+
+        router.get("/trigger-error", function(req, res, next) {
+            app.reportError("Oh no! An error has happened!");
+            res.status(500).json({ success: false, error: { message: "The server done fucked up.", code: "debug" } });
+        });
+        router.get("/trigger-error-report", function(req, res, next) {
+            app.errorTracker.handleErrorCheckingInterval();
+            res.json({ success: true });
+        });
+
+    }
 
     return router;
 }
