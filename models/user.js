@@ -117,8 +117,8 @@ UserSchema.methods.setUserName = function(username, callback, usernameSet) {
         return callback();
     });
 }
-UserSchema.methods.recordAccess = function(userAgent, ipAddress, key) {
-    return Access.recordAccess(this.id, userAgent, ipAddress, key)
+UserSchema.methods.recordAccess = function(app, userAgent, ipAddress, key) {
+    return Access.recordAccess(app, this.id, userAgent, ipAddress, key)
 }
 
 UserSchema.statics.register = function(username, password, callback, OAuthID, OAuthName) {
