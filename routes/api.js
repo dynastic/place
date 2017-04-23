@@ -163,6 +163,26 @@ function APIRouter(app) {
         });
     });
 
+    router.get("/admin/toggle_mod", app.adminMiddleware, function(req, res, next) {
+        if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
+        if(req.query.id == req.user.id) return res.status(400).json({success: false, error: {message: "You may not change your own moderator status.", code: "cant_modify_self"}});
+        User.findById(req.query.id).then(user => {
+            user.moderator = !user.moderator;
+            user.save().then(user => res.json({success: true, banned: user.banned})).catch(err => res.status(500).json({success: false}));
+        }).catch(err => res.status(500).json({success: false}));
+    });
+
+    // Mod APIs
+
+    router.get("/mod/toggle_ban", app.modMiddleware, function(req, res, next) {
+        if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
+        if(req.query.id == req.user.id) return res.status(400).json({success: false, error: {message: "You may not ban yourself.", code: "cant_modify_self"}});
+        User.findById(req.query.id).then(user => {
+            user.banned = !user.banned;
+            user.save().then(user => res.json({success: true, banned: user.banned})).catch(err => res.status(500).json({success: false}));
+        }).catch(err => res.status(500).json({success: false}));
+    });
+
     return router;
 }
 
