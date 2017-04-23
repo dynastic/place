@@ -16,7 +16,10 @@ $(document).ready(function() {
             'targets': 4,
             'searchable': false,
             'orderable': false,
-            'render': (data, type, full, meta) => 'actions here'
+            'render': (data, type, full, meta) => `<div class="actions-ctn" data-user-id="${full._id}">
+                <a href="/admin/users/similar/${full._id}" class="btn btn-warning disabled">View Similar</a>
+                ${actions.ban.buttonText(full)}
+            </div>`
         }],
         select: {
             style: 'os',
