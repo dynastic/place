@@ -100,14 +100,11 @@ function PublicRouter(app) {
         function renderResponse(errorMsg) {
             return responseFactory.sendRenderedResponse("public/signup", req, res, { ccaptcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
         }
-        console.log("SUIGNUP POST!!!");
         function doSignup() {
-            console.log("TEST");
             User.register(req.body.username, req.body.password, function(user, error) {
                 if(!user) return renderResponse(error.message);
                 req.login(user, function(err) {
                     if (err) return renderResponse(null);
-                    console.log("DONE");
                     return res.redirect("/?signedup=1");
                 });
             });
