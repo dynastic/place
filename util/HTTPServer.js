@@ -45,12 +45,12 @@ function HTTPServer(app) {
     server.use(passport.initialize());
     server.use((req, res, next) => {
         var userID = null;
-        if(req.session) if(req.session.passport) userID = req.session.passport.user;
+        if(req.session && req.session.passport) userID = req.session.passport.user;
         if(userID) {
             User.findById(userID).then(user => {
                 if(user && user.loginError()) {
-                    res.session.passport = null;
-                    res.redirect("/signin?loginerror=1");
+                    req.session.passport = null;
+                    return res.redirect("/signin?loginerror=1");
                 }
                 if(user) user.recordAccess(app, req.get("User-Agent"), req.get('X-Forwarded-For') || req.connection.remoteAddress, (typeof req.key !== 'undefined' ? req.key : null));
                 req.user = user;
