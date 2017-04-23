@@ -10,15 +10,15 @@ function AdminRouter(app) {
 
     let router = express.Router()
 
-    router.get('/', app.adminMiddleware, function(req, res) {
+    router.get('/', app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/dashboard", req, res);
     });
 
-    router.get('/actions', app.adminMiddleware, function(req, res) {
+    router.get('/actions', app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
-    router.get('/stats', app.adminMiddleware, function(req, res) {
+    router.get('/stats', app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
@@ -30,11 +30,11 @@ function AdminRouter(app) {
         return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
-    router.get('/users', app.adminMiddleware, function(req, res) {
+    router.get('/users', app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/users", req, res);
     });
 
-    router.get('/pixels', app.adminMiddleware, function(req, res) {
+    router.get('/pixels', app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 

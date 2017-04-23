@@ -1,20 +1,36 @@
 var actions = {
     ban: {
         url: "mod/toggle_ban",
+        btnStyle: "danger",
         callback: function(data, elem) {
-            if(data.banned) elem.text("Unban");
-            else elem.text("Ban");
+            elem.text(`${data.banned ? "Unban" : "Ban"}`);
         },
         buttonText: function(data) {
-            return `<a href="javascript:void(0)" class="btn btn-danger user-action-btn" data-user-action="ban">${data.banned ? "Unban" : "Ban"}</a>`
+            return data.banned ? "Unban" : "Ban";
+        }
+    },
+    mod: {
+        url: "admin/toggle_mod",
+        btnStyle: "info",
+        adminOnly: true,
+        callback: function(data, elem) {
+            console.log(data);
+            elem.text(`${data.moderator ? "Remove" : "Give"} Moderator`);
+        },
+        buttonText: function(data) {
+            return `${data.moderator ? "Remove" : "Give"} Moderator`
         }
     }
+}
+var renderAction = function(actionName, data) {
+    var action = actions[actionName];
+    return `<a href="javascript:void(0)" class="btn btn-${action.btnStyle} user-action-btn" data-admin-only=${action.adminOnly === true} data-user-action="${actionName}">${action.buttonText(data)}</a>`;
 }
 
 $("body").on("click", ".user-action-btn", function() {
     function handleError(data) {
         var error = "An unknown error occurred."
-        if(typeof data.error !== 'undefined' && data.error.message) error = data.error.message;
+        if(data && typeof data.error !== 'undefined' && data.error.message) error = data.error.message;
         alert("Couldn't perform action on user: " + error);
     }
     var userID = $(this).parent().data("user-id");

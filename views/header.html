@@ -65,7 +65,7 @@
               </ul>
             </li>
             <%- renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money"); %>
-            <% if(user && user.admin) { %><%- renderNavItem("Admin", "/admin", "gavel"); %><% } %>
+            <% if(user && userMod) { %><%- renderNavItem(userAdmin ? "Admin" : "Moderator", "/admin", "gavel"); %><% } %>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <% if(user) { %>

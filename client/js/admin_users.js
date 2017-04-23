@@ -18,7 +18,8 @@ $(document).ready(function() {
             'orderable': false,
             'render': (data, type, full, meta) => `<div class="actions-ctn" data-user-id="${full._id}">
                 <a href="/admin/users/similar/${full._id}" class="btn btn-warning disabled">View Similar</a>
-                ${actions.ban.buttonText(full)}
+                ${renderAction("ban", full)}
+                ${renderAction("mod", full)}
             </div>`
         }],
         select: {
