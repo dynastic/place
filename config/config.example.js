@@ -8,6 +8,12 @@ module.exports = {
     'googleAnalyticsTrackingID': "", // UA-XXXXXXXX-XX
     'host': 'http://place.dynastic.co', // the publicly accessible URL of the site
     'placeTimeout': 300,
+    'cachet': {
+        // Setup reporting error count as a metric to Cachet
+        'apiKey': "",
+        'site': "",
+        'metricID': 0
+    },
     'recaptcha': { // Leave blank to disable
         'siteKey': "",
         'secretKey': ""

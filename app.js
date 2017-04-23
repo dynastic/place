@@ -11,6 +11,7 @@ const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
 const del = require('del');
 const pump = require('pump');
+const ErrorTracker = require("./util/ErrorTracker");
 
 let paths = {
     scripts: {
@@ -23,13 +24,21 @@ var app = {};
 app.config = config;
 app.temporaryUserInfo = TemporaryUserInfo;
 
+// Setup error tracking
+app.errorTracker = ErrorTracker(app);
+app.reportError = app.errorTracker.reportError;
+process.on('uncaughtException', function(err) {
+    // Catch all uncaught exceptions and report them
+    app.reportError(err);
+});
+
 // Get image handler
 app.paintingHandler = paintingHandler(app);
 console.log("Loading image from the database...")
 app.paintingHandler.loadImageFromDatabase().then((image) => {
     console.log("Successfully loaded image from database.");
 }).catch(err => {
-    console.error("An error occurred while loading the image from the database.\nError: " + err);
+    app.reportError("Error while loading the image from database: " + err);
 })
 
 app.responseFactory = ResponseFactory(app);
@@ -66,7 +75,7 @@ mongoose.connect(config.database);
 gulp.task('clean', () => del(['public/js/build']));
 
 function swallowError(error) {
-    console.error("An error occurred while trying to process JavaScript: " + error);
+    app.reportError("Error while processing JavaScript: " + error);
     this.emit("end");
 }
 
