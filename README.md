@@ -1,48 +1,51 @@
-![DynasticDevelopment](https://github.com/dynasticdevelop/assets/raw/master/images/brand.png)
+![Dynastic Development](https://github.com/dynasticdevelop/assets/raw/master/images/brand.png)
 
 # Place 2.0
 
-An opensource place alternative, made by [Dynastic Development](https://dynastic.co). Join our [discord](https://discord.gg/CgC8FTg).
+An open-source place alternative, made by [Dynastic Development](https://dynastic.co). Want to chat? Join our [Discord](https://discord.gg/CgC8FTg).
 
 ## Getting started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will help you get a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
 
-* mongodb
-* Node 7 or **higher**
+* MongoDB
+* Node 7.6.0 or **higher**
 * An internet connection
 
 ### Installing
 
-* Rename config/config.example.js to config/config.js
+* Copy config/config.example.js to config/config.js
+* Configure your Place server as you see fit by modifying the values
     * Set a strong secret in the secret field!
-* Run `npm i` to install dependencies
+* Run `npm i` to install the dependencies
 * Finally, run `node app.js`
 
 ## Deployment
 
-Please only host your own copy if you abide by the [license](https://github.com/dynasticdevelop/place/blob/master/LICENSE). **Failure to comply will result in legal action.**
+Please only host your own copy if you are willing to abide by the clearly defined [license](https://github.com/dynasticdevelop/place/blob/master/LICENSE). **Failure to comply with the listed terms will result in legal action.**
 
-When deploying, it is reccomended you use a daemon to keep the server alive. We use `pm2`, however, you could use something like `forever`.
+When deploying, it is recommended you use a daemon to keep the server alive. We use `pm2`, but any daemon utility, such as `forever`, should work.
 
 ### Deploying with pm2
 
-* You'll need to install `pm2` **globally**, using `npm i -g pm2`
-* To start place, it's as simple as `pm2 start app.js --name=place`
+1. Get [pm2](http://pm2.keymetrics.io) installed **globally** by running `npm i -g pm2`.
+2. Once pm2 is installed, starting Place is as simple as running `pm2 start app.js --name=Place`.
 
-You can manage your pm2 instances using `pm2 show place`.
+You can manage your pm2 instances using `pm2 show Place`.
+
+You can instruct pm2 to save the currently running pm2 instances and start them at boot with `pm2 startup`.
 
 ### Other notes
 
-It's reccomended you use a reverse proxy, rather than running place direcly on port 80. Below is our nginx configuration.
+It's recommended that you use a reverse proxy rather than running Place direcly on port 80. Below is our nginx configuration.
 ```nginx
 server {
         listen 80;
         listen [::]:80;
 
-        server_name place.dynastic.co direct-place.dynastic.co;
+        server_name place.dynastic.co;
 
         include /etc/nginx/global/*;
 
@@ -67,7 +70,7 @@ server {
 
 ## Contributing 
 
-Please make a [pull request](/https://github.com/dynasticdevelop/place/pulls). Before making a pull request, come and chat to us on [discord](https://discord.gg/CgC8FTg), in #contributors.
+Please make a [pull request](/https://github.com/dynasticdevelop/place/pulls). Before making a pull request, come and chat woth us on [Discord](https://discord.gg/CgC8FTg) in #contributors.
 
 ### Roadmap
 
@@ -75,10 +78,10 @@ Check our currently open issues for an idea on what to work on!
 
 ## Authors
 
-* [AppleBetas](https://applebetas.co) - Core developer
-* [nullpixel](https://nullpixel.uk) - Core developer
+* [AppleBetas](https://applebetas.co) - Core Developer
+* [nullpixel](https://nullpixel.uk) - Core Developer
 
-See also the list of [contributors](https://github.com/dynasticdevelop/place/contributors) who participated in this project, and helped make it as great as it is!
+Also see the list of [contributors](https://www.github.com/dynasticdevelop/place/contributors) who participated in this project and helped to make it as great as it is!
 
 ## License
 
@@ -86,5 +89,6 @@ Place 2.0 is licensed under the [APGL-3.0 license](https://github.com/dynasticde
 
 ## Acknowledgments
 
-* Thanks reddit for /r/place, and the original place
-* Thanks to the many subreddits who we work with to make cool art!
+Thank you to:
+* Reddit for the original Place
+* The many subreddits and groups who we work with to make cool art!
