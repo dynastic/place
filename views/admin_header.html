@@ -1,5 +1,7 @@
 <%
 if(typeof pageTitle === 'undefined') pageTitle = null;
+if(typeof user === 'undefined') user = null;
+var userAdmin = user ? user.admin : false;
 var renderNavItem = function(name, itemPath) {
     let isCurrentPage = itemPath == path;
     return `<li ${isCurrentPage ? " class=\"active\"" : ""}>` +
@@ -18,8 +20,8 @@ var renderNavItem = function(name, itemPath) {
             <ul class="nav nav-sidebar">
                 <%- renderNavItem("Dashboard", "/admin/"); %>
                 <%- renderNavItem("Recent Actions", "/admin/actions"); %>
-                <%- renderNavItem("Moderator Log", "/admin/log"); %>
-                <%- renderNavItem("Pending Mod Actions", "/admin/pending"); %>
+                <% if(userAdmin) { %><%- renderNavItem("Moderator Log", "/admin/log"); %>
+                <%- renderNavItem("Pending Mod Actions", "/admin/pending"); %><% } %>
             </ul>
             <ul class="nav nav-sidebar">
                 <%- renderNavItem("Users", "/admin/users"); %>

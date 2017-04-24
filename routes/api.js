@@ -178,7 +178,7 @@ function APIRouter(app) {
         if(req.query.id == req.user.id) return res.status(400).json({success: false, error: {message: "You may not change your own moderator status.", code: "cant_modify_self"}});
         User.findById(req.query.id).then(user => {
             user.moderator = !user.moderator;
-            user.save().then(user => res.json({success: true, banned: user.banned})).catch(err => {
+            user.save().then(user => res.json({success: true, moderator: user.moderator})).catch(err => {
                 app.reportError("Error trying to save moderator status on user.");
                 res.status(500).json({success: false});
             });
