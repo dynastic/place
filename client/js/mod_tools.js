@@ -14,7 +14,6 @@ var actions = {
         btnStyle: "info",
         adminOnly: true,
         callback: function(data, elem) {
-            console.log(data);
             elem.text(`${data.moderator ? "Remove" : "Give"} Moderator`);
         },
         buttonText: function(data) {
