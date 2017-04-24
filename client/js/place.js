@@ -506,6 +506,7 @@ var place = {
     doTimer: function(data) {
         this.changePlaceTimerVisibility(true);
         if(data.canPlace) return this.changePlaceTimerVisibility(false);
+        this.deselectColour();
         this.unlockTime = (new Date().getTime() / 1000) + data.seconds;
         this.secondTimer = setInterval(() => this.checkSecondsTimer(), 1000);
         this.checkSecondsTimer();
