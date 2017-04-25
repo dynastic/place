@@ -2,18 +2,18 @@
     css: ['https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css']
 }) -%>
 <% var getUserRow = function(user, relationString) { console.log(user);
-    return '<div class="user">' + 
-        '<div class="user-info">' +
-            `<p class="username">${user.name}</p>` +
-            `<span class="relation">${relationString}</span>` + 
-            `<span class="signup">Signed up <strong><time class="timeago" title="${user.creationDate.toLocaleString()}" datetime="${user.creationDate.toISOString()}">${user.creationDate.toLocaleString()}</time></strong>.</span>` + 
-            (user.lastPlace ? `<span class="last-place">Last placed <strong><time class="timeago" title="${user.lastPlace.toLocaleString()}" datetime="${user.lastPlace.toISOString()}">${user.lastPlace.toLocaleString()}</time></strong>.</span>` : "") + 
-            `<span class="placed-tiles">Placed <strong>${user.placeCount} tile${user.placeCount == 1 ? "" : "s"}</strong>.</span>` + 
-        '</div>' +
-        '<div class="user-actions">' +
-            'ACTIONS' + 
-        '</div>' +
-    '</div>';
+    return `<div class="user"> 
+        <div class="user-info">
+            <p class="username">${user.name}</p>
+            <span class="relation">${relationString}</span>
+            <span class="signup">Signed up <strong><time class="timeago" title="${user.creationDate.toLocaleString()}" datetime="${user.creationDate.toISOString()}">${user.creationDate.toLocaleString()}</time></strong>.</span>
+            ${user.lastPlace ? `<span class="last-place">Last placed <strong><time class="timeago" title="${user.lastPlace.toLocaleString()}" datetime="${user.lastPlace.toISOString()}">${user.lastPlace.toLocaleString()}</time></strong>.</span>` : ""}
+            <span class="placed-tiles">Placed <strong>${user.placeCount} tile${user.placeCount == 1 ? "" : "s"}</strong>.</span>
+        </div>
+        <div class="user-actions">
+            ACTIONS
+        </div>
+    </div>`;
 } %>
 <div class="page-header">
     <h1>Similar Accounts</h1>
