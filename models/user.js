@@ -176,6 +176,14 @@ UserSchema.methods.canPlace = function() {
     return this.getPlaceSecondsRemaining() <= 0;
 }
 
+UserSchema.methods.findSimilarIPUsers = function() {
+    return new Promise((resolve, reject) => {
+        Access.findSimilarIPUserIDs(this).then(userIDs => {
+            this.model('User').find({ _id: { $in: userIDs } }).then(resolve).catch(reject);
+        }).catch(reject);
+    });
+}
+
 UserSchema.plugin(dataTables, {
     totalKey: 'recordsFiltered',
 });
