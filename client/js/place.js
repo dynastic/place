@@ -655,6 +655,7 @@ var place = {
                 } else {
                     popover.find(".user-info").hide();
                     popover.find("#pixel-badge").hide();
+                    popover.find("#mod-user-action-ctn").html("");
                 }
             });
         }
