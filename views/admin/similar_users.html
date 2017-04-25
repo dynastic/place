@@ -1,7 +1,7 @@
 <%- include('../admin_header.html', {
     css: ['https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css']
 }) -%>
-<% var getUserRow = function(user, relationString) { console.log(user);
+<% var getUserRow = function(user, relationString) {
     return `<div class="user"> 
         <div class="user-info">
             <p class="username">${user.name}</p>
