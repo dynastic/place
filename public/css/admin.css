@@ -202,3 +202,7 @@ table.filters {
 .user .user-actions {
     float: right;
 }
+
+.page-header > h1 {
+  margin-top: 0;
+}
