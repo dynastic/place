@@ -18,7 +18,7 @@ $(document).ready(function() {
         $(getUserRow(response.target, "Original User")).appendTo("#target-ctn");
         $(`<h4>${response.identifiedAccounts.length} Matching User${response.identifiedAccounts.length == 1 ? "" : "s"}</h4>`).appendTo("#similar-ctn > .heading");
         response.identifiedAccounts.forEach(identification => {
-            var elem = $(getUserRow(identification.user, `Same ${identification.reasons.map((item, i, arr) => item + (i == arr.length - 1 ? "" : i == arr.length - 2 ? " and " : ", ")).join("")}`)).appendTo("#similar");
+            $(getUserRow(identification.user, `Same ${identification.reasons.map((item, i, arr) => item + (i == arr.length - 1 ? "" : i == arr.length - 2 ? " and " : ", ")).join("")}`)).appendTo("#similar");
         });
         $(".timeago").timeago();
     }).fail(function() {
