@@ -17,7 +17,7 @@ $(document).ready(function() {
             'searchable': false,
             'orderable': false,
             'render': (data, type, full, meta) => `<div class="actions-ctn" data-user-id="${full._id}">
-                <a href="/admin/users/similar/${full._id}" class="btn btn-warning disabled">View Similar</a>
+                <a href="/admin/users/similar/${full._id}" class="btn btn-warning">View Similar</a>
                 ${renderAction("ban", full)}
                 ${renderAction("mod", full)}
             </div>`
