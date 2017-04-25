@@ -315,7 +315,6 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 .pixel-data > .summary {
-    border-bottom: 1px solid #eaeaea;
     padding: 14px 24px;
 }
 
@@ -358,17 +357,19 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 .pixel-data > .user-info {
-    padding: 14px 24px;
-    background: #FAFAF7;
     border-radius: 0 0 8px 8px;
+}
+
+.pixel-data > .user-info, .pixel-data > #mod-user-action-ctn > .actions-ctn  {
+    padding: 14px 24px;
+    border-top: 1px solid #eaeaea;
+    background: #FAFAF7;
+}
+
+.pixel-data > #mod-user-action-ctn > .actions-ctn {
+    text-align: center;
 }
 
 .pixel-data > .user-info > .field {
     width: 100%;
-}
-
-#mod-user-action-ctn > .actions-ctn {
-    padding: 10px;
-    text-align: center;
-    border-top: 1px solid #eaeaea;
 }

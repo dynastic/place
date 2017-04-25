@@ -24,6 +24,7 @@
                 </div>
             </div>
         </div>
+        <% if(user && (user.moderator || user.admin)) { %><div id="mod-user-action-ctn"></div><% } %>
         <div class="user-info">
             <div class="field">
                 <span class="title">Total tiles placed</span>
@@ -38,6 +39,5 @@
                 <span class="value timeago" id="pixel-data-user-last-place"></span>
             </div>
         </div>
-        <% if(user && (user.moderator || user.admin)) { %><div id="mod-user-action-ctn"></div><% } %>
     </div>
 </div>
