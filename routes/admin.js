@@ -36,10 +36,14 @@ function AdminRouter(app) {
     });
 
     router.get('/users/similar/:userID', app.modMiddleware, function(req, res) {
-        if(!req.params.userID || req.params.userID == "") return res.redirect("/admin/users");
+        function renderError(msg = "An unknown error occurred.") {
+            return responseFactory.sendRenderedResponse("admin/similar_users_error", req, res, { errorMsg: msg });
+        }
+        if(!req.params.userID || req.params.userID == "") return renderError("You did not specify a user ID to look up.");
         User.findById(req.params.userID).then(user => {
+            if(!req.user.canPerformActionsOnUser(user)) return renderError("You may not perform actions on this user.");
             return responseFactory.sendRenderedResponse("admin/similar_users", req, res, { target: user });
-        }).catch(err => res.redirect("/admin/users"));
+        }).catch(err => renderError("Could not find a user by that ID."));
     });
 
     router.get('/pixels', app.modMiddleware, function(req, res) {
