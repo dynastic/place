@@ -25,7 +25,7 @@ $(document).ready(function() {
         serverParams: data => data.bChunkSearch = true
     }).columns().every( function () {
         var that = this;
-        $('input[type=search]', this.footer() ).on( 'keyup change', function () {
+        $('input[type=search]', this.footer() ).attr("spellcheck", "false").attr("autocomplete", "off").attr("autocorrect", "off").attr("autocapitalize", "off").on( 'keyup change', function () {
             if (that.search() !== this.value) {
                 that.search(this.value, true).draw();
             }
