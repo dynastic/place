@@ -7,7 +7,7 @@ $(document).ready(function() {
                 <span class="relation">${relationString}</span>
                 <span class="signup">Signed up <strong><time class="timeago" title="${new Date(user.creationDate).toLocaleString()}" datetime="${new Date(user.creationDate).toISOString()}">${new Date(user.creationDate).toLocaleString()}</time></strong>.</span>
                 ${user.lastPlace ? `<span class="last-place">Last placed <strong><time class="timeago" title="${new Date(user.lastPlace).toLocaleString()}" datetime="${new Date(user.lastPlace).toISOString()}">${new Date(user.lastPlace).toLocaleString()}</time></strong>.</span>` : ""}
-                <span class="placed-tiles">Placed <strong>${user.placeCount} tile${user.placeCount == 1 ? "" : "s"}</strong>.</span>
+                <span class="placed-tiles">Placed <strong>${user.placeCount.toLocaleString()} tile${user.placeCount == 1 ? "" : "s"}</strong>.</span>
             </div>
             <div class="user-actions">${renderUserActions(user)}</div>
         </div>`;
