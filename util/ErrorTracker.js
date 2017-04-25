@@ -26,13 +26,10 @@ function ErrorTracker(app) {
                     errors = 0;
                     console.log(`Published error data (count: ${errors}) for last checking interval.`);
                 }).catch((err) => console.error("Couldn't publish errors to cachet: " + err));
-            } else {
-                console.log(`Would report an error count of ${errors} to Cachet, but it is not setup.`);
-                errors = 0;
             }
         }
     }
-    setInterval(tracker.handleErrorCheckingInterval, 1000 * 60);
+    if(cachet) setInterval(tracker.handleErrorCheckingInterval, 1000 * 60);
     return tracker;
 }
 
