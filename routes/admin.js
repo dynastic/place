@@ -38,7 +38,7 @@ function AdminRouter(app) {
     router.get('/users/similar/:userID', app.modMiddleware, function(req, res) {
         if(!req.params.userID || req.params.userID == "") return res.redirect("/admin/users");
         User.findById(req.params.userID).then(user => {
-            return responseFactory.sendRenderedResponse("admin/similar_users", req, res, { target: user, identifiedAccounts: [] });
+            return responseFactory.sendRenderedResponse("admin/similar_users", req, res, { target: user });
         }).catch(err => res.redirect("/admin/users"));
     });
 

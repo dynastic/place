@@ -149,6 +149,7 @@ body {
   margin-right: 5px;
 }
 
+/* User Search Filter */
 table.filters select, table.filters .bootstrap-select, table.filters input {
   width: 220px;
   margin-right: 10px;
@@ -162,4 +163,42 @@ table.filters .remove {
 
 table.filters {
   margin-bottom: 0;
+}
+
+/* User Display Block */
+.user {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 5px 0;
+}
+.user.user-template {
+  display: none;
+}
+.user .username {
+    font-weight: 300;
+    font-size: 21px;
+    margin-bottom: 2px;
+}
+.user span {
+    display: block;
+}
+.user::after {
+    clear: both;
+    content: "";
+    display: block;
+}
+.user .relation {
+    color: #777;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    margin-top: -1px;
+}
+.user .user-info {
+    float: left;
+}
+.user .user-actions {
+    float: right;
 }

@@ -211,7 +211,7 @@ function APIRouter(app) {
             // Find similar IP accesses
             user.findSimilarIPUsers().then(users => {
                 var identifiedAccounts = users.map(user => { return { user: user, reasons: ["ip"] } });
-                return res.json({ success: true, identifiedAccounts: identifiedAccounts })
+                return res.json({ success: true, target: user, identifiedAccounts: identifiedAccounts })
             }).catch(err => {
                 app.reportError("Error finding similar accounts: " + err);
                 res.status(500).json({ success: false });
