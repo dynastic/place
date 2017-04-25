@@ -205,10 +205,23 @@ function APIRouter(app) {
         });
     });
 
+    router.get('/mod/similar_users/:userID', app.modMiddleware, function(req, res) {
+        if(!req.params.userID || req.params.userID == "") return res.redirect("/admin/users");
+        User.findById(req.params.userID).then(user => {
+            // Find similar IP accesses
+            user.findSimilarIPUsers().then(users => {
+                var identifiedAccounts = users.map(user => { return { user: user, reasons: ["ip"] } });
+                return res.json({ success: true, identifiedAccounts: identifiedAccounts })
+            }).catch(err => {
+                app.reportError("Error finding similar accounts: " + err);
+                res.status(500).json({ success: false });
+            });
+        }).catch(err => res.status(400).json({ success: false }));
+    });
+
     // Debug APIs
 
     if(config.debug) {
-
         router.get("/trigger-error", function(req, res, next) {
             app.reportError("Oh no! An error has happened!");
             res.status(500).json({ success: false, error: { message: "The server done fucked up.", code: "debug" } });
@@ -217,7 +230,6 @@ function APIRouter(app) {
             app.errorTracker.handleErrorCheckingInterval();
             res.json({ success: true });
         });
-
     }
 
     return router;
