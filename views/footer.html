@@ -1,6 +1,6 @@
 <% if(typeof isAdmin === 'undefined') isAdmin = false;
 if(typeof user === 'undefined') user = null;
-if(typeof js === 'undefined') js = [];
+if(typeof js === 'undefined' || !js) js = [];
 var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
 if(userMod) js.unshift("/js/build/mod_tools.js");
   %>

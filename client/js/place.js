@@ -651,6 +651,7 @@ var place = {
                     if (data.pixel.editor.admin) popover.find("#pixel-badge").show().text("Admin");
                     else if (data.pixel.editor.moderator) popover.find("#pixel-badge").show().text("Moderator");
                     else popover.find("#pixel-badge").hide();
+                    if(popover.find("#mod-user-action-ctn")[0]) popover.find("#mod-user-action-ctn").html(renderUserActions(data.pixel.editor));
                 } else {
                     popover.find(".user-info").hide();
                     popover.find("#pixel-badge").hide();
