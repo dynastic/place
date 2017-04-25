@@ -39,7 +39,7 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
   </head>
-  <body class="fixed-navbar<% if(user) { %> signed-in<% } %>" data-user-is-mod="<%= userMod %>" data-user-is-admin="<%= userAdmin %>">
+  <body class="fixed-navbar<% if(user) { %> signed-in<% } %>" data-user-is-mod="<%= userMod %>" data-user-is-admin="<%= userAdmin %>" data-user-id="<%= user ? user._id : ""; %>">
     <nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %>">
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->

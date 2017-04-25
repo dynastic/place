@@ -177,6 +177,7 @@ function APIRouter(app) {
         if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
         if(req.query.id == req.user.id) return res.status(400).json({success: false, error: {message: "You may not change your own moderator status.", code: "cant_modify_self"}});
         User.findById(req.query.id).then(user => {
+            if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.moderator = !user.moderator;
             user.save().then(user => res.json({success: true, moderator: user.moderator})).catch(err => {
                 app.reportError("Error trying to save moderator status on user.");
@@ -194,6 +195,7 @@ function APIRouter(app) {
         if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
         if(req.query.id == req.user.id) return res.status(400).json({success: false, error: {message: "You may not ban yourself.", code: "cant_modify_self"}});
         User.findById(req.query.id).then(user => {
+            if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.banned = !user.banned;
             user.save().then(user => res.json({success: true, banned: user.banned})).catch(err => {
                 app.reportError("Error trying to save banned status on user.");
@@ -205,10 +207,23 @@ function APIRouter(app) {
         });
     });
 
+    router.get('/mod/similar_users/:userID', app.modMiddleware, function(req, res) {
+        if(!req.params.userID || req.params.userID == "") return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
+        User.findById(req.params.userID).then(user => {
+            if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
+            user.findSimilarIPUsers().then(users => {
+                var identifiedAccounts = users.map(user => { return { user: user, reasons: ["ip"] } });
+                return res.json({ success: true, target: user, identifiedAccounts: identifiedAccounts })
+            }).catch(err => {
+                app.reportError("Error finding similar accounts: " + err);
+                res.status(500).json({ success: false });
+            });
+        }).catch(err => res.status(400).json({success: false, error: {message: "No user with that ID exists.", code: "user_doesnt_exist"}}));
+    });
+
     // Debug APIs
 
     if(config.debug) {
-
         router.get("/trigger-error", function(req, res, next) {
             app.reportError("Oh no! An error has happened!");
             res.status(500).json({ success: false, error: { message: "The server done fucked up.", code: "debug" } });
@@ -217,7 +232,6 @@ function APIRouter(app) {
             app.errorTracker.handleErrorCheckingInterval();
             res.json({ success: true });
         });
-
     }
 
     return router;

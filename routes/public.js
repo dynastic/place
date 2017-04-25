@@ -112,7 +112,6 @@ function PublicRouter(app) {
         if (req.user) return res.redirect("/");
         if (!req.body.username || !req.body.password || !req.body.passwordverify) return renderResponse("Please fill out all the fields.")
         if (req.body.password != req.body.passwordverify) return renderResponse("The passwords you entered did not match.");
-        console.log("MADE IT TO SIGN UP PART");
         if(app.enableCaptcha) {
             app.recaptcha.verify(req, error => {
                 if(error) return renderResponse("Please fill in the captcha properly.");

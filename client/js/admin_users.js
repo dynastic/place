@@ -16,11 +16,7 @@ $(document).ready(function() {
             'targets': 4,
             'searchable': false,
             'orderable': false,
-            'render': (data, type, full, meta) => `<div class="actions-ctn" data-user-id="${full._id}">
-                <a href="/admin/users/similar/${full._id}" class="btn btn-warning">View Similar</a>
-                ${renderAction("ban", full)}
-                ${renderAction("mod", full)}
-            </div>`
+            'render': (data, type, full, meta) => renderUserActions(full)
         }],
         select: {
             style: 'os',

@@ -1,68 +1,19 @@
 <%- include('../admin_header.html', {
     css: ['https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css']
 }) -%>
-<% var getUserRow = function(user, relationString) {
-    return '<div class="user">' + 
-        '<div class="user-info">' +
-            `<p class="username">${user.name}</p>` +
-            `<span class="relation">${relationString}</span>` + 
-            `<span class="signup">Signed up on <strong><time class="timeago" title="${user.creationDate.toLocaleString()}" datetime="${user.creationDate.toISOString()}">${user.creationDate.toLocaleString()}</time></strong>.</span>` + 
-            `<span class="placed-tiles">Placed <strong>${user.placeCount} tile${user.placeCount == 1 ? "" : "s"}</strong>.</span>` + 
-        '</div>' +
-        '<div class="user-actions">' +
-            'ACTIONS' + 
-        '</div>' +
-    '</div>';
-} %>
 <div class="page-header">
     <h1>Similar Accounts</h1>
-    <p class="lead">Accounts identified to be similar to 'NAME_HERE'</p>
+    <p class="lead">Accounts identified to be similar to '<%- target.name -%>'.</p>
 </div>
-<style>
-.user {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 5px 0;
-}
-.user .username {
-    font-weight: 300;
-    font-size: 21px;
-    margin-bottom: 2px;
-}
-.user span {
-    display: block;
-}
-.user::after {
-    clear: both;
-    content: "";
-    display: block;
-}
-.user .relation {
-    color: #777;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    margin-bottom: 3px;
-    margin-top: -1px;
-}
-.user .user-info {
-    float: left;
-}
-.user .user-actions {
-    float: right;
-}
-</style>
-<div class="user-list">
-    <%- getUserRow(target, "Original User") %>
-</div><br>
-<h4><%- identifiedAccounts.length -%> Matching User<%- identifiedAccounts.length == 1 ? "" : "s" -%></h4>
-<div class="user-list">
-    <% identifiedAccounts.forEach(identification => { %>
-        <%- getUserRow(identification.user, `Same ${identification.reasons.map((item, i, arr) => item + (i == arr.length - 1 ? "" : i == arr.length - 2 ? " and " : ", ")).join("")}`) %>
-    <% }) %>
+<div id="data">
+    <div id="loading"><i class="fa fa-circle-o-notch fa-spin"></i> Loading similar accounts...</i></div>
+    <div id="target-ctn"></div><br>
+    <div id="similar-ctn">
+        <div class="heading"></div>
+        <div class="user-list" id="similar"></div>
+    </div>
 </div>
+<script>var userID = "<%- target._id -%>";</script>
 <%- include('../admin_footer.html', {
-    js: ["https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"]
+    js: ["https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js", "/js/build/admin_similar_users.js"]
 }) -%>
-<script>$(".timeago").timeago();</script>

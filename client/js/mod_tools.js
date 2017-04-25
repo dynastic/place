@@ -26,6 +26,19 @@ var renderAction = function(actionName, data) {
     return `<a href="javascript:void(0)" class="btn btn-${action.btnStyle} user-action-btn" data-admin-only=${action.adminOnly === true} data-user-action="${actionName}">${action.buttonText(data)}</a>`;
 }
 
+var renderUserActions = function(user) {
+    var currentUserID = $("body").data("user-id");
+    var currentIsAdmin = $("body").data("user-is-admin");
+    var currentIsMod = $("body").data("user-is-mod");
+    var canTouchUser = (currentIsMod && !(user.moderator || user.admin)) || (currentIsAdmin && !user.admin);
+    if(currentUserID == user._id || !canTouchUser) return "";
+    return `<div class="actions-ctn" data-user-id="${user._id}">
+        <a href="/admin/users/similar/${user._id}" class="btn btn-warning">View Similar</a>
+        ${renderAction("ban", user)}
+        ${renderAction("mod", user)}
+    </div>`
+}
+
 $("body").on("click", ".user-action-btn", function() {
     function handleError(data) {
         var error = "An unknown error occurred."

@@ -184,6 +184,11 @@ UserSchema.methods.findSimilarIPUsers = function() {
     });
 }
 
+UserSchema.methods.canPerformActionsOnUser = function(user) {
+    var canTouchUser = (this.moderator && !(user.moderator || user.admin)) || (this.admin && !user.admin);
+    return this._id != user._id && canTouchUser;
+}
+
 UserSchema.plugin(dataTables, {
     totalKey: 'recordsFiltered',
 });
