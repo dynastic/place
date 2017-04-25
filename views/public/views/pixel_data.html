@@ -38,5 +38,6 @@
                 <span class="value timeago" id="pixel-data-user-last-place"></span>
             </div>
         </div>
+        <% if(user && (user.moderator || user.admin)) { %><div id="mod-user-action-ctn"></div><% } %>
     </div>
 </div>

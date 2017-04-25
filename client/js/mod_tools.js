@@ -31,9 +31,10 @@ var renderUserActions = function(user) {
     var currentIsAdmin = $("body").data("user-is-admin");
     var currentIsMod = $("body").data("user-is-mod");
     var canTouchUser = (currentIsMod && !(user.moderator || user.admin)) || (currentIsAdmin && !user.admin);
-    if(currentUserID == user._id || !canTouchUser) return "";
-    return `<div class="actions-ctn" data-user-id="${user._id}">
-        <a href="/admin/users/similar/${user._id}" class="btn btn-warning">View Similar</a>
+    if(user._id) user.id = user._id;
+    if(currentUserID == user.id || !canTouchUser) return "";
+    return `<div class="actions-ctn" data-user-id="${user.id}">
+        <a href="/admin/users/similar/${user.id}" class="btn btn-warning">View Similar</a>
         ${renderAction("ban", user)}
         ${renderAction("mod", user)}
     </div>`

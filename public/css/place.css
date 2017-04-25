@@ -366,3 +366,9 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 .pixel-data > .user-info > .field {
     width: 100%;
 }
+
+#mod-user-action-ctn > .actions-ctn {
+    padding: 10px;
+    text-align: center;
+    border-top: 1px solid #eaeaea;
+}
