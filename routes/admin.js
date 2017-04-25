@@ -38,6 +38,10 @@ function AdminRouter(app) {
         return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
+    router.get('/reports', app.modMiddleware, function(req, res) {
+        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
+    });
+
     return router;
 }
 
