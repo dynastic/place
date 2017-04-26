@@ -195,12 +195,13 @@ function PublicRouter(app) {
                 res.redirect('/?signedin=1');
             });
         }
-        
-        router.get('/signout', function(req, res) {
-            req.logout();
-            res.redirect("/?signedout=1");
-        });
     }
+        
+    router.get('/signout', function(req, res) {
+        req.logout();
+        res.redirect("/?signedout=1");
+    });
+
 
     return router;
 }
