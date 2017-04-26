@@ -1,9 +1,68 @@
 <%- include('../header.html', {
-    pageTitle: "Page not found"
-}) -%>
+    pageTitle: "Account Details",
+    css: ["/css/dashboard.css"]
+});
+ -%>
+<%
+var now = new Date()
+%>
 <div class="container">
-    <h1>Coming Soon</h1>
-    <p class="text-muted">As Place 2.0 is still in beta, some things don't work yet. Please wait while we add this feature.</p>
-    <a href="/">&laquo; Go to home page</a>
+    <h1>Hello, <%- user.name %></h1>
+    <hr>
+    <div class="container">
+      <div class="col-lg-9">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">About Me</h3>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Join Date</th>
+              <td><%- user.creationDate.toLocaleDateString()+" "+user.creationDate.toLocaleTimeString()  %></td>
+            </tr>
+            <tr>
+              <th scope="row">Has OAuth</th>
+              <td><%- user.isOauth ? "Yes" : "No" %></td>
+            </tr>
+            <tr>
+              <th scope="row">Role</th>
+              <td>
+                <% if (user.admin) { %>
+                  <span class="label label-danger">
+                <% } else if (user.moderator) { %>
+                  <span class="label label-info">
+                <% } else { %>
+                  <span class="label label-default">
+                <% } %>
+                <%-
+                  user.admin ? "Admin" : user.moderator ? "Moderator" : "User"
+                %>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Date of last pixel place</th>
+              <td><%- user.lastPlace.toLocaleDateString()+" "+user.lastPlace.toLocaleTimeString() %></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="panel-footer">Generated on <%- now.toLocaleDateString()+" "+now.toLocaleTimeString() %> <%- %></div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="row placeholders pull-right">
+          <div class="placeholder">
+              <div class="admin-stat" id="pixels-placed"><span><%- user.placeCount -%></span></div>
+              <h4>Pixels placed</h4>
+          </div>
+      </div>
+    </div>
+    </div>
 </div>
-<%- include('../footer.html') -%>
+<%- include('../footer.html', {js: []}) -%>
