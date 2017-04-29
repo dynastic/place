@@ -41,7 +41,7 @@
     <![endif]-->
   </head>
   <body class="fixed-navbar<% if(user) { %> signed-in<% } %>" data-user-is-mod="<%= userMod %>" data-user-is-admin="<%= userAdmin %>" data-user-id="<%= user ? user._id : ""; %>">
-    <nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %><%= navbarSupportsTopMode ? " supports-top" : "" %>">
+    <nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %><%= navbarSupportsTopMode ? " supports-top" : "" %>" id="page-nav">
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">

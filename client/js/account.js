@@ -54,3 +54,10 @@ $(document).ready(function() {
   setTimeout(function() { $(".navbar").addClass("animate") }, 250);
   $("time.timeago").timeago();
 });
+
+$("#page-nav .navbar-collapse").on('hide.bs.collapse', function() {
+  $("#page-nav").removeClass("expanded");
+})
+$("#page-nav .navbar-collapse").on('show.bs.collapse', function() {
+  $("#page-nav").addClass("expanded");
+})

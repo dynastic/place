@@ -2,22 +2,22 @@
   transition: 0.25s ease-in-out background-color;
 }
 
-.navbar.supports-top.top {
+.navbar.supports-top.top:not(.expanded) {
   background: none;
 }
 
-.navbar.supports-top.top .navbar-brand, .navbar.supports-top.top .navbar-brand:focus, .navbar.supports-top.top .navbar-brand:hover, .navbar.supports-top.top .navbar-nav > li > a, .navbar.supports-top.top .navbar-nav > li > a:hover, .navbar.supports-top.top .navbar-nav>.open>a, .navbar.supports-top.top .navbar-nav>.open>a:focus, .navbar.supports-top.top .navbar-nav>.open>a:hover {
+.navbar.supports-top.top:not(.expanded) .navbar-brand, .navbar.supports-top.top:not(.expanded) .navbar-brand:focus, .navbar.supports-top.top:not(.expanded) .navbar-brand:hover, .navbar.supports-top.top:not(.expanded) .navbar-nav > li > a, .navbar.supports-top.top:not(.expanded) .navbar-nav > li > a:hover, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:focus, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:hover {
   color: #fff;
 }
-.navbar.supports-top.top .navbar-toggle .icon-bar {
+.navbar.supports-top.top:not(.expanded) .navbar-toggle .icon-bar {
   background-color: #fff;
 }
 
-.navbar.supports-top.top .navbar-nav > li > a:hover, .navbar.supports-top.top .navbar-brand:focus, .navbar.supports-top.top .navbar-brand:hover {
+.navbar.supports-top.top:not(.expanded) .navbar-nav > li > a:hover, .navbar.supports-top.top:not(.expanded) .navbar-brand:focus, .navbar.supports-top.top:not(.expanded) .navbar-brand:hover {
   color: rgba(255, 255, 255, 0.8)
 }
 
-.navbar.supports-top.top .navbar-nav>.open>a, .navbar.supports-top.top .navbar-nav>.open>a:focus, .navbar.supports-top.top .navbar-nav>.open>a:hover {
+.navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:focus, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -26,13 +26,14 @@ body {
 }
 
 .profile-header {
-  background: #ddd url("/api/board-image") no-repeat fixed center;
+  background: #fff url("/api/board-image") no-repeat fixed center;
   image-rendering: optimizeSpeed;             /*                     */
   image-rendering: -moz-crisp-edges;          /* Firefox             */
   image-rendering: -o-crisp-edges;            /* Opera               */
   image-rendering: -webkit-optimize-contrast; /* Chrome (and Safari) */
   image-rendering: optimize-contrast;         /* CSS3 Proposed       */
   -ms-interpolation-mode: nearest-neighbor;   /* IE8+                */
+  image-rendering: pixelated;
   background-size: 4000px;
   height: 400px;
   width: 100%;
@@ -55,23 +56,15 @@ body {
 }
 
 .profile-header .overlay {
-  background-color: rgba(0, 0, 0, 0.2);
+  background: linear-gradient(-180deg, rgba(0,0,0,0.3) 2%, rgba(0,0,0,0.05) 99%);
   position: absolute;
   z-index: 6;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  transition: 0.1s ease-out background;
+  transition: 0.1s ease-out opacity;
   pointer-events: none;
-}
-
-.profile-header:hover {
-  height: 425px;
-}
-
-.profile-header:hover .overlay {
-  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .profile-header .diagonal-obscure {
@@ -157,6 +150,14 @@ body {
 @media(min-width: 800px) {
   .profile-info .user-header-info {
     display: flex;
+  }
+  
+  .profile-header:hover {
+    height: 425px;
+  }
+
+  .profile-header:hover .overlay {
+    opacity: 0.1;
   }
 }
 
