@@ -34,65 +34,36 @@ function APIRouter(app) {
     });
 
     router.post('/user/change_password', function(req, res) {
-        return res.status(500).json({success: false, error: {message: "Password changes are not available at this time."}});
         if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
         if (!req.body.old || !req.body.new) return res.status(403).json({success: false, error: {message: 'Your old password and a new password is required.', code: 'invalid_parameters'}});
-        done = function(matches){
-          if(matches){
-            req.user.password = req.body.newPassword;
-            req.user.isNew = true;
+        req.user.comparePassword(req.body.old, (error, match) => {
+            if(!match || error) return res.status(401).json({success: false, error: {message: "The old password you entered was incorrect.", code: "incorrect_password"}});
+            req.user.password = req.body.new;
             req.user.save();
-            return res.send({success: true});
-          }else{
-            return res.status(401).json({success: false, error: {message: "Invalid credentials", code: 'invalid_credentials'}});
-          }
-        }
-        req.user.comparePassword(req.body.old, function(error, match){
-          done(match && !error);
-        });
-    });
-
-    router.post('/user/change_username', function(req, res) {
-        if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
-        if(!req.body.username) return res.status(403).json({success: false, error: {message: "The username field is required.", code: 'invalid_parameters'}});
-        if(!User.isValidUsername(req.body.username)) return res.status(403).json({success: false, error: {message: "That username is not available. Please choose another one.", code: 'username_taken'}});
-        var oldName = req.user.name
-        req.user.name = req.body.username
-        req.user.save(function(err) {
-            if (err) return res.status(403).json({success: false, error: {message: "That username already exists", code: "username_taken"}});
-            return res.send({success: true, newName: req.user.name});
+            return res.json({success: true});
         });
     });
 
     router.post('/user/deactivate', function(req, res) {
         if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
-        if (!req.body.password) return res.status(403).json({sucess: false, error: {message: "The password field is required.", code: "invalid_parameters"}});
-        var done = false;
-        var passwordMatch = false;
-        done = function(match){
-          if(match){
+        if (!req.body.password) return res.status(400).json({sucess: false, error: {message: "The password field is required.", code: "invalid_parameters"}});
+        req.user.comparePassword(req.body.password, (error, match) => {
+            if(!match || error) return res.status(401).json({success: false, error: {message: "The password you entered was incorrect.", code: "incorrect_password"}});
             req.user.deactivated = true;
             req.user.save();
-            return res.send({success: true, deactivated: req.user.deactivated});
-          }else{
-            if(!passwordMatch) return res.status(401).json({success: false, error: {message: "Invalid credentials.", code: "invalid_credentials"}});
-          }
-        }
-        req.user.comparePassword(req.body.password, function(error, match){
-          passwordMatch = (match && !error);
-          done(passwordMatch);
+            return res.json({success: true});
         });
     });
 
     router.get('/session', function(req, res, next) {
-        if (req.user) return res.send({ success: true, user: req.user.toInfo() });
+        if (req.user) return res.json({ success: true, user: req.user.toInfo() });
         passport.authenticate('jwt', { session: false }, function(err, user, info) {
             if (!user && info.error) {
                 app.reportError("Session auth error: " + info.error);
                 return res.status(500).json({ success: false, error: info.error });
             }
             if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
-            return res.send({ success: true, user: user.toInfo() });
+            return res.json({ success: true, user: user.toInfo() });
         })(req, res, next);
     });
 
@@ -141,11 +112,11 @@ function APIRouter(app) {
             let countData = { canPlace: seconds <= 0, seconds: seconds };
             return { success: true, timer: countData };
         }
-        if (req.user) return res.send(getTimerPayload(req.user));
+        if (req.user) return res.json(getTimerPayload(req.user));
         passport.authenticate('jwt', { session: false }, function(err, user, info) {
             if (!user && info.error) return res.status(500).json({ success: false, error: info.error });
             if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
-            return res.send(getTimerPayload(user));
+            return res.json(getTimerPayload(user));
         })(req, res, next);
     });
 
