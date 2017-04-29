@@ -115,7 +115,13 @@ function PublicRouter(app) {
     });
 
     router.get('/@:username', function(req, res) {
-        User.findOne({name: req.params.username, banned: false, deactivated: false}).then(user => {
+        var query = {name: req.params.username};
+        var canSeeInvisibleUsers = req.user ? req.user.moderator || req.user.admin : false;
+        if(!canSeeInvisibleUsers) {
+            query.banned = {$ne: true};
+            query.deactivated = {$ne: true};
+        }
+        User.findOne(query).then(user => {
             user.getLatestAvailablePixel().then(pixel => {
                 return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
             }).catch(err => {
