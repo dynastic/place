@@ -341,6 +341,15 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     font-size: 24px;
     font-weight: 300;
     line-height: 1.1;
+    color: #000;
+}
+
+.pixel-data > .summary > .contents > .user-summary > .username-container > .username:hover {
+    text-decoration: none;
+}
+
+.pixel-data > .summary > .contents > .user-summary > .username-container > .username[href]:hover {
+    text-decoration: underline;
 }
 
 .pixel-data > .summary > .contents > .user-summary > .username-container > .username.deleted-account {

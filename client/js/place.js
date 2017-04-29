@@ -649,6 +649,7 @@ var place = {
                     popover.find("#pixel-data-user-last-place").text($.timeago(data.pixel.editor.statistics.lastPlace));
                     popover.find("#pixel-data-user-last-place").attr("datetime", data.pixel.editor.statistics.lastPlace);
                     popover.find("#pixel-data-user-last-place").attr("title", new Date(data.pixel.editor.statistics.lastPlace).toLocaleString());
+                    popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.editor.id}`);
                     if (data.pixel.editor.admin) popover.find("#pixel-badge").show().text("Admin");
                     else if (data.pixel.editor.moderator) popover.find("#pixel-badge").show().text("Moderator");
                     else popover.find("#pixel-badge").hide();
@@ -657,6 +658,7 @@ var place = {
                     popover.find(".user-info").hide();
                     popover.find("#pixel-badge").hide();
                     popover.find("#mod-user-action-ctn").html("");
+                    popover.find("#pixel-data-username").removeAttr("href");
                 }
             });
         }
