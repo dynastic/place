@@ -278,8 +278,8 @@ function APIRouter(app) {
         User.findById(req.params.userID).then(user => {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.findSimilarIPUsers().then(users => {
-                var identifiedAccounts = users.map(user => { return { user: user, reasons: ["ip"] } });
-                return res.json({ success: true, target: user, identifiedAccounts: identifiedAccounts })
+                var identifiedAccounts = users.map(user => { return { user: user.toInfo(), reasons: ["ip"] } });
+                return res.json({ success: true, target: user.toInfo(), identifiedAccounts: identifiedAccounts })
             }).catch(err => {
                 app.reportError("Error finding similar accounts: " + err);
                 res.status(500).json({ success: false });
