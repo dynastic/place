@@ -1,6 +1,6 @@
 <%- include('../header.html', {
     pageTitle: "Account Details",
-    css: ["/css/dashboard.css"]
+    css: ["/css/dashboard.css", "/css/selfadmin.css"]
 });
  -%>
 <%
@@ -58,5 +58,118 @@ var now = new Date()
       </div>
     </div>
     </div>
+    <hr>
+    <div class="container">
+      <div class="col-lg-9">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            Self-Administration
+          </div>
+          <div class="panel-footer">
+            <!-- Modals -->
+            <div class="modal fade" id="changePassword" tabindex="-1" role="dialog">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Change Password</h4>
+                  </div>
+                  <div class="modal-body row">
+                    <div class="col-lg-8 col-lg-offset-2">
+                      <div class="alert hidden" role="alert" name="changePasswordProgressAlert"></div>
+                      <form id="changePasswordForm">
+                        <fieldset class="input-group-vertical">
+                          <div class="form-group">
+                            <label class="sr-only">Current Password</label>
+                            <input type="password" class="form-control" placeholder="Current Password" name="currentPassword">
+                          </div>
+                          <div class="form-group">
+                            <label class="sr-only">New Password</label>
+                            <input type="password" class="form-control" placeholder="New Password" name="newPassword">
+                          </div>
+                          <div class="form-group">
+                            <label class="sr-only">Confirm New Password</label>
+                            <input type="password" class="form-control" placeholder="Confirm New Password" name="newConfPassword">
+                          </div>
+                        </fieldset>
+                      </form>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" name="changePasswordSubmitButton">Submit</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal fade" id="changeUsername" tabindex="-1" role="dialog">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Change Username</h4>
+                  </div>
+                  <div class="modal-body row">
+                    <div class="col-lg-8 col-lg-offset-2">
+                      <div class="alert hidden" role="alert" name="changeUsernameProgressAlert"></div>
+                      <form id="changeUsernameForm">
+                        <div class="form-group">
+                          <label class="sr-only">New Username</label>
+                          <input type="text" name="newUsername" class="form-control" placeholder="New Username">
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" name="changeUsernameSubmitButton">Submit</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal fade" id="deactivateAccount" tabindex="-1" role="dialog">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Deactivate Account</h4>
+                  </div>
+                  <div class="modal-body row">
+                    <div class="col-lg-8 col-lg-offset-2">
+                      <div class="alert hidden" role="alert" name="deactivateAccountProgressAlert"></div>
+                      <form id="deactivateAccountForm">
+                        <div class="form-group">
+                          <label class="sr-only">Verify Password</label>
+                          <input type="password" name="deactivatePasswordVerification" class="form-control" placeholder="Verify Password">
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" name="deactivateAccountSubmitButton">Submit</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-group btn-group-justified" role="group">
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#changePassword" data-tooltip="yes" data-placement="left" title="This feature is still in development">Change Password</button>
+              </div>
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#changeUsername" >Change Username</button>
+              </div>
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deactivateAccount">Deactivate Account</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 </div>
-<%- include('../footer.html', {js: []}) -%>
+<%- include('../footer.html', {js: ["/js/tooltip.js", "/js/build/self_admin.js"]}) -%>

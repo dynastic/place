@@ -22,8 +22,59 @@ function APIRouter(app) {
         passport.authenticate('local', { session: false }, function(err, user, info) {
             if (!user) return res.status(500).json({ success: false, error: info.error || { message: "An unknown error occurred." } });
             let token = jwt.encode(user, config.secret);
-            res.json({ success: true, token: 'JWT ' + token }); // create and return jwt token here        
+            res.json({ success: true, token: 'JWT ' + token }); // create and return jwt token here
         })(req, res, next);
+    });
+
+    router.post('/user/change_password', function(req, res) {
+        return res.status(500).json({success: false, error: {message: "Password changes are not available at this time."}});
+        if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
+        if (!req.body.old || !req.body.new) return res.status(403).json({success: false, error: {message: 'Your old password and a new password is required.', code: 'invalid_parameters'}});
+        done = function(matches){
+          if(matches){
+            req.user.password = req.body.newPassword;
+            req.user.isNew = true;
+            req.user.save();
+            return res.send({success: true});
+          }else{
+            return res.status(401).json({success: false, error: {message: "Invalid credentials", code: 'invalid_credentials'}});
+          }
+        }
+        req.user.comparePassword(req.body.old, function(error, match){
+          done(match && !error);
+        });
+    });
+
+    router.post('/user/change_username', function(req, res) {
+        if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
+        if(!req.body.username) return res.status(403).json({success: false, error: {message: "The username field is required.", code: 'invalid_parameters'}});
+        if(!User.isValidUsername(req.body.username)) return res.status(403).json({success: false, error: {message: "That username is not available. Please choose another one.", code: 'username_taken'}});
+        var oldName = req.user.name
+        req.user.name = req.body.username
+        req.user.save(function(err) {
+            if (err) return res.status(403).json({success: false, error: {message: "That username already exists", code: "username_taken"}});
+            return res.send({success: true, newName: req.user.name});
+        });
+    });
+
+    router.post('/user/deactivate', function(req, res) {
+        if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
+        if (!req.body.password) return res.status(403).json({sucess: false, error: {message: "The password field is required.", code: "invalid_parameters"}});
+        var done = false;
+        var passwordMatch = false;
+        done = function(match){
+          if(match){
+            req.user.deactivated = true;
+            req.user.save();
+            return res.send({success: true, deactivated: req.user.deactivated});
+          }else{
+            if(!passwordMatch) return res.status(401).json({success: false, error: {message: "Invalid credentials.", code: "invalid_credentials"}});
+          }
+        }
+        req.user.comparePassword(req.body.password, function(error, match){
+          passwordMatch = (match && !error);
+          done(passwordMatch);
+        });
     });
 
     router.get('/session', function(req, res, next) {
@@ -156,7 +207,7 @@ function APIRouter(app) {
         User.dataTables({
             limit: req.body.length || 25,
             skip: req.body.start || 0,
-            select: ["id", "name", "creationDate", "admin", "moderator", "banned", "lastPlace", "placeCount"],
+            select: ["id", "name", "creationDate", "admin", "moderator", "banned", "deactivated", "lastPlace", "placeCount"],
             search: {
                 value: searchValue,
                 fields: ['name']
@@ -203,6 +254,21 @@ function APIRouter(app) {
             });
         }).catch(err => {
             app.reportError("Error trying to get user to set banned status on.");
+            res.status(500).json({success: false});
+        });
+    });
+
+    router.get("/mod/toggle_active", app.modMiddleware, function(req, res, next) {
+        if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
+        User.findById(req.query.id).then(user => {
+            if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
+            user.deactivated = !user.deactivated;
+            user.save().then(user => res.json({success: true, deactivated: user.deactivated})).catch(err => {
+                app.reportError("Error trying to save activation status on user.");
+                res.status(500).json({success: false})
+            });
+        }).catch(err => {
+            app.reportError("Error trying to get user to set activation status on.");
             res.status(500).json({success: false});
         });
     });
