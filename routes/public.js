@@ -115,7 +115,7 @@ function PublicRouter(app) {
     });
 
     router.get('/@:username', function(req, res) {
-        User.findOne({name: req.params.username, banned: false, deactivated: false}).then(user => {
+        User.findOne({name: req.params.username, banned: {$ne: true}, deactivated: {$ne: true}}).then(user => {
             user.getLatestAvailablePixel().then(pixel => {
                 return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
             }).catch(err => {
