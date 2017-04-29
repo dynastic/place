@@ -21,24 +21,31 @@ function PublicRouter(app) {
     });
 
     router.post('/pick-username', function(req, res) {
+        function renderResponse(errorMsg) {
+            return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username, user: {name: ""} });
+        }
         if(!req.user) res.redirect("/signup");
         if(req.user.usernameSet) res.redirect("/");
         let user = req.user;
         user.name = req.body.username;
-        app.recaptcha.verify(req, error => {
-            if(error) return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, error: {message: "Please fill in the captcha properly."}, user: {name: ""}, username: req.body.username});
-            
+        function doPickUsername() {
             user.setUserName(user.name, function(err) {
-                if(err) return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, error: err, username: req.body.name, user: {name: ""}});
+                if(err) return renderResponse(err.message);
                 req.login(user, function(err) {
                     if (err) {
                         app.reportError("Unknown user login error.");
-                        return responseFactory.sendRenderedResponse("public/signin", req, res, { captcha: app.enableCaptcha, error: { message: "An unknown error occurred." }, username: req.body.username, user: {name: ""}});
+                        return renderResponse("An unknown error occurred.");
                     }
                     res.redirect("/?signedin=1");
                 });
             });
-        });
+        }
+        if(app.enableCaptcha) {
+            app.recaptcha.verify(req, error => {
+                if(error) return renderResponse("Please fill in the captcha properly.");
+                doPickUsername();
+            });
+        } else doPickUsername();
     });
 
     const ratelimitCallback = function (req, res, next, nextValidRequestDate) {
