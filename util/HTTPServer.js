@@ -44,21 +44,30 @@ function HTTPServer(app) {
 
     server.use(passport.initialize());
     server.use((req, res, next) => {
-        var userID = null;
-        if(req.session && req.session.passport) userID = req.session.passport.user;
-        if(userID) {
-            User.findById(userID).then(user => {
-                if(user && user.loginError()) {
-                    req.session.passport = null;
-                    return res.redirect("/signin?loginerror=1");
-                }
-                if(user) user.recordAccess(app, req.get("User-Agent"), req.get('X-Forwarded-For') || req.connection.remoteAddress, (typeof req.key !== 'undefined' ? req.key : null));
-                req.user = user;
-                next();
-            }).catch(err => {
+        function authUser(user) {
+            if(user && user.loginError()) {
+                req.session.passport = null;
+                return res.redirect("/signin?loginerror=1");
+            }
+            if(user) user.recordAccess(app, req.get("User-Agent"), req.get('X-Forwarded-For') || req.connection.remoteAddress, (typeof req.key !== 'undefined' ? req.key : null));
+            req.user = user;
+            next();
+        }
+        // Check session for users
+        if(req.session && req.session.passport) {
+            userID = req.session.passport.user;
+            User.findById(req.session.passport.user).then(user => authUser(user)).catch(err => {
                 app.reportError("Error validating user session: " + err)
                 next();
             });
+            return;
+        }
+        // None in session, check headers
+        if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'JWT') {
+            passport.authenticate('jwt', { session: false }, function(err, user, info) {
+                if (!user || err) return next();
+                authUser(user);
+            })(req, res, next);
             return;
         }
         next();

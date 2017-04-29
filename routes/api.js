@@ -18,6 +18,11 @@ function APIRouter(app) {
         next();
     })
 
+    const requireUser = (req, res, next) => {
+        if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
+        next()
+    }
+
     // Normal APIs
 
     router.post('/signup', function(req, res) {
@@ -25,7 +30,7 @@ function APIRouter(app) {
     });
 
     router.post('/identify', function(req, res, next) {
-        if (!req.body.username || !req.body.password) return res.status(403).json({ success: false, error: { message: 'A username and password are required.', code: 'invalid_parameters' } });
+        if (!req.body.username || !req.body.password) return res.status(400).json({ success: false, error: { message: 'A username and password are required.', code: 'invalid_parameters' } });
         passport.authenticate('local', { session: false }, function(err, user, info) {
             if (!user) return res.status(500).json({ success: false, error: info.error || { message: "An unknown error occurred." } });
             let token = jwt.encode(user, config.secret);
@@ -33,8 +38,7 @@ function APIRouter(app) {
         })(req, res, next);
     });
 
-    router.post('/user/change_password', function(req, res) {
-        if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
+    router.post('/user/change_password', requireUser, function(req, res) {
         if (!req.body.old || !req.body.new) return res.status(403).json({success: false, error: {message: 'Your old password and a new password is required.', code: 'invalid_parameters'}});
         req.user.comparePassword(req.body.old, (error, match) => {
             if(!match || error) return res.status(401).json({success: false, error: {message: "The old password you entered was incorrect.", code: "incorrect_password"}});
@@ -44,8 +48,7 @@ function APIRouter(app) {
         });
     });
 
-    router.post('/user/deactivate', function(req, res) {
-        if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
+    router.post('/user/deactivate', requireUser, function(req, res) {
         if (!req.body.password) return res.status(400).json({sucess: false, error: {message: "The password field is required.", code: "invalid_parameters"}});
         req.user.comparePassword(req.body.password, (error, match) => {
             if(!match || error) return res.status(401).json({success: false, error: {message: "The password you entered was incorrect.", code: "incorrect_password"}});
@@ -55,16 +58,8 @@ function APIRouter(app) {
         });
     });
 
-    router.get('/session', function(req, res, next) {
-        if (req.user) return res.json({ success: true, user: req.user.toInfo() });
-        passport.authenticate('jwt', { session: false }, function(err, user, info) {
-            if (!user && info.error) {
-                app.reportError("Session auth error: " + info.error);
-                return res.status(500).json({ success: false, error: info.error });
-            }
-            if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
-            return res.json({ success: true, user: user.toInfo() });
-        })(req, res, next);
+    router.get('/session', requireUser, function(req, res, next) {
+        res.json({ success: true, user: req.user.toInfo() });
     });
 
     router.get('/board-image', function(req, res, next) {
@@ -77,7 +72,7 @@ function APIRouter(app) {
         });
     });
 
-    router.post('/place', function(req, res, next) {
+    router.post('/place', requireUser, function(req, res, next) {
          if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
              const legit = require('../util/legit');
              if (!legit.verify(req)) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
@@ -95,29 +90,16 @@ function APIRouter(app) {
                 }).catch(err => res.json({ success: true }));
             }).catch(err => res.status(500).json({ success: false, error: err }));
         }
-        if (req.user) return paintWithUser(req.user);
-        passport.authenticate('jwt', { session: false }, function(err, user, info) {
-            if (!user && info.error) {
-                app.reportError("Session auth error: " + info.error);
-                return res.status(500).json({ success: false, error: info.error });
-            }
-            if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
-            return paintWithUser(user);
-        })(req, res, next);
+        paintWithUser(req.user);
     });
 
-    router.get('/timer', function(req, res, next) {
+    router.get('/timer', requireUser, function(req, res, next) {
         function getTimerPayload(user) {
             let seconds = user.getPlaceSecondsRemaining();
             let countData = { canPlace: seconds <= 0, seconds: seconds };
             return { success: true, timer: countData };
         }
-        if (req.user) return res.json(getTimerPayload(req.user));
-        passport.authenticate('jwt', { session: false }, function(err, user, info) {
-            if (!user && info.error) return res.status(500).json({ success: false, error: info.error });
-            if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
-            return res.json(getTimerPayload(user));
-        })(req, res, next);
+        return res.json(getTimerPayload(req.user));
     });
 
     router.get('/online', function(req, res, next) {
