@@ -17,7 +17,7 @@
   color: rgba(255, 255, 255, 0.8)
 }
 
-.navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:focus, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:hover {
+.navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:focus, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:hover, .navbar.supports-top.top:not(.expanded) .navbar-toggle:focus, .navbar.supports-top.top:not(.expanded) .navbar-toggle:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -151,7 +151,7 @@ body {
   .profile-info .user-header-info {
     display: flex;
   }
-  
+
   .profile-header:hover {
     height: 425px;
   }
