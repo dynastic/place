@@ -6,7 +6,7 @@ $(document).ready(function() {
         pageLength: 25,
         ajax: { url: "/api/admin/users", type: "POST", contentType: "application/json", data: d => JSON.stringify(d) },
         columns: [
-            { data: "name", defaultContent: "" },
+            { data: "name", defaultContent: "", render: (data) => `<a href="/@${data}">${data}</a>` },
             { data: "creationDate", defaultContent: "", render: (data, type, full) => new Date(data).toLocaleString() },
             { data: "lastPlace", defaultContent: "Never", render: (data, type, full) => data ? new Date(data).toLocaleString() : "Never" },
             { data: "placeCount", defaultContent: "0", render: (data, type, full) => data.toLocaleString() },

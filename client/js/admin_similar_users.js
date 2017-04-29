@@ -3,7 +3,7 @@ $(document).ready(function() {
     var getUserRow = function(user, relationString) {
         return `<div class="user"> 
             <div class="user-info">
-                <p class="username">${user.username}</p>
+                <a href="/@${user.username}" class="username">${user.username}</a>
                 <span class="relation">${relationString}</span>
                 <span class="signup">Signed up <strong><time class="timeago" title="${new Date(user.creationDate).toLocaleString()}" datetime="${new Date(user.creationDate).toISOString()}">${new Date(user.creationDate).toLocaleString()}</time></strong>.</span>
                 ${user.statistics.lastPlace ? `<span class="last-place">Last placed <strong><time class="timeago" title="${new Date(user.statistics.lastPlace).toLocaleString()}" datetime="${new Date(user.statistics.lastPlace).toISOString()}">${new Date(user.statistics.lastPlace).toLocaleString()}</time></strong>.</span>` : ""}
