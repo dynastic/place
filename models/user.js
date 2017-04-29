@@ -64,6 +64,11 @@ var UserSchema = new Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+    deactivated: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 });
 
@@ -106,6 +111,7 @@ UserSchema.methods.toInfo = function() {
 
 UserSchema.methods.loginError = function() {
     if(this.banned === true) return { message: "You are banned from using this service due to violations of the rules.", code: "banned" }
+    if(this.deactivated === true) return { message: "Your account has been deactivated. Please contact the moderators via Discord to reactivate your account.", code: "deactivated"}
     return null;
 }
 UserSchema.methods.setUserName = function(username, callback, usernameSet) {
@@ -184,9 +190,43 @@ UserSchema.methods.findSimilarIPUsers = function() {
     });
 }
 
+UserSchema.methods.getLatestAvailablePixel = function() {
+    return new Promise((resolve, reject) => {
+        Pixel.findOne({ editorID: this.id }, {}, { sort: { lastModified: -1 } }, function(err, pixel) {
+            if(err) resolve(null);
+            resolve(pixel);
+        });
+    });
+}
+
 UserSchema.methods.canPerformActionsOnUser = function(user) {
     var canTouchUser = (this.moderator && !(user.moderator || user.admin)) || (this.admin && !user.admin);
     return this._id != user._id && canTouchUser;
+}
+
+UserSchema.methods.getUsernameInitials = function() {
+    function getInitials(string) {
+        var output = "";
+        var mustBeUppercase = false;
+        var lastCharacterUsed = false;
+        for(var i = 0; i < string.length; i++) {
+            // Limit to three characters
+            if(output.length >= 3) break;
+            // Check if this character is uppercase, and add to string if so
+            if((string[i].toUpperCase() == string[i] || !mustBeUppercase) && string[i].match(/[a-z0-9]/i)) {
+            // Don't allow subsequent matches
+                if(!lastCharacterUsed) output += string[i].toUpperCase();
+                lastCharacterUsed = true;
+            } else {
+                lastCharacterUsed = false;
+            }
+            mustBeUppercase = true;
+            // Check if this character is a separator, and skip needing to be uppercase if so
+            if([",", " ", "_", "-"].indexOf(string[i]) > -1) mustBeUppercase = false;
+        }
+        return output;
+    }
+    return getInitials(this.name);
 }
 
 UserSchema.plugin(dataTables, {

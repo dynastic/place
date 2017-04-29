@@ -3,6 +3,7 @@
   if(typeof css === 'undefined') css = [];
   if(typeof pageTitle === 'undefined') pageTitle = null;
   if(typeof isAdmin === 'undefined') isAdmin = false;
+  if(typeof navbarSupportsTopMode === 'undefined') navbarSupportsTopMode = false;
   var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
   var renderNavItem = function(name, itemPath, icon = null) {
       let isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
@@ -40,7 +41,7 @@
     <![endif]-->
   </head>
   <body class="fixed-navbar<% if(user) { %> signed-in<% } %>" data-user-is-mod="<%= userMod %>" data-user-is-admin="<%= userAdmin %>" data-user-id="<%= user ? user._id : ""; %>">
-    <nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %>">
+    <nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %><%= navbarSupportsTopMode ? " supports-top" : "" %>">
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -70,7 +71,7 @@
           <ul class="nav navbar-nav navbar-right">
             <% if(user) { %>
               <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user fa-fw"></i><%= user.usernameSet ? user.name : "" %> <span class="caret"></span></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user fa-fw"></i><span name="user-dropdown"><%= user.usernameSet ? user.name : "" %></span> <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                   <%- renderNavItem("Account details", "/account", "pencil-square-o"); %>
                   <li role="separator" class="divider"></li>

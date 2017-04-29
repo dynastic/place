@@ -1,0 +1,213 @@
+.navbar.supports-top.animate {
+  transition: 0.25s ease-in-out background-color;
+}
+
+.navbar.supports-top.top {
+  background: none;
+}
+
+.navbar.supports-top.top .navbar-brand, .navbar.supports-top.top .navbar-brand:focus, .navbar.supports-top.top .navbar-brand:hover, .navbar.supports-top.top .navbar-nav > li > a, .navbar.supports-top.top .navbar-nav > li > a:hover, .navbar.supports-top.top .navbar-nav>.open>a, .navbar.supports-top.top .navbar-nav>.open>a:focus, .navbar.supports-top.top .navbar-nav>.open>a:hover {
+  color: #fff;
+}
+.navbar.supports-top.top .navbar-toggle .icon-bar {
+  background-color: #fff;
+}
+
+.navbar.supports-top.top .navbar-nav > li > a:hover, .navbar.supports-top.top .navbar-brand:focus, .navbar.supports-top.top .navbar-brand:hover {
+  color: rgba(255, 255, 255, 0.8)
+}
+
+.navbar.supports-top.top .navbar-nav>.open>a, .navbar.supports-top.top .navbar-nav>.open>a:focus, .navbar.supports-top.top .navbar-nav>.open>a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+body {
+  padding: 0!important;
+}
+
+.profile-header {
+  background: #ddd url("/api/board-image") no-repeat fixed center;
+  image-rendering: optimizeSpeed;             /*                     */
+  image-rendering: -moz-crisp-edges;          /* Firefox             */
+  image-rendering: -o-crisp-edges;            /* Opera               */
+  image-rendering: -webkit-optimize-contrast; /* Chrome (and Safari) */
+  image-rendering: optimize-contrast;         /* CSS3 Proposed       */
+  -ms-interpolation-mode: nearest-neighbor;   /* IE8+                */
+  background-size: 4000px;
+  height: 400px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0;
+  cursor: pointer;
+  transition: 0.1s ease-out height;
+}
+
+.profile-header .navbar-legibility {
+  background-image: linear-gradient(-180deg, rgba(0,0,0,0.65) 0%, transparent 100%);
+  position: absolute;
+  z-index: 5;
+  height: 82px;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.profile-header .overlay {
+  background-color: rgba(0, 0, 0, 0.2);
+  position: absolute;
+  z-index: 6;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: 0.1s ease-out background;
+  pointer-events: none;
+}
+
+.profile-header:hover {
+  height: 425px;
+}
+
+.profile-header:hover .overlay {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.profile-header .diagonal-obscure {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  right: 0;
+  height: 209px;
+  background: linear-gradient(to top left, white 50%, transparent 0) no-repeat;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.profile-info {
+  padding: 0 30px 30px;
+  max-width: 1000px;
+}
+
+.profile-info > h1 {
+  font-size: 30px;
+  font-weight: 300;
+  margin-bottom: 20px;
+}
+
+.profile-info > hr {
+  margin: 36px -10px;
+  border-color: #e0e0e0;
+}
+
+.profile-info .user-header-info {
+  padding-bottom: 20px;
+  margin: 0 auto;
+  z-index: 8;
+  position: relative;
+  max-width: 900px;
+  margin-top: 80px;
+  pointer-events: none;
+}
+
+.has-pixel.profile-info .user-header-info {
+  margin-top: -100px;
+}
+
+.profile-info .user-info > .username {
+  font-size: 40px;
+  font-weight: 300;
+}
+
+.profile-info .user-info > .username .badge-label {
+  font-size: 13px;
+}
+
+.profile-info .user-info {
+  align-self: center;
+}
+
+.has-pixel.profile-info .user-info {
+  align-self: flex-end;
+}
+
+.profile-info .user-details {
+  font-size: 16px;
+}
+
+.profile-info .avatar {
+  background: #cacaca;
+  width: 150px;
+  height: 150px;
+  color: #fff;
+  border-radius: 50%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  font-size: 50px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  justify-content: center;
+  margin-right: 26px;
+  overflow: hidden;
+}
+
+@media(min-width: 800px) {
+  .profile-info .user-header-info {
+    display: flex;
+  }
+}
+
+@media(max-width: 799px) {
+  .profile-info .user-info > .username {
+    font-size: 32px;
+  }
+  .profile-info .user-info > .username .badge-label {
+    font-size: 12px;
+  }
+  .profile-info .avatar {
+    margin-bottom: 10px;
+  }
+  .profile-info .user-info > .subdetails {
+    margin-top: 10px;
+  }
+  .profile-info .user-header-info {
+    padding-bottom: 0;
+  }
+}
+
+@media(max-width: 340px) {
+  .profile-info .user-info > .username {
+    font-size: 26px;
+  }
+  .profile-info .user-info > .username .badge-label {
+    font-size: 11px;
+  }
+}
+
+.has-pixel.profile-info .avatar {
+  box-shadow: 0 -1px 10px -5px rgba(0, 0, 0, 0.5);
+}
+
+.profile-info .user-info > .subdetails > div {
+  margin-right: 10px;
+}
+
+.profile-info .user-info > .subdetails > div > span {
+  display: block;
+  color: #555;
+}
+
+.profile-info .user-info > .subdetails > div > span.value {
+  font-size: 23px;
+  font-weight: 300;
+}
+.profile-info .user-info > .subdetails > div > span.name {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #888;
+}

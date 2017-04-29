@@ -11,6 +11,18 @@ const fs = require('fs');
 function APIRouter(app) {
     let router = express.Router();
 
+    router.use(function(req, res, next) {
+        res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+        res.header('Expires', '-1');
+        res.header('Pragma', 'no-cache');
+        next();
+    })
+
+    const requireUser = (req, res, next) => {
+        if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
+        next()
+    }
+
     // Normal APIs
 
     router.post('/signup', function(req, res) {
@@ -18,24 +30,36 @@ function APIRouter(app) {
     });
 
     router.post('/identify', function(req, res, next) {
-        if (!req.body.username || !req.body.password) return res.status(403).json({ success: false, error: { message: 'A username and password are required.', code: 'invalid_parameters' } });
+        if (!req.body.username || !req.body.password) return res.status(400).json({ success: false, error: { message: 'A username and password are required.', code: 'invalid_parameters' } });
         passport.authenticate('local', { session: false }, function(err, user, info) {
             if (!user) return res.status(500).json({ success: false, error: info.error || { message: "An unknown error occurred." } });
             let token = jwt.encode(user, config.secret);
-            res.json({ success: true, token: 'JWT ' + token }); // create and return jwt token here        
+            res.json({ success: true, token: 'JWT ' + token }); // create and return jwt token here
         })(req, res, next);
     });
 
-    router.get('/session', function(req, res, next) {
-        if (req.user) return res.send({ success: true, user: req.user.toInfo() });
-        passport.authenticate('jwt', { session: false }, function(err, user, info) {
-            if (!user && info.error) {
-                app.reportError("Session auth error: " + info.error);
-                return res.status(500).json({ success: false, error: info.error });
-            }
-            if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
-            return res.send({ success: true, user: user.toInfo() });
-        })(req, res, next);
+    router.post('/user/change_password', requireUser, function(req, res) {
+        if (!req.body.old || !req.body.new) return res.status(403).json({success: false, error: {message: 'Your old password and a new password is required.', code: 'invalid_parameters'}});
+        req.user.comparePassword(req.body.old, (error, match) => {
+            if(!match || error) return res.status(401).json({success: false, error: {message: "The old password you entered was incorrect.", code: "incorrect_password"}});
+            req.user.password = req.body.new;
+            req.user.save();
+            return res.json({success: true});
+        });
+    });
+
+    router.post('/user/deactivate', requireUser, function(req, res) {
+        if (!req.body.password) return res.status(400).json({sucess: false, error: {message: "The password field is required.", code: "invalid_parameters"}});
+        req.user.comparePassword(req.body.password, (error, match) => {
+            if(!match || error) return res.status(401).json({success: false, error: {message: "The password you entered was incorrect.", code: "incorrect_password"}});
+            req.user.deactivated = true;
+            req.user.save();
+            return res.json({success: true});
+        });
+    });
+
+    router.get('/session', requireUser, function(req, res, next) {
+        res.json({ success: true, user: req.user.toInfo() });
     });
 
     router.get('/board-image', function(req, res, next) {
@@ -48,7 +72,7 @@ function APIRouter(app) {
         });
     });
 
-    router.post('/place', function(req, res, next) {
+    router.post('/place', requireUser, function(req, res, next) {
          if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
              const legit = require('../util/legit');
              if (!legit.verify(req)) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
@@ -66,29 +90,16 @@ function APIRouter(app) {
                 }).catch(err => res.json({ success: true }));
             }).catch(err => res.status(500).json({ success: false, error: err }));
         }
-        if (req.user) return paintWithUser(req.user);
-        passport.authenticate('jwt', { session: false }, function(err, user, info) {
-            if (!user && info.error) {
-                app.reportError("Session auth error: " + info.error);
-                return res.status(500).json({ success: false, error: info.error });
-            }
-            if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
-            return paintWithUser(user);
-        })(req, res, next);
+        paintWithUser(req.user);
     });
 
-    router.get('/timer', function(req, res, next) {
+    router.get('/timer', requireUser, function(req, res, next) {
         function getTimerPayload(user) {
             let seconds = user.getPlaceSecondsRemaining();
             let countData = { canPlace: seconds <= 0, seconds: seconds };
             return { success: true, timer: countData };
         }
-        if (req.user) return res.send(getTimerPayload(req.user));
-        passport.authenticate('jwt', { session: false }, function(err, user, info) {
-            if (!user && info.error) return res.status(500).json({ success: false, error: info.error });
-            if (!user) return res.status(403).json({ success: false, error: { message: "You do not have a valid session", code: "invalid_session" } });
-            return res.send(getTimerPayload(user));
-        })(req, res, next);
+        return res.json(getTimerPayload(req.user));
     });
 
     router.get('/online', function(req, res, next) {
@@ -156,7 +167,7 @@ function APIRouter(app) {
         User.dataTables({
             limit: req.body.length || 25,
             skip: req.body.start || 0,
-            select: ["id", "name", "creationDate", "admin", "moderator", "banned", "lastPlace", "placeCount"],
+            select: ["id", "name", "creationDate", "admin", "moderator", "banned", "deactivated", "lastPlace", "placeCount"],
             search: {
                 value: searchValue,
                 fields: ['name']
@@ -207,13 +218,28 @@ function APIRouter(app) {
         });
     });
 
+    router.get("/mod/toggle_active", app.modMiddleware, function(req, res, next) {
+        if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
+        User.findById(req.query.id).then(user => {
+            if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
+            user.deactivated = !user.deactivated;
+            user.save().then(user => res.json({success: true, deactivated: user.deactivated})).catch(err => {
+                app.reportError("Error trying to save activation status on user.");
+                res.status(500).json({success: false})
+            });
+        }).catch(err => {
+            app.reportError("Error trying to get user to set activation status on.");
+            res.status(500).json({success: false});
+        });
+    });
+
     router.get('/mod/similar_users/:userID', app.modMiddleware, function(req, res) {
         if(!req.params.userID || req.params.userID == "") return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
         User.findById(req.params.userID).then(user => {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.findSimilarIPUsers().then(users => {
-                var identifiedAccounts = users.map(user => { return { user: user, reasons: ["ip"] } });
-                return res.json({ success: true, target: user, identifiedAccounts: identifiedAccounts })
+                var identifiedAccounts = users.map(user => { return { user: user.toInfo(), reasons: ["ip"] } });
+                return res.json({ success: true, target: user.toInfo(), identifiedAccounts: identifiedAccounts })
             }).catch(err => {
                 app.reportError("Error finding similar accounts: " + err);
                 res.status(500).json({ success: false });

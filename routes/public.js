@@ -21,24 +21,31 @@ function PublicRouter(app) {
     });
 
     router.post('/pick-username', function(req, res) {
+        function renderResponse(errorMsg) {
+            return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username, user: {name: ""} });
+        }
         if(!req.user) res.redirect("/signup");
         if(req.user.usernameSet) res.redirect("/");
         let user = req.user;
         user.name = req.body.username;
-        app.recaptcha.verify(req, error => {
-            if(error) return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, error: {message: "Please fill in the captcha properly."}, user: {name: ""}, username: req.body.username});
-            
+        function doPickUsername() {
             user.setUserName(user.name, function(err) {
-                if(err) return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, error: err, username: req.body.name, user: {name: ""}});
+                if(err) return renderResponse(err.message);
                 req.login(user, function(err) {
                     if (err) {
                         app.reportError("Unknown user login error.");
-                        return responseFactory.sendRenderedResponse("public/signin", req, res, { captcha: app.enableCaptcha, error: { message: "An unknown error occurred." }, username: req.body.username, user: {name: ""}});
+                        return renderResponse("An unknown error occurred.");
                     }
                     res.redirect("/?signedin=1");
                 });
             });
-        });
+        }
+        if(app.enableCaptcha) {
+            app.recaptcha.verify(req, error => {
+                if(error) return renderResponse("Please fill in the captcha properly.");
+                doPickUsername();
+            });
+        } else doPickUsername();
     });
 
     const ratelimitCallback = function (req, res, next, nextValidRequestDate) {
@@ -62,6 +69,11 @@ function PublicRouter(app) {
 
     router.get('/', function(req, res) {
         return responseFactory.sendRenderedResponse("public/index", req, res);
+    });
+
+    router.get('/deactivated', function(req, res) {
+        if(req.user) res.redirect("/");
+        return responseFactory.sendRenderedResponse("public/deactivated", req, res);
     });
 
     router.get('/sitemap.xml', function(req, res, next) {
@@ -93,7 +105,11 @@ function PublicRouter(app) {
 
     router.get('/account', function(req, res) {
         if (!req.user) return res.redirect("/signin");
-        return responseFactory.sendRenderedResponse("public/account", req, res);
+        req.user.getLatestAvailablePixel().then(pixel => {
+            return responseFactory.sendRenderedResponse("public/account", req, res, { pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - req.user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
+        }).catch(err => {
+            return responseFactory.sendRenderedResponse("public/account", req, res, { pixel: null, isLatestPixel: false, hasNewPassword: req.query.hasNewPassword });            
+        });
     });
 
     router.post('/signup', signupRatelimit.prevent, function(req, res, next) {
@@ -195,12 +211,13 @@ function PublicRouter(app) {
                 res.redirect('/?signedin=1');
             });
         }
-        
-        router.get('/signout', function(req, res) {
-            req.logout();
-            res.redirect("/?signedout=1");
-        });
     }
+        
+    router.get('/signout', function(req, res) {
+        req.logout();
+        res.redirect("/?signedout=1");
+    });
+
 
     return router;
 }

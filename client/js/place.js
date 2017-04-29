@@ -621,6 +621,7 @@ var place = {
         if(this.selectedColour === null) {
             function getUserStateText(userState) {
                 if(userState == "ban") return "Banned user";
+                if(userState == "deactivated") return "Deactivated user";
                 return "Deleted account";
             }
             this.zoomIntoPoint(x, y);
@@ -655,6 +656,7 @@ var place = {
                 } else {
                     popover.find(".user-info").hide();
                     popover.find("#pixel-badge").hide();
+                    popover.find("#mod-user-action-ctn").html("");
                 }
             });
         }

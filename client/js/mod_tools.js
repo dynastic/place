@@ -9,6 +9,16 @@ var actions = {
             return data.banned ? "Unban" : "Ban";
         }
     },
+    activation: {
+        url: "mod/toggle_active",
+        btnStyle: "warning",
+        callback: function(data, elem) {
+            elem.text(`${data.deactivated ? "Activate" : "Deactivate"}`);
+        },
+        buttonText: function(data) {
+            return data.deactivated ? "Activate" : "Deactivate";
+        }
+    },
     mod: {
         url: "admin/toggle_mod",
         btnStyle: "info",
@@ -32,10 +42,11 @@ var renderUserActions = function(user) {
     var currentIsMod = $("body").data("user-is-mod");
     var canTouchUser = (currentIsMod && !(user.moderator || user.admin)) || (currentIsAdmin && !user.admin);
     if(user._id) user.id = user._id;
-    if(currentUserID == user.id || !canTouchUser) return "";
+    if(currentUserID == user.id || !canTouchUser) return ``;
     return `<div class="actions-ctn" data-user-id="${user.id}">
         <a href="/admin/users/similar/${user.id}" class="btn btn-warning">View Similar</a>
         ${renderAction("ban", user)}
+        ${renderAction("activation", user)}
         ${renderAction("mod", user)}
     </div>`
 }
@@ -52,10 +63,10 @@ $("body").on("click", ".user-action-btn", function() {
     $(this).addClass("disabled");
     $(this).html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
     var elem = $(this);
-    $.get(`/api/${action.url}/`, {id: userID}).success(function(data) {
+    $.get(`/api/${action.url}/`, {id: userID}).done(function(data) {
         if(!data.success) return handleError(data);
         action.callback(data, elem);
-    }).error(function(res) {
+    }).fail(function(res) {
         handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON);
         if(action.callbackModifiesText !== false) elem.html(originalText);
     }).always(function() {
