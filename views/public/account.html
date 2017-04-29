@@ -5,7 +5,7 @@
 });
  -%>
 <%
-var now = new Date()
+var isSelf = user ? user.id == profileUser.id : false;
 %>
 <% if(pixel) { %>
 <a href="/#<%= `x=${pixel.xPos}&y=${pixel.yPos}` %>"><div class="profile-header" style="background-position: calc(50% - <%= (pixel.xPos - 500) * 4 %>px) <%= -(pixel.yPos * 4) + 175 %>px;">
@@ -34,7 +34,7 @@ var now = new Date()
   <div class="alert alert-success"><strong>Success!</strong> Your password has been successfully changed!</div>
   <hr>
   <% } %>
-  <h1>About <%= user.id == profileUser.id ? "me" : "them" %></h1>
+  <h1>About <%= isSelf ? "me" : "them" %></h1>
   <div class="user-details">
     <p>
       <strong>Joined</strong> <time class="timeago" datetime="<%= profileUser.creationDate.toISOString() %>" title="<%= profileUser.creationDate.toLocaleString() %>"><%= profileUser.creationDate.toLocaleString() %></time>.</p>
@@ -42,7 +42,7 @@ var now = new Date()
       <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(isLatestPixel && pixel) { %> at (<%= `${pixel.xPos.toLocaleString()}, ${pixel.yPos.toLocaleString()}` %>)<% } %>.
      </p><% } %>
   </div>
-  <% if(user.id == profileUser.id) { %>
+  <% if(isSelf) { %>
   <hr>
   <h1>My account</h1>
   <a class="btn btn-info" data-toggle="modal" data-target="#changePassword">Change Password</a>
