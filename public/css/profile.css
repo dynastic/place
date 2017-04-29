@@ -33,6 +33,7 @@ body {
   image-rendering: -webkit-optimize-contrast; /* Chrome (and Safari) */
   image-rendering: optimize-contrast;         /* CSS3 Proposed       */
   -ms-interpolation-mode: nearest-neighbor;   /* IE8+                */
+  image-rendering: pixelated;
   background-size: 4000px;
   height: 400px;
   width: 100%;
@@ -55,14 +56,14 @@ body {
 }
 
 .profile-header .overlay {
-  background-image: linear-gradient(-180deg, rgba(0,0,0,0.3) 2%, rgba(0,0,0,0.05) 99%);
+  background: linear-gradient(-180deg, rgba(0,0,0,0.3) 2%, rgba(0,0,0,0.05) 99%);
   position: absolute;
   z-index: 6;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  transition: 0.1s ease-out background;
+  transition: 0.1s ease-out opacity;
   pointer-events: none;
 }
 
@@ -71,7 +72,7 @@ body {
 }
 
 .profile-header:hover .overlay {
-  background-color: rgba(0, 0, 0, 0.05);
+  opacity: 0.1;
 }
 
 .profile-header .diagonal-obscure {
