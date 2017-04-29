@@ -2,22 +2,22 @@
   transition: 0.25s ease-in-out background-color;
 }
 
-.navbar.supports-top.top {
+.navbar.supports-top.top:not(.expanded) {
   background: none;
 }
 
-.navbar.supports-top.top .navbar-brand, .navbar.supports-top.top .navbar-brand:focus, .navbar.supports-top.top .navbar-brand:hover, .navbar.supports-top.top .navbar-nav > li > a, .navbar.supports-top.top .navbar-nav > li > a:hover, .navbar.supports-top.top .navbar-nav>.open>a, .navbar.supports-top.top .navbar-nav>.open>a:focus, .navbar.supports-top.top .navbar-nav>.open>a:hover {
+.navbar.supports-top.top:not(.expanded) .navbar-brand, .navbar.supports-top.top:not(.expanded) .navbar-brand:focus, .navbar.supports-top.top:not(.expanded) .navbar-brand:hover, .navbar.supports-top.top:not(.expanded) .navbar-nav > li > a, .navbar.supports-top.top:not(.expanded) .navbar-nav > li > a:hover, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:focus, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:hover {
   color: #fff;
 }
-.navbar.supports-top.top .navbar-toggle .icon-bar {
+.navbar.supports-top.top:not(.expanded) .navbar-toggle .icon-bar {
   background-color: #fff;
 }
 
-.navbar.supports-top.top .navbar-nav > li > a:hover, .navbar.supports-top.top .navbar-brand:focus, .navbar.supports-top.top .navbar-brand:hover {
+.navbar.supports-top.top:not(.expanded) .navbar-nav > li > a:hover, .navbar.supports-top.top:not(.expanded) .navbar-brand:focus, .navbar.supports-top.top:not(.expanded) .navbar-brand:hover {
   color: rgba(255, 255, 255, 0.8)
 }
 
-.navbar.supports-top.top .navbar-nav>.open>a, .navbar.supports-top.top .navbar-nav>.open>a:focus, .navbar.supports-top.top .navbar-nav>.open>a:hover {
+.navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:focus, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
