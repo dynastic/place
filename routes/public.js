@@ -105,11 +105,17 @@ function PublicRouter(app) {
 
     router.get('/account', function(req, res) {
         if (!req.user) return res.redirect("/signin");
-        req.user.getLatestAvailablePixel().then(pixel => {
-            return responseFactory.sendRenderedResponse("public/account", req, res, { pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - req.user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
-        }).catch(err => {
-            return responseFactory.sendRenderedResponse("public/account", req, res, { pixel: null, isLatestPixel: false, hasNewPassword: req.query.hasNewPassword });            
-        });
+        res.redirect("/user/" + req.user.id);
+    });
+
+    router.get('/user/:userID', function(req, res) {
+        User.findById(req.params.userID).then(user => {
+            user.getLatestAvailablePixel().then(pixel => {
+                return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - req.user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
+            }).catch(err => {
+                return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: null, isLatestPixel: false, hasNewPassword: req.query.hasNewPassword });            
+            });
+        }).catch(err => res.redirect("/"))
     });
 
     router.post('/signup', signupRatelimit.prevent, function(req, res, next) {

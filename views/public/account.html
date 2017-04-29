@@ -17,14 +17,14 @@ var now = new Date()
 <div class="container profile-info<%= pixel ? " has-pixel" : "" %>">
   <div class="user-header-info">
     <div class="avatar">
-      <span><%= user.getUsernameInitials() %></span>
+      <span><%= profileUser.getUsernameInitials() %></span>
     </div>
     <div class="user-info">
-      <span class="username"><%= user.name %> <%- user.admin || user.moderator ? `<span class="label label-danger badge-label">${user.admin ? "Admin" : "Moderator"}</span>` : "" %></span>
+      <span class="username"><%= profileUser.name %> <%- profileUser.admin || profileUser.moderator ? `<span class="label label-danger badge-label">${profileUser.admin ? "Admin" : "Moderator"}</span>` : "" %></span>
       <div class="subdetails">
         <div>
-          <span class="value"><%= user.placeCount.toLocaleString() -%></span>
-          <span class="name">pixel<%= user.placeCount == 1 ? "" : "s" -%> placed</span>
+          <span class="value"><%= profileUser.placeCount.toLocaleString() -%></span>
+          <span class="name">pixel<%= profileUser.placeCount == 1 ? "" : "s" -%> placed</span>
         </div>
       </div>
     </div>
@@ -34,18 +34,25 @@ var now = new Date()
   <div class="alert alert-success"><strong>Success!</strong> Your password has been successfully changed!</div>
   <hr>
   <% } %>
-  <h1>About me</h1>
+  <h1>About <%= user.id == profileUser.id ? "me" : "them" %></h1>
   <div class="user-details">
     <p>
-      <strong>Joined</strong> <time class="timeago" datetime="<%= user.creationDate.toISOString() %>" title="<%= user.creationDate.toLocaleString() %>"><%= user.creationDate.toLocaleString() %></time>.</p>
-    <% if(user.lastPlace) { %><p>
-      <strong>Last placed</strong> <time class="timeago" datetime="<%= user.lastPlace.toISOString() %>" title="<%= user.lastPlace.toLocaleString() %>"><%= user.lastPlace.toLocaleString() %></time><% if(isLatestPixel && pixel) { %> at (<%= `${pixel.xPos.toLocaleString()}, ${pixel.yPos.toLocaleString()}` %>)<% } %>.
+      <strong>Joined</strong> <time class="timeago" datetime="<%= profileUser.creationDate.toISOString() %>" title="<%= profileUser.creationDate.toLocaleString() %>"><%= profileUser.creationDate.toLocaleString() %></time>.</p>
+    <% if(profileUser.lastPlace) { %><p>
+      <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(isLatestPixel && pixel) { %> at (<%= `${pixel.xPos.toLocaleString()}, ${pixel.yPos.toLocaleString()}` %>)<% } %>.
      </p><% } %>
   </div>
+  <% if(user.id == profileUser.id) { %>
   <hr>
   <h1>My account</h1>
   <a class="btn btn-info" data-toggle="modal" data-target="#changePassword">Change Password</a>
   <a class="btn btn-danger" data-toggle="modal" data-target="#deactivateAccount">Deactivate Account</a>
+  <% } %>
+  <% if(user.canPerformActionsOnUser(profileUser)) { %>
+  <hr>
+  <h1>Moderator tools</h1>
+  <div id="profile-mod-tools-ctn"></div>
+  <% } %>
 </div>
 <div class="modal fade" id="changePassword" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
@@ -117,4 +124,9 @@ var now = new Date()
     </div>
   </div>
 </div>
-<%- include('../footer.html', {js: ["/js/tooltip.js", "/js/build/account.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"]}) -%>
+<%- include('../footer.html', {
+  js: ["/js/tooltip.js", "/js/build/account.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"],
+  jsSnippets: [`  $(document).ready(function() {
+    $("#profile-mod-tools-ctn").html(renderUserActions(${JSON.stringify(profileUser)}));
+  });`]
+}) -%>

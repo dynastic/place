@@ -1,6 +1,7 @@
 <% if(typeof isAdmin === 'undefined') isAdmin = false;
 if(typeof user === 'undefined') user = null;
 if(typeof js === 'undefined' || !js) js = [];
+if(typeof jsSnippets === 'undefined' || !jsSnippets) jsSnippets = [];
 var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
 if(userMod) js.unshift("/js/build/mod_tools.js");
   %>
@@ -15,6 +16,9 @@ if(userMod) js.unshift("/js/build/mod_tools.js");
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
     <% js.forEach(function(jsFilename) { %>
       <script src="<%= jsFilename %>"></script>
+    <% }) %>
+    <% jsSnippets.forEach(function(jsSnippet) { %>
+      <script><%- jsSnippet %></script>
     <% }) %>
 <% if(typeof config.googleAnalyticsTrackingID !== "undefined") {
   if(config.googleAnalyticsTrackingID !== null && config.googleAnalyticsTrackingID != "") { %>
