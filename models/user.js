@@ -64,6 +64,11 @@ var UserSchema = new Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+    deactivated: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 });
 
@@ -106,6 +111,7 @@ UserSchema.methods.toInfo = function() {
 
 UserSchema.methods.loginError = function() {
     if(this.banned === true) return { message: "You are banned from using this service due to violations of the rules.", code: "banned" }
+    if(this.deactivated === true) return { message: "Your account has been deactivated. Please contact the moderators via Discord to reactivate your account.", code: "deactivated"}
     return null;
 }
 UserSchema.methods.setUserName = function(username, callback, usernameSet) {

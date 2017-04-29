@@ -103,6 +103,7 @@ PixelSchema.methods.getInfo = function() {
         let info = this.toInfo();
         require("./user").findById(this.editorID).then(user => {
             if(user.banned) info.userError = "ban";
+            else if(user.deactivated) info.userError = "deactivated";
             else info.editor = user.toInfo();
             resolve(info);
         }).catch(err => {

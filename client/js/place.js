@@ -621,6 +621,7 @@ var place = {
         if(this.selectedColour === null) {
             function getUserStateText(userState) {
                 if(userState == "ban") return "Banned user";
+                if(userState == "deactivated") return "Deactivated user";
                 return "Deleted account";
             }
             this.zoomIntoPoint(x, y);
