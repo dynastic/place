@@ -71,6 +71,11 @@ function PublicRouter(app) {
         return responseFactory.sendRenderedResponse("public/index", req, res);
     });
 
+    router.get('/deactivated', function(req, res) {
+        if(req.user) res.redirect("/");
+        return responseFactory.sendRenderedResponse("public/deactivated", req, res);
+    });
+
     router.get('/sitemap.xml', function(req, res, next) {
         if(typeof config.host === undefined) return next();
         return responseFactory.sendRenderedResponse("public/sitemap.xml.html", req, res, null, "text/xml");
@@ -100,7 +105,11 @@ function PublicRouter(app) {
 
     router.get('/account', function(req, res) {
         if (!req.user) return res.redirect("/signin");
-        return responseFactory.sendRenderedResponse("public/account", req, res);
+        req.user.getLatestAvailablePixel().then(pixel => {
+            return responseFactory.sendRenderedResponse("public/account", req, res, { pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - req.user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
+        }).catch(err => {
+            return responseFactory.sendRenderedResponse("public/account", req, res, { pixel: null, isLatestPixel: false, hasNewPassword: req.query.hasNewPassword });            
+        });
     });
 
     router.post('/signup', signupRatelimit.prevent, function(req, res, next) {
