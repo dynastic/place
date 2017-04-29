@@ -12,7 +12,7 @@ $(document).ready(function() {
             <div class="user-actions">${renderUserActions(user)}</div>
         </div>`;
     }
-    $.get("/api/mod/similar_users/" + userID).success(function(response) {
+    $.get("/api/mod/similar_users/" + userID).done(function(response) {
         if(!response.success) return $("#loading").text("An error occurred while loading data");
         $("#loading").remove();
         $(getUserRow(response.target, "Original User")).appendTo("#target-ctn");
