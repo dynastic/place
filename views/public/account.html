@@ -48,7 +48,7 @@ var isSelf = user ? user.id == profileUser.id : false;
   <a class="btn btn-info" data-toggle="modal" data-target="#changePassword">Change Password</a>
   <a class="btn btn-danger" data-toggle="modal" data-target="#deactivateAccount">Deactivate Account</a>
   <% } %>
-  <% if(user.canPerformActionsOnUser(profileUser)) { %>
+  <% if(user && user.canPerformActionsOnUser(profileUser)) { %>
   <hr>
   <h1>Moderator tools</h1>
   <div id="profile-mod-tools-ctn"></div>
