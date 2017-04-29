@@ -111,7 +111,7 @@ function PublicRouter(app) {
     router.get('/user/:userID', function(req, res) {
         User.findById(req.params.userID).then(user => {
             user.getLatestAvailablePixel().then(pixel => {
-                return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - req.user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
+                return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
             }).catch(err => {
                 return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: null, isLatestPixel: false, hasNewPassword: req.query.hasNewPassword });            
             });
