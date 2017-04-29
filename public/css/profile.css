@@ -67,14 +67,6 @@ body {
   pointer-events: none;
 }
 
-.profile-header:hover {
-  height: 425px;
-}
-
-.profile-header:hover .overlay {
-  opacity: 0.1;
-}
-
 .profile-header .diagonal-obscure {
   position: absolute;
   bottom: 0;
@@ -158,6 +150,14 @@ body {
 @media(min-width: 800px) {
   .profile-info .user-header-info {
     display: flex;
+  }
+  
+  .profile-header:hover {
+    height: 425px;
+  }
+
+  .profile-header:hover .overlay {
+    opacity: 0.1;
   }
 }
 
