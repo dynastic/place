@@ -105,11 +105,17 @@ function PublicRouter(app) {
 
     router.get('/account', function(req, res) {
         if (!req.user) return res.redirect("/signin");
-        res.redirect("/user/" + req.user.id);
+        res.redirect("/@" + req.user.name);
     });
 
     router.get('/user/:userID', function(req, res) {
         User.findById(req.params.userID).then(user => {
+            res.redirect(`/@${user.name}`);
+        }).catch(err => res.redirect("/"))
+    });
+
+    router.get('/@:username', function(req, res) {
+        User.findOne({name: req.params.username, banned: false, deactivated: false}).then(user => {
             user.getLatestAvailablePixel().then(pixel => {
                 return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
             }).catch(err => {
