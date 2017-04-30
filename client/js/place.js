@@ -37,7 +37,14 @@ var canvasController = {
 };
 
 var notificationHandler = {
-    notificationsSupported: "Notification" in window,
+    notificationsSupported: "Notification" in window, supportsNewNotificationAPI: false,
+
+    setup: function() {
+        if(navigator.serviceWorker) {
+            navigator.serviceWorker.register('/js/build/sw.js');
+            this.supportsNewNotificationAPI = true;
+        }
+    },
 
     canNotify: function() {
         if (!this.notificationsSupported) return false;
@@ -65,9 +72,25 @@ var notificationHandler = {
                 if (granted) this.sendNotification(message, requesting);
             });
         }
-        let notification = new Notification(title, {
-            body: message
-        });
+        if(this.supportsNewNotificationAPI) {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification('Place 2.0', {
+                    body: message,
+                    tag: btoa(message),
+                    badge: 1,
+                    vibrate: [200, 100, 200, 100, 200, 100, 200]
+                });
+            });
+        } else {
+            try {
+                // Failsafe so it doesn't get stuck on 1 second
+                new Notification(title, {
+                    body: message
+                });
+            } catch(e) {
+                console.error("Tried to send notification via old API, but failed: " + e);
+            }
+        }
     }
 }
 
@@ -144,6 +167,8 @@ var place = {
         this.userCountElement = userCountElement;
         this.gridHint = gridHint;
         this.pixelDataPopover = pixelDataPopover;
+
+        this.notificationHandler.setup();
 
         this.colourPaletteElement = colourPaletteElement;
         this.setupColours();
