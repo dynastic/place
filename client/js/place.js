@@ -194,10 +194,10 @@ var place = {
             if (this.isMouseDown) this.handleMouseDrag(event || window.event);
             this.handleMouseMove(event || window.event);
         }
-        canvas.addEventListener("touchstart", event => this.handleMouseDown(event.changedTouches[0]));
+        canvas.addEventListener("touchstart", event => { this.handleMouseDown(event.changedTouches[0])} );
         canvas.addEventListener("touchmove", event => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
-        canvas.addEventListener("touchend", event => this.handleMouseUp(event.changedTouches[0]));
-        canvas.addEventListener("touchcancel", event => this.handleMouseUp(event.changedTouches[0]));
+        canvas.addEventListener("touchend", event => { this.shouldClick = false; this.handleMouseUp(event.changedTouches[0]) });
+        canvas.addEventListener("touchcancel", event => { this.shouldClick = false; this.handleMouseUp(event.changedTouches[0]) });
         canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
         document.body.onkeyup = 
