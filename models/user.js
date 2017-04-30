@@ -105,7 +105,9 @@ UserSchema.methods.toInfo = function() {
         statistics: {
             totalPlaces: this.placeCount,
             lastPlace: this.lastPlace
-        }
+        },
+        banned: this.banned,
+        deactivated: this.deactivated
     }
 }
 
@@ -213,7 +215,7 @@ UserSchema.methods.getUsernameInitials = function() {
             // Limit to three characters
             if(output.length >= 3) break;
             // Check if this character is uppercase, and add to string if so
-            if((string[i].toUpperCase() == string[i] || !mustBeUppercase) && string[i].match(/[a-z0-9]/i)) {
+            if((string[i].toUpperCase() == string[i] || !mustBeUppercase) && string[i].match(mustBeUppercase ? /[a-z]/i : /[a-z0-9]/i)) {
             // Don't allow subsequent matches
                 if(!lastCharacterUsed) output += string[i].toUpperCase();
                 lastCharacterUsed = true;
