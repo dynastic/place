@@ -23,7 +23,6 @@
     image-rendering: pixelated;
     height: 1000px;
     width: 1000px;
-    touch-action: none;
 }
 
 body.debug #place-canvas-draw {
@@ -382,4 +381,8 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 
 .pixel-data > .user-info > .field {
     width: 100%;
+}
+
+body {
+    overflow-y: hidden;
 }
