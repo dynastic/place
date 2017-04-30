@@ -236,7 +236,6 @@ var place = {
 
     handleHashChange: function() {
         var point = this.getHashPoint();
-        console.log(point);
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
