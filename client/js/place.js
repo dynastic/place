@@ -196,8 +196,8 @@ var place = {
         }
         canvas.addEventListener("touchstart", event => { event.preventDefault(); this.handleMouseDown(event.changedTouches[0])} );
         canvas.addEventListener("touchmove", event => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
-        canvas.addEventListener("touchend", event => { event.preventDefault(); this.shouldClick = false; this.handleMouseUp(event.changedTouches[0]) });
-        canvas.addEventListener("touchcancel", event => { event.preventDefault(); this.shouldClick = false; this.handleMouseUp(event.changedTouches[0]) });
+        canvas.addEventListener("touchend", event => { event.preventDefault(); this.handleMouseUp(event.changedTouches[0]) });
+        canvas.addEventListener("touchcancel", event => { event.preventDefault(); this.handleMouseUp(event.changedTouches[0]) });
         canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
         document.body.onkeyup = 
