@@ -72,18 +72,14 @@ var notificationHandler = {
 }
 
 var hashHandler = {
-    currentHash: null,
-
     getHash: function() {
-        if (this.currentHash === null) this.currentHash = this.decodeHash(window.location.hash);
-        return this.currentHash;
+        return this.decodeHash(window.location.hash);
     },
 
     setHash: function(hash) {
         let encodedHash = this.encodeHash(hash);
         if("history" in window) window.history.replaceState(null, null, "#" + encodedHash);
         else window.location.hash = encodedHash;
-        this.currentHash = hash;
     },
 
     modifyHash: function(newHash) {
@@ -124,7 +120,7 @@ var place = {
     socket: null,
     zoomButton: null,
     dragStart: null,
-    isMouseDown: false, shouldClick: true, placing: false, didSetHash: false, shouldShowPopover: false,
+    isMouseDown: false, shouldClick: true, placing: false, shouldShowPopover: false,
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null},
@@ -224,11 +220,8 @@ var place = {
     },
 
     handleHashChange: function() {
-        if(this.didSetHash) {
-            this.didSetHash = false;
-            return;
-        }
-        let point = this.getHashPoint();
+        var point = this.getHashPoint();
+        console.log(point);
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
@@ -488,7 +481,6 @@ var place = {
             this.zoomIntoPoint(newCoord.x, newCoord.y, false);
         }
         this.hashHandler.modifyHash(coord);
-        this.didSetHash = true;
     },
 
     contextMenu: function(event) {
