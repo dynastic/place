@@ -105,7 +105,9 @@ UserSchema.methods.toInfo = function() {
         statistics: {
             totalPlaces: this.placeCount,
             lastPlace: this.lastPlace
-        }
+        },
+        banned: this.banned,
+        deactivated: this.deactivated
     }
 }
 
