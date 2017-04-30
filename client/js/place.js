@@ -117,6 +117,13 @@ var place = {
         zoomHandle: null,
         fastZoom: false
     },
+    keys: {
+        left: [37, 65],
+        up: [38, 87],
+        right: [39, 70],
+        down: [40, 83]
+    },
+    keyStates: {},
     socket: null,
     zoomButton: null,
     dragStart: null,
@@ -168,6 +175,12 @@ var place = {
         canvas.addEventListener("touchcancel", event => this.handleMouseUp(event.changedTouches[0]));
         canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
+        document.body.onkeyup = 
+        document.body.onkeydown = function(e) {
+            var kc = e.keyCode || e.which;
+            app.keyStates[kc] = e.type == 'keydown';
+        };
+
         window.onresize = () => this.handleResize();
         window.onhashchange = () => this.handleHashChange();
 
@@ -191,7 +204,9 @@ var place = {
             this.userCountChanged(online);
         }).catch(err => $(this.userCountElement).hide())
 
-        this.socket = this.startSocketConnection()
+        this.socket = this.startSocketConnection();
+
+        setInterval(function() { app.doKeys() }, 15);
     },
 
     loadUserCount: function() {
@@ -371,15 +386,15 @@ var place = {
         this.isMouseDown = false;
     },
 
-    moveCamera: function(deltaX, deltaY) {
+    moveCamera: function(deltaX, deltaY, softAllowBoundPush = true) {
         var cam = $(this.cameraController);
         var zoomModifier = this._getCurrentZoom();
         var coords = this.getCoordinates();
         var x = deltaX / zoomModifier, y = deltaY / zoomModifier;
         var pushbackXModifier = 1, pushbackYModifier = 1;
-        if(this.isOutsideOfBounds(true).x) pushbackXModifier = Math.abs(Math.min(coords.x, size - coords.x)) / 30 + 1;
-        if(this.isOutsideOfBounds(true).y) pushbackYModifier = Math.abs(Math.min(coords.y, size - coords.y)) / 30 + 1;
-        this.setCanvasPosition(x / pushbackXModifier, y / pushbackYModifier, true);
+        if(this.isOutsideOfBounds(true).x && softAllowBoundPush) pushbackXModifier = Math.abs(Math.min(coords.x, size - coords.x)) / 30 + 1;
+        if(this.isOutsideOfBounds(true).y && softAllowBoundPush) pushbackYModifier = Math.abs(Math.min(coords.y, size - coords.y)) / 30 + 1;
+        this.setCanvasPosition(x / pushbackXModifier, y / pushbackYModifier, true, softAllowBoundPush);
     },
 
     updateCoordinates: function() {
@@ -406,15 +421,18 @@ var place = {
         return {x: Math.round(-this.panX) + dcanvas.width / 2, y: Math.round(-this.panY) + dcanvas.height / 2};
     },
 
-    setCanvasPosition: function(x, y, delta = false) {
+    setCanvasPosition: function(x, y, delta = false, softAllowBoundPush = true) {
         $(this.pixelDataPopover).hide();
-        let deltaStr = delta ? "+=" : ""
-        $(this.cameraController).css({
-            top: `${deltaStr}${y}px`,
-            left: `${deltaStr}${x}px`
-        })
         if (delta) this.panX += x, this.panY += y;
         else this.panX = x, this.panY = y;
+        if(!softAllowBoundPush) {
+            this.panX = Math.max(-(size / 2) + 1, Math.min((size / 2), this.panX));
+            this.panY = Math.max(-(size / 2) + 1, Math.min((size / 2), this.panY));
+        }
+        $(this.cameraController).css({
+            top: `${this.panY}px`,
+            left: `${this.panX}px`
+        })
         this.updateCoordinates();
         this.updateDisplayCanvas();
     },
@@ -702,6 +720,14 @@ var place = {
     setPixel: function(colour, x, y) {
         this.canvasController.setPixel(colour, x, y);
         this.updateDisplayCanvas();
+    },
+
+    doKeys: function() {
+        var keys = Object.keys(this.keys).filter(key => this.keys[key].filter(keyCode => this.keyStates[keyCode] === true).length > 0);
+        if(keys.indexOf("up") > -1) this.moveCamera(0, 5, false);
+        if(keys.indexOf("down") > -1) this.moveCamera(0, -5, false);
+        if(keys.indexOf("left") > -1) this.moveCamera(5, 0, false);
+        if(keys.indexOf("right") > -1) this.moveCamera(-5, 0, false);
     }
 }
 
