@@ -23,6 +23,7 @@
     image-rendering: pixelated;
     height: 1000px;
     width: 1000px;
+    touch-action: none;
 }
 
 body.debug #place-canvas-draw {
