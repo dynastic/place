@@ -216,8 +216,9 @@ var place = {
     getHashPoint: function() {
         let hash = this.hashHandler.getHash();
         if(typeof hash.x !== "undefined" && typeof hash.y !== "undefined") {
-            let x = parseInt(hash.x), y = parseInt(hash.y);
-            if(x !== null && y !== null && !isNaN(x) && !isNaN(y)) return {x: -x + (size / 2), y: -y + (size / 2)};
+            var x = parseInt(hash.x), y = parseInt(hash.y);
+            var fixed = this.closestInsideCoordinates(x, y);
+            if(x !== null && y !== null && !isNaN(x) && !isNaN(y)) return {x: -fixed.x + (size / 2), y: -fixed.y + (size / 2)};
         }
         return null;
     },
