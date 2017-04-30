@@ -143,7 +143,7 @@ var place = {
     keys: {
         left: [37, 65],
         up: [38, 87],
-        right: [39, 70],
+        right: [39, 68],
         down: [40, 83]
     },
     keyStates: {},
