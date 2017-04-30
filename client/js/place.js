@@ -72,18 +72,14 @@ var notificationHandler = {
 }
 
 var hashHandler = {
-    currentHash: null,
-
     getHash: function() {
-        if (this.currentHash === null) this.currentHash = this.decodeHash(window.location.hash);
-        return this.currentHash;
+        return this.decodeHash(window.location.hash);
     },
 
     setHash: function(hash) {
         let encodedHash = this.encodeHash(hash);
         if("history" in window) window.history.replaceState(null, null, "#" + encodedHash);
         else window.location.hash = encodedHash;
-        this.currentHash = hash;
     },
 
     modifyHash: function(newHash) {
@@ -118,12 +114,20 @@ var place = {
         zoomFrom: 0,
         zoomTo: 0,
         zoomTime: 0,
-        zoomHandle: null
+        zoomHandle: null,
+        fastZoom: false
     },
+    keys: {
+        left: [37, 65],
+        up: [38, 87],
+        right: [39, 70],
+        down: [40, 83]
+    },
+    keyStates: {},
     socket: null,
     zoomButton: null,
     dragStart: null,
-    isMouseDown: false, shouldClick: true, placing: false, didSetHash: false, shouldShowPopover: false,
+    isMouseDown: false, shouldClick: true, placing: false, shouldShowPopover: false,
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null},
@@ -171,6 +175,12 @@ var place = {
         canvas.addEventListener("touchcancel", event => this.handleMouseUp(event.changedTouches[0]));
         canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
+        document.body.onkeyup = 
+        document.body.onkeydown = function(e) {
+            var kc = e.keyCode || e.which;
+            app.keyStates[kc] = e.type == 'keydown';
+        };
+
         window.onresize = () => this.handleResize();
         window.onhashchange = () => this.handleHashChange();
 
@@ -194,7 +204,9 @@ var place = {
             this.userCountChanged(online);
         }).catch(err => $(this.userCountElement).hide())
 
-        this.socket = this.startSocketConnection()
+        this.socket = this.startSocketConnection();
+
+        setInterval(function() { app.doKeys() }, 15);
     },
 
     loadUserCount: function() {
@@ -215,18 +227,16 @@ var place = {
     getHashPoint: function() {
         let hash = this.hashHandler.getHash();
         if(typeof hash.x !== "undefined" && typeof hash.y !== "undefined") {
-            let x = parseInt(hash.x), y = parseInt(hash.y);
-            if(x !== null && y !== null && !isNaN(x) && !isNaN(y)) return {x: -x + 500, y: -y + 500};
+            var x = parseInt(hash.x), y = parseInt(hash.y);
+            var fixed = this.closestInsideCoordinates(x, y);
+            if(x !== null && y !== null && !isNaN(x) && !isNaN(y)) return {x: -fixed.x + (size / 2), y: -fixed.y + (size / 2)};
         }
         return null;
     },
 
     handleHashChange: function() {
-        if(this.didSetHash) {
-            this.didSetHash = false;
-            return;
-        }
-        let point = this.getHashPoint();
+        var point = this.getHashPoint();
+        console.log(point);
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
@@ -314,7 +324,7 @@ var place = {
     },
 
     animateZoom: function() {
-        this.zooming.zoomTime += 1
+        this.zooming.zoomTime += this.zooming.fastZoom ? 5 : 1
 
         let x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
         let y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
@@ -328,6 +338,7 @@ var place = {
             let coord = this.getCoordinates();
             this.hashHandler.modifyHash(coord);
             this.zooming.zoomHandle = null;
+            this.zooming.fastZoom = false;
             if(this.shouldShowPopover) {
                 $(this.pixelDataPopover).fadeIn(250);
                 this.shouldShowPopover = false;
@@ -375,13 +386,15 @@ var place = {
         this.isMouseDown = false;
     },
 
-    moveCamera: function(deltaX, deltaY, animated) {
-        if (typeof animated === "undefined") animated = false;
-        let cam = $(this.cameraController);
-        let zoomModifier = this._getCurrentZoom();
-        let x = deltaX / zoomModifier,
-            y = deltaY / zoomModifier;
-        this.setCanvasPosition(x, y, true);
+    moveCamera: function(deltaX, deltaY, softAllowBoundPush = true) {
+        var cam = $(this.cameraController);
+        var zoomModifier = this._getCurrentZoom();
+        var coords = this.getCoordinates();
+        var x = deltaX / zoomModifier, y = deltaY / zoomModifier;
+        var pushbackXModifier = 1, pushbackYModifier = 1;
+        if(this.isOutsideOfBounds(true).x && softAllowBoundPush) pushbackXModifier = Math.abs(Math.min(coords.x, size - coords.x)) / 30 + 1;
+        if(this.isOutsideOfBounds(true).y && softAllowBoundPush) pushbackYModifier = Math.abs(Math.min(coords.y, size - coords.y)) / 30 + 1;
+        this.setCanvasPosition(x / pushbackXModifier, y / pushbackYModifier, true, softAllowBoundPush);
     },
 
     updateCoordinates: function() {
@@ -397,20 +410,29 @@ var place = {
         this.lastUpdatedCoordinates = coord;
     },
 
+    isOutsideOfBounds: function(precise = false) {
+        var coord = this.getCoordinates();
+        var x = coord.x < 0 || coord.x >= size, y = coord.y >= size || coord.y < 0
+        return precise ? { x: x, y: y } : x || y;
+    },
+
     getCoordinates: function() {
         let dcanvas = this.canvasController.canvas;
         return {x: Math.round(-this.panX) + dcanvas.width / 2, y: Math.round(-this.panY) + dcanvas.height / 2};
     },
 
-    setCanvasPosition: function(x, y, delta = false) {
+    setCanvasPosition: function(x, y, delta = false, softAllowBoundPush = true) {
         $(this.pixelDataPopover).hide();
-        let deltaStr = delta ? "+=" : ""
-        $(this.cameraController).css({
-            top: `${deltaStr}${y}px`,
-            left: `${deltaStr}${x}px`
-        })
         if (delta) this.panX += x, this.panY += y;
         else this.panX = x, this.panY = y;
+        if(!softAllowBoundPush) {
+            this.panX = Math.max(-(size / 2) + 1, Math.min((size / 2), this.panX));
+            this.panY = Math.max(-(size / 2) + 1, Math.min((size / 2), this.panY));
+        }
+        $(this.cameraController).css({
+            top: `${this.panY}px`,
+            left: `${this.panX}px`
+        })
         this.updateCoordinates();
         this.updateDisplayCanvas();
     },
@@ -453,6 +475,13 @@ var place = {
         }
     },
 
+    closestInsideCoordinates: function(x, y) {
+        return {
+            x: Math.max(0, Math.min(x, size - 1)),
+            y: Math.max(0, Math.min(y, size - 1))
+        }
+    },
+
     handleMouseUp: function(event) {
         if(this.shouldClick && this.isMouseDown) {
             if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.indexOf(event.target) >= 0 || event.target == this.zoomButton || !this.shouldClick) return;
@@ -464,8 +493,12 @@ var place = {
         $(this.zoomController).removeClass("grabbing");
         this.dragStart = null;
         let coord = this.getCoordinates();
+        if(this.isOutsideOfBounds()) {
+            var newCoord = this.closestInsideCoordinates(coord.x, coord.y);
+            this.zooming.fastZoom = true;
+            this.zoomIntoPoint(newCoord.x, newCoord.y, false);
+        }
         this.hashHandler.modifyHash(coord);
-        this.didSetHash = true;
     },
 
     contextMenu: function(event) {
@@ -594,14 +627,14 @@ var place = {
         }
     },
 
-    zoomIntoPoint: function(x, y) {
+    zoomIntoPoint: function(x, y, actuallyZoom = true) {
         this.zooming.panToX = -(x - size / 2);
         this.zooming.panToY = -(y - size / 2);
 
         this.zooming.panFromX = this.panX;
         this.zooming.panFromY = this.panY;
 
-        this.setZoomedIn(true);
+        this.setZoomedIn(actuallyZoom ? true : this.zooming.zoomedIn); // this is lazy as fuck but so am i
     },
 
     canvasClicked: function(x, y, event) {
@@ -687,6 +720,14 @@ var place = {
     setPixel: function(colour, x, y) {
         this.canvasController.setPixel(colour, x, y);
         this.updateDisplayCanvas();
+    },
+
+    doKeys: function() {
+        var keys = Object.keys(this.keys).filter(key => this.keys[key].filter(keyCode => this.keyStates[keyCode] === true).length > 0);
+        if(keys.indexOf("up") > -1) this.moveCamera(0, 5, false);
+        if(keys.indexOf("down") > -1) this.moveCamera(0, -5, false);
+        if(keys.indexOf("left") > -1) this.moveCamera(5, 0, false);
+        if(keys.indexOf("right") > -1) this.moveCamera(-5, 0, false);
     }
 }
 
