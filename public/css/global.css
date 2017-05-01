@@ -40,3 +40,18 @@ body.fixed-navbar {
 body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=true]) .actions-ctn *[data-admin-only=true] {
   display: none;
 }
+
+.norctn, .melctn {
+    max-width: 780px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 15px;
+}
+
+.melctn {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 15px;
+}
