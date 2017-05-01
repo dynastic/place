@@ -24,6 +24,7 @@
     "gulp-babel": "^6.1.2",
     "gulp-uglify": "^2.1.2",
     "jwt-simple": "^0.5.1",
+    "marked": "^0.3.6",
     "mongoose": "^4.9.2",
     "mongoose-datatables": "^3.0.0",
     "morgan": "^1.8.1",
