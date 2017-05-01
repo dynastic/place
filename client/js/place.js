@@ -143,7 +143,7 @@ var place = {
     keys: {
         left: [37, 65],
         up: [38, 87],
-        right: [39, 70],
+        right: [39, 68],
         down: [40, 83]
     },
     keyStates: {},
@@ -156,12 +156,12 @@ var place = {
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null},
     notificationHandler: notificationHandler, hashHandler: hashHandler,
 
-    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover) {
+    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
         this.canvas = canvas;
         this.canvasController = canvasController;
         this.canvasController.init(canvas);
+        this.grid = grid;
         this.displayCanvas = displayCanvas;
-        this.setupDisplayCanvas(this.displayCanvas);
 
         this.coordinateElement = coordinateElement;
         this.userCountElement = userCountElement;
@@ -200,10 +200,15 @@ var place = {
         canvas.addEventListener("touchcancel", event => { event.preventDefault(); this.handleMouseUp(event.changedTouches[0]) });
         canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
-        document.body.onkeyup = 
-        document.body.onkeydown = function(e) {
+        var handleKeyEvents = function(e) {
             var kc = e.keyCode || e.which;
             app.keyStates[kc] = e.type == 'keydown';
+        }
+
+        document.body.onkeyup = handleKeyEvents;
+        document.body.onkeydown = function(e) {
+            handleKeyEvents(e);
+            app.handleKeyDown(e.keyCode || e.which);
         };
 
         window.onresize = () => this.handleResize();
@@ -211,6 +216,7 @@ var place = {
 
         this.zoomController = zoomController;
         this.cameraController = cameraController;
+        this.setupDisplayCanvas(this.displayCanvas);
 
         let spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
@@ -307,6 +313,7 @@ var place = {
         this.displayCtx.msImageSmoothingEnabled = false;
         this.displayCtx.imageSmoothingEnabled = false;
         this.updateDisplayCanvas();
+        this.updateGrid();
     },
 
     setupDisplayCanvas: function(canvas) {
@@ -347,7 +354,7 @@ var place = {
         });
     },
 
-    animateZoom: function() {
+    animateZoom: function(callback = null) {
         this.zooming.zoomTime += this.zooming.fastZoom ? 5 : 1
 
         let x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
@@ -355,7 +362,7 @@ var place = {
         this.setCanvasPosition(x, y)
 
         if (this.zooming.zoomTime >= 100) {
-            this.zooming.zooming = false
+            this.zooming.zooming = false;
             this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
             this.zooming.panToX = null, this.zooming.panToY = null;
             clearInterval(this.zooming.zoomHandle);
@@ -367,11 +374,13 @@ var place = {
                 $(this.pixelDataPopover).fadeIn(250);
                 this.shouldShowPopover = false;
             }
+            if(callback) callback();
             return
         }
     },
 
     setZoomedIn: function(zoomedIn) {
+        var app = this;
         if(this.zooming.zoomHandle !== null) return;
         this.zooming.panFromX = this.panX;
         this.zooming.panFromY = this.panY;
@@ -382,10 +391,13 @@ var place = {
         this.zooming.zooming = true
         this.zooming.zoomedIn = zoomedIn;
         this.zooming.zoomTo = this._getZoomMultiplier()
-        this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this), 1)
+        this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this, function() {
+            $(app.grid).removeClass("zooming");
+        }), 1)
 
         if (zoomedIn) $(this.zoomController).parent().addClass("zoomed");
         else $(this.zoomController).parent().removeClass("zoomed");
+        $(this.grid).addClass("zooming");
         this.updateDisplayCanvas();
         this._adjustZoomButtonText();
     },
@@ -457,8 +469,21 @@ var place = {
             top: `${this.panY}px`,
             left: `${this.panX}px`
         })
+        this.updateGrid();
         this.updateCoordinates();
         this.updateDisplayCanvas();
+    },
+
+    updateGrid: function() {
+        let zoom = this._getCurrentZoom();
+        $(this.grid).css({
+            transform: `translate(${(($(this.cameraController).offset().left / zoom) - 0.5) * zoom % zoom}px, ${(($(this.cameraController).offset().top / zoom) - 0.5) * zoom % zoom}px)`,
+            backgroundSize: `${zoom}px ${zoom}px`
+        })
+    },
+
+    toggleGrid: function() {
+        $(this.grid).toggleClass("show");
     },
 
     handleMouseMove: function(event) {
@@ -752,8 +777,16 @@ var place = {
         if(keys.indexOf("down") > -1) this.moveCamera(0, -5, false);
         if(keys.indexOf("left") > -1) this.moveCamera(5, 0, false);
         if(keys.indexOf("right") > -1) this.moveCamera(-5, 0, false);
+    },
+
+    handleKeyDown: function(keycode) {
+        if(keycode == 71) { // G - Grid
+            this.toggleGrid();
+        } else if(keycode == 32) { // Spacebar - Toggle Zoom
+            this.toggleZoom();
+        }
     }
 }
 
-place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0]);
+place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
 place.setZoomButton($("#zoom-button")[0]);

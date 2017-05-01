@@ -1,8 +1,5 @@
 <div class="canvas-container">
     <%- include("views/pixel_data.html") %>
-    <link rel="apple-touch-icon" href="place20.png"/>
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <div id="zoom-button" class="control btn btn-default"></div>
     <div id="grid-hint"></div>
     <div id="palette-ctn">
@@ -23,6 +20,7 @@
         </div>
     </div>
     <canvas id="place-canvas" height="100%" width="100%"></canvas>
+    <div id="grid"></div>
     <div id="zoom-controller">
         <div id="camera-controller">
             <canvas id="place-canvas-draw" height="1000" width="1000"></canvas>
