@@ -77,7 +77,7 @@ body {
     width: 1000px;
 }
 
-#zoom-button {
+.button-ctn {
     position: absolute;
     top: 20px;
     right: 20px;
@@ -225,6 +225,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     left: 0;
     display: none;
     transition: 250ms ease-out opacity;
+    z-index: 1;
 }
 
 #grid.show {
