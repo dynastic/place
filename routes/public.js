@@ -71,6 +71,10 @@ function PublicRouter(app) {
         return responseFactory.sendRenderedResponse("public/index", req, res);
     });
 
+    router.get('/guidelines', function(req, res) {
+        return responseFactory.sendRenderedResponse("public/guidelines", req, res);
+    });
+
     router.get('/deactivated', function(req, res) {
         if(req.user) res.redirect("/");
         return responseFactory.sendRenderedResponse("public/deactivated", req, res);

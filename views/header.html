@@ -77,6 +77,7 @@
               </ul>
             </li>
             <%- renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money"); %>
+            <%- renderNavItem("Community Guidelines", "/guidelines", "handshake-o"); %>
             <% if(user && userMod) { %><%- renderNavItem(userAdmin ? "Admin" : "Moderator", "/admin", "gavel"); %><% } %>
           </ul>
           <ul class="nav navbar-nav navbar-right">
