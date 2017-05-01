@@ -12,6 +12,13 @@ if(typeof error === 'undefined') error = null;
         <label for="inputUsername" class="sr-only">Username</label>
         <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="username" value="<%= username %>" required autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <% if(captcha) { %><%- renderCaptcha() %><br><% } %>
+        <% if(fs.existsSync('./config/community_guidelines.md')) { %>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="agreeToGuidelines"> I agree to abide by the <a href="/guidelines">Community Guidelines</a>.
+          </label>
+        </div>
+        <% } %>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Save</button>
         <% if(error) { %>
             <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %></div>

@@ -6,6 +6,8 @@ const jwt = require('jwt-simple');
 const passport = require('passport');
 require('../util/passport')(passport);
 const User = require('../models/user');
+const marked = require("../util/Markdown");
+const fs = require("fs");
 
 function PublicRouter(app) {
     const responseFactory = require("../util/ResponseFactory")(app);
@@ -40,12 +42,15 @@ function PublicRouter(app) {
                 });
             });
         }
-        if(app.enableCaptcha) {
-            app.recaptcha.verify(req, error => {
-                if(error) return renderResponse("Please fill in the captcha properly.");
-                doPickUsername();
-            });
-        } else doPickUsername();
+        fs.exists(__dirname + "/../config/community_guidelines.md", exists => {
+            if (!req.body.agreeToGuidelines && exists) return renderResponse("You must agree to the community guidelines to use this service.");
+            if(app.enableCaptcha) {
+                app.recaptcha.verify(req, error => {
+                    if(error) return renderResponse("Please fill in the captcha properly.");
+                    doPickUsername();
+                });
+            } else doPickUsername();
+        });
     });
 
     const ratelimitCallback = function (req, res, next, nextValidRequestDate) {
@@ -71,8 +76,14 @@ function PublicRouter(app) {
         return responseFactory.sendRenderedResponse("public/index", req, res);
     });
 
-    router.get('/guidelines', function(req, res) {
-        return responseFactory.sendRenderedResponse("public/guidelines", req, res);
+    router.get('/guidelines', function(req, res, next) {
+        fs.readFile(__dirname + "/../config/community_guidelines.md", "utf8", (err, data) => {
+            if(err || !data) return next();
+            marked(data, (err, markdown) => {
+                if(err || !markdown) return next();
+                return responseFactory.sendRenderedResponse("public/guidelines", req, res, { md: markdown });
+            });
+        });
     });
 
     router.get('/deactivated', function(req, res) {
@@ -148,14 +159,17 @@ function PublicRouter(app) {
             });
         }
         if (req.user) return res.redirect("/");
-        if (!req.body.username || !req.body.password || !req.body.passwordverify) return renderResponse("Please fill out all the fields.")
-        if (req.body.password != req.body.passwordverify) return renderResponse("The passwords you entered did not match.");
-        if(app.enableCaptcha) {
-            app.recaptcha.verify(req, error => {
-                if(error) return renderResponse("Please fill in the captcha properly.");
-                doSignup();
-            });
-        } else doSignup();
+        fs.exists(__dirname + "/../config/community_guidelines.md", exists => {
+            if (!req.body.username || !req.body.password || !req.body.passwordverify) return renderResponse("Please fill out all the fields.")
+            if (req.body.password != req.body.passwordverify) return renderResponse("The passwords you entered did not match.");
+            if (!req.body.agreeToGuidelines && exists) return renderResponse("You must agree to the community guidelines to use this service.");
+            if(app.enableCaptcha) {
+                app.recaptcha.verify(req, error => {
+                    if(error) return renderResponse("Please fill in the captcha properly.");
+                    doSignup();
+                });
+            } else doSignup();
+        });
     });
 
     if(typeof config.oauth !== 'undefined') {
