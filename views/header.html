@@ -3,6 +3,7 @@
   if(typeof css === 'undefined') css = [];
   if(typeof pageTitle === 'undefined') pageTitle = null;
   if(typeof isAdmin === 'undefined') isAdmin = false;
+  if(typeof pinnable === 'undefined') pinnable = false;
   if(typeof navbarSupportsTopMode === 'undefined') navbarSupportsTopMode = false;
   var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
   var renderNavItem = function(name, itemPath, icon = null) {
@@ -20,6 +21,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <title><% if(pageTitle) { %><%= pageTitle %> &middot; <% } %>Place 2.0</title>
+
+    <link rel="apple-touch-icon" href="place20.png"/>
+    <% if(pinnable) { %>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <% } %>
 
     <meta property="og:title" content="Place 2.0">
     <meta property="og:url" content="https://place.dynastic.co">
