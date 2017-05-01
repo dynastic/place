@@ -1,8 +1,24 @@
+body {
+    overflow-y: hidden;
+    touch-action: none;
+}
+
 .canvas-container {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    position: fixed;
+    top: 64px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: #ddd;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
 }
 
 #place-canvas {
@@ -23,28 +39,6 @@
     image-rendering: pixelated;
     height: 1000px;
     width: 1000px;
-}
-
-body.debug #place-canvas-draw {
-    opacity: 1;
-}
-
-body.debug #place-canvas {
-    opacity: 0;
-}
-
-.canvas-container {
-    position: fixed;
-    top: 64px;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    background-color: #ddd;
-    align-items: center;
-    display: flex;
-    justify-content: center;
-    overflow: hidden;
 }
 
 #zoom-controller {
@@ -219,6 +213,28 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     z-index: 1;
 }
 
+#grid {
+    position: absolute;
+    width: 110vw;
+    height: 110vh;
+    background-size: 4px 4px;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image: linear-gradient(to right, #ccc 1px, transparent 1px), linear-gradient(to bottom, #ccc 1px, transparent 1px);
+    top: 0;
+    left: 0;
+    display: none;
+    transition: 250ms ease-out opacity;
+}
+
+#grid.show {
+    display: block;
+}
+
+#grid.show.zooming {
+    display: none!important;
+}
+
 #pixel-data-ctn {
     position: absolute;
     display: none;
@@ -381,9 +397,4 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 
 .pixel-data > .user-info > .field {
     width: 100%;
-}
-
-body {
-    overflow-y: hidden;
-    touch-action: none;
 }
