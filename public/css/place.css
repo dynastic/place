@@ -226,6 +226,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     display: none;
     transition: 250ms ease-out opacity;
     z-index: 1;
+    background-position: -0.5px -0.5px;
 }
 
 #grid.show {
