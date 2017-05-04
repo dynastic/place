@@ -314,6 +314,7 @@ var place = {
         this.displayCtx.imageSmoothingEnabled = false;
         this.updateDisplayCanvas();
         this.updateGrid();
+        this.updateGridHint(this.lastX, this.lastY);
     },
 
     setupDisplayCanvas: function(canvas) {
@@ -502,20 +503,27 @@ var place = {
         this._adjustGridButtonText();
     },
 
+    updateGridHint: function(x, y) {
+        console.log(x, y);
+        this.lastX = x;
+        this.lastY = y;
+        if(this.gridHint) {
+            let zoom = this._getCurrentZoom();
+            // Hover position in grid multiplied by zoom
+            let x = Math.round((this.lastX - $(this.cameraController).offset().left) / zoom), y = Math.round((this.lastY - $(this.cameraController).offset().top) / zoom);
+            let elem = $(this.gridHint);
+            let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
+            let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
+            elem.css({
+                left: posX * zoom,
+                top: posY * zoom,
+            });
+        }
+    },
+
     handleMouseMove: function(event) {
         if(!this.placing) {
-            if(this.gridHint) {
-                let zoom = this._getCurrentZoom();
-                // Hover position in grid multiplied by zoom
-                let x = Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), y = Math.round((event.pageY - $(this.cameraController).offset().top) / zoom);
-                let elem = $(this.gridHint);
-                let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
-                let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
-                elem.css({
-                    left: posX * zoom,
-                    top: posY * zoom,
-                });
-            }
+            this.updateGridHint(event.pageX, event.pageY);
             if(this.handElement) {
                 let elem = $(this.handElement);
                 elem.css({
