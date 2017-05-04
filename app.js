@@ -35,6 +35,14 @@ process.on('uncaughtException', function(err) {
     app.reportError(err);
 });
 
+if (typeof app.config.bugSnagKey !== undefined) {
+    // Configure bugsnag
+    app.bugsnag = require('bugsnag');
+    app.bugsnag.releaseStage = process.env.NODE_ENV;
+    app.bugsnag.notifyReleaseStages = ["production"];
+    app.bugsnag.register(app.config.bugSnagKey);
+}
+
 // Get image handler
 app.paintingHandler = paintingHandler(app);
 console.log("Loading image from the database...")
