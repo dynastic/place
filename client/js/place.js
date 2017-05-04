@@ -150,18 +150,18 @@ var place = {
     socket: null,
     zoomButton: null,
     dragStart: null,
-    isMouseDown: false, shouldClick: true, placing: false, shouldShowPopover: false,
+    placing: false, shouldShowPopover: false,
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null},
     notificationHandler: notificationHandler, hashHandler: hashHandler,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
-        this.canvas = canvas;
+        this.canvas = canvas; // moved around; hidden
         this.canvasController = canvasController;
         this.canvasController.init(canvas);
         this.grid = grid;
-        this.displayCanvas = displayCanvas;
+        this.displayCanvas = displayCanvas; // used for display
 
         this.coordinateElement = coordinateElement;
         this.userCountElement = userCountElement;
@@ -187,17 +187,7 @@ var place = {
         this.updatePlaceTimer();
 
         let controller = $(zoomController).parent()[0];
-        canvas.onmousedown = (event) => { if(event.which == 1) this.handleMouseDown(event || window.event) };
-        canvas.onmouseup = (event) => { if(event.which == 1) this.handleMouseUp(event || window.event) };
-        canvas.onmouseout = (event) => { if(event.which == 1) { this.shouldClick = false; this.handleMouseUp(event || window.event) } };
-        canvas.onmousemove = (event) => {
-            if (this.isMouseDown) this.handleMouseDrag(event || window.event);
-            this.handleMouseMove(event || window.event);
-        }
-        canvas.addEventListener("touchstart", event => { event.preventDefault(); this.handleMouseDown(event.changedTouches[0])} );
-        canvas.addEventListener("touchmove", event => { event.preventDefault(); if (this.isMouseDown) this.handleMouseDrag(event.changedTouches[0]); });
-        canvas.addEventListener("touchend", event => { event.preventDefault(); this.handleMouseUp(event.changedTouches[0]) });
-        canvas.addEventListener("touchcancel", event => { event.preventDefault(); this.handleMouseUp(event.changedTouches[0]) });
+        canvas.onmousemove = (event) => this.handleMouseMove(event || window.event);
         canvas.addEventListener("contextmenu", event => this.contextMenu(event));
 
         var handleKeyEvents = function(e) {
@@ -217,6 +207,7 @@ var place = {
         this.zoomController = zoomController;
         this.cameraController = cameraController;
         this.setupDisplayCanvas(this.displayCanvas);
+        this.setupInteraction();
 
         let spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
@@ -238,6 +229,29 @@ var place = {
         this.socket = this.startSocketConnection();
 
         setInterval(function() { app.doKeys() }, 15);
+    },
+
+    setupInteraction: function() {
+        var app = this;
+        interact(this.cameraController).draggable({
+            inertia: true,
+            restrict: {
+                restriction: "parent",
+                elementRect: { top: 0.5, left: 0.5, bottom: 0.5, right: 0.5 },
+                endOnly: true
+            },
+            autoScroll: true,
+            onstart: event => $(app.zoomController).addClass("grabbing"),
+            onmove: event => app.moveCamera(event.dx, event.dy),
+            onend: event => {
+                $(app.zoomController).removeClass("grabbing");
+                var coord = app.getCoordinates();
+                app.hashHandler.modifyHash(coord);
+            }
+        }).on("tap", event => {
+            let zoom = app._getZoomMultiplier();
+            app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom))
+        });
     },
 
     loadUserCount: function() {
@@ -447,12 +461,10 @@ var place = {
 
     handleZoomButtonClick: function() {
         this.toggleZoom();
-        this.isMouseDown = false;
     },
 
     handleGridButtonClick: function() {
         this.toggleGrid();
-        this.isMouseDown = false;
     },
 
     moveCamera: function(deltaX, deltaY, softAllowBoundPush = true) {
@@ -460,10 +472,7 @@ var place = {
         var zoomModifier = this._getCurrentZoom();
         var coords = this.getCoordinates();
         var x = deltaX / zoomModifier, y = deltaY / zoomModifier;
-        var pushbackXModifier = 1, pushbackYModifier = 1;
-        if(this.isOutsideOfBounds(true).x && softAllowBoundPush) pushbackXModifier = Math.abs(Math.min(coords.x, size - coords.x)) / 30 + 1;
-        if(this.isOutsideOfBounds(true).y && softAllowBoundPush) pushbackYModifier = Math.abs(Math.min(coords.y, size - coords.y)) / 30 + 1;
-        this.setCanvasPosition(x / pushbackXModifier, y / pushbackYModifier, true, softAllowBoundPush);
+        this.setCanvasPosition(x, y, true, softAllowBoundPush);
     },
 
     updateCoordinates: function() {
@@ -551,44 +560,11 @@ var place = {
         }
     },
 
-    handleMouseDown: function(event) {
-        this.isMouseDown = true;
-        $(this.zoomController).addClass("grabbing");
-        this.dragStart = { x: event.pageX, y: event.pageY };
-    },
-
-    handleMouseDrag: function(event) {
-        if (event.pageX !== this.dragStart.x || event.pageY !== this.dragStart.y) {
-            this.shouldClick = false;
-            if (this.dragStart) this.moveCamera(event.pageX - this.dragStart.x, event.pageY - this.dragStart.y);
-            this.dragStart = { x: event.pageX, y: event.pageY };
-        }
-    },
-
     closestInsideCoordinates: function(x, y) {
         return {
             x: Math.max(0, Math.min(x, size - 1)),
             y: Math.max(0, Math.min(y, size - 1))
         }
-    },
-
-    handleMouseUp: function(event) {
-        if(this.shouldClick && this.isMouseDown) {
-            if(event.target === this.colourPaletteElement || this.colourPaletteOptionElements.indexOf(event.target) >= 0 || event.target == this.zoomButton || !this.shouldClick) return;
-            let zoom = this._getZoomMultiplier();
-            this.canvasClicked(Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), Math.round((event.pageY - $(this.cameraController).offset().top) / zoom))
-        }
-        this.shouldClick = true;
-        this.isMouseDown = false;
-        $(this.zoomController).removeClass("grabbing");
-        this.dragStart = null;
-        let coord = this.getCoordinates();
-        if(this.isOutsideOfBounds()) {
-            var newCoord = this.closestInsideCoordinates(coord.x, coord.y);
-            this.zooming.fastZoom = true;
-            this.zoomIntoPoint(newCoord.x, newCoord.y, false);
-        }
-        this.hashHandler.modifyHash(coord);
     },
 
     contextMenu: function(event) {
