@@ -73,10 +73,8 @@ body {
 
 #camera-controller {
     position: relative;
-    height: 999px;
-    width: 999px;
-    -webkit-transform: translate(0, 0);
-    transform: translate(0, 0);
+    height: 1000px;
+    width: 1000px;
 }
 
 .button-ctn {

@@ -123,26 +123,21 @@ function PublicRouter(app) {
         res.redirect("/@" + req.user.name);
     });
 
-    router.get('/user/:userID', function(req, res) {
+    router.get('/user/:userID', function(req, res, next) {
         User.findById(req.params.userID).then(user => {
             res.redirect(`/@${user.name}`);
-        }).catch(err => res.redirect("/"))
+        }).catch(err => next())
     });
 
-    router.get('/@:username', function(req, res) {
-        var query = {name: req.params.username};
-        var canSeeInvisibleUsers = req.user ? req.user.moderator || req.user.admin : false;
-        if(!canSeeInvisibleUsers) {
-            query.banned = {$ne: true};
-            query.deactivated = {$ne: true};
-        }
-        User.findOne(query).then(user => {
+    router.get('/@:username', function(req, res, next) {
+        User.findByUsername(req.params.username).then(user => {
+            if((user.banned || user.deactivated) && !(req.user.moderator || req.user.admin)) return next();
             user.getLatestAvailablePixel().then(pixel => {
                 return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
             }).catch(err => {
                 return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: null, isLatestPixel: false, hasNewPassword: req.query.hasNewPassword });            
             });
-        }).catch(err => res.redirect("/"))
+        }).catch(err => next())
     });
 
     router.post('/signup', signupRatelimit.prevent, function(req, res, next) {

@@ -497,7 +497,7 @@ var place = {
 
     getCoordinates: function() {
         let dcanvas = this.canvasController.canvas;
-        return {x: Math.round(-this.panX) + dcanvas.width / 2, y: Math.round(-this.panY) + dcanvas.height / 2};
+        return {x: Math.floor(-this.panX) + dcanvas.width / 2, y: Math.floor(-this.panY) + dcanvas.height / 2};
     },
 
     setCanvasPosition: function(x, y, delta = false, softAllowBoundPush = true) {

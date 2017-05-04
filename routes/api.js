@@ -155,6 +155,11 @@ function APIRouter(app) {
         res.json({success: true});
     });
 
+    router.get("/admin/reload_config", app.adminMiddleware, function(req, res, next) {
+        app.loadConfig();
+        res.json({success: true});
+    });
+
     router.post("/admin/users", app.modMiddleware, function(req, res, next) {
         let searchValue = req.body.search ? req.body.search.value || "" : "";
         var sort = { creationDate: "desc" };
