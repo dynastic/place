@@ -428,6 +428,23 @@ var place = {
         $(btn).click(this.handleGridButtonClick.bind(this));
     },
 
+    setCoordinatesButton: function(btn) {
+        if(Clipboard.isSupported()) {
+            var app = this;
+            var clipboard = new Clipboard(btn);
+            $(btn).addClass("supported").tooltip({
+                title: "Copied to clipboard!",
+                trigger: "manual",
+            });
+            clipboard.on("success", function(e) {
+                $(btn).tooltip("show");
+                setTimeout(function() {
+                    $(btn).tooltip("hide");
+                }, 2500);
+            })
+        }
+    },
+
     handleZoomButtonClick: function() {
         this.toggleZoom();
         this.isMouseDown = false;
@@ -457,6 +474,7 @@ var place = {
                 let spans = coordElem.find("span");
                 spans.first().text(coord.x.toLocaleString());
                 spans.last().text(coord.y.toLocaleString());
+                coordElem.attr("data-clipboard-text", `(${coord.x}, ${coord.y})`);
             }, 0);
         }
         this.lastUpdatedCoordinates = coord;
@@ -504,7 +522,6 @@ var place = {
     },
 
     updateGridHint: function(x, y) {
-        console.log(x, y);
         this.lastX = x;
         this.lastY = y;
         if(this.gridHint) {
@@ -817,3 +834,4 @@ var place = {
 place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
 place.setZoomButton($("#zoom-button")[0]);
 place.setGridButton($("#grid-button")[0]);
+place.setCoordinatesButton($("#coordinates")[0]);
