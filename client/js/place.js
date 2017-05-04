@@ -808,6 +808,8 @@ var place = {
             this.toggleGrid();
         } else if(keycode == 32) { // Spacebar - Toggle Zoom
             this.toggleZoom();
+        } else if(keycode == 27 && this.selectedColour !== null) { // Esc - Deselect colour
+            this.deselectColour();
         }
     }
 }
