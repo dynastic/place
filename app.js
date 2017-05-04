@@ -21,7 +21,10 @@ let paths = {
 }
 
 var app = {};
-app.config = config;
+app.loadConfig = () => {
+    app.config = require('./config/config');
+}
+app.loadConfig();
 app.temporaryUserInfo = TemporaryUserInfo;
 
 // Setup error tracking
@@ -51,7 +54,7 @@ if(typeof app.config.recaptcha !== 'undefined') {
 }
 if(app.enableCaptcha) {
     // Set up reCaptcha
-    recaptcha.init(config.recaptcha.siteKey, config.recaptcha.secretKey);
+    recaptcha.init(app.config.recaptcha.siteKey, app.config.recaptcha.secretKey);
     app.recaptcha = recaptcha;
 }
 
@@ -69,7 +72,7 @@ app.httpServer = new HTTPServer(app);
 app.server = require('http').createServer(app.httpServer.server);
 app.websocketServer = new WebsocketServer(app, app.server);
 
-mongoose.connect(config.database);
+mongoose.connect(app.config.database);
 
 // Clean existing built JS
 gulp.task('clean', () => del(['public/js/build']));
@@ -85,7 +88,7 @@ gulp.task('scripts', ['clean'], (cb) => {
     let t = gulp.src(paths.scripts.src)
     t = t.pipe(babel({ presets: ['es2015'] }));
     t = t.on("error", swallowError);
-    if(!config.debug) t = t.pipe(uglify());
+    if(!app.config.debug) t = t.pipe(uglify());
     t = t.on("error", swallowError);
     t = t.pipe(gulp.dest(paths.scripts.built));
     t = t.on("end", () => console.log("Finished processing JavaScript."));
@@ -98,4 +101,4 @@ gulp.task('watch', () => gulp.watch(paths.scripts.src, ['scripts']));
 gulp.task('default', ['watch', 'scripts']);
 gulp.start(['watch', 'scripts'])
 
-app.server.listen(config.port, config.onlyListenLocal ? "127.0.0.1" : null);
+app.server.listen(app.config.port, app.config.onlyListenLocal ? "127.0.0.1" : null);
