@@ -28,7 +28,7 @@ module.exports = function(passport) {
     }));
 
     passport.use(new LocalStrategy(function(username, password, done) {
-        User.findOne({ name: username }, function(err, user) {
+        User.findByUsername(username, function(err, user) {
             if (err) return done(err, false);
             if (user) {
                 // Don't allow Oauth logins from normal login area.
