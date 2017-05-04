@@ -206,3 +206,7 @@ table.filters {
 .page-header > h1 {
   margin-top: 0;
 }
+
+.content {
+  margin-top: 10px;
+}

@@ -1,39 +1,63 @@
 var actions = {
-    ban: {
-        url: "mod/toggle_ban",
-        btnStyle: "danger",
-        callback: function(data, elem) {
-            elem.text(`${data.banned ? "Unban" : "Ban"}`);
+    user: {
+        ban: {
+            url: "mod/toggle_ban",
+            btnStyle: "danger",
+            callback: function(data, elem) {
+                elem.text(`${data.banned ? "Unban" : "Ban"}`);
+            },
+            buttonText: function(data) {
+                return data.banned ? "Unban" : "Ban";
+            }
         },
-        buttonText: function(data) {
-            return data.banned ? "Unban" : "Ban";
+        activation: {
+            url: "mod/toggle_active",
+            btnStyle: "warning",
+            callback: function(data, elem) {
+                elem.text(`${data.deactivated ? "Activate" : "Deactivate"}`);
+            },
+            buttonText: function(data) {
+                return data.deactivated ? "Activate" : "Deactivate";
+            }
+        },
+        mod: {
+            url: "admin/toggle_mod",
+            btnStyle: "info",
+            adminOnly: true,
+            callback: function(data, elem) {
+                elem.text(`${data.moderator ? "Remove" : "Give"} Moderator`);
+            },
+            buttonText: function(data) {
+                return `${data.moderator ? "Remove" : "Give"} Moderator`
+            }
         }
     },
-    activation: {
-        url: "mod/toggle_active",
-        btnStyle: "warning",
-        callback: function(data, elem) {
-            elem.text(`${data.deactivated ? "Activate" : "Deactivate"}`);
+    server: {
+        reloadConfig: {
+            url: "admin/reload_config",
+            btnStyle: "success",
+            adminOnly: true,
+            callback: (data, elem) => {
+                elem.text(actions.server.reloadConfig.buttonText(data));
+                alert("Successfully reloaded configuration from file.")
+            },
+            buttonText: data => "Reload Config"
         },
-        buttonText: function(data) {
-            return data.deactivated ? "Activate" : "Deactivate";
-        }
-    },
-    mod: {
-        url: "admin/toggle_mod",
-        btnStyle: "info",
-        adminOnly: true,
-        callback: function(data, elem) {
-            elem.text(`${data.moderator ? "Remove" : "Give"} Moderator`);
-        },
-        buttonText: function(data) {
-            return `${data.moderator ? "Remove" : "Give"} Moderator`
+        refreshClients: {
+            url: "admin/refresh_clients",
+            btnStyle: "danger",
+            adminOnly: true,
+            callback: (data, elem) => {
+                elem.text(actions.server.refreshClients.buttonText(data));
+                alert("Successfully refreshed all clients currently connected to websockets.")
+            },
+            buttonText: data => "Refresh All Clients"
         }
     }
 }
-var renderAction = function(actionName, data) {
-    var action = actions[actionName];
-    return `<a href="javascript:void(0)" class="btn btn-${action.btnStyle} user-action-btn" data-admin-only=${action.adminOnly === true} data-user-action="${actionName}">${action.buttonText(data)}</a>`;
+var renderAction = function(actionName, data = {}, type = "user") {
+    var action = actions[type][actionName];
+    return `<a href="javascript:void(0)" class="btn btn-${action.btnStyle} ${type}-action-btn" data-admin-only=${action.adminOnly === true} data-${type}-action="${actionName}">${action.buttonText(data)}</a>`;
 }
 
 var renderUserActions = function(user) {
@@ -51,6 +75,13 @@ var renderUserActions = function(user) {
     </div>`
 }
 
+var renderServerActions = function() {
+    return `<div class="actions-ctn">
+        ${renderAction("reloadConfig", {}, "server")}
+        ${renderAction("refreshClients", {}, "server")}
+    </div>`
+}
+
 $("body").on("click", ".user-action-btn", function() {
     function handleError(data) {
         var error = "An unknown error occurred."
@@ -58,12 +89,36 @@ $("body").on("click", ".user-action-btn", function() {
         alert("Couldn't perform action on user: " + error);
     }
     var userID = $(this).parent().data("user-id");
-    var action = actions[$(this).data("user-action")];
+    var action = actions.user[$(this).data("user-action")];
     var originalText = $(this).html();
     $(this).addClass("disabled");
     $(this).html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
     var elem = $(this);
     $.get(`/api/${action.url}/`, {id: userID}).done(function(data) {
+        if(!data.success) return handleError(data);
+        action.callback(data, elem);
+    }).fail(function(res) {
+        handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON);
+        if(action.callbackModifiesText !== false) elem.html(originalText);
+    }).always(function() {
+        elem.removeClass("disabled");
+        if(action.callbackModifiesText === false) elem.html(originalText);
+    });
+});
+
+
+$("body").on("click", ".server-action-btn", function() {
+    function handleError(data) {
+        var error = "An unknown error occurred."
+        if(data && typeof data.error !== 'undefined' && data.error.message) error = data.error.message;
+        alert("Couldn't perform action: " + error);
+    }
+    var action = actions.server[$(this).data("server-action")];
+    var originalText = $(this).html();
+    $(this).addClass("disabled");
+    $(this).html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
+    var elem = $(this);
+    $.get(`/api/${action.url}/`).done(function(data) {
         if(!data.success) return handleError(data);
         action.callback(data, elem);
     }).fail(function(res) {

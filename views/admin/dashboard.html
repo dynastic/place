@@ -1,6 +1,7 @@
 <%- include('../admin_header.html') -%>
+<% var jsSnippets = []; %>
 <h1 class="page-header">Dashboard</h1>
-
+<!-- Status Updates -->
 <div class="row placeholders">
     <div class="col-xs-6 col-sm-3 placeholder">
         <div class="admin-stat" id="users-online"><span><i class="fa fa-circle-o-notch fa-spin"></i></span></div>
@@ -23,7 +24,17 @@
         <span class="text-muted">per minute<br><small>(averaged from last 20 minutes)</small></span>
     </div>
 </div>
-
+<% if(user.admin) { %>
+<!-- Administrator Actions -->
+<div class="section-heading">
+    <h2 class="sub-header">Administrator Actions</h2>
+</div>
+<div id="admin-actions" class="content">Loading...</div>
+<% jsSnippets.push(`
+    $("#admin-actions").html(renderServerActions())
+`) %>
+<% } %>
+<!-- Recent Actions -->
 <div class="section-heading">
     <h2 class="sub-header">Recent actions</h2>
     <a href="/admin/actions">See all &raquo;</a>
@@ -157,5 +168,6 @@
 </table>
 </div>-->
 <%- include('../admin_footer.html', {
-    js: ["/js/build/admin_dashboard.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"]
+    js: ["/js/build/admin_dashboard.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"],
+    jsSnippets: jsSnippets
 }) -%>
