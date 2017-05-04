@@ -314,6 +314,7 @@ var place = {
         this.displayCtx.imageSmoothingEnabled = false;
         this.updateDisplayCanvas();
         this.updateGrid();
+        this.updateGridHint(this.lastX, this.lastY);
     },
 
     setupDisplayCanvas: function(canvas) {
@@ -407,8 +408,12 @@ var place = {
     },
 
     _adjustZoomButtonText: function() {
-        let zoomIcon = `<i class="fa fa-fw fa-search-${this.zooming.zoomedIn ? "minus" : "plus"}"></i>`;
-        if (this.zoomButton) $(this.zoomButton).html(zoomIcon + (this.zooming.zoomedIn ? "Zoom Out" : "Zoom In"))
+        if (this.zoomButton) $(this.zoomButton).html(`<i class="fa fa-fw fa-search-${this.zooming.zoomedIn ? "minus" : "plus"}"></i>`).attr("title", this.zooming.zoomedIn ? "Zoom Out" : "Zoom In");
+    },
+
+    _adjustGridButtonText: function() {
+        var gridShown = $(this.grid).hasClass("show");
+        if (this.gridButton) $(this.gridButton).html(`<i class="fa fa-fw fa-${gridShown ? "square" : "th"}"></i>`).attr("title", gridShown ? "Hide Grid" : "Show Grid");
     },
 
     setZoomButton: function(btn) {
@@ -417,8 +422,19 @@ var place = {
         $(btn).click(this.handleZoomButtonClick.bind(this));
     },
 
+    setGridButton: function(btn) {
+        this.gridButton = btn;
+        this._adjustGridButtonText();
+        $(btn).click(this.handleGridButtonClick.bind(this));
+    },
+
     handleZoomButtonClick: function() {
         this.toggleZoom();
+        this.isMouseDown = false;
+    },
+
+    handleGridButtonClick: function() {
+        this.toggleGrid();
         this.isMouseDown = false;
     },
 
@@ -484,22 +500,30 @@ var place = {
 
     toggleGrid: function() {
         $(this.grid).toggleClass("show");
+        this._adjustGridButtonText();
+    },
+
+    updateGridHint: function(x, y) {
+        console.log(x, y);
+        this.lastX = x;
+        this.lastY = y;
+        if(this.gridHint) {
+            let zoom = this._getCurrentZoom();
+            // Hover position in grid multiplied by zoom
+            let x = Math.round((this.lastX - $(this.cameraController).offset().left) / zoom), y = Math.round((this.lastY - $(this.cameraController).offset().top) / zoom);
+            let elem = $(this.gridHint);
+            let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
+            let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
+            elem.css({
+                left: posX * zoom,
+                top: posY * zoom,
+            });
+        }
     },
 
     handleMouseMove: function(event) {
         if(!this.placing) {
-            if(this.gridHint) {
-                let zoom = this._getCurrentZoom();
-                // Hover position in grid multiplied by zoom
-                let x = Math.round((event.pageX - $(this.cameraController).offset().left) / zoom), y = Math.round((event.pageY - $(this.cameraController).offset().top) / zoom);
-                let elem = $(this.gridHint);
-                let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
-                let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
-                elem.css({
-                    left: posX * zoom,
-                    top: posY * zoom,
-                });
-            }
+            this.updateGridHint(event.pageX, event.pageY);
             if(this.handElement) {
                 let elem = $(this.handElement);
                 elem.css({
@@ -552,7 +576,7 @@ var place = {
 
     contextMenu: function(event) {
         event.preventDefault();
-        if(this.selectedColour) return this.deselectColour();
+        if(this.selectedColour !== null) return this.deselectColour();
         if(this.zooming.zoomedIn) this.setZoomedIn(false);
     },
 
@@ -784,9 +808,12 @@ var place = {
             this.toggleGrid();
         } else if(keycode == 32) { // Spacebar - Toggle Zoom
             this.toggleZoom();
+        } else if(keycode == 27 && this.selectedColour !== null) { // Esc - Deselect colour
+            this.deselectColour();
         }
     }
 }
 
 place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
 place.setZoomButton($("#zoom-button")[0]);
+place.setGridButton($("#grid-button")[0]);
