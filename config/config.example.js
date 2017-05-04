@@ -8,7 +8,7 @@ module.exports = {
     'googleAnalyticsTrackingID': "", // UA-XXXXXXXX-XX
     'host': 'http://place.dynastic.co', // the publicly accessible URL of the site
     'placeTimeout': 60,
-    'bugSnagKey': 'af8bf8fc85783e3c3b7536e1c5b5a0e1',
+    //'bugSnagKey': '', UNCOMMENT IF YOU HAVE A KEY
     'cachet': {
         // Setup reporting error count as a metric to Cachet
         'apiKey': "",
