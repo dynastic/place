@@ -137,8 +137,11 @@ UserSchema.statics.findByUsername = function(username, callback = null) {
 UserSchema.statics.register = function(username, password, callback, OAuthID, OAuthName) {
     if (!OAuthID && !this.isValidUsername(username)) return callback(null, { message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
     
+    var Schema = this;
+
     function continueWithRegistration() {
-        let newUser = this({
+        // ghetto af boi
+        let newUser = Schema({
             name: username,
             usernameSet: !OAuthID, // Opposite of OAuth will give us false which is what we need
             password: password,
