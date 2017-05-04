@@ -73,8 +73,10 @@ body {
 
 #camera-controller {
     position: relative;
-    height: 1000px;
-    width: 1000px;
+    height: 999px;
+    width: 999px;
+    -webkit-transform: translate(0, 0);
+    transform: translate(0, 0);
 }
 
 .button-ctn {
@@ -104,7 +106,7 @@ body {
     margin: 2px 0;
 }
 
-#palette-ctn > .ctn-row > div {
+#palette-ctn > .ctn-row > .content {
     background: #fff;
     width: auto;
     border-radius: 10px;
@@ -116,7 +118,7 @@ body {
     pointer-events: all;
 }
 
-#palette-ctn > .ctn-row > div.compact {
+#palette-ctn > .ctn-row > .content.compact {
     border-radius: 5px;
     padding: 5px 8px;
 }
@@ -128,6 +130,10 @@ body {
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
     position: relative;
+}
+
+#coordinates.supported {
+    cursor: pointer;
 }
 
 #coordinates > span {
@@ -183,7 +189,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 @supports (backdrop-filter:none) or (-webkit-backdrop-filter:none) {
-    #palette-ctn > .ctn-row > div {
+    #palette-ctn > .ctn-row > .content {
         background: rgba(255, 255, 255, 0.8);
         border: 1px solid rgba(0, 0, 0, 0.15);
         backdrop-filter: blur(12px);
