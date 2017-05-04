@@ -29,6 +29,11 @@ function HTTPServer(app) {
     // Log to console
     server.use(morgan('dev'));
 
+    if (typeof app.config.bugSnagKey !== undefined) {
+        server.use(app.bugsnag.requestHandler);
+        server.use(app.bugsnag.errorHandler);
+    }
+
     server.set('trust proxy', typeof app.config.trustProxyDepth === "number" ? app.config.trustProxyDepth : 0);
 
     // Setup passport for auth
@@ -78,13 +83,29 @@ function HTTPServer(app) {
     server.use('/admin', AdminRouter(app));
     server.use('/', PublicRouter(app));
 
+    if (server.get('env') === 'development') {
+        // Will print stack traces
+        server.use(function(err, req, res, next) {
+            res.status(err.status || 500);
+            res.render('error', {
+                message: err.message,
+                error: err
+            });
+        });
+    }
+
+    // Production error handler, no stack traces shown to user
+    server.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        if (req.accepts('json') && !req.accepts("html")) return res.send({ error: 'An unknown error occured.' });
+        app.responseFactory.sendRenderedResponse("errors/500", req, res);
+    });
+
     // 404 pages
     server.use((req, res, next) => {
         res.status(404);
-
         // respond with json
         if (req.accepts('json') && !req.accepts("html")) return res.send({ error: 'Not found' });
-
         // send HTML
         app.responseFactory.sendRenderedResponse("errors/404", req, res);
     });
