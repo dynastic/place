@@ -29,7 +29,7 @@ function WebsocketServer(app, httpServer) {
 
         checkUserCount: function() {
             if(!this.lastConnectedClientBroadcastCount || this.lastConnectedClientBroadcastCount != this.connectedClients) {
-                this.lastConnectedClientBroadcastCount = connectedClients;
+                this.lastConnectedClientBroadcastCount = this.connectedClients;
                 this.sendConnectedClientBroadcast();
             }
         }
