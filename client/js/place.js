@@ -241,16 +241,28 @@ var place = {
                 endOnly: true
             },
             autoScroll: true,
-            onstart: event => $(app.zoomController).addClass("grabbing"),
+            onstart: event => {
+                if(event.interaction.downEvent.button == 2) return event.preventDefault();
+                $(app.zoomController).addClass("grabbing");
+            },
             onmove: event => app.moveCamera(event.dx, event.dy),
             onend: event => {
+                if(event.interaction.downEvent.button == 2) return event.preventDefault();
                 $(app.zoomController).removeClass("grabbing");
                 var coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
             }
         }).on("tap", event => {
+            if(event.interaction.downEvent.button == 2) return event.preventDefault();
             let zoom = app._getZoomMultiplier();
             app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom))
+            event.preventDefault();
+        }).on("doubletap", event => {
+            if(app.zooming.zoomedIn) {
+                app.zoomFinished();
+                app.setZoomedIn(false);
+                event.preventDefault();
+            }
         });
     },
 
@@ -377,14 +389,7 @@ var place = {
         this.setCanvasPosition(x, y)
 
         if (this.zooming.zoomTime >= 100) {
-            this.zooming.zooming = false;
-            this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
-            this.zooming.panToX = null, this.zooming.panToY = null;
-            clearInterval(this.zooming.zoomHandle);
-            let coord = this.getCoordinates();
-            this.hashHandler.modifyHash(coord);
-            this.zooming.zoomHandle = null;
-            this.zooming.fastZoom = false;
+            this.zoomFinished();
             if(this.shouldShowPopover) {
                 $(this.pixelDataPopover).fadeIn(250);
                 this.shouldShowPopover = false;
@@ -392,6 +397,17 @@ var place = {
             if(callback) callback();
             return
         }
+    },
+
+    zoomFinished: function() {
+        this.zooming.zooming = false;
+        this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
+        this.zooming.panToX = null, this.zooming.panToY = null;
+        clearInterval(this.zooming.zoomHandle);
+        let coord = this.getCoordinates();
+        this.hashHandler.modifyHash(coord);
+        this.zooming.zoomHandle = null;
+        this.zooming.fastZoom = false;
     },
 
     setZoomedIn: function(zoomedIn) {
