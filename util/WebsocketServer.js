@@ -28,7 +28,10 @@ function WebsocketServer(app, httpServer) {
         },
 
         checkUserCount: function() {
-            if(!this.lastConnectedClientBroadcastCount || this.lastConnectedClientBroadcastCount != this.connectedClients) this.sendConnectedClientBroadcast();
+            if(!this.lastConnectedClientBroadcastCount || this.lastConnectedClientBroadcastCount != this.connectedClients) {
+                this.lastConnectedClientBroadcastCount = connectedClients;
+                this.sendConnectedClientBroadcast();
+            }
         }
     }
     obj.setup();
