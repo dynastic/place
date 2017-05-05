@@ -12,13 +12,11 @@ function WebsocketServer(app, httpServer) {
             var a = this;
             this.server.on('connection', socket => {
                 a.connectedClients++;
-                a.sendConnectedClientBroadcast();
-
                 socket.on('disconnect', function () {
                     a.connectedClients--;
-                    a.sendConnectedClientBroadcast();
                 });
             });
+            setInterval(() => a.checkUserCount(), 1000);
         },
 
         sendConnectedClientBroadcast: function() {
@@ -27,6 +25,10 @@ function WebsocketServer(app, httpServer) {
 
         broadcast: function(name, payload) {
             this.server.sockets.emit(name, payload);
+        },
+
+        checkUserCount: function() {
+            if(!this.lastConnectedClientBroadcastCount || this.lastConnectedClientBroadcastCount != this.connectedClients) this.sendConnectedClientBroadcast();
         }
     }
     obj.setup();
