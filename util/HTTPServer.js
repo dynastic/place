@@ -95,8 +95,9 @@ function HTTPServer(app) {
     }
 
     // Production error handler, no stack traces shown to user
-    server.use(function(err, req, res, next) {
+    server.use((err, req, res, next) => {
         res.status(err.status || 500);
+        app.reportError(err);
         if (req.accepts('json') && !req.accepts("html")) return res.send({ success: false, error: { message: "An unknown error occured.", code: "internal_server_error" } });
         app.responseFactory.sendRenderedResponse("errors/500", req, res);
     });
