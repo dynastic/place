@@ -135,7 +135,7 @@ UserSchema.methods.recordAccess = function(app, userAgent, ipAddress, key) {
 }
 
 UserSchema.statics.findByUsername = function(username, callback = null) {
-    return this.findOne({name: {$regex: new RegExp("^" + username.toLowerCase(), "i") }}, callback)
+    return this.findOne({name: {$regex: new RegExp(["^", username.toLowerCase(), "$"].join(""), "i") }}, callback)
 }
 
 UserSchema.statics.register = function(username, password, callback, OAuthID, OAuthName) {
