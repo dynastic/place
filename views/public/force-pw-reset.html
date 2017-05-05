@@ -1,0 +1,20 @@
+<%- include('../header.html', {
+    pageTitle: "Reset your password",
+    css: ["/css/signin.css"]
+}) -%>
+<% if(typeof error === 'undefined') error = null; %>
+<div class="container">
+    <form class="form-signin" method="POST" action="/force-pw-reset">
+        <h2 class="form-signin-heading">Reset your password</h2>
+        <p>You are required to change your password to continue using Place 2.0.</p><br>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required autofocus>
+        <label for="inputPasswordC" class="sr-only">Password (again)</label>
+        <input type="password" id="inputPasswordC" class="form-control" placeholder="Password (again)" name="confirmPassword" required>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Reset Password</button>
+        <% if(error) { %>
+            <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %></div>
+        <% } %>
+    </form>
+</div> <!-- /container -->
+<%- include('../footer.html') -%>

@@ -83,29 +83,21 @@ function HTTPServer(app) {
     server.use('/admin', AdminRouter(app));
     server.use('/', PublicRouter(app));
 
-    if (server.get('env') === 'development') {
-        // Will print stack traces
-        server.use(function(err, req, res, next) {
+    if (server.get('env') !== 'development') {
+        // Production error handler, no stack traces shown to user
+        server.use((err, req, res, next) => {
             res.status(err.status || 500);
-            res.render('error', {
-                message: err.message,
-                error: err
-            });
+            app.reportError(err);
+            if (req.accepts('json') && !req.accepts("html")) return res.send({ success: false, error: { message: "An unknown error occured.", code: "internal_server_error" } });
+            app.responseFactory.sendRenderedResponse("errors/500", req, res);
         });
     }
-
-    // Production error handler, no stack traces shown to user
-    server.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        if (req.accepts('json') && !req.accepts("html")) return res.send({ error: 'An unknown error occured.' });
-        app.responseFactory.sendRenderedResponse("errors/500", req, res);
-    });
 
     // 404 pages
     server.use((req, res, next) => {
         res.status(404);
         // respond with json
-        if (req.accepts('json') && !req.accepts("html")) return res.send({ error: 'Not found' });
+        if (req.accepts('json') && !req.accepts("html")) return res.send({ success: false, error: { message: "Page not found", code: "not_found" } });
         // send HTML
         app.responseFactory.sendRenderedResponse("errors/404", req, res);
     });

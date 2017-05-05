@@ -29,6 +29,11 @@ var canvasController = {
         this.isDisplayDirty = true;
     },
 
+    drawImageData: function(imageData) {
+        this.ctx.putImageData(imageData, 0, 0);
+        this.isDisplayDirty = true;
+    },
+
     setPixel: function(colour, x, y) {
         this.ctx.fillStyle = colour;
         this.ctx.fillRect(x, y, 1, 1);
@@ -153,7 +158,7 @@ var place = {
     placing: false, shouldShowPopover: false,
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
-    selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null},
+    selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null}, loadedImage: false,
     notificationHandler: notificationHandler, hashHandler: hashHandler,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
@@ -214,12 +219,7 @@ var place = {
         $(this.coordinateElement).show();
         $(this.userCountElement).show();
 
-        this.loadImage().then(image => {
-            this.canvasController.clearCanvas();
-            this.canvasController.drawImage(image);
-            this.updateDisplayCanvas();
-            this.displayCtx.imageSmoothingEnabled = false;
-        });
+        this.getCanvasImage();
 
         this.changeUserCount(null);
         this.loadUserCount().then(online => {
@@ -229,6 +229,55 @@ var place = {
         this.socket = this.startSocketConnection();
 
         setInterval(function() { app.doKeys() }, 15);
+    },
+
+    getCanvasImage: function() {
+        var app = this;
+        this.adjustLoadingScreen("Loading…");;
+        this.loadImage().then(image => {
+            app.adjustLoadingScreen();
+            app.canvasController.clearCanvas();
+            app.canvasController.drawImage(image);
+            app.updateDisplayCanvas();
+            app.displayCtx.imageSmoothingEnabled = false;
+            app.loadedImage = true;
+        }).catch(err => {
+            console.error("Error loading board image", err);
+            if(typeof err.status !== "undefined" && err.status === 503) {
+                app.adjustLoadingScreen("Waiting for server…");
+                console.log("Server wants us to await its instruction");
+                setTimeout(function() {
+                    app.getCanvasImage()
+                }, 15000);
+            } else {
+                app.adjustLoadingScreen("An error occurred. Please wait…");
+                setTimeout(function() {
+                    app.getCanvasImage()
+                }, 5000);
+            }
+        });
+    },
+
+    loadImage: function() {
+        return new Promise((resolve, reject) => {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/api/board-image', true);
+            xhr.responseType = 'blob';
+            xhr.onload = function(e) {
+                if(xhr.status == 200) {
+                    var url = URL.createObjectURL(this.response);
+                    var img = new Image();
+                    img.onload = function() {
+                        URL.revokeObjectURL(this.src);
+                        resolve(img);
+                    };
+                    img.onerror = () => reject(xhr);
+                    img.src = url;
+                } else reject(xhr);
+            };
+            xhr.onerror = () => reject(xhr);
+            xhr.send();
+        });
     },
 
     setupInteraction: function() {
@@ -241,16 +290,28 @@ var place = {
                 endOnly: true
             },
             autoScroll: true,
-            onstart: event => $(app.zoomController).addClass("grabbing"),
+            onstart: event => {
+                if(event.interaction.downEvent.button == 2) return event.preventDefault();
+                $(app.zoomController).addClass("grabbing");
+            },
             onmove: event => app.moveCamera(event.dx, event.dy),
             onend: event => {
+                if(event.interaction.downEvent.button == 2) return event.preventDefault();
                 $(app.zoomController).removeClass("grabbing");
                 var coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
             }
         }).on("tap", event => {
+            if(event.interaction.downEvent.button == 2) return event.preventDefault();
             let zoom = app._getZoomMultiplier();
             app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom))
+            event.preventDefault();
+        }).on("doubletap", event => {
+            if(app.zooming.zoomedIn) {
+                app.zoomFinished();
+                app.setZoomedIn(false);
+                event.preventDefault();
+            }
         });
     },
 
@@ -290,6 +351,7 @@ var place = {
         socket.on("connect", () => console.log("Socket successfully connected"));
 
         socket.on("tile_placed", this.liveUpdateTile.bind(this));
+        socket.on("server_ready", () => this.getCanvasImage());
         socket.on("user_change", this.userCountChanged.bind(this));
         socket.on("reload_client", () => window.location.reload());
         return socket;
@@ -359,16 +421,6 @@ var place = {
         return this.zooming.zoomedIn ? 40 : 4;
     },
 
-    loadImage: function() {
-        return new Promise((resolve, reject) => {
-            var image = new Image();
-            image.src = "/api/board-image";
-            image.onload = () => {
-                resolve(image);
-            };
-        });
-    },
-
     animateZoom: function(callback = null) {
         this.zooming.zoomTime += this.zooming.fastZoom ? 5 : 1
 
@@ -377,14 +429,7 @@ var place = {
         this.setCanvasPosition(x, y)
 
         if (this.zooming.zoomTime >= 100) {
-            this.zooming.zooming = false;
-            this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
-            this.zooming.panToX = null, this.zooming.panToY = null;
-            clearInterval(this.zooming.zoomHandle);
-            let coord = this.getCoordinates();
-            this.hashHandler.modifyHash(coord);
-            this.zooming.zoomHandle = null;
-            this.zooming.fastZoom = false;
+            this.zoomFinished();
             if(this.shouldShowPopover) {
                 $(this.pixelDataPopover).fadeIn(250);
                 this.shouldShowPopover = false;
@@ -392,6 +437,17 @@ var place = {
             if(callback) callback();
             return
         }
+    },
+
+    zoomFinished: function() {
+        this.zooming.zooming = false;
+        this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
+        this.zooming.panToX = null, this.zooming.panToY = null;
+        clearInterval(this.zooming.zoomHandle);
+        let coord = this.getCoordinates();
+        this.hashHandler.modifyHash(coord);
+        this.zooming.zoomHandle = null;
+        this.zooming.fastZoom = false;
     },
 
     setZoomedIn: function(zoomedIn) {
@@ -803,6 +859,14 @@ var place = {
             this.toggleZoom();
         } else if(keycode == 27 && this.selectedColour !== null) { // Esc - Deselect colour
             this.deselectColour();
+        }
+    },
+
+    adjustLoadingScreen: function(text = null) {
+        if(text) {
+            $("#loading").show().find(".text").text(text);
+        } else {
+            $("#loading").fadeOut();
         }
     }
 }

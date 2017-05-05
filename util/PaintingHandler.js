@@ -52,6 +52,7 @@ function PaintingHandler(app) {
                             this.hasImage = true;
                             this.image = image;
                             this.imageBatch = this.image.batch();
+                            app.websocketServer.broadcast("server_ready", {});
                             resolve(image);
                         });
                     }).catch(err => reject(err));

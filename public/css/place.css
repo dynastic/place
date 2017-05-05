@@ -404,3 +404,70 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 .pixel-data > .user-info > .field {
     width: 100%;
 }
+
+#loading {
+    background-color: #fff;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+@-webkit-keyframes flair {
+  0% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+  50% {
+    -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+  }
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+@keyframes flair {
+  0% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+  50% {
+    -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+  }
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+
+
+#loading .icon {
+	-webkit-animation: flair 0.8s ease-in-out infinite both;
+	-moz-animation: flair 0.8s ease-in-out infinite both;
+	animation: flair 0.8s ease-in-out infinite both;
+}
+
+#loading .text {
+    font-size: 21px;
+    font-weight: 300;
+    display: block;
+    margin-top: 30px;
+}
+
+
+
+@supports (backdrop-filter:none) or (-webkit-backdrop-filter:none) {
+    #loading {
+        background: rgba(255,255,255,0.7);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+    }
+}
