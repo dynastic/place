@@ -18,6 +18,11 @@ function APIRouter(app) {
         next();
     })
 
+    router.use(function(req, res, next) {
+        if(req.user && !req.user.usernameSet && req.user.OAuthName) return res.status(401).json({ success: false, error: { message: "Please create a username for your account before continuing.", code: "oauth_no_username" } })
+        next(); // Otherwise, carry on...
+    });
+
     const requireUser = (req, res, next) => {
         if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
         next()
