@@ -45,7 +45,7 @@ var isSelf = user ? user.id == profileUser.id : false;
   <% if(isSelf) { %>
   <hr>
   <h1>My account</h1>
-  <a class="btn btn-info" data-toggle="modal" data-target="#changePassword">Change Password</a>
+  <% if(profileUser.isOauth) { %><a class="btn btn-info" data-toggle="modal" data-target="#changePassword">Change Password</a><% } %>
   <a class="btn btn-danger" data-toggle="modal" data-target="#deactivateAccount">Deactivate Account</a>
   <% } %>
   <% if(user && user.canPerformActionsOnUser(profileUser)) { %>
