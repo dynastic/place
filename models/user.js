@@ -28,6 +28,10 @@ var UserSchema = new Schema({
         type: Boolean,
         required: false
     },
+    passwordResetKey: {
+        type: String,
+        required: false
+    },
     usernameSet: {
         type: Boolean,
         required: true,

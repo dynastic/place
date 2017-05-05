@@ -14,10 +14,15 @@ function PublicRouter(app) {
 
     let router = express.Router()
 
-    router.use(function(req, res, next) { // Force user to pick a username
-        if(req.url == "/signout" || req.url == "/pick-username") return next(); // Allow the user to sign out or POST their new username
+    router.use(function(req, res, next) {
+        if(req.url == "/signout") return next(); // Allow the user to sign out
         if(req.user && !req.user.usernameSet && req.user.OAuthName) { // If the user has no username...
+            if(req.url == "/pick-username" && req.method == "POST") return next(); // Allow the user to POST their new username
             return responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: app.enableCaptcha, username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20), user: {name: ""}}); // Send the username picker
+        }
+        if(req.user && req.user.passwordResetKey) {
+            if(req.url == "/force-pw-reset" && req.method == "POST") return next(); // Allow the user to POST their new password
+            return responseFactory.sendRenderedResponse("public/force-pw-reset", req, res);
         }
         next(); // Otherwise, carry on...
     });
@@ -50,6 +55,23 @@ function PublicRouter(app) {
                     doPickUsername();
                 });
             } else doPickUsername();
+        });
+    });
+    
+    router.post('/force-pw-reset', function(req, res) {
+        function renderResponse(errorMsg) {
+            return responseFactory.sendRenderedResponse("public/force-pw-reset", req, res, { error: { message: errorMsg || "An unknown error occurred" } });
+        }
+        if(!req.user) res.redirect("/signup");
+        if(!req.user.passwordResetKey) res.redirect("/");
+        if(!req.body.password) return renderResponse("Please enter your new password.");
+        if(req.body.password != req.body.confirmPassword) return renderResponse("The two passwords did not match.");
+        if(req.user.isOauth) return renderResponse("You may not change your password as you are using an external service for login.");
+        req.user.password = req.body.password;
+        req.user.passwordResetKey = null;
+        req.user.save(err => {
+            if(err) return renderResponse("An unknown error occurred while trying to reset your password.");
+            res.redirect("/?signedin=1");
         });
     });
 

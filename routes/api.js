@@ -20,6 +20,7 @@ function APIRouter(app) {
 
     router.use(function(req, res, next) {
         if(req.user && !req.user.usernameSet && req.user.OAuthName) return res.status(401).json({ success: false, error: { message: "Please create a username for your account before continuing.", code: "oauth_no_username" } })
+        if(req.user && req.user.passwordResetKey) return res.status(401).json({ success: false, error: { message: "Please go to the Place 2.0 website to reset your password.", code: "forced_password_reset" }})
         next(); // Otherwise, carry on...
     });
 
@@ -44,7 +45,7 @@ function APIRouter(app) {
     });
 
     router.post('/user/change_password', requireUser, function(req, res) {
-        if (!req.body.old || !req.body.new) return res.status(403).json({success: false, error: {message: 'Your old password and a new password is required.', code: 'invalid_parameters'}});
+        if (!req.body.old || !req.body.new) return res.status(403).json({success: false, error: {message: 'Your old password and new password are required.', code: 'invalid_parameters'}});
         if(req.user.isOauth) return res.status(400).json({success: false, error: {message: 'You may not change your password as you are using an external service for login.', code: 'regular_account_only'}});
         req.user.comparePassword(req.body.old, (error, match) => {
             if(!match || error) return res.status(401).json({success: false, error: {message: "The old password you entered was incorrect.", code: "incorrect_password"}});

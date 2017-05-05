@@ -35,10 +35,14 @@ module.exports = function(passport) {
                 if(user.isOauth === true) return done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
                 if (user.loginError()) return done(null, false, { error: user.loginError() });
               
-                return user.comparePassword(password, function(err, match) {
-                    if (match && !err) return done(null, user);
-                    done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
-                });
+                if(user.passwordResetKey) {
+                    if(user.passwordResetKey == password) return done(null, user);
+                } else {
+                    return user.comparePassword(password, function(err, match) {
+                        if (match && !err) return done(null, user);
+                        done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
+                    });
+                }
             }
             done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
         });
