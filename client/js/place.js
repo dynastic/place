@@ -307,7 +307,7 @@ var place = {
             app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom))
             event.preventDefault();
         }).on("doubletap", event => {
-            if(app.zooming.zoomedIn) {
+            if(app.zooming.zoomedIn && this.selectedColour === null) {
                 app.zoomFinished();
                 app.setZoomedIn(false);
                 event.preventDefault();
