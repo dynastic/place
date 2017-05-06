@@ -20,10 +20,16 @@ function WebsocketServer(app, httpServer) {
         },
 
         sendConnectedClientBroadcast: function() {
-            this.broadcast("user_change", this.connectedClients );
+            this.broadcastRaw("user_change", this.connectedClients);
         },
 
-        broadcast: function(name, payload) {
+        broadcast: function(name, payload = null) {
+            var jsonPayload = null;
+            if(payload) jsonPayload = JSON.stringify(payload);
+            this.broadcastRaw(name, jsonPayload);
+        },
+
+        broadcastRaw: function(name, payload = null) {
             this.server.sockets.emit(name, payload);
         },
 

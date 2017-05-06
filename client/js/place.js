@@ -347,10 +347,15 @@ var place = {
 
     startSocketConnection() {
         var socket = io();
+
+        socket.onJSON = function(event, listener) {
+            return this.on(event, data => listener(JSON.parse(data)));
+        }
+
         socket.on("error", e => console.log("Socket error: " + e));
         socket.on("connect", () => console.log("Socket successfully connected"));
 
-        socket.on("tile_placed", this.liveUpdateTile.bind(this));
+        socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
         socket.on("server_ready", () => this.getCanvasImage());
         socket.on("user_change", this.userCountChanged.bind(this));
         socket.on("reload_client", () => window.location.reload());
