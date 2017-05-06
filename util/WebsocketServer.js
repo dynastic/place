@@ -20,7 +20,7 @@ function WebsocketServer(app, httpServer) {
         },
 
         sendConnectedClientBroadcast: function() {
-            this.broadcast("user_change", { count: this.connectedClients });
+            this.broadcast("user_change", this.connectedClients );
         },
 
         broadcast: function(name, payload) {

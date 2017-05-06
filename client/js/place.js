@@ -318,7 +318,7 @@ var place = {
     loadUserCount: function() {
         return new Promise((resolve, reject) => {
             $.get("/api/online").done(data => {
-                if(data.success && !!data.online) return resolve(data.online);
+                if(data.success && !!data.online) return resolve(data.online.count);
                 reject();
             }).fail(err => reject(err));
         });
@@ -369,7 +369,7 @@ var place = {
     },
 
     userCountChanged: function (data) {
-        if(data) this.changeUserCount(data.count);
+        if(data) this.changeUserCount(data);
     },
 
     setupColours: function() {
