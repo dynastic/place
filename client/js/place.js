@@ -307,7 +307,7 @@ var place = {
             app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom))
             event.preventDefault();
         }).on("doubletap", event => {
-            if(app.zooming.zoomedIn) {
+            if(app.zooming.zoomedIn && this.selectedColour === null) {
                 app.zoomFinished();
                 app.setZoomedIn(false);
                 event.preventDefault();
@@ -318,7 +318,7 @@ var place = {
     loadUserCount: function() {
         return new Promise((resolve, reject) => {
             $.get("/api/online").done(data => {
-                if(data.success && !!data.online) return resolve(data.online);
+                if(data.success && !!data.online) return resolve(data.online.count);
                 reject();
             }).fail(err => reject(err));
         });
@@ -347,10 +347,15 @@ var place = {
 
     startSocketConnection() {
         var socket = io();
+
+        socket.onJSON = function(event, listener) {
+            return this.on(event, data => listener(JSON.parse(data)));
+        }
+
         socket.on("error", e => console.log("Socket error: " + e));
         socket.on("connect", () => console.log("Socket successfully connected"));
 
-        socket.on("tile_placed", this.liveUpdateTile.bind(this));
+        socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
         socket.on("server_ready", () => this.getCanvasImage());
         socket.on("user_change", this.userCountChanged.bind(this));
         socket.on("reload_client", () => window.location.reload());
@@ -369,7 +374,7 @@ var place = {
     },
 
     userCountChanged: function (data) {
-        if(data) this.changeUserCount(data.count);
+        if(data) this.changeUserCount(data);
     },
 
     setupColours: function() {

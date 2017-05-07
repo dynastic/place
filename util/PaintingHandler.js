@@ -41,21 +41,21 @@ function PaintingHandler(app) {
         loadImageFromDatabase: function() {
             return new Promise((resolve, reject) => {
                 let image = this.getBlankImage().then(image => {
-                    Pixel.getAllPixels().then(pixels => {
-                        let batch = image.batch();
-                        pixels.forEach(pixel => {
-                            let x = pixel.point.x, y = pixel.point.y;
-                            if(x >= 0 && y >= 0 && x < 1000 && y < 1000) batch.setPixel(x, y, pixel.colour);
-                        })
+                    let batch = image.batch();
+                    Pixel.find({}).stream().on("data", pixel => {
+                        var x = pixel.xPos, y = pixel.yPos;
+                        var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB }
+                        if(x >= 0 && y >= 0 && x < 1000 && y < 1000) batch.setPixel(x, y, colour);
+                    }).on("close", () => {
                         batch.exec((err, image) => {
                             if (err) return reject(err);
                             this.hasImage = true;
                             this.image = image;
                             this.imageBatch = this.image.batch();
-                            app.websocketServer.broadcast("server_ready", {});
+                            app.websocketServer.broadcast("server_ready");
                             resolve(image);
                         });
-                    }).catch(err => reject(err));
+                    }).on("error", err => reject(err));
                 }).catch(err => {
                     reject(err);
                 })
@@ -97,10 +97,10 @@ function PaintingHandler(app) {
         },
 
         doPaint: function(colour, x, y, user) {
-            if(app.temporaryUserInfo.isUserPlacing(user)) return reject({message: "You cannot place more than one tile at once.", code: "attempted_overload"});
             var a = this;
             return new Promise((resolve, reject) => {
                 if(!this.hasImage) return reject({message: "Server not ready", code: "not_ready"});
+                if(app.temporaryUserInfo.isUserPlacing(user)) return reject({message: "You cannot place more than one tile at once.", code: "attempted_overload"});
                 app.temporaryUserInfo.setUserPlacing(user, true);
                 // Add to DB:
                 user.addPixel(colour, x, y, (changed, err) => {
