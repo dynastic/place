@@ -118,7 +118,9 @@ function PublicRouter(app) {
 
     router.get('/signin', function(req, res) {
         if (req.user) return res.redirect("/");
-        return responseFactory.sendRenderedResponse("public/signin", req, res);
+        var error = null;
+        if(req.query.logintext) error = { message: req.query.logintext };
+        return responseFactory.sendRenderedResponse("public/signin", req, res, { error: error });
     });
 
     router.post('/signin', function(req, res, next) {
