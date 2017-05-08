@@ -118,17 +118,20 @@ function PublicRouter(app) {
 
     router.get('/signin', function(req, res) {
         if (req.user) return res.redirect("/");
-        return responseFactory.sendRenderedResponse("public/signin", req, res);
+        var error = null;
+        if(req.query.logintext) error = { message: req.query.logintext };
+        return responseFactory.sendRenderedResponse("public/signin", req, res, { error: error });
     });
 
     router.post('/signin', function(req, res, next) {
         if (req.user) return res.redirect("/");
         if (!req.body.username || !req.body.password) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: { message: "A username and password are required." }, username: req.body.username });
+        var redirectURL = typeof req.query.redirectURL !== 'undefined' ? req.query.redirectURL : null;
         passport.authenticate('local', function(err, user, info) {
             if (!user) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: info.error || { message: "An unknown error occurred." }, username: req.body.username });
             req.login(user, function(err) {
                 if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: { message: "An unknown error occurred." }, username: req.body.username });
-                return res.redirect("/?signedin=1");
+                return res.redirect(`/${(redirectURL == "/" ? "" : redirectURL) || ""}`);
             });
         })(req, res, next);
     });
@@ -136,6 +139,34 @@ function PublicRouter(app) {
     router.get('/signup', function(req, res) {
         if (req.user) return res.redirect("/");
         return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha });
+    });
+
+    router.post('/signup', signupRatelimit.prevent, function(req, res, next) {
+        function renderResponse(errorMsg) {
+            return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
+        }
+        var redirectURL = typeof req.query.redirectURL !== 'undefined' ? req.query.redirectURL : null;
+        function doSignup() {
+            User.register(req.body.username, req.body.password, function(user, error) {
+                if(!user) return renderResponse(error.message);
+                req.login(user, function(err) {
+                    if (err) return renderResponse(null);
+                    return res.redirect(`/${(redirectURL == "/" ? "" : redirectURL) || ""}`);
+                });
+            });
+        }
+        if (req.user) return res.redirect("/");
+        fs.exists(__dirname + "/../config/community_guidelines.md", exists => {
+            if (!req.body.username || !req.body.password || !req.body.passwordverify) return renderResponse("Please fill out all the fields.")
+            if (req.body.password != req.body.passwordverify) return renderResponse("The passwords you entered did not match.");
+            if (!req.body.agreeToGuidelines && exists) return renderResponse("You must agree to the community guidelines to use this service.");
+            if(app.enableCaptcha) {
+                app.recaptcha.verify(req, error => {
+                    if(error) return renderResponse("Please fill in the captcha properly.");
+                    doSignup();
+                });
+            } else doSignup();
+        });
     });
 
     router.get('/account', function(req, res) {
@@ -158,33 +189,6 @@ function PublicRouter(app) {
                 return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, pixel: null, isLatestPixel: false, hasNewPassword: req.query.hasNewPassword });            
             });
         }).catch(err => next())
-    });
-
-    router.post('/signup', signupRatelimit.prevent, function(req, res, next) {
-        function renderResponse(errorMsg) {
-            return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
-        }
-        function doSignup() {
-            User.register(req.body.username, req.body.password, function(user, error) {
-                if(!user) return renderResponse(error.message);
-                req.login(user, function(err) {
-                    if (err) return renderResponse(null);
-                    return res.redirect("/?signedup=1");
-                });
-            });
-        }
-        if (req.user) return res.redirect("/");
-        fs.exists(__dirname + "/../config/community_guidelines.md", exists => {
-            if (!req.body.username || !req.body.password || !req.body.passwordverify) return renderResponse("Please fill out all the fields.")
-            if (req.body.password != req.body.passwordverify) return renderResponse("The passwords you entered did not match.");
-            if (!req.body.agreeToGuidelines && exists) return renderResponse("You must agree to the community guidelines to use this service.");
-            if(app.enableCaptcha) {
-                app.recaptcha.verify(req, error => {
-                    if(error) return renderResponse("Please fill in the captcha properly.");
-                    doSignup();
-                });
-            } else doSignup();
-        });
     });
 
     if(typeof config.oauth !== 'undefined') {
@@ -266,7 +270,8 @@ function PublicRouter(app) {
         
     router.get('/signout', function(req, res) {
         req.logout();
-        res.redirect("/?signedout=1");
+        var redirectURL = typeof req.query.redirectURL !== 'undefined' ? req.query.redirectURL : null;
+        return res.redirect(`/${(redirectURL == "/" ? "" : redirectURL) || ""}`);
     });
 
 
