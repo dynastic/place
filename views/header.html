@@ -9,7 +9,7 @@
   var renderNavItem = function(name, itemPath, icon = null) {
       let isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
       let iconPrefix = icon ? `<i class="fa fa-${icon} fa-fw"></i>` : "";
-      return `<li ${isCurrentPage ? " class=\"active\"" : ""}>` +
+      return `<li id="nav-${name.toLowerCase().replace(/ /g, "-")}" ${isCurrentPage ? " class=\"active\"" : ""}>` +
         `<a href="${itemPath}">${iconPrefix}${name} ${isCurrentPage ? " <span class=\"sr-only\">(current)</span>" : ""}</a>` +
       "</li>";
   }
@@ -74,6 +74,8 @@
                 <%- renderNavItem("Official Subreddit", "https://www.reddit.com/r/place20", "reddit-alien"); %>
                 <%- renderNavItem("Chat on Discord", "https://discord.gg/CgC8FTg", "comments"); %>
                 <%- renderNavItem("Internet World Congress", "https://discord.gg/nQ4m2Gv", "globe"); %>
+                <%- renderNavItem("Timelapses", "https://disk.ph1l3r.fr/place20/", "clock-o"); %>
+                <%- renderNavItem("Source Code", "https://www.github.com/dynasticdevelop/place", "github"); %>
               </ul>
             </li>
             <%- renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money"); %>
