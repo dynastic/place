@@ -1,3 +1,25 @@
+body.fixed-navbar {
+    padding-top: 50px;
+    min-height: 100%;
+}
+
+@supports (backdrop-filter:none) or (-webkit-backdrop-filter:none) {
+    nav.navbar {
+        background: rgba(255,255,255,0.8);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        border-color: rgba(0, 0, 0, 0.07);
+    }
+
+    .navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:focus, .navbar-default .navbar-nav>.active>a:hover {
+        background-color: rgba(0, 0, 0, 0.07);
+    }
+}
+
+.footer {
+    display: none;
+}
+
 body {
     overflow-y: hidden;
     touch-action: none;
@@ -8,17 +30,14 @@ body {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    position: fixed;
-    top: 64px;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
     background-color: #ddd;
     align-items: center;
     display: flex;
     justify-content: center;
     overflow: hidden;
+    position: relative;
+    top: 0!important;
+    width: 100%;
 }
 
 #place-canvas {
@@ -408,7 +427,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 #loading {
     background-color: #fff;
     position: absolute;
-    top: 50px;
+    top: 0;
     left: 0;
     bottom: 0;
     right: 0;
@@ -469,5 +488,277 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
         background: rgba(255,255,255,0.7);
         -webkit-backdrop-filter: blur(12px);
         backdrop-filter: blur(12px);
+    }
+}
+
+#popout-container {
+    width: 100%;
+    max-width: 320px;
+    height: 100%;
+    background: #fff;
+    border-left: 1px solid #eee;
+    position: relative;
+    flex-direction: column;
+    justify-content: stretch;
+    display: none;
+}
+
+.popout-open #popout-container {
+    display: flex;
+}
+
+#popout-container > .navigation-bar, #popout-container > .tabbar {
+    align-self: flex-start;
+    width: 100%;
+    height: 51px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#popout-container > .navigation-bar .title {
+    font-size: 13px;
+    letter-spacing: 2px;
+    font-weight: 600;
+    text-align: center;
+    align-self: center;
+    text-transform: uppercase;
+    color: #333;
+}
+
+#popout-container > .navigation-bar .close-btn {
+    color: #999;
+    font-size: 20px;
+    text-align: right;
+    margin-left: auto;
+    cursor: pointer;
+}
+
+#popout-container > .tabbar {
+    border-top: 1px solid #eee;
+    border-bottom: none;
+    padding: 0;
+    align-self: flex-end;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    padding: 2px;
+}
+
+#popout-container > .tabbar .tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    color: #999;
+    font-size: 22px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#popout-container > .tabbar .active {
+    color: rgb(0, 127, 255);
+    background: #eee;
+    cursor: default;
+}
+
+#popout-container > .tabbar .tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+#popout-container > .content-ctn {
+    flex: 1 0 0;
+    position: relative;
+}
+
+#popout-container > .content-ctn > .tab-content {
+    display: none;
+    min-height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    padding: 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#popout-container > .content-ctn > .tab-content.active {
+    display: block;
+}
+
+#popout-container > .content-ctn > .tab-content .coming-soon {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 400;
+    font-size: 23px;
+    text-align: center;
+    color: #b2b2b2;
+}
+
+#place {
+    display: flex;
+    position: absolute;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+}
+
+.popout-btns {
+    margin-top: 5px;
+}
+
+.popout-open .popout-btns {
+    display: none;
+}
+
+.chat {
+    padding: 0!important;
+    flex-direction: column!important;
+    justify-content: stretch!important;
+}
+
+.chat.active {
+    display: flex!important;
+}
+
+.chat .messages {
+    padding: 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1 0 0;
+}
+
+.chat .text-field {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    display: none;
+    align-items: center;
+}
+
+.signed-in .chat .text-field {
+    display: flex;
+}
+
+.chat .text-field > input {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px 10px;
+    outline: 0;
+    flex: 1 0 0;
+}
+
+.chat .text-field > input:focus {
+    border-color: #66afe9;
+}
+
+.chat .text-field > .send-btn {
+    color: rgb(0, 127, 255);
+    font-weight: 500;
+    margin-left: 10px;
+    font-size: 15px;
+}
+
+.chat .text-field > .send-btn[disabled] {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.chat .text-field > .send-btn:hover {
+    text-decoration: none!important;
+}
+
+.chat .message-ctn {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+}
+
+.chat .message-separator {
+    display: block;
+    width: 100%;
+    height: 10px;
+}
+
+.chat .message-ctn:first-child {
+    margin-top: 0;
+}
+
+.chat .message-ctn:last-child {
+    margin-bottom: 0;
+}
+
+.chat .message {
+    padding: 10px 13px;
+    background: #efefef;
+    border-radius: 8px;
+    float: left;
+    max-width: 200px;
+    white-space: -moz-pre-wrap;    
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+}
+
+.chat .message.outgoing {
+    background: rgb(0, 127, 255);
+    color: #fff;
+    float: right;
+}
+
+.chat .username {
+    color: #777;
+    font-size: 12px;
+    margin-bottom: 5px;
+    margin-left: 2px;
+    display: block;
+}
+
+.chat .timestamp {
+    color: #666;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
+@media(max-width: 600px) {
+    #place {
+        display: block;
+    }
+
+    .canvas-container {
+        height: 100%;
+        width: 100%;
+    }
+
+    #popout-container {
+        position: absolute;
+        display: flex;
+        transition: 0.25s top ease-out;
+        top: 100%;
+        max-width: none;
+        z-index: 99;
+    }
+
+    .popout-open #popout-container {
+        top: 0;
     }
 }

@@ -5,6 +5,8 @@ const passport = require('passport');
 require('../util/passport')(passport);
 const User = require('../models/user');
 const Pixel = require('../models/pixel');
+const ChatMessage = require('../models/chatMessage');
+const Ratelimit = require('express-brute');
 const path = require("path");
 const fs = require('fs');
 
@@ -125,6 +127,37 @@ function APIRouter(app) {
                 res.json({ success: true, pixel: info })
             }).catch(err => fail(err));
         }).catch(err => fail(err));
+    });
+
+    router.get('/chat', function(req, res, next) {
+         ChatMessage.getLatestMessages().then(messages => {
+            var promises = messages.reverse().map(m => m.toInfo());
+            Promise.all(promises).then(messages => {
+                res.json({ success: true, messages: messages });
+            }).catch(err => res.status(500).json({ success: false, error: { message: "An error occurred while trying to retrieve messages.", code: "server_message_error" } }));
+         }).catch(err => res.status(500).json( { success: false, error: { message: "An error occurred while trying to retrieve messages.", code: "server_message_error" } }))
+    });
+
+    const chatRatelimit = new Ratelimit(require('../util/RatelimitStore')("Chat"), {
+        freeRetries: 6, // 6 messages per 15 seconds
+        attachResetToRequest: false,
+        refreshTimeoutOnRequest: false,
+        minWait: 15*1000, // 15 seconds
+        maxWait: 15*1000, // 15 seconds, 
+        failCallback: (req, res, next, nextValidRequestDate) => res.status(429).json({ success: false, error: { message: "You're doing that too fast.", code: "rate_limit" } }),
+        handleStoreError: error => app.reportError("Chat rate limit store error: " + error),
+        proxyDepth: config.trustProxyDepth
+    });
+
+    router.post('/chat', [requireUser, chatRatelimit.prevent], function(req, res, next) {
+        if(!req.body.text || !req.body.x || !req.body.y) return res.status(400).json({ success: false, error: { message: "You did not specify the required information to send a message.", code: "bad_request" } })
+        if(req.body.text.length < 1 || req.body.text.length > 250) return  res.status(400).json( { success: false, error: { message: "Your message must be shorter than 250 characters and may not be blank.", code: "message_text_length" } })
+         ChatMessage.createMessage(app, req.user.id, req.body.text, req.body.x, req.body.y).then(message => {
+             var info = message.toInfo().then(info => {
+                res.json({ success: true, message: info });
+                app.websocketServer.broadcast("new_message", info);
+             }).catch(err => res.json({ success: true }))
+         }).catch(err => res.status(500).json( { success: false, error: { message: "An error occurred while trying to send your message.", code: "server_message_error" } }))
     });
 
     // Admin APIs

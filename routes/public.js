@@ -75,22 +75,20 @@ function PublicRouter(app) {
         });
     });
 
-    const ratelimitCallback = function (req, res, next, nextValidRequestDate) {
-        function renderResponse(errorMsg) {
-            return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
-        }
-        res.status(429);
-        return renderResponse("You're doing that too fast.");
-    }
-
-    const signupRatelimit = new Ratelimit(ratelimitStore, {
+    const signupRatelimit = new Ratelimit(require('../util/RatelimitStore')(), {
         freeRetries: 3, // 3 signups per hour
         attachResetToRequest: false,
         refreshTimeoutOnRequest: false,
         minWait: 60*60*1000, // 1 hour
         maxWait: 60*60*1000, // 1 hour, 
-        failCallback: ratelimitCallback,
-        handleStoreError: error => app.reportError("Rate limit store error: " + error),
+        failCallback: (req, res, next, nextValidRequestDate) => {
+            function renderResponse(errorMsg) {
+                return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
+            }
+            res.status(429);
+            return renderResponse("You're doing that too fast.");   
+        },
+        handleStoreError: error => app.reportError("Sign up rate limit store error: " + error),
         proxyDepth: config.trustProxyDepth
     });
 
