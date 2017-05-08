@@ -743,6 +743,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 @media(max-width: 600px) {
     #place {
         display: block;
+        overflow: hidden;
     }
 
     .canvas-container {
