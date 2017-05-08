@@ -142,8 +142,9 @@ function APIRouter(app) {
         freeRetries: 6, // 6 messages per 15 seconds
         attachResetToRequest: false,
         refreshTimeoutOnRequest: false,
-        minWait: 15*1000, // 15 seconds
-        maxWait: 15*1000, // 15 seconds, 
+        minWait: 10*1000, // 10 seconds
+        maxWait: 20*1000, // 20 seconds,
+        lifetime: 45*1000, // remember spam for max of 40 seconds
         failCallback: (req, res, next, nextValidRequestDate) => res.status(429).json({ success: false, error: { message: "You're doing that too fast.", code: "rate_limit" } }),
         handleStoreError: error => app.reportError("Chat rate limit store error: " + error),
         proxyDepth: config.trustProxyDepth
