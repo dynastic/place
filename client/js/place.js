@@ -1042,7 +1042,7 @@ var place = {
     },
 
     updateAuthLinks: function() {
-        var redirectURLPart = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
+        var redirectURLPart = encodeURIComponent(window.location.pathname.substr(1) + window.location.search + window.location.hash);
         $("#nav-sign-in > a, #overlay-sign-in").attr("href", `/signin?redirectURL=${redirectURLPart}`)
         $("#nav-sign-up > a, #overlay-sign-up").attr("href", `/signup?redirectURL=${redirectURLPart}`)
         $("#nav-sign-out > a").attr("href", `/signout?redirectURL=${redirectURLPart}`)

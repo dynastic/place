@@ -131,7 +131,7 @@ function PublicRouter(app) {
             if (!user) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: info.error || { message: "An unknown error occurred." }, username: req.body.username });
             req.login(user, function(err) {
                 if (err) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: { message: "An unknown error occurred." }, username: req.body.username });
-                return res.redirect(`/${redirectURL || ""}`);
+                return res.redirect(`/${(redirectURL == "/" ? "" : redirectURL) || ""}`);
             });
         })(req, res, next);
     });
@@ -145,16 +145,16 @@ function PublicRouter(app) {
         function renderResponse(errorMsg) {
             return responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
         }
+        var redirectURL = typeof req.query.redirectURL !== 'undefined' ? req.query.redirectURL : null;
         function doSignup() {
             User.register(req.body.username, req.body.password, function(user, error) {
                 if(!user) return renderResponse(error.message);
                 req.login(user, function(err) {
                     if (err) return renderResponse(null);
-                    return res.redirect(`/${redirectURL || ""}`);
+                    return res.redirect(`/${(redirectURL == "/" ? "" : redirectURL) || ""}`);
                 });
             });
         }
-        var redirectURL = typeof req.query.redirectURL !== 'undefined' ? req.query.redirectURL : null;
         if (req.user) return res.redirect("/");
         fs.exists(__dirname + "/../config/community_guidelines.md", exists => {
             if (!req.body.username || !req.body.password || !req.body.passwordverify) return renderResponse("Please fill out all the fields.")
@@ -271,7 +271,7 @@ function PublicRouter(app) {
     router.get('/signout', function(req, res) {
         req.logout();
         var redirectURL = typeof req.query.redirectURL !== 'undefined' ? req.query.redirectURL : null;
-        return res.redirect(`/${redirectURL || ""}`);
+        return res.redirect(`/${(redirectURL == "/" ? "" : redirectURL) || ""}`);
     });
 
 
