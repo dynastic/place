@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const User = require('./user');
 
 var colourPieceValidator = function(c) {
     return Number.isInteger(c) && c >= 0 && c <= 255;
