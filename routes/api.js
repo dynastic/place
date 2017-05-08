@@ -42,7 +42,7 @@ function APIRouter(app) {
         passport.authenticate('local', { session: false }, function(err, user, info) {
             if (!user) return res.status(500).json({ success: false, error: info.error || { message: "An unknown error occurred." } });
             let token = jwt.encode(user, config.secret);
-            res.json({ success: true, token: 'JWT ' + token }); // create and return jwt token here
+            res.json({ success: true, token: `JWT ${token}`, user: req.user.toInfo() }); // create and return jwt token here
         })(req, res, next);
     });
 
