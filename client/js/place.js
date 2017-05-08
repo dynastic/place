@@ -133,6 +133,54 @@ var hashHandler = {
     }
 }
 
+function PopoutController(popoutContainer) {
+    var controller = {
+        popoutContainer: popoutContainer,
+        tabChangeCallback: null, visibilityChangeCallback: null,
+
+        _setup: function() {
+            var p = this;
+            $(this.popoutContainer).find(".tabbar > .tab").click(function() {
+                p.changeTab($(this).data("tab-name"));
+            });
+            $(this.popoutContainer).find(".navigation-bar .close-btn").click(function() {
+                p.close();
+            });
+        },
+
+        changeTab: function(name) {
+            var p = this;
+            $(this.popoutContainer).find(".tab-content.active, .tab.active").removeClass("active");
+            $(this.popoutContainer).find(`.tab-content[data-tab-name=${name}], .tab[data-tab-name=${name}]`).addClass("active").each(function() {
+                if($(this).data("tab-title")) {
+                    p._adjustTitle($(this).data("tab-title"));
+                    return false;
+                }
+            });
+            if(this.tabChangeCallback) this.tabChangeCallback(name);
+        },
+
+        _adjustTitle: function(title) {
+            $(this.popoutContainer).find(".navigation-bar > .title").text(title);
+        },
+
+        open: function() {
+            $("body").addClass("popout-open");
+            if(this.visibilityChangeCallback) this.visibilityChangeCallback();
+        },
+        close: function() {
+            $("body").removeClass("popout-open");
+            if(this.visibilityChangeCallback) this.visibilityChangeCallback();
+        },
+        toggle: function() {
+            $("body").toggleClass("popout-open");
+            if(this.visibilityChangeCallback) this.visibilityChangeCallback();
+        }
+    }
+    controller._setup();
+    return controller;
+}
+
 var place = {
     zooming: {
         zoomedIn: false,
@@ -160,13 +208,19 @@ var place = {
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null}, loadedImage: false,
     notificationHandler: notificationHandler, hashHandler: hashHandler,
+    messages: null,
 
-    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
+    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid, popoutContainer) {
         this.canvas = canvas; // moved around; hidden
         this.canvasController = canvasController;
         this.canvasController.init(canvas);
         this.grid = grid;
         this.displayCanvas = displayCanvas; // used for display
+        this.popoutController = PopoutController(popoutContainer);
+        this.popoutController.tabChangeCallback = name => {
+            if(name == "chat") this.scrollToChatBottom();
+        }
+        this.popoutController.visibilityChangeCallback = () => app.handleResize();
 
         this.coordinateElement = coordinateElement;
         this.userCountElement = userCountElement;
@@ -200,10 +254,14 @@ var place = {
             app.keyStates[kc] = e.type == 'keydown';
         }
 
-        document.body.onkeyup = handleKeyEvents;
+        document.body.onkeyup = function(e) {
+            if(document.activeElement.tagName != "INPUT") handleKeyEvents(e);
+        }
         document.body.onkeydown = function(e) {
-            handleKeyEvents(e);
-            app.handleKeyDown(e.keyCode || e.which);
+            if(document.activeElement.tagName != "INPUT") {
+                handleKeyEvents(e);
+                app.handleKeyDown(e.keyCode || e.which);
+            }
         };
 
         window.onresize = () => this.handleResize();
@@ -229,9 +287,12 @@ var place = {
         this.socket = this.startSocketConnection();
 
         setInterval(function() { app.doKeys() }, 15);
+
+        this.setupChat();
     },
 
     getCanvasImage: function() {
+        if(this.loadedImage) return;
         var app = this;
         this.adjustLoadingScreen("Loading…");;
         this.loadImage().then(image => {
@@ -293,6 +354,7 @@ var place = {
             onstart: event => {
                 if(event.interaction.downEvent.button == 2) return event.preventDefault();
                 $(app.zoomController).addClass("grabbing");
+                $(":focus").blur();
             },
             onmove: event => app.moveCamera(event.dx, event.dy),
             onend: event => {
@@ -357,6 +419,7 @@ var place = {
 
         socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
         socket.on("server_ready", () => this.getCanvasImage());
+        socket.onJSON("new_message", this.addChatMessage.bind(this));
         socket.on("user_change", this.userCountChanged.bind(this));
         socket.on("reload_client", () => window.location.reload());
         return socket;
@@ -387,8 +450,9 @@ var place = {
     },
 
     handleResize: function() {
-        this.displayCanvas.height = window.innerHeight;
-        this.displayCanvas.width = window.innerWidth;
+        var canvasContainer = $(this.zoomController).parent();
+        this.displayCanvas.height = canvasContainer.height();
+        this.displayCanvas.width = canvasContainer.width();
         this.displayCtx.mozImageSmoothingEnabled = false;
         this.displayCtx.webkitImageSmoothingEnabled = false;
         this.displayCtx.msImageSmoothingEnabled = false;
@@ -469,7 +533,7 @@ var place = {
         this.zooming.zoomTo = this._getZoomMultiplier()
         this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this, function() {
             $(app.grid).removeClass("zooming");
-        }), 1)
+        }), 1);
 
         if (zoomedIn) $(this.zoomController).parent().addClass("zoomed");
         else $(this.zoomController).parent().removeClass("zoomed");
@@ -873,10 +937,114 @@ var place = {
         } else {
             $("#loading").fadeOut();
         }
+    },
+
+    loadChatMessages: function() {
+        var app = this;
+        $.get("/api/chat").done(function(response) {
+            if(!response.success || !response.messages) alert("fail");
+            app.messages = response.messages;
+            app.layoutMessages();
+        }).fail(function() {
+            alert("fail")
+        });
+    },
+
+    layoutMessages: function() {
+        function getFancyDate(date) {
+            var now = new Date();
+            var almostSameDate = now.getMonth() == date.getMonth() && now.getFullYear() == date.getFullYear();
+            var isToday = now.getDate() == date.getDate();
+            var isYesterday = !isToday && now.getDate() == date.getDate() - 1;
+            return `${isToday ? "Today" : (isYesterday ? "Yesterday" : date.toLocaleDateString())}, ${date.toLocaleTimeString()}`
+        }
+
+        $("#chat-messages > *").remove();
+        var sinceLastTimestamp = 0;
+        this.messages.forEach((item, index, arr) => {
+            var outgoing = $("body").data("user-id") == item.userID;
+            var hasLastMessage = index > 0;
+            var lastMessageDate = null;
+            if(hasLastMessage) lastMessageDate = new Date(arr[index - 1].date);
+            var messageDate = new Date(item.date);
+            var resetTimestamp = false;
+            if(sinceLastTimestamp > 10) {
+                sinceLastTimestamp = 0;
+                resetTimestamp = true;
+            }
+            var needsTimestamp = resetTimestamp || !hasLastMessage || (messageDate - lastMessageDate > 1000 * 60 * 3) || (messageDate.toDateString() !== lastMessageDate.toDateString());
+            if(!needsTimestamp) sinceLastTimestamp++;
+            var needsUsername = !outgoing && (needsTimestamp || !hasLastMessage || arr[index - 1].userID != item.userID);
+            if(needsTimestamp) $(`<div class="timestamp"></div>`).text(getFancyDate(new Date(item.date))).appendTo("#chat-messages");
+            var ctn = $(`<div class="message-ctn clearfix"><div class="message"></div></div>`);
+            if(needsUsername) $(`<a class="username"></a>`).text(item.username).attr("href", `/@${item.username}`).prependTo(ctn);
+            ctn.find(".message").text(item.text).addClass(outgoing ? "outgoing" : "incoming").attr("title", messageDate.toLocaleString());
+            ctn.appendTo("#chat-messages");
+        });
+        this.scrollToChatBottom();
+    },
+
+    addChatMessage: function(message) {
+        if(this.messages.map(m => m.id).indexOf(message.id) < 0) {
+            this.messages.push(message);
+            this.layoutMessages();
+        }
+    },
+
+    scrollToChatBottom: function() {
+        $("#chat-messages").scrollTop($("#chat-messages")[0].scrollHeight);
+    },
+
+    sendChatMessage: function() {
+        var parseError = function(response) {
+            var data = typeof response.error === "object" ? response : (typeof response.error().responseJSON === 'undefined' ? null : response.error().responseJSON);
+            return data.error.message ? data.error.message : "An error occurred while trying to send your chat message.";
+        }
+        var app = this;
+        var input = $("#chat-input-field");
+        var btn = $("#chat-send-btn");
+        btn.text("Sending…").attr("disabled", "disabled");
+        if(input.val().length <= 0) return;
+        var coords = this.getCoordinates();
+        var text = input.val();
+        $.post("/api/chat", {
+            text: text,
+            x: coords.x,
+            y: coords.y
+        }).done(function(response) {
+            if(!response.success) return alert(parseError(response));
+            input.val("");
+            input.focus();
+            if(response.message) app.addChatMessage(response.message);
+        }).fail(function(response) {
+            alert(parseError(response));
+        }).always(function() {
+            btn.text("Send").removeAttr("disabled");
+        })
+    },
+
+    setupChat: function() {
+        var app = this;
+        this.loadChatMessages();
+        $("#chat-send-btn").click(function() {
+            app.sendChatMessage();
+        })
+        $("#chat-input-field").focus(function() {
+            app.scrollToChatBottom();
+        })
+        $("#chat-input-field").keydown(function(e) {
+            if((e.keyCode || e.which) != 13) return;
+            app.sendChatMessage();
+        })
     }
 }
 
-place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
+place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0], $("#popout-container")[0]);
 place.setZoomButton($("#zoom-button")[0]);
 place.setGridButton($("#grid-button")[0]);
 place.setCoordinatesButton($("#coordinates")[0]);
+
+$(".popout-control").click(function() {
+    place.popoutController.open();
+    place.popoutController.changeTab($(this).data("tab-name"));
+})

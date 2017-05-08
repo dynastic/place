@@ -1,38 +1,72 @@
-<div class="canvas-container">
+<div id="place">
     <div id="loading">
         <div class="content">
             <img src="https://www.dynastic.co/img/dd-big.png" height="75" class="icon">
             <span class="text">Loading…</span>
         </div>
     </div>
-    <%- include("pixel_data.html") %>
-    <div class="button-ctn">
-        <div id="grid-button" class="control btn btn-success"></div>
-        <div id="zoom-button" class="control btn btn-primary"></div>
-    </div>
-    <div id="grid"></div>
-    <div id="grid-hint"></div>
-    <div id="palette-ctn">
-        <div class="ctn-row">
-            <div id="user-count" class="content compact" style="display: none;"><i class="fa fa-user fa-fw"></i><span class="count"></span><i class="fa fa-circle-o-notch fa-spin fa-fw loading"></i></div>
-            <button id="coordinates" class="content compact" style="display: none;"><i class="fa fa-map-marker fa-fw"></i>(<span></span>, <span></span>)</button>
+    <div class="canvas-container">
+        <%- include("pixel_data.html") %>
+        <div class="button-ctn">
+            <div id="grid-button" class="control btn btn-success"></div>
+            <div id="zoom-button" class="control btn btn-primary"></div>
+            <div class="popout-btns">
+                <div class="popout-control control btn btn-default" data-tab-name="chat"><i class="fa fa-comments fa-fw"></i></div>
+                <div class="popout-control control btn btn-default" data-tab-name="leaderboard"><i class="fa fa-trophy fa-fw"></i></div>
+            </div>
         </div>
-        <div class="ctn-row">
-            <div id="palette" class="content">
-                <div class="overlay" id="sign-in-reminder">
-                    <span><a href="/signin">Sign in</a> or <a href="/signup">sign up</a> to start placing!</span>
+        <div id="grid"></div>
+        <div id="grid-hint"></div>
+        <div id="palette-ctn">
+            <div class="ctn-row">
+                <div id="user-count" class="content compact" style="display: none;"><i class="fa fa-user fa-fw"></i><span class="count"></span><i class="fa fa-circle-o-notch fa-spin fa-fw loading"></i></div>
+                <button id="coordinates" class="content compact" style="display: none;"><i class="fa fa-map-marker fa-fw"></i>(<span></span>, <span></span>)</button>
+            </div>
+            <div class="ctn-row">
+                <div id="palette" class="content">
+                    <div class="overlay" id="sign-in-reminder">
+                        <span><a href="/signin">Sign in</a> or <a href="/signup">sign up</a> to start placing!</span>
+                    </div>
+                    <div class="overlay" id="placing-modal">
+                        <span>Placing…<span>
+                    </div>
+                    <div class="overlay" id="place-timer"><span></span></div>
                 </div>
-                <div class="overlay" id="placing-modal">
-                    <span>Placing…<span>
-                </div>
-                <div class="overlay" id="place-timer"><span></span></div>
+            </div>
+        </div>
+        <canvas id="place-canvas" height="100%" width="100%"></canvas>
+        <div id="zoom-controller">
+            <div id="camera-controller">
+                <canvas id="place-canvas-draw" height="1000" width="1000"></canvas>
             </div>
         </div>
     </div>
-    <canvas id="place-canvas" height="100%" width="100%"></canvas>
-    <div id="zoom-controller">
-        <div id="camera-controller">
-            <canvas id="place-canvas-draw" height="1000" width="1000"></canvas>
+    <div id="popout-container">
+        <div class="navigation-bar">
+            <span class="title">Chat</span>
+            <span class="close-btn"><i class="fa fa-times"></i></span>
+        </div>
+        <div class="content-ctn">
+            <div class="tab-content active chat" data-tab-name="chat">
+                <div class="messages" id="chat-messages"></div>
+                <div class="text-field">
+                    <input type="text" maxlength="249" autocomplete="off" placeholder="Send a message" id="chat-input-field" />
+                    <a href="javascript:void(0)" class="send-btn" id="chat-send-btn">Send</a>
+                </div>
+            </div>
+            <div class="tab-content" data-tab-name="leaderboard">
+                <div class="coming-soon">
+                    <p>Coming Soon</p>
+                </div>
+            </div>
+        </div>
+        <div class="tabbar">
+            <div class="tab active" data-tab-name="chat" data-tab-title="Chat">
+                <i class="fa fa-comments"></i>
+            </div>
+            <div class="tab" data-tab-name="leaderboard" data-tab-title="Leaderboard">
+                <i class="fa fa-trophy"></i>
+            </div>
         </div>
     </div>
 </div>
