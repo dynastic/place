@@ -87,12 +87,12 @@
                 <ul class="dropdown-menu">
                   <%- renderNavItem("Account details", "/account", "pencil-square-o"); %>
                   <li role="separator" class="divider"></li>
-                  <%- renderNavItem("Sign out", "/signout", "sign-out"); %>
+                  <%- renderNavItem("Sign out", `/signout?redirectURL=${redirectURLPart}`, "sign-out"); %>
                 </ul>
               </li>
             <% } else { %>
-              <%- renderNavItem("Sign in", "/signin", "sign-in"); %>
-              <%- renderNavItem("Sign up", "/signup", "user-plus"); %>
+              <%- renderNavItem("Sign in", `/signin?redirectURL=${redirectURLPart}`, "sign-in"); %>
+              <%- renderNavItem("Sign up", `/signup?redirectURL=${redirectURLPart}`, "user-plus"); %>
             <% } %>
           </ul>
         </div>
