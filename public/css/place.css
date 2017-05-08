@@ -757,6 +757,14 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
         top: 100%;
         max-width: none;
         z-index: 99;
+        margin: 0;
+        height: 100%;
+        padding-top: 50px;
+        background: none;
+    }
+
+    #popout-container > * {
+        background: #fff;
     }
 
     .popout-open #popout-container {

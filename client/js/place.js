@@ -1029,6 +1029,9 @@ var place = {
         $("#chat-send-btn").click(function() {
             app.sendChatMessage();
         })
+        $("#chat-input-field").focus(function() {
+            app.scrollToChatBottom();
+        })
         $("#chat-input-field").keydown(function(e) {
             if((e.keyCode || e.which) != 13) return;
             app.sendChatMessage();
