@@ -97,7 +97,10 @@ function APIRouter(app) {
                     let countData = { canPlace: seconds <= 0, seconds: seconds };
                     return res.json({ success: true, timer: countData })
                 }).catch(err => res.json({ success: true }));
-            }).catch(err => res.status(500).json({ success: false, error: err }));
+            }).catch(err => {
+                app.reportError("Error placing pixel: " + err);
+                res.status(500).json({ success: false, error: err })
+            });
         }
         paintWithUser(req.user);
     });
