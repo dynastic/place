@@ -289,6 +289,7 @@ var place = {
         setInterval(function() { app.doKeys() }, 15);
 
         this.setupChat();
+        this.updateAuthLinks();
     },
 
     getCanvasImage: function() {
@@ -362,6 +363,7 @@ var place = {
                 $(app.zoomController).removeClass("grabbing");
                 var coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
+                app.updateAuthLinks();
             }
         }).on("tap", event => {
             if(event.interaction.downEvent.button == 2) return event.preventDefault();
@@ -515,6 +517,7 @@ var place = {
         clearInterval(this.zooming.zoomHandle);
         let coord = this.getCoordinates();
         this.hashHandler.modifyHash(coord);
+        this.updateAuthLinks();
         this.zooming.zoomHandle = null;
         this.zooming.fastZoom = false;
     },
@@ -601,9 +604,9 @@ var place = {
     },
 
     updateCoordinates: function() {
-        let coord = this.getCoordinates();
+        var coord = this.getCoordinates();
         if(coord != this.lastUpdatedCoordinates) {
-            let coordElem = $(this.coordinateElement);
+            var coordElem = $(this.coordinateElement);
             setTimeout(function() {
                 let spans = coordElem.find("span");
                 spans.first().text(coord.x.toLocaleString());
@@ -1036,6 +1039,13 @@ var place = {
             if((e.keyCode || e.which) != 13) return;
             app.sendChatMessage();
         })
+    },
+
+    updateAuthLinks: function() {
+        var redirectURLPart = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
+        $("#nav-sign-in > a, #overlay-sign-in").attr("href", `/signin?redirectURL=${redirectURLPart}`)
+        $("#nav-sign-up > a, #overlay-sign-up").attr("href", `/signup?redirectURL=${redirectURLPart}`)
+        $("#nav-sign-out > a").attr("href", `/signout?redirectURL=${redirectURLPart}`)
     }
 }
 
