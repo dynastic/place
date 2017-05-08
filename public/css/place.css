@@ -36,7 +36,7 @@ body {
     justify-content: center;
     overflow: hidden;
     position: relative;
-    top: 0!important;
+    bottom: 0;
     width: 100%;
 }
 
@@ -100,6 +100,7 @@ body {
     position: absolute;
     top: 20px;
     right: 20px;
+    margin-top: 50px;
     z-index: 2;
 }
 
@@ -494,7 +495,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 #popout-container {
     width: 100%;
     max-width: 320px;
-    height: 100%;
+    margin-top: 50px;
     background: #fff;
     border-left: 1px solid #eee;
     position: relative;
@@ -613,7 +614,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 #place {
     display: flex;
     position: absolute;
-    top: 51px;
+    top: 0;
     bottom: 0;
     left: 0;
     right: 0;
