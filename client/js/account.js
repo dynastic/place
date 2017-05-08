@@ -1,8 +1,8 @@
 var passwordProgressAlert = $('div[name="changePasswordProgressAlert"]');
 var deactivateProgressAlert = $('div[name="deactivateAccountProgressAlert"]');
 
-var parseError = function(response){
-  var data = typeof response.error().responseJSON === 'undefined' ? null : response.error().responseJSON;
+var parseError = function(response) {
+  var data = typeof response.error === "object" ? response : (typeof response.error().responseJSON === 'undefined' ? null : response.error().responseJSON);
   return data.error.message ? data.error.message : "An unknown error occured.";
 }
 
