@@ -846,21 +846,16 @@ var place = {
         if(wasZoomedOut) this.zoomIntoPoint(x, y);
 
         if(this.selectedColour === null) {
-            function getUserStateText(userState) {
-                if(userState == "ban") return "Banned user";
-                if(userState == "deactivated") return "Deactivated user";
-                return "Deleted account";
-            }
             this.zoomIntoPoint(x, y);
             return this.getPixel(x, y, (err, data) => {
                 if(err || !data.pixel) return;
                 let popover = $(this.pixelDataPopover);
                 if(this.zooming.zooming) this.shouldShowPopover = true;
                 else popover.fadeIn(250);
-                let hasUser = !!data.pixel.user;
+                var hasUser = !!data.pixel.user;
                 if(typeof data.pixel.userError === 'undefined') data.pixel.userError = null;
-                popover.find("#pixel-data-username").text(hasUser ? data.pixel.user.username : getUserStateText(data.pixel.userError));
-                if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account")
+                popover.find("#pixel-data-username").text(hasUser ? data.pixel.user.username : this.getUserStateText(data.pixel.userError));
+                if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account");
                 else popover.find("#pixel-data-username").addClass("deleted-account");
                 popover.find("#pixel-data-time").text($.timeago(data.pixel.modified));
                 popover.find("#pixel-data-time").attr("datetime", data.pixel.modified);
@@ -977,12 +972,21 @@ var place = {
                 sinceLastTimestamp = 0;
                 resetTimestamp = true;
             }
+            var hasUser = !!item.user;
+            if(typeof item.userError === 'undefined') item.userError = null;
             var needsTimestamp = resetTimestamp || !hasLastMessage || (messageDate - lastMessageDate > 1000 * 60 * 3) || (messageDate.toDateString() !== lastMessageDate.toDateString());
             if(!needsTimestamp) sinceLastTimestamp++;
             var needsUsername = !outgoing && (needsTimestamp || !hasLastMessage || arr[index - 1].userID != item.userID);
             if(needsTimestamp) $(`<div class="timestamp"></div>`).text(getFancyDate(new Date(item.date))).appendTo("#chat-messages");
             var ctn = $(`<div class="message-ctn clearfix"><div class="message"></div></div>`);
-            if(needsUsername) $(`<a class="username"></a>`).text(item.username).attr("href", `/@${item.username}`).prependTo(ctn);
+            var usernameHTML = $(`<a class="username"><span></span></a>`);
+            usernameHTML.find("span").text(hasUser ? item.user.username : this.getUserStateText(item.userError))
+            if(hasUser) {
+                usernameHTML.attr("href", `/@${item.user.username}`);
+                if(item.user.banned || item.user.deactivated) $(`<span class="label label-danger badge-label"></span>`).text(item.user.banned ? "Banned" : "Deactivated").appendTo(usernameHTML);
+                if(item.user.moderator || item.user.admin) $(`<span class="label label-warning badge-label"></span>`).text(item.user.admin ? "Admin" : "Moderator").prependTo(usernameHTML);
+            } else usernameHTML.addClass("deleted-account");
+            if(needsUsername) usernameHTML.prependTo(ctn);
             ctn.find(".message").text(item.text).addClass(outgoing ? "outgoing" : "incoming").attr("title", messageDate.toLocaleString());
             ctn.appendTo("#chat-messages");
         });
@@ -1048,6 +1052,12 @@ var place = {
         $("#nav-sign-in > a, #overlay-sign-in").attr("href", `/signin?redirectURL=${redirectURLPart}`)
         $("#nav-sign-up > a, #overlay-sign-up").attr("href", `/signup?redirectURL=${redirectURLPart}`)
         $("#nav-sign-out > a").attr("href", `/signout?redirectURL=${redirectURLPart}`)
+    },
+
+    getUserStateText: function(userState) {
+        if(userState == "ban") return "Banned user";
+        if(userState == "deactivated") return "Deactivated user";
+        return "Deleted account";
     }
 }
 

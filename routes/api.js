@@ -135,7 +135,8 @@ function APIRouter(app) {
 
     router.get('/chat', function(req, res, next) {
          ChatMessage.getLatestMessages().then(messages => {
-            var promises = messages.reverse().map(m => m.toInfo());
+            var overrideDataAccess = req.user && (req.user.moderator || req.user.admin);
+            var promises = messages.reverse().map(m => m.getInfo(overrideDataAccess));
             Promise.all(promises).then(messages => {
                 res.json({ success: true, messages: messages });
             }).catch(err => res.status(500).json({ success: false, error: { message: "An error occurred while trying to retrieve messages.", code: "server_message_error" } }));

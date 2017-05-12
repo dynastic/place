@@ -730,6 +730,26 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     margin-bottom: 5px;
     margin-left: 2px;
     display: block;
+    text-decoration: none!important;
+}
+
+.chat .username[href]:hover {
+    text-decoration: underline!important;
+}
+
+.chat .username.deleted-account {
+    font-style: italic;
+}
+
+.chat .username > span {
+    margin: 0 2px;
+    text-decoration: none!important;
+}
+.chat .username > *:first-child {
+    margin-left: 0;
+}
+.chat .username > *:last-child {
+    margin-right: 0;
 }
 
 .chat .timestamp {
