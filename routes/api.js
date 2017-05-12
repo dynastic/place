@@ -296,7 +296,23 @@ function APIRouter(app) {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.findSimilarIPUsers().then(users => {
                 var identifiedAccounts = users.map(user => { return { user: user.toInfo(), reasons: ["ip"] } });
-                return res.json({ success: true, target: user.toInfo(), identifiedAccounts: identifiedAccounts })
+                function respondIdentifiedAccounts() {
+                    res.json({ success: true, target: user.toInfo(), identifiedAccounts: identifiedAccounts })
+                }
+                if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
+                    const legit = require('../util/legit');
+                    var currentUsernames = identifiedAccounts.map(i => i.user.username);
+                    legit.findSimilarUsers(user).then(users => {
+                        var reason = legit.similarityAspectName();
+                        users.forEach(user => {
+                            if(currentUsernames.includes(user.name)) {
+                                var i = currentUsernames.indexOf(user.name);
+                                identifiedAccounts[i].reasons.push(reason);
+                            } else identifiedAccounts.push({ user: user.toInfo(), reasons: [reason] });
+                        });
+                        respondIdentifiedAccounts();
+                    }).catch(err => respondIdentifiedAccounts());
+                } else respondIdentifiedAccounts();
             }).catch(err => {
                 app.reportError("Error finding similar accounts: " + err);
                 res.status(500).json({ success: false });
