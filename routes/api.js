@@ -149,7 +149,7 @@ function APIRouter(app) {
         refreshTimeoutOnRequest: false,
         minWait: 10*1000, // 10 seconds
         maxWait: 15*1000, // 15 seconds,
-        lifetime: 25*1000, // remember spam for max of 25 seconds
+        lifetime: 25, // remember spam for max of 25 seconds
         failCallback: (req, res, next, nextValidRequestDate) => {
             var seconds = Math.round((nextValidRequestDate - new Date()) / 1000);
             return res.status(429).json({ success: false, error: { message: `You're sending messages too fast! To avoid spamming the chat, please get everything into one message if you can. You will be able to chat again in ${seconds.toLocaleString()} second${seconds == 1 ? "" : "s"}.`, code: "rate_limit" } })
