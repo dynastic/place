@@ -180,7 +180,6 @@ UserSchema.methods.addPixel = function(colour, x, y, callback) {
     Pixel.addPixel(colour, x, y, this.id, (changed, error) => {
         if (changed === null) return callback(null, error);
         if(changed) {
-            console.log("PIXLE WAS CHANGED!!!!")
             user.lastPlace = new Date();
             user.placeCount++;
         }
