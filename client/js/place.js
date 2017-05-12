@@ -209,6 +209,7 @@ var place = {
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null}, loadedImage: false,
     notificationHandler: notificationHandler, hashHandler: hashHandler,
     messages: null,
+    isOutdated: false,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid, popoutContainer) {
         this.canvas = canvas; // moved around; hidden
@@ -295,7 +296,7 @@ var place = {
     getCanvasImage: function() {
         if(this.loadedImage) return;
         var app = this;
-        this.adjustLoadingScreen("Loading…");;
+        if(!this.isOutdated) this.adjustLoadingScreen("Loading…");;
         this.loadImage().then(image => {
             app.adjustLoadingScreen();
             app.canvasController.clearCanvas();
@@ -416,8 +417,19 @@ var place = {
             return this.on(event, data => listener(JSON.parse(data)));
         }
 
-        socket.on("error", e => console.log("Socket error: " + e));
-        socket.on("connect", () => console.log("Socket successfully connected"));
+        socket.on("error", e => {
+            console.log("Socket error: " + e)
+            this.isOutdated = true;
+        });
+        socket.on("connect", () => {
+            console.log("Socket successfully connected");
+            if(this.isOutdated) {
+                this.loadedImage = false;
+                this.getCanvasImage();
+                this.loadChatMessages();
+                this.isOutdated = false;
+            }
+        });
 
         socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
         socket.on("server_ready", () => this.getCanvasImage());
