@@ -179,8 +179,11 @@ UserSchema.methods.addPixel = function(colour, x, y, callback) {
     var user = this;
     Pixel.addPixel(colour, x, y, this.id, (changed, error) => {
         if (changed === null) return callback(null, error);
-        if(changed) user.lastPlace = new Date();
-        user.placeCount++;
+        if(changed) {
+            console.log("PIXLE WAS CHANGED!!!!")
+            user.lastPlace = new Date();
+            user.placeCount++;
+        }
         user.save(function(err) {
             if (err) return callback(null, { message: "An unknown error occurred while trying to place that pixel." });
             return callback(changed, null);
