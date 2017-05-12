@@ -159,11 +159,14 @@ function APIRouter(app) {
         if(!req.body.text || !req.body.x || !req.body.y) return res.status(400).json({ success: false, error: { message: "You did not specify the required information to send a message.", code: "bad_request" } })
         if(req.body.text.length < 1 || req.body.text.length > 250) return  res.status(400).json( { success: false, error: { message: "Your message must be shorter than 250 characters and may not be blank.", code: "message_text_length" } })
          ChatMessage.createMessage(app, req.user.id, req.body.text, req.body.x, req.body.y).then(message => {
-             var info = message.toInfo().then(info => {
+             var info = message.getInfo().then(info => {
                 res.json({ success: true, message: info });
                 app.websocketServer.broadcast("new_message", info);
              }).catch(err => res.json({ success: true }))
-         }).catch(err => res.status(500).json( { success: false, error: { message: "An error occurred while trying to send your message.", code: "server_message_error" } }))
+         }).catch(err => {
+             app.reportError(err);
+             res.status(500).json( { success: false, error: { message: "An error occurred while trying to send your message.", code: "server_message_error" } })
+        })
     });
 
     // Admin APIs
