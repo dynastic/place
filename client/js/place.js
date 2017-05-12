@@ -857,9 +857,9 @@ var place = {
                 let popover = $(this.pixelDataPopover);
                 if(this.zooming.zooming) this.shouldShowPopover = true;
                 else popover.fadeIn(250);
-                let hasUser = !!data.pixel.editor;
+                let hasUser = !!data.pixel.user;
                 if(typeof data.pixel.userError === 'undefined') data.pixel.userError = null;
-                popover.find("#pixel-data-username").text(hasUser ? data.pixel.editor.username : getUserStateText(data.pixel.userError));
+                popover.find("#pixel-data-username").text(hasUser ? data.pixel.user.username : getUserStateText(data.pixel.userError));
                 if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account")
                 else popover.find("#pixel-data-username").addClass("deleted-account");
                 popover.find("#pixel-data-time").text($.timeago(data.pixel.modified));
@@ -869,18 +869,18 @@ var place = {
                 popover.find("#pixel-data-y").text(y.toLocaleString());
                 if(hasUser) {
                     popover.find(".user-info").show();
-                    popover.find("#pixel-data-user-tile-count").text(data.pixel.editor.statistics.totalPlaces.toLocaleString());
-                    popover.find("#pixel-data-user-account-date").text($.timeago(data.pixel.editor.creationDate));
-                    popover.find("#pixel-data-user-account-date").attr("datetime", data.pixel.editor.creationDate);
-                    popover.find("#pixel-data-user-account-date").attr("title", new Date(data.pixel.editor.creationDate).toLocaleString());
-                    popover.find("#pixel-data-user-last-place").text($.timeago(data.pixel.editor.statistics.lastPlace));
-                    popover.find("#pixel-data-user-last-place").attr("datetime", data.pixel.editor.statistics.lastPlace);
-                    popover.find("#pixel-data-user-last-place").attr("title", new Date(data.pixel.editor.statistics.lastPlace).toLocaleString());
-                    popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.editor.id}`);
-                    if (data.pixel.editor.admin) popover.find("#pixel-badge").show().text("Admin");
-                    else if (data.pixel.editor.moderator) popover.find("#pixel-badge").show().text("Moderator");
+                    popover.find("#pixel-data-user-tile-count").text(data.pixel.user.statistics.totalPlaces.toLocaleString());
+                    popover.find("#pixel-data-user-account-date").text($.timeago(data.pixel.user.creationDate));
+                    popover.find("#pixel-data-user-account-date").attr("datetime", data.pixel.user.creationDate);
+                    popover.find("#pixel-data-user-account-date").attr("title", new Date(data.pixel.user.creationDate).toLocaleString());
+                    popover.find("#pixel-data-user-last-place").text($.timeago(data.pixel.user.statistics.lastPlace));
+                    popover.find("#pixel-data-user-last-place").attr("datetime", data.pixel.user.statistics.lastPlace);
+                    popover.find("#pixel-data-user-last-place").attr("title", new Date(data.pixel.user.statistics.lastPlace).toLocaleString());
+                    popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.user.id}`);
+                    if (data.pixel.user.admin) popover.find("#pixel-badge").show().text("Admin");
+                    else if (data.pixel.user.moderator) popover.find("#pixel-badge").show().text("Moderator");
                     else popover.find("#pixel-badge").hide();
-                    if(popover.find("#mod-user-action-ctn")[0]) popover.find("#mod-user-action-ctn").html(renderUserActions(data.pixel.editor));
+                    if(popover.find("#mod-user-action-ctn")[0]) popover.find("#mod-user-action-ctn").html(renderUserActions(data.pixel.user));
                 } else {
                     popover.find(".user-info").hide();
                     popover.find("#pixel-badge").hide();

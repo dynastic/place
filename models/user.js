@@ -255,6 +255,21 @@ UserSchema.methods.getUsernameInitials = function() {
     return getInitials(this.name);
 }
 
+UserSchema.statics.getPubliclyAvailableUserInfo = function(userID) {
+    return new Promise((resolve, reject) => {
+        var info = {};
+        this.findById(userID).then(user => {
+            if(user.banned) info.userError = "ban";
+            else if(user.deactivated) info.userError = "deactivated";
+            else info.user = user.toInfo();
+            resolve(info);
+        }).catch(err => {
+            info.userError = "delete";
+            resolve(info);
+        });
+    })
+}
+
 UserSchema.plugin(dataTables, {
     totalKey: 'recordsFiltered',
 });

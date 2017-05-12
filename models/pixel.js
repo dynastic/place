@@ -101,26 +101,8 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
 PixelSchema.methods.getInfo = function() {
     return new Promise((resolve, reject) => {
         let info = this.toInfo();
-        require("./user").findById(this.editorID).then(user => {
-            if(user.banned) info.userError = "ban";
-            else if(user.deactivated) info.userError = "deactivated";
-            else info.editor = user.toInfo();
-            resolve(info);
-        }).catch(err => {
-            info.userError = "delete";
-            resolve(info);
-        });
+        require("./user").getPubliclyAvailableUserInfo(this.editorID).then(userInfo => resolve(Object.assign(info, userInfo))).catch(err => reject(err));
     })
-}
-
-PixelSchema.statics.getAllPixels = function() {
-    return new Promise((resolve, reject) => {
-        this.find({}, function(err, pixels) {
-            if (!pixels) return reject(err);
-            let info = pixels.map(pixel => pixel.toInfo())
-            resolve(info)
-        });
-    });
 }
 
 module.exports = mongoose.model('Pixel', PixelSchema);
