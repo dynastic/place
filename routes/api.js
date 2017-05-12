@@ -144,13 +144,16 @@ function APIRouter(app) {
     });
 
     const chatRatelimit = new Ratelimit(require('../util/RatelimitStore')("Chat"), {
-        freeRetries: 6, // 6 messages per 15 seconds
+        freeRetries: 7, // 7 messages per 10-15 seconds
         attachResetToRequest: false,
         refreshTimeoutOnRequest: false,
         minWait: 10*1000, // 10 seconds
-        maxWait: 20*1000, // 20 seconds,
-        lifetime: 45*1000, // remember spam for max of 40 seconds
-        failCallback: (req, res, next, nextValidRequestDate) => res.status(429).json({ success: false, error: { message: "You're doing that too fast.", code: "rate_limit" } }),
+        maxWait: 15*1000, // 15 seconds,
+        lifetime: 25*1000, // remember spam for max of 25 seconds
+        failCallback: (req, res, next, nextValidRequestDate) => {
+            var seconds = Math.round((nextValidRequestDate - new Date()) / 1000);
+            return res.status(429).json({ success: false, error: { message: `You're sending messages too fast! To avoid spamming the chat, please get everything into one message if you can. You will be able to chat again in ${seconds.toLocaleString()} second${seconds == 1 ? "" : "s"}.`, code: "rate_limit" } })
+        },
         handleStoreError: error => app.reportError("Chat rate limit store error: " + error),
         proxyDepth: config.trustProxyDepth
     });
