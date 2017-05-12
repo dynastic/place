@@ -1034,8 +1034,8 @@ var place = {
         var app = this;
         var input = $("#chat-input-field");
         var btn = $("#chat-send-btn");
-        btn.text("Sending…").attr("disabled", "disabled");
         if(input.val().length <= 0) return;
+        btn.text("Sending…").attr("disabled", "disabled");
         var coords = this.getCoordinates();
         var text = input.val();
         $.post("/api/chat", {
