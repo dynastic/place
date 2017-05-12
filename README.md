@@ -70,7 +70,7 @@ server {
 
 ## Contributing 
 
-Please make a [pull request](/https://github.com/dynasticdevelop/place/pulls). Before making a pull request, come and chat woth us on [Discord](https://discord.gg/CgC8FTg) in #contributors.
+Please make a [pull request](/https://github.com/dynasticdevelop/place/pulls). Before making a pull request, come and chat with us on [Discord](https://discord.gg/CgC8FTg) in #contributors.
 
 ### Roadmap
 
