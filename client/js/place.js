@@ -880,10 +880,12 @@ var place = {
                     if (data.pixel.user.admin) popover.find("#pixel-badge").show().text("Admin");
                     else if (data.pixel.user.moderator) popover.find("#pixel-badge").show().text("Moderator");
                     else popover.find("#pixel-badge").hide();
+                    if (data.pixel.user.banned) popover.find("#pixel-user-state-badge").show().text("Banned");
+                    else if (data.pixel.user.deactivated) popover.find("#pixel-user-state-badge").show().text("Deactivated");
+                    else popover.find("#pixel-user-state-badge").hide();
                     if(popover.find("#mod-user-action-ctn")[0]) popover.find("#mod-user-action-ctn").html(renderUserActions(data.pixel.user));
                 } else {
-                    popover.find(".user-info").hide();
-                    popover.find("#pixel-badge").hide();
+                    popover.find(".user-info, #pixel-badge, #pixel-user-state-badge").hide();
                     popover.find("#mod-user-action-ctn").html("");
                     popover.find("#pixel-data-username").removeAttr("href");
                 }

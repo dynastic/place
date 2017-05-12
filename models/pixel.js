@@ -98,10 +98,10 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
     });
 }
 
-PixelSchema.methods.getInfo = function() {
+PixelSchema.methods.getInfo = function(overrideDataAccess = false) {
     return new Promise((resolve, reject) => {
         let info = this.toInfo();
-        require("./user").getPubliclyAvailableUserInfo(this.editorID).then(userInfo => resolve(Object.assign(info, userInfo))).catch(err => reject(err));
+        require("./user").getPubliclyAvailableUserInfo(this.editorID, overrideDataAccess).then(userInfo => resolve(Object.assign(info, userInfo))).catch(err => reject(err));
     })
 }
 
