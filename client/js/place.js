@@ -942,11 +942,11 @@ var place = {
     loadChatMessages: function() {
         var app = this;
         $.get("/api/chat").done(function(response) {
-            if(!response.success || !response.messages) alert("fail");
+            if(!response.success || !response.messages) console.log("Failed to load chat messages.");
             app.messages = response.messages;
             app.layoutMessages();
         }).fail(function() {
-            alert("fail")
+            console.log("Failed to load chat messages.");
         });
     },
 
@@ -961,24 +961,29 @@ var place = {
 
         $("#chat-messages > *").remove();
         var sinceLastTimestamp = 0;
+        const maxMessageBlock = 10;
         this.messages.forEach((item, index, arr) => {
             var outgoing = $("body").data("user-id") == item.userID;
+            // Check if this message is not the first
             var hasLastMessage = index > 0;
+            // Get the date of the last message, if possible
             var lastMessageDate = null;
             if(hasLastMessage) lastMessageDate = new Date(arr[index - 1].date);
             var messageDate = new Date(item.date);
-            var resetTimestamp = false;
-            if(sinceLastTimestamp > 10) {
-                sinceLastTimestamp = 0;
-                resetTimestamp = true;
-            }
+            // Check if this message has an attached user
             var hasUser = !!item.user;
             if(typeof item.userError === 'undefined') item.userError = null;
-            var needsTimestamp = resetTimestamp || !hasLastMessage || (messageDate - lastMessageDate > 1000 * 60 * 3) || (messageDate.toDateString() !== lastMessageDate.toDateString());
-            if(!needsTimestamp) sinceLastTimestamp++;
+            // Determine if this message should have a timestamp before it (they appear for first messages, every 10 messages without a timestamp, after 3 minute breaks, or if messages were sent on different days)
+            var needsTimestamp = sinceLastTimestamp > 10 || !hasLastMessage || (messageDate - lastMessageDate > 1000 * 60 * 3) || (messageDate.toDateString() !== lastMessageDate.toDateString());
+            // Determine if this message should show a username (checks if its not sent my user and if it is the first message sent, or if the message before it was sent by someone else)
             var needsUsername = !outgoing && (needsTimestamp || !hasLastMessage || arr[index - 1].userID != item.userID);
+            // Determine if this message should show a coordinate (if its the last message, the previous message was sent by someone else, or separated by three minutes)
+            var needsCoordinate = index >= arr.length - 1 || (arr[index + 1].userID != item.userID || new Date(arr[index + 1].date) - messageDate > 1000 * 60 * 3 || sinceLastTimestamp == 10);
+            // Calculate our maximum message blocks
+            if(sinceLastTimestamp > 10) sinceLastTimestamp = 0;
+            if(!needsTimestamp) sinceLastTimestamp++;
             if(needsTimestamp) $(`<div class="timestamp"></div>`).text(getFancyDate(new Date(item.date))).appendTo("#chat-messages");
-            var ctn = $(`<div class="message-ctn clearfix"><div class="message"></div></div>`);
+            var ctn = $(`<div class="message-ctn"><div class="clearfix"><div class="message"></div></div></div>`).addClass(outgoing ? "outgoing" : "incoming");
             var usernameHTML = $(`<a class="username"><span></span></a>`);
             usernameHTML.find("span").text(hasUser ? item.user.username : this.getUserStateText(item.userError))
             if(hasUser) {
@@ -987,7 +992,12 @@ var place = {
                 if(item.user.moderator || item.user.admin) $(`<span class="label label-warning badge-label"></span>`).text(item.user.admin ? "Admin" : "Moderator").prependTo(usernameHTML);
             } else usernameHTML.addClass("deleted-account");
             if(needsUsername) usernameHTML.prependTo(ctn);
-            ctn.find(".message").text(item.text).addClass(outgoing ? "outgoing" : "incoming").attr("title", messageDate.toLocaleString());
+            ctn.find(".message").text(item.text).attr("title", messageDate.toLocaleString());
+            if(needsCoordinate) {
+                var coords = $(`<a class="chat-coordinates" href="javascript:void(0);"><i class="fa fa-map-marker"></i> <span></span></a>`).click(() => this.zoomIntoPoint(item.position.x, item.position.y, false));
+                coords.find("span").text(`(${item.position.x.toLocaleString()}, ${item.position.y.toLocaleString()})`);
+                coords.appendTo(ctn);
+            }
             ctn.appendTo("#chat-messages");
         });
         this.scrollToChatBottom();
