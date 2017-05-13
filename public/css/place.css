@@ -718,18 +718,47 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     word-wrap: break-word;
 }
 
-.chat .message.outgoing {
+.chat .message-ctn.outgoing .message {
     background: rgb(0, 127, 255);
     color: #fff;
     float: right;
 }
 
-.chat .username {
+.chat .username, .chat .chat-coordinates {
     color: #777;
     font-size: 12px;
     margin-bottom: 5px;
     margin-left: 2px;
     display: block;
+    text-decoration: none!important;
+}
+
+.chat .chat-coordinates {
+    margin-bottom: 0;
+    margin-top: 5px;
+}
+
+.chat .message-ctn.outgoing .chat-coordinates {
+    text-align: right;
+}
+
+.chat .username[href]:hover, .chat .chat-coordinates[href]:hover {
+    text-decoration: underline!important;
+}
+
+.chat .username.deleted-account {
+    font-style: italic;
+}
+
+.chat .username > span {
+    margin: 0 2px;
+    text-decoration: none!important;
+}
+.chat .username > *:first-child {
+    margin-left: 0;
+}
+.chat .username > *:last-child {
+    margin-right: 0;
 }
 
 .chat .timestamp {
@@ -743,6 +772,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 @media(max-width: 600px) {
     #place {
         display: block;
+        overflow: hidden;
     }
 
     .canvas-container {

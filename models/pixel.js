@@ -92,35 +92,17 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
         if (err) return callback(null, { message: "An error occurred while trying to place the pixel." });
         var wasIdentical = colour.r == 255 && colour.g == 255 && colour.b == 255; // set to identical if pixel was white
         if(pixel) { // we have data from the old pixel
-            wasIdentical = pixel.colourR == colour.r && pixel.colourG == colour.g && pixel.colourB; // set to identical if colour matched old pixel
+            wasIdentical = pixel.colourR == colour.r && pixel.colourG == colour.g && pixel.colourB == pixel.colourB; // set to identical if colour matched old pixel
         }
         return callback(!wasIdentical, null);
     });
 }
 
-PixelSchema.methods.getInfo = function() {
+PixelSchema.methods.getInfo = function(overrideDataAccess = false) {
     return new Promise((resolve, reject) => {
         let info = this.toInfo();
-        require("./user").findById(this.editorID).then(user => {
-            if(user.banned) info.userError = "ban";
-            else if(user.deactivated) info.userError = "deactivated";
-            else info.editor = user.toInfo();
-            resolve(info);
-        }).catch(err => {
-            info.userError = "delete";
-            resolve(info);
-        });
+        require("./user").getPubliclyAvailableUserInfo(this.editorID, overrideDataAccess).then(userInfo => resolve(Object.assign(info, userInfo))).catch(err => reject(err));
     })
-}
-
-PixelSchema.statics.getAllPixels = function() {
-    return new Promise((resolve, reject) => {
-        this.find({}, function(err, pixels) {
-            if (!pixels) return reject(err);
-            let info = pixels.map(pixel => pixel.toInfo())
-            resolve(info)
-        });
-    });
 }
 
 module.exports = mongoose.model('Pixel', PixelSchema);

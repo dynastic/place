@@ -91,7 +91,7 @@ function APIRouter(app) {
             if (!req.body.x || !req.body.y || !req.body.colour) return res.status(400).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
             let rgb = app.paintingHandler.getColourRGB(req.body.colour);
             if (!rgb) return res.status(400).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
-            app.paintingHandler.doPaint(rgb, req.body.x, req.body.y, user).then((pixel) => {
+            app.paintingHandler.doPaint(rgb, req.body.x, req.body.y, user).then(pixel => {
                 return User.findById(user.id).then(user => {
                     let seconds = user.getPlaceSecondsRemaining();
                     let countData = { canPlace: seconds <= 0, seconds: seconds };
@@ -124,9 +124,10 @@ function APIRouter(app) {
             return res.status(500).json({ success: false, error: { message: "An error occurred while trying to look up information about that pixel." } })
         }
         if(!req.query.x || !req.query.y) return res.status(400).json( { success: false, error: { message: "You did not specify the coordinates of the pixel to look up.", code: "bad_request" } });
+        var overrideDataAccess = req.user && (req.user.moderator || req.user.admin);
         Pixel.find({xPos: req.query.x, yPos: req.query.y}).then(pixels => {
             if (pixels.length <= 0) return res.json( {success: true, pixel: null });
-            pixels[0].getInfo().then(info => {
+            pixels[0].getInfo(overrideDataAccess).then(info => {
                 res.json({ success: true, pixel: info })
             }).catch(err => fail(err));
         }).catch(err => fail(err));
@@ -134,7 +135,8 @@ function APIRouter(app) {
 
     router.get('/chat', function(req, res, next) {
          ChatMessage.getLatestMessages().then(messages => {
-            var promises = messages.reverse().map(m => m.toInfo());
+            var overrideDataAccess = req.user && (req.user.moderator || req.user.admin);
+            var promises = messages.reverse().map(m => m.getInfo(overrideDataAccess));
             Promise.all(promises).then(messages => {
                 res.json({ success: true, messages: messages });
             }).catch(err => res.status(500).json({ success: false, error: { message: "An error occurred while trying to retrieve messages.", code: "server_message_error" } }));
@@ -142,13 +144,16 @@ function APIRouter(app) {
     });
 
     const chatRatelimit = new Ratelimit(require('../util/RatelimitStore')("Chat"), {
-        freeRetries: 6, // 6 messages per 15 seconds
+        freeRetries: 7, // 7 messages per 10-15 seconds
         attachResetToRequest: false,
         refreshTimeoutOnRequest: false,
         minWait: 10*1000, // 10 seconds
-        maxWait: 20*1000, // 20 seconds,
-        lifetime: 45*1000, // remember spam for max of 40 seconds
-        failCallback: (req, res, next, nextValidRequestDate) => res.status(429).json({ success: false, error: { message: "You're doing that too fast.", code: "rate_limit" } }),
+        maxWait: 15*1000, // 15 seconds,
+        lifetime: 25, // remember spam for max of 25 seconds
+        failCallback: (req, res, next, nextValidRequestDate) => {
+            var seconds = Math.round((nextValidRequestDate - new Date()) / 1000);
+            return res.status(429).json({ success: false, error: { message: `You're sending messages too fast! To avoid spamming the chat, please get everything into one message if you can. You will be able to chat again in ${seconds.toLocaleString()} second${seconds == 1 ? "" : "s"}.`, code: "rate_limit" } })
+        },
         handleStoreError: error => app.reportError("Chat rate limit store error: " + error),
         proxyDepth: config.trustProxyDepth
     });
@@ -157,11 +162,14 @@ function APIRouter(app) {
         if(!req.body.text || !req.body.x || !req.body.y) return res.status(400).json({ success: false, error: { message: "You did not specify the required information to send a message.", code: "bad_request" } })
         if(req.body.text.length < 1 || req.body.text.length > 250) return  res.status(400).json( { success: false, error: { message: "Your message must be shorter than 250 characters and may not be blank.", code: "message_text_length" } })
          ChatMessage.createMessage(app, req.user.id, req.body.text, req.body.x, req.body.y).then(message => {
-             var info = message.toInfo().then(info => {
+             var info = message.getInfo().then(info => {
                 res.json({ success: true, message: info });
                 app.websocketServer.broadcast("new_message", info);
              }).catch(err => res.json({ success: true }))
-         }).catch(err => res.status(500).json( { success: false, error: { message: "An error occurred while trying to send your message.", code: "server_message_error" } }))
+         }).catch(err => {
+             app.reportError(err);
+             res.status(500).json( { success: false, error: { message: "An error occurred while trying to send your message.", code: "server_message_error" } })
+        })
     });
 
     // Admin APIs
@@ -288,7 +296,23 @@ function APIRouter(app) {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.findSimilarIPUsers().then(users => {
                 var identifiedAccounts = users.map(user => { return { user: user.toInfo(), reasons: ["ip"] } });
-                return res.json({ success: true, target: user.toInfo(), identifiedAccounts: identifiedAccounts })
+                function respondIdentifiedAccounts() {
+                    res.json({ success: true, target: user.toInfo(), identifiedAccounts: identifiedAccounts })
+                }
+                if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
+                    const legit = require('../util/legit');
+                    var currentUsernames = identifiedAccounts.map(i => i.user.username);
+                    legit.findSimilarUsers(user).then(users => {
+                        var reason = legit.similarityAspectName();
+                        users.forEach(user => {
+                            if(currentUsernames.includes(user.name)) {
+                                var i = currentUsernames.indexOf(user.name);
+                                identifiedAccounts[i].reasons.push(reason);
+                            } else identifiedAccounts.push({ user: user.toInfo(), reasons: [reason] });
+                        });
+                        respondIdentifiedAccounts();
+                    }).catch(err => respondIdentifiedAccounts());
+                } else respondIdentifiedAccounts();
             }).catch(err => {
                 app.reportError("Error finding similar accounts: " + err);
                 res.status(500).json({ success: false });

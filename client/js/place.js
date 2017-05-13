@@ -209,6 +209,7 @@ var place = {
     selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null}, loadedImage: false,
     notificationHandler: notificationHandler, hashHandler: hashHandler,
     messages: null,
+    isOutdated: false,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid, popoutContainer) {
         this.canvas = canvas; // moved around; hidden
@@ -295,7 +296,7 @@ var place = {
     getCanvasImage: function() {
         if(this.loadedImage) return;
         var app = this;
-        this.adjustLoadingScreen("Loading…");;
+        if(!this.isOutdated) this.adjustLoadingScreen("Loading…");;
         this.loadImage().then(image => {
             app.adjustLoadingScreen();
             app.canvasController.clearCanvas();
@@ -416,8 +417,19 @@ var place = {
             return this.on(event, data => listener(JSON.parse(data)));
         }
 
-        socket.on("error", e => console.log("Socket error: " + e));
-        socket.on("connect", () => console.log("Socket successfully connected"));
+        socket.on("error", e => {
+            console.log("Socket error: " + e)
+            this.isOutdated = true;
+        });
+        socket.on("connect", () => {
+            console.log("Socket successfully connected");
+            if(this.isOutdated) {
+                this.loadedImage = false;
+                this.getCanvasImage();
+                this.loadChatMessages();
+                this.isOutdated = false;
+            }
+        });
 
         socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
         socket.on("server_ready", () => this.getCanvasImage());
@@ -846,21 +858,16 @@ var place = {
         if(wasZoomedOut) this.zoomIntoPoint(x, y);
 
         if(this.selectedColour === null) {
-            function getUserStateText(userState) {
-                if(userState == "ban") return "Banned user";
-                if(userState == "deactivated") return "Deactivated user";
-                return "Deleted account";
-            }
             this.zoomIntoPoint(x, y);
             return this.getPixel(x, y, (err, data) => {
                 if(err || !data.pixel) return;
                 let popover = $(this.pixelDataPopover);
                 if(this.zooming.zooming) this.shouldShowPopover = true;
                 else popover.fadeIn(250);
-                let hasUser = !!data.pixel.editor;
+                var hasUser = !!data.pixel.user;
                 if(typeof data.pixel.userError === 'undefined') data.pixel.userError = null;
-                popover.find("#pixel-data-username").text(hasUser ? data.pixel.editor.username : getUserStateText(data.pixel.userError));
-                if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account")
+                popover.find("#pixel-data-username").text(hasUser ? data.pixel.user.username : this.getUserStateText(data.pixel.userError));
+                if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account");
                 else popover.find("#pixel-data-username").addClass("deleted-account");
                 popover.find("#pixel-data-time").text($.timeago(data.pixel.modified));
                 popover.find("#pixel-data-time").attr("datetime", data.pixel.modified);
@@ -869,21 +876,23 @@ var place = {
                 popover.find("#pixel-data-y").text(y.toLocaleString());
                 if(hasUser) {
                     popover.find(".user-info").show();
-                    popover.find("#pixel-data-user-tile-count").text(data.pixel.editor.statistics.totalPlaces.toLocaleString());
-                    popover.find("#pixel-data-user-account-date").text($.timeago(data.pixel.editor.creationDate));
-                    popover.find("#pixel-data-user-account-date").attr("datetime", data.pixel.editor.creationDate);
-                    popover.find("#pixel-data-user-account-date").attr("title", new Date(data.pixel.editor.creationDate).toLocaleString());
-                    popover.find("#pixel-data-user-last-place").text($.timeago(data.pixel.editor.statistics.lastPlace));
-                    popover.find("#pixel-data-user-last-place").attr("datetime", data.pixel.editor.statistics.lastPlace);
-                    popover.find("#pixel-data-user-last-place").attr("title", new Date(data.pixel.editor.statistics.lastPlace).toLocaleString());
-                    popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.editor.id}`);
-                    if (data.pixel.editor.admin) popover.find("#pixel-badge").show().text("Admin");
-                    else if (data.pixel.editor.moderator) popover.find("#pixel-badge").show().text("Moderator");
+                    popover.find("#pixel-data-user-tile-count").text(data.pixel.user.statistics.totalPlaces.toLocaleString());
+                    popover.find("#pixel-data-user-account-date").text($.timeago(data.pixel.user.creationDate));
+                    popover.find("#pixel-data-user-account-date").attr("datetime", data.pixel.user.creationDate);
+                    popover.find("#pixel-data-user-account-date").attr("title", new Date(data.pixel.user.creationDate).toLocaleString());
+                    popover.find("#pixel-data-user-last-place").text($.timeago(data.pixel.user.statistics.lastPlace));
+                    popover.find("#pixel-data-user-last-place").attr("datetime", data.pixel.user.statistics.lastPlace);
+                    popover.find("#pixel-data-user-last-place").attr("title", new Date(data.pixel.user.statistics.lastPlace).toLocaleString());
+                    popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.user.id}`);
+                    if (data.pixel.user.admin) popover.find("#pixel-badge").show().text("Admin");
+                    else if (data.pixel.user.moderator) popover.find("#pixel-badge").show().text("Moderator");
                     else popover.find("#pixel-badge").hide();
-                    if(popover.find("#mod-user-action-ctn")[0]) popover.find("#mod-user-action-ctn").html(renderUserActions(data.pixel.editor));
+                    if (data.pixel.user.banned) popover.find("#pixel-user-state-badge").show().text("Banned");
+                    else if (data.pixel.user.deactivated) popover.find("#pixel-user-state-badge").show().text("Deactivated");
+                    else popover.find("#pixel-user-state-badge").hide();
+                    if(popover.find("#mod-user-action-ctn")[0]) popover.find("#mod-user-action-ctn").html(renderUserActions(data.pixel.user));
                 } else {
-                    popover.find(".user-info").hide();
-                    popover.find("#pixel-badge").hide();
+                    popover.find(".user-info, #pixel-badge, #pixel-user-state-badge").hide();
                     popover.find("#mod-user-action-ctn").html("");
                     popover.find("#pixel-data-username").removeAttr("href");
                 }
@@ -945,11 +954,11 @@ var place = {
     loadChatMessages: function() {
         var app = this;
         $.get("/api/chat").done(function(response) {
-            if(!response.success || !response.messages) alert("fail");
+            if(!response.success || !response.messages) console.log("Failed to load chat messages.");
             app.messages = response.messages;
             app.layoutMessages();
         }).fail(function() {
-            alert("fail")
+            console.log("Failed to load chat messages.");
         });
     },
 
@@ -964,24 +973,43 @@ var place = {
 
         $("#chat-messages > *").remove();
         var sinceLastTimestamp = 0;
+        const maxMessageBlock = 10;
         this.messages.forEach((item, index, arr) => {
             var outgoing = $("body").data("user-id") == item.userID;
+            // Check if this message is not the first
             var hasLastMessage = index > 0;
+            // Get the date of the last message, if possible
             var lastMessageDate = null;
             if(hasLastMessage) lastMessageDate = new Date(arr[index - 1].date);
             var messageDate = new Date(item.date);
-            var resetTimestamp = false;
-            if(sinceLastTimestamp > 10) {
-                sinceLastTimestamp = 0;
-                resetTimestamp = true;
-            }
-            var needsTimestamp = resetTimestamp || !hasLastMessage || (messageDate - lastMessageDate > 1000 * 60 * 3) || (messageDate.toDateString() !== lastMessageDate.toDateString());
-            if(!needsTimestamp) sinceLastTimestamp++;
+            // Check if this message has an attached user
+            var hasUser = !!item.user;
+            if(typeof item.userError === 'undefined') item.userError = null;
+            // Determine if this message should have a timestamp before it (they appear for first messages, every 10 messages without a timestamp, after 3 minute breaks, or if messages were sent on different days)
+            var needsTimestamp = sinceLastTimestamp > 10 || !hasLastMessage || (messageDate - lastMessageDate > 1000 * 60 * 3) || (messageDate.toDateString() !== lastMessageDate.toDateString());
+            // Determine if this message should show a username (checks if its not sent my user and if it is the first message sent, or if the message before it was sent by someone else)
             var needsUsername = !outgoing && (needsTimestamp || !hasLastMessage || arr[index - 1].userID != item.userID);
+            // Determine if this message should show a coordinate (if its the last message, the previous message was sent by someone else, or separated by three minutes)
+            var needsCoordinate = index >= arr.length - 1 || (arr[index + 1].userID != item.userID || new Date(arr[index + 1].date) - messageDate > 1000 * 60 * 3 || sinceLastTimestamp == 10);
+            // Calculate our maximum message blocks
+            if(sinceLastTimestamp > 10) sinceLastTimestamp = 0;
+            if(!needsTimestamp) sinceLastTimestamp++;
             if(needsTimestamp) $(`<div class="timestamp"></div>`).text(getFancyDate(new Date(item.date))).appendTo("#chat-messages");
-            var ctn = $(`<div class="message-ctn clearfix"><div class="message"></div></div>`);
-            if(needsUsername) $(`<a class="username"></a>`).text(item.username).attr("href", `/@${item.username}`).prependTo(ctn);
-            ctn.find(".message").text(item.text).addClass(outgoing ? "outgoing" : "incoming").attr("title", messageDate.toLocaleString());
+            var ctn = $(`<div class="message-ctn"><div class="clearfix"><div class="message"></div></div></div>`).addClass(outgoing ? "outgoing" : "incoming");
+            var usernameHTML = $(`<a class="username"><span></span></a>`);
+            usernameHTML.find("span").text(hasUser ? item.user.username : this.getUserStateText(item.userError))
+            if(hasUser) {
+                usernameHTML.attr("href", `/@${item.user.username}`);
+                if(item.user.banned || item.user.deactivated) $(`<span class="label label-danger badge-label"></span>`).text(item.user.banned ? "Banned" : "Deactivated").appendTo(usernameHTML);
+                if(item.user.moderator || item.user.admin) $(`<span class="label label-warning badge-label"></span>`).text(item.user.admin ? "Admin" : "Moderator").prependTo(usernameHTML);
+            } else usernameHTML.addClass("deleted-account");
+            if(needsUsername) usernameHTML.prependTo(ctn);
+            ctn.find(".message").text(item.text).attr("title", messageDate.toLocaleString());
+            if(needsCoordinate) {
+                var coords = $(`<a class="chat-coordinates" href="javascript:void(0);"><i class="fa fa-map-marker"></i> <span></span></a>`).click(() => this.zoomIntoPoint(item.position.x, item.position.y, false));
+                coords.find("span").text(`(${item.position.x.toLocaleString()}, ${item.position.y.toLocaleString()})`);
+                coords.appendTo(ctn);
+            }
             ctn.appendTo("#chat-messages");
         });
         this.scrollToChatBottom();
@@ -1006,8 +1034,8 @@ var place = {
         var app = this;
         var input = $("#chat-input-field");
         var btn = $("#chat-send-btn");
-        btn.text("Sending…").attr("disabled", "disabled");
         if(input.val().length <= 0) return;
+        btn.text("Sending…").attr("disabled", "disabled");
         var coords = this.getCoordinates();
         var text = input.val();
         $.post("/api/chat", {
@@ -1046,6 +1074,12 @@ var place = {
         $("#nav-sign-in > a, #overlay-sign-in").attr("href", `/signin?redirectURL=${redirectURLPart}`)
         $("#nav-sign-up > a, #overlay-sign-up").attr("href", `/signup?redirectURL=${redirectURLPart}`)
         $("#nav-sign-out > a").attr("href", `/signout?redirectURL=${redirectURLPart}`)
+    },
+
+    getUserStateText: function(userState) {
+        if(userState == "ban") return "Banned user";
+        if(userState == "deactivated") return "Deactivated user";
+        return "Deleted account";
     }
 }
 

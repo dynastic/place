@@ -39,7 +39,7 @@ var ChatMessageSchema = new Schema({
 });
 
 ChatMessageSchema.methods.toInfo = function() {
-    var data = {
+    return {
         id: this.id,
         userID: this.userID,
         date: this.date,
@@ -49,16 +49,11 @@ ChatMessageSchema.methods.toInfo = function() {
             y: this.yPos
         }
     }
+}
+
+ChatMessageSchema.methods.getInfo = function(overrideDataAccess = false) {
     return new Promise((resolve, reject) => {
-        function doWithUsername(username) {
-            data.username = username;
-            resolve(data);
-        }
-        User.findById(this.userID).then(user => {
-            if(user.banned) return doWithUsername("Banned user");
-            else if(user.deactivated) return doWithUsername("Deactivated user");
-            doWithUsername(user.name);
-        }).catch(err => doWithUsername("Deleted account"))
+        User.getPubliclyAvailableUserInfo(this.userID, overrideDataAccess).then(userInfo => resolve(Object.assign(this.toInfo(), userInfo))).catch(err => reject(err));
     })
 }
 
