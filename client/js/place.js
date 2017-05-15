@@ -77,24 +77,13 @@ var notificationHandler = {
                 if (granted) this.sendNotification(message, requesting);
             });
         }
-        if(this.supportsNewNotificationAPI) {
-            navigator.serviceWorker.ready.then(registration => {
-                registration.showNotification('Place 2.0', {
-                    body: message,
-                    tag: btoa(message),
-                    badge: 1,
-                    vibrate: [200, 100, 200, 100, 200, 100, 200]
-                });
+        try {
+            // Failsafe so it doesn't get stuck on 1 second
+            new Notification(title, {
+                body: message
             });
-        } else {
-            try {
-                // Failsafe so it doesn't get stuck on 1 second
-                new Notification(title, {
-                    body: message
-                });
-            } catch(e) {
-                console.error("Tried to send notification via old API, but failed: " + e);
-            }
+        } catch(e) {
+            console.error("Tried to send notification via old API, but failed: " + e);
         }
     }
 }
