@@ -368,12 +368,15 @@ var place = {
             }
         }).on("tap", event => {
             if(event.interaction.downEvent.button == 2) return event.preventDefault();
-            let zoom = app._getZoomMultiplier();
-            app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom))
+            if(!this.zooming.zooming) {
+                let zoom = app._getZoomMultiplier();
+                app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom));
+            }
             event.preventDefault();
         }).on("doubletap", event => {
             if(app.zooming.zoomedIn && this.selectedColour === null) {
                 app.zoomFinished();
+                app.shouldShowPopover = false;
                 app.setZoomedIn(false);
                 event.preventDefault();
             }
