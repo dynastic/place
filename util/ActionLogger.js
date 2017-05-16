@@ -101,7 +101,7 @@ var actionLogger = {
         Action({
             actionID: actionID,
             performingUserID: performingUser.id,
-            moderatingUser: moderatingUser.id,
+            moderatingUser: moderatingUser ? moderatingUser.id : null,
             info: info,
             date: new Date()
         }).save().catch(err => app.reportError("An error occurred while trying to log action: " + err));
