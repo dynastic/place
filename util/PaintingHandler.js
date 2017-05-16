@@ -1,5 +1,6 @@
 const lwip = require('pajk-lwip');
 const Pixel = require('../models/pixel');
+const ActionLogger = require("../util/ActionLogger");
 
 const imageSize = 1000;
 
@@ -114,7 +115,9 @@ function PaintingHandler(app) {
                         }
                     });
                     // Send notice to all clients:
-                    app.websocketServer.broadcast("tile_placed", {x: x, y: y, colour: colour});
+                    var info = {x: x, y: y, colour: colour, userID: user.id};
+                    app.websocketServer.broadcast("tile_placed", info);
+                    ActionLogger.log("place", req.user, null, info);
                     resolve();
                 });
             });

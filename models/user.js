@@ -5,6 +5,7 @@ const Pixel = require('./pixel');
 const Access = require('./access');
 const config = require("../config/config");
 const dataTables = require("mongoose-datatables");
+const ActionLogger = require("../util/ActionLogger");
 
 var UserSchema = new Schema({
     name: {
@@ -158,6 +159,7 @@ UserSchema.statics.register = function(username, password, callback, OAuthID, OA
         // Save the user
         newUser.save(function(err) {
             if (err) return callback(null, { message: "An account with that username already exists.", code: "username_taken" });
+            ActionLogger.log("signUp", newUser);
             return callback(newUser, null)
         });
     }
