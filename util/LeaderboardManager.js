@@ -36,7 +36,6 @@ function LeaderboardManager(app) {
         },
 
         getInfo: function(callback) {
-            console.log(this);
             if(this.isUpdating) return this.waitingForUpdate.push(callback);
             if(!this.topUsers || !this.pixelCounts) return callback("No leaderboard data loaded", null);
             User.find({_id: { $in: this.topUsers }}).then(users => {

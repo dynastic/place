@@ -153,7 +153,7 @@ function APIRouter(app) {
 
     router.get('/leaderboard', function(req, res, next) {
          app.leaderboardManager.getInfo((err, leaderboard) => {
-             if(err || !leaderboard) return console.log(err);//res.status(500).json({ success: false });
+             if(err || !leaderboard) return res.status(500).json({ success: false });
              res.json({ success: true, leaderboard: leaderboard });
          })
     });
