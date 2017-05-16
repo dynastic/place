@@ -117,7 +117,7 @@ function PaintingHandler(app) {
                     // Send notice to all clients:
                     var info = {x: x, y: y, colour: colour, userID: user.id};
                     app.websocketServer.broadcast("tile_placed", info);
-                    ActionLogger.log("place", req.user, null, info);
+                    ActionLogger.log("place", user, null, info);
                     resolve();
                 });
             });
