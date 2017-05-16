@@ -279,7 +279,7 @@ var place = {
         setInterval(function() { app.doKeys() }, 15);
 
         this.setupChat();
-        this.loadLeaderboard();
+        //this.loadLeaderboard();
         this.updateAuthLinks();
     },
 
