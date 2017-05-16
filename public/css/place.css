@@ -801,3 +801,55 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
         top: 0;
     }
 }
+
+#leaderboardTab .top-place {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#leaderboardTab .top-place .big-icon {
+    font-size: 75px;
+    color: #999;
+    display: block;
+    margin: 20px auto;
+}
+
+#leaderboardTab .top-place .info {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+#leaderboardTab .top-place .leader-info a.name {
+    font-size: 20px;
+    text-decoration: none!important;
+}
+
+#leaderboardTab .row-label, #leaderboardTab .pixel-label  {
+    font-size: 8px;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    display: block;
+    color: #888;
+}
+
+#leaderboardTab .pixel-label {
+    font-size: 11px;
+    margin-top: 7px;
+    color: #777;
+}
+
+#leaderboardTab .stat {
+    text-align: right;
+}
+
+#leaderboardTab .subdetails {
+    margin-top: 5px;
+}
+
+.bold {
+    font-weight: 500;
+}

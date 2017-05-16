@@ -118,6 +118,7 @@ function PaintingHandler(app) {
                     var info = {x: x, y: y, colour: colour, userID: user.id};
                     app.websocketServer.broadcast("tile_placed", info);
                     ActionLogger.log("place", user, null, info);
+                    app.leaderboardManager.needsUpdating = true;
                     resolve();
                 });
             });

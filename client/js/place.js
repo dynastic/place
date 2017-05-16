@@ -279,6 +279,7 @@ var place = {
         setInterval(function() { app.doKeys() }, 15);
 
         this.setupChat();
+        this.loadLeaderboard();
         this.updateAuthLinks();
     },
 
@@ -1072,6 +1073,64 @@ var place = {
         if(userState == "ban") return "Banned user";
         if(userState == "deactivated") return "Deactivated user";
         return "Deleted account";
+    },
+
+    showTextOnLeaderboard: function(text) {
+        var tab = $("#leaderboardTab");
+        tab.html("");
+        $("<div>").addClass("coming-soon").text(text).appendTo(tab);
+    },
+
+    loadLeaderboard: function() {
+        var app = this;
+        $.get("/api/leaderboard").done(function(response) {
+            if(!response.success || !response.leaderboard) {
+                console.log("Failed to load leaderboard data.");
+                return app.showTextOnLeaderboard("Failed to load");
+            }
+            app.leaderboard = response.leaderboard;
+            app.layoutLeaderboard();
+        }).fail(function() {
+            console.log("Failed to load leaderboard data.");
+            app.showTextOnLeaderboard("Failed to load");
+        });
+    },
+
+    layoutLeaderboard: function() {
+        function getStatElement(name, value) {
+            var elem = $("<div>");
+            $("<span>").addClass("value").text(value).appendTo(elem);
+            $("<span>").addClass("name").text(name).appendTo(elem);
+            return elem;
+        }
+        var tab = $("#leaderboardTab");
+        tab.find("*").remove();
+        if(!this.leaderboard) return this.showTextOnLeaderboard("Loading…");
+        if(this.leaderboard.length <= 0) return this.showTextOnLeaderboard("No leaderboard data");
+        var topPlace = $(`<div class="top-place"><i class="fa fa-trophy big-icon"></i><span class="info">Leader</span></div>`).appendTo(tab);
+        var userInfo = $("<div>").addClass("leader-info").appendTo(topPlace);
+        $("<a>").addClass("name").attr("href", `/@${this.leaderboard[0].username}`).text(this.leaderboard[0].username).appendTo(userInfo);
+        $("<span>").addClass("pixel-label").text("Pixels placed").appendTo(userInfo);
+        var subdetails = $("<div>").addClass("subdetails row-fluid clearfix").appendTo(userInfo);
+        getStatElement("This week", this.leaderboard[0].leaderboardCount.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
+        getStatElement("Total", this.leaderboard[0].statistics.totalPlaces.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
+        if(this.leaderboard.length > 1) {
+            var table = $(`<table class="table"></table>`).appendTo(tab);
+            this.leaderboard.forEach((item, index) => {
+                if(index > 0) {
+                    var row = $("<tr>");
+                    $("<td>").addClass("bold").text(`${index + 1}.`).appendTo(row);
+                    $("<a>").text(item.username).attr("href", `/@${item.username}`).appendTo($("<td>").appendTo(row));
+                    var info1 = $("<td>").addClass("stat").appendTo(row);
+                    $("<span>").text(item.leaderboardCount).appendTo(info1);
+                    $("<span>").text("This week").addClass("row-label").appendTo(info1);
+                    var info2 = $("<td>").addClass("stat").appendTo(row);
+                    $("<span>").text(item.statistics.totalPlaces).appendTo(info2);
+                    $("<span>").text("Total").addClass("row-label").appendTo(info2);
+                    row.appendTo(table);
+                }
+            });
+        }
     }
 }
 
