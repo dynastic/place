@@ -22,7 +22,7 @@ function LeaderboardManager(app) {
             }).on("close", () => {
                 this.pixelCounts = pixelCounts;
                 // Get top users from pixel count, put them in sortable array, sort from greatest to least, cut down to 25, then just extract user ID
-                this.topUsers = Object.keys(pixelCounts).map(userID => [userID, pixelCounts[userID]]).sort((a, b) => b[1] - a[1]).slice(0, 25).map(a => a[0]);
+                this.topUsers = Object.keys(pixelCounts).map(userID => [userID, pixelCounts[userID]]).sort((a, b) => b[1] - a[1]).map(a => a[0]);
                 this.isUpdating = false;
                 // Finish all waiting for leaderboard
                 this.waitingForUpdate.forEach(callback => this.getInfo(callback));
