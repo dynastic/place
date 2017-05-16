@@ -1122,10 +1122,10 @@ var place = {
                     $("<td>").addClass("bold").text(`${index + 1}.`).appendTo(row);
                     $("<a>").text(item.username).attr("href", `/@${item.username}`).appendTo($("<td>").appendTo(row));
                     var info1 = $("<td>").addClass("stat").appendTo(row);
-                    $("<span>").text(item.leaderboardCount).appendTo(info1);
+                    $("<span>").text(item.leaderboardCount.toLocaleString()).appendTo(info1);
                     $("<span>").text("This week").addClass("row-label").appendTo(info1);
                     var info2 = $("<td>").addClass("stat").appendTo(row);
-                    $("<span>").text(item.statistics.totalPlaces).appendTo(info2);
+                    $("<span>").text(item.statistics.totalPlaces.toLocaleString()).appendTo(info2);
                     $("<span>").text("Total").addClass("row-label").appendTo(info2);
                     row.appendTo(table);
                 }
