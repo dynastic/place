@@ -48,7 +48,7 @@ function LeaderboardManager(app) {
         }
     }
     manager.update()
-    setInterval(manager.update, 1000 * 60 * 15); // Update the leaderboard every 15 minutes
+    setInterval(manager.update, 1000 * 60 * 3); // Update the leaderboard every 15 minutes
     return manager;
 }
 
