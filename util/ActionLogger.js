@@ -109,6 +109,10 @@ var actionLogger = {
 
     infoForAction: function(actionID) {
         return actions[actionID];
+    },
+
+    actionIDsToRetrieve: function(modOnly = false) {
+        return Object.keys(actions).filter(a => modOnly ? actions[a].isPrivileged : true);
     }
 }
 

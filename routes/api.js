@@ -10,6 +10,7 @@ const Ratelimit = require('express-brute');
 const path = require("path");
 const fs = require('fs');
 const ActionLogger = require("../util/ActionLogger");
+const Action = require("../models/action");
 
 function APIRouter(app) {
     let router = express.Router();
@@ -58,7 +59,7 @@ function APIRouter(app) {
                 return res.json({success: true});
             }).catch(err => {
                 app.reportError("Password change error: " + err);
-                return res.json({success: false});
+                return res.status(500).json({success: false});
             });
         });
     });
@@ -337,6 +338,23 @@ function APIRouter(app) {
                 res.status(500).json({ success: false });
             });
         }).catch(err => res.status(400).json({success: false, error: {message: "No user with that ID exists.", code: "user_doesnt_exist"}}));
+    });
+
+    router.get('/mod/actions', app.modMiddleware, function(req, res) {
+        var condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === true) } };
+        if (req.query.lastID) condition._id = { $gt: req.query.lastID };
+        Action.find(condition, {}, {_id: 1}).limit(Math.min(25, req.query.limit || 25)).then(actions => {
+            var lastID = null;
+            if(actions.length > 1) lastID = actions[actions.length - 1]._id;
+            var promises = actions.map(a => a.getInfo());
+            Promise.all(promises).then(actions => {
+                res.json({ success: true, actions: actions, lastID: lastID })
+            }).catch(err => res.status(500).json({ success: false }))
+        }).catch(err => {
+            app.reportError("An error occurred while trying to retrieve actions: " + err);
+            res.status(500).json({ success: false });
+        })
+
     });
 
     // Debug APIs
