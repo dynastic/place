@@ -815,11 +815,11 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 #leaderboardTab .top-place .info {
-    font-size: 11px;
+    font-size: 12px;
     color: #666;
     text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 1px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
 }
 
 #leaderboardTab .top-place .leader-info a.name {
@@ -837,7 +837,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 #leaderboardTab .pixel-label {
-    font-size: 11px;
+    font-size: 10px;
     margin-top: 7px;
     color: #777;
 }
@@ -848,6 +848,12 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 
 #leaderboardTab .subdetails {
     margin-top: 5px;
+}
+
+#leaderboardTab table a {
+    overflow: hidden;
+    word-break: break-all;
+    display: inline-block;
 }
 
 .bold {
