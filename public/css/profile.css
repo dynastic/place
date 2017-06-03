@@ -191,24 +191,3 @@ body {
 .has-pixel.profile-info .avatar {
   box-shadow: 0 -1px 10px -5px rgba(0, 0, 0, 0.5);
 }
-
-.profile-info .user-info > .subdetails > div {
-  margin-right: 10px;
-}
-
-.profile-info .user-info > .subdetails > div > span {
-  display: block;
-  color: #555;
-}
-
-.profile-info .user-info > .subdetails > div > span.value {
-  font-size: 23px;
-  font-weight: 300;
-}
-.profile-info .user-info > .subdetails > div > span.name {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #888;
-}

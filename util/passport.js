@@ -11,6 +11,7 @@ const JwtStrategy = require('passport-jwt').Strategy,
 // Get user model
 const User = require('../models/user');
 const config = require('../config/config');
+const ActionLogger = require('../util/ActionLogger');
 
 module.exports = function(passport) {
     var opts = {};
@@ -40,6 +41,7 @@ module.exports = function(passport) {
                 } else {
                     return user.comparePassword(password, function(err, match) {
                         if (match && !err) return done(null, user);
+                        ActionLogger.log("signIn", user, null, {method: "normal"});
                         done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
                     });
                 }
@@ -54,6 +56,7 @@ module.exports = function(passport) {
             if(err) return done(err, false);
             if(user) {
                 if(user.isOauth !== true) return done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
+                ActionLogger.log("signIn", user, null, {method: "oauth"});
                 return done(null, user);
             }
             // Even though we don't use the password field, it's better to set it to *SOMETHING* unique

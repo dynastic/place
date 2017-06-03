@@ -8,6 +8,7 @@ require('../util/passport')(passport);
 const User = require('../models/user');
 const marked = require("../util/Markdown");
 const fs = require("fs");
+const ActionLogger = require("../util/ActionLogger");
 
 function PublicRouter(app) {
     const responseFactory = require("../util/ResponseFactory")(app);
@@ -71,6 +72,7 @@ function PublicRouter(app) {
         req.user.passwordResetKey = null;
         req.user.save(err => {
             if(err) return renderResponse("An unknown error occurred while trying to reset your password.");
+            ActionLogger.log("changePassword", req.user);
             res.redirect("/?signedin=1");
         });
     });
@@ -261,7 +263,6 @@ function PublicRouter(app) {
 
         if (config.oauth.twitter.enabled) {
             router.get('/auth/twitter', passport.authenticate('twitter'));
-
             router.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/signup' }), function(req, res) {
                 res.redirect('/?signedin=1');
             });
@@ -269,6 +270,7 @@ function PublicRouter(app) {
     }
         
     router.get('/signout', function(req, res) {
+        ActionLogger.log("signOut", req.user);
         req.logout();
         var redirectURL = typeof req.query.redirectURL !== 'undefined' ? req.query.redirectURL : null;
         return res.redirect(`/${(redirectURL == "/" ? "" : redirectURL) || ""}`);

@@ -9,6 +9,8 @@ const ChatMessage = require('../models/chatMessage');
 const Ratelimit = require('express-brute');
 const path = require("path");
 const fs = require('fs');
+const ActionLogger = require("../util/ActionLogger");
+const Action = require("../models/action");
 
 function APIRouter(app) {
     let router = express.Router();
@@ -52,8 +54,13 @@ function APIRouter(app) {
         req.user.comparePassword(req.body.old, (error, match) => {
             if(!match || error) return res.status(401).json({success: false, error: {message: "The old password you entered was incorrect.", code: "incorrect_password"}});
             req.user.password = req.body.new;
-            req.user.save();
-            return res.json({success: true});
+            req.user.save().then(() => {
+                ActionLogger.log("changePassword", req.user);
+                return res.json({success: true});
+            }).catch(err => {
+                app.reportError("Password change error: " + err);
+                return res.status(500).json({success: false});
+            });
         });
     });
 
@@ -62,6 +69,7 @@ function APIRouter(app) {
         req.user.comparePassword(req.body.password, (error, match) => {
             if(!match || error) return res.status(401).json({success: false, error: {message: "The password you entered was incorrect.", code: "incorrect_password"}});
             req.user.deactivated = true;
+            ActionLogger.log("deactivate", req.user);
             req.user.save();
             return res.json({success: true});
         });
@@ -126,7 +134,7 @@ function APIRouter(app) {
         if(!req.query.x || !req.query.y) return res.status(400).json( { success: false, error: { message: "You did not specify the coordinates of the pixel to look up.", code: "bad_request" } });
         var overrideDataAccess = req.user && (req.user.moderator || req.user.admin);
         Pixel.find({xPos: req.query.x, yPos: req.query.y}).then(pixels => {
-            if (pixels.length <= 0) return res.json( {success: true, pixel: null });
+            if (pixels.length <= 0) return res.json({ success: true, pixel: null });
             pixels[0].getInfo(overrideDataAccess).then(info => {
                 res.json({ success: true, pixel: info })
             }).catch(err => fail(err));
@@ -139,8 +147,15 @@ function APIRouter(app) {
             var promises = messages.reverse().map(m => m.getInfo(overrideDataAccess));
             Promise.all(promises).then(messages => {
                 res.json({ success: true, messages: messages });
-            }).catch(err => res.status(500).json({ success: false, error: { message: "An error occurred while trying to retrieve messages.", code: "server_message_error" } }));
-         }).catch(err => res.status(500).json( { success: false, error: { message: "An error occurred while trying to retrieve messages.", code: "server_message_error" } }))
+            }).catch(err => res.status(500).json({ success: false }));
+         }).catch(err => res.status(500).json( { success: false }))
+    });
+
+    router.get('/leaderboard', function(req, res, next) {
+         app.leaderboardManager.getInfo((err, leaderboard) => {
+             if(err || !leaderboard) return res.status(500).json({ success: false });
+             res.json({ success: true, leaderboard: leaderboard });
+         })
     });
 
     const chatRatelimit = new Ratelimit(require('../util/RatelimitStore')("Chat"), {
@@ -164,6 +179,7 @@ function APIRouter(app) {
          ChatMessage.createMessage(app, req.user.id, req.body.text, req.body.x, req.body.y).then(message => {
              var info = message.getInfo().then(info => {
                 res.json({ success: true, message: info });
+                ActionLogger.log("sendChatMessage", req.user, null, { messageID: info.id });
                 app.websocketServer.broadcast("new_message", info);
              }).catch(err => res.json({ success: true }))
          }).catch(err => {
@@ -204,11 +220,13 @@ function APIRouter(app) {
 
     router.get("/admin/refresh_clients", app.adminMiddleware, function(req, res, next) {
         app.websocketServer.broadcast("reload_client");
+        ActionLogger.log("refreshClients", req.user);
         res.json({success: true});
     });
 
     router.get("/admin/reload_config", app.adminMiddleware, function(req, res, next) {
         app.loadConfig();
+        ActionLogger.log("reloadConfig", req.user);
         res.json({success: true});
     });
 
@@ -247,7 +265,10 @@ function APIRouter(app) {
         User.findById(req.query.id).then(user => {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.moderator = !user.moderator;
-            user.save().then(user => res.json({success: true, moderator: user.moderator})).catch(err => {
+            user.save().then(user => {
+                ActionLogger.log(user.moderator ? "giveModerator" : "removeModerator", user, req.user);
+                res.json({success: true, moderator: user.moderator})
+            }).catch(err => {
                 app.reportError("Error trying to save moderator status on user.");
                 res.status(500).json({success: false});
             });
@@ -265,7 +286,10 @@ function APIRouter(app) {
         User.findById(req.query.id).then(user => {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.banned = !user.banned;
-            user.save().then(user => res.json({success: true, banned: user.banned})).catch(err => {
+            user.save().then(user => {
+                ActionLogger.log(user.banned ? "ban" : "unban", user, req.user);
+                res.json({success: true, banned: user.banned})
+            }).catch(err => {
                 app.reportError("Error trying to save banned status on user.");
                 res.status(500).json({success: false})
             });
@@ -280,7 +304,10 @@ function APIRouter(app) {
         User.findById(req.query.id).then(user => {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.deactivated = !user.deactivated;
-            user.save().then(user => res.json({success: true, deactivated: user.deactivated})).catch(err => {
+            user.save().then(user => {
+                ActionLogger.log(user.deactivated ? "deactivateOther" : "activateOther", user, req.user);
+                res.json({success: true, deactivated: user.deactivated})
+            }).catch(err => {
                 app.reportError("Error trying to save activation status on user.");
                 res.status(500).json({success: false})
             });
@@ -318,6 +345,23 @@ function APIRouter(app) {
                 res.status(500).json({ success: false });
             });
         }).catch(err => res.status(400).json({success: false, error: {message: "No user with that ID exists.", code: "user_doesnt_exist"}}));
+    });
+
+    router.get('/mod/actions', app.modMiddleware, function(req, res) {
+        var condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === true) } };
+        if (req.query.lastID) condition._id = { $gt: req.query.lastID };
+        Action.find(condition, {}, {_id: 1}).limit(Math.min(250, req.query.limit || 25)).then(actions => {
+            var lastID = null;
+            if(actions.length > 1) lastID = actions[actions.length - 1]._id;
+            var promises = actions.map(a => a.getInfo());
+            Promise.all(promises).then(actions => {
+                res.json({ success: true, actions: actions, lastID: lastID })
+            }).catch(err => res.status(500).json({ success: false }))
+        }).catch(err => {
+            app.reportError("An error occurred while trying to retrieve actions: " + err);
+            res.status(500).json({ success: false });
+        })
+
     });
 
     // Debug APIs

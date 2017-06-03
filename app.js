@@ -1,7 +1,7 @@
 const ResponseFactory = require("./util/ResponseFactory");
 const config = require('./config/config');
 const mongoose = require('mongoose');
-const paintingHandler = require("./util/PaintingHandler");
+const PaintingHandler = require("./util/PaintingHandler");
 const recaptcha = require('express-recaptcha');
 const HTTPServer = require("./util/HTTPServer");
 const WebsocketServer = require("./util/WebsocketServer");
@@ -12,6 +12,7 @@ const babel = require('gulp-babel');
 const del = require('del');
 const pump = require('pump');
 const ErrorTracker = require("./util/ErrorTracker");
+const LeaderboardManager = require("./util/LeaderboardManager");
 
 let paths = {
     scripts: {
@@ -44,7 +45,7 @@ if (typeof app.config.bugSnagKey !== undefined) {
 }
 
 // Get image handler
-app.paintingHandler = paintingHandler(app);
+app.paintingHandler = PaintingHandler(app);
 console.log("Loading image from the database...")
 app.paintingHandler.loadImageFromDatabase().then((image) => {
     console.log("Successfully loaded image from database.");
@@ -52,6 +53,7 @@ app.paintingHandler.loadImageFromDatabase().then((image) => {
     app.reportError("Error while loading the image from database: " + err);
 })
 
+app.leaderboardManager = LeaderboardManager(app);
 app.responseFactory = ResponseFactory(app);
 
 app.enableCaptcha = false;

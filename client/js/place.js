@@ -77,24 +77,13 @@ var notificationHandler = {
                 if (granted) this.sendNotification(message, requesting);
             });
         }
-        if(this.supportsNewNotificationAPI) {
-            navigator.serviceWorker.ready.then(registration => {
-                registration.showNotification('Place 2.0', {
-                    body: message,
-                    tag: btoa(message),
-                    badge: 1,
-                    vibrate: [200, 100, 200, 100, 200, 100, 200]
-                });
+        try {
+            // Failsafe so it doesn't get stuck on 1 second
+            new Notification(title, {
+                body: message
             });
-        } else {
-            try {
-                // Failsafe so it doesn't get stuck on 1 second
-                new Notification(title, {
-                    body: message
-                });
-            } catch(e) {
-                console.error("Tried to send notification via old API, but failed: " + e);
-            }
+        } catch(e) {
+            console.error("Tried to send notification via old API, but failed: " + e);
         }
     }
 }
@@ -290,6 +279,7 @@ var place = {
         setInterval(function() { app.doKeys() }, 15);
 
         this.setupChat();
+        this.loadLeaderboard();
         this.updateAuthLinks();
     },
 
@@ -368,12 +358,15 @@ var place = {
             }
         }).on("tap", event => {
             if(event.interaction.downEvent.button == 2) return event.preventDefault();
-            let zoom = app._getZoomMultiplier();
-            app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom))
+            if(!this.zooming.zooming) {
+                let zoom = app._getZoomMultiplier();
+                app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom));
+            }
             event.preventDefault();
         }).on("doubletap", event => {
             if(app.zooming.zoomedIn && this.selectedColour === null) {
                 app.zoomFinished();
+                app.shouldShowPopover = false;
                 app.setZoomedIn(false);
                 event.preventDefault();
             }
@@ -1080,6 +1073,65 @@ var place = {
         if(userState == "ban") return "Banned user";
         if(userState == "deactivated") return "Deactivated user";
         return "Deleted account";
+    },
+
+    showTextOnLeaderboard: function(text) {
+        var tab = $("#leaderboardTab");
+        tab.html("");
+        $("<div>").addClass("coming-soon").text(text).appendTo(tab);
+    },
+
+    loadLeaderboard: function() {
+        var app = this;
+        $.get("/api/leaderboard").done(function(response) {
+            if(!response.success || !response.leaderboard) {
+                console.log("Failed to load leaderboard data.");
+                return app.showTextOnLeaderboard("Failed to load");
+            }
+            app.leaderboard = response.leaderboard;
+            app.layoutLeaderboard();
+        }).fail(function() {
+            console.log("Failed to load leaderboard data.");
+            app.showTextOnLeaderboard("Failed to load");
+        });
+    },
+
+    layoutLeaderboard: function() {
+        function getStatElement(name, value) {
+            var elem = $("<div>");
+            $("<span>").addClass("value").text(value).appendTo(elem);
+            $("<span>").addClass("name").text(name).appendTo(elem);
+            return elem;
+        }
+        var tab = $("#leaderboardTab");
+        tab.find("*").remove();
+        if(!this.leaderboard) return this.showTextOnLeaderboard("Loading…");
+        if(this.leaderboard.length <= 0) return this.showTextOnLeaderboard("No leaderboard data");
+        var topPlace = $(`<div class="top-place"><i class="fa fa-trophy big-icon"></i><span class="info">Leader</span></div>`).appendTo(tab);
+        var userInfo = $("<div>").addClass("leader-info").appendTo(topPlace);
+        $("<a>").addClass("name").attr("href", `/@${this.leaderboard[0].username}`).text(this.leaderboard[0].username).appendTo(userInfo);
+        $("<span>").addClass("pixel-label").text("Pixels placed").appendTo(userInfo);
+        var subdetails = $("<div>").addClass("subdetails row-fluid clearfix").appendTo(userInfo);
+        getStatElement("This week", this.leaderboard[0].leaderboardCount.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
+        getStatElement("Total", this.leaderboard[0].statistics.totalPlaces.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
+        if(this.leaderboard.length > 1) {
+            var table = $(`<table class="table"></table>`).appendTo(tab);
+            this.leaderboard.forEach((item, index) => {
+                if(index > 0) {
+                    var row = $("<tr>");
+                    $("<td>").addClass("bold").text(`${index + 1}.`).appendTo(row);
+                    $("<a>").text(item.username).attr("href", `/@${item.username}`).appendTo($("<td>").appendTo(row));
+                    var info1 = $("<td>").addClass("stat").appendTo(row);
+                    $("<span>").text(item.leaderboardCount.toLocaleString()).appendTo(info1);
+                    $("<span>").text("This week").addClass("row-label").appendTo(info1);
+                    var info2 = $("<td>").addClass("stat").appendTo(row);
+                    $("<span>").text(item.statistics.totalPlaces.toLocaleString()).appendTo(info2);
+                    $("<span>").text("Total").addClass("row-label").appendTo(info2);
+                    row.appendTo(table);
+                }
+            });
+        }
+        $("<p>").addClass("text-muted").text("Leaderboards are calculated based on the number of pixels you have placed (that someone else hasn't overwritten) over the span of the last week. To get a spot on the leaderboard, start placing!").appendTo(tab);
     }
 }
 

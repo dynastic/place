@@ -55,3 +55,24 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     justify-content: center;
     padding: 0 15px;
 }
+
+.subdetails:not(.row):not(.row-fluid) > div {
+  margin-right: 10px;
+}
+
+.subdetails > div > span {
+  display: block;
+  color: #555;
+}
+
+.subdetails > div > span.value {
+  font-size: 23px;
+  font-weight: 300;
+}
+.subdetails > div > span.name {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #888;
+}
