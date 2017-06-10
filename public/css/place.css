@@ -182,6 +182,8 @@ body {
     margin: 0;
     z-index: 3;
     pointer-events: none;
+    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
 #palette > .overlay {
