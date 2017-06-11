@@ -159,7 +159,7 @@ function APIRouter(app) {
                 app.reportError("Error fetching leaderboard: " + (err || "Returned null"))     
                 return res.status(500).json({ success: false });
             }
-            res.json({ success: true, leaderboard: leaderboard });
+            res.json({ success: true, leaderboard: leaderboard.splice(0, 25) });
         })
     });
 
