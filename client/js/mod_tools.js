@@ -207,6 +207,7 @@ function fetchActions(lastID, modOnly, limit, firstID, callback) {
         if(!data.success || !data.actions || !data.actionTemplates) return callback(null);
         actionTemplates = data.actionTemplates;
         callback(data.actions, data.lastID);
+        $(".timeago").timeago();
     }).fail(function() {
         callback(null, null);
     });
