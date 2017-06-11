@@ -905,6 +905,7 @@ var place = {
                     popover.find(".user-info, #pixel-badge, #pixel-user-state-badge").hide();
                     popover.find("#mod-user-action-ctn").html("");
                     popover.find("#pixel-data-username").removeAttr("href");
+                    popover.find(".rank-container").hide();
                 }
             });
         }
