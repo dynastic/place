@@ -46,7 +46,7 @@ if (typeof app.config.bugSnagKey !== undefined) {
 
 // Get image handler
 app.paintingHandler = PaintingHandler(app);
-console.log("Loading image from the database...")
+console.log("Loading image from the database…");
 app.paintingHandler.loadImageFromDatabase().then((image) => {
     console.log("Successfully loaded image from database.");
 }).catch(err => {
@@ -94,7 +94,7 @@ function swallowError(error) {
 
 // Process JavaScript
 gulp.task('scripts', ['clean'], (cb) => {
-    console.log("Processing JavaScript...");
+    console.log("Processing JavaScript…");
     let t = gulp.src(paths.scripts.src)
     t = t.pipe(babel({ presets: ['es2015'] }));
     t = t.on("error", swallowError);

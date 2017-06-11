@@ -98,6 +98,10 @@ function PublicRouter(app) {
         return responseFactory.sendRenderedResponse("public/index", req, res);
     });
 
+    router.get('/popout', function(req, res) {
+        return responseFactory.sendRenderedResponse("public/popout", req, res);
+    });
+
     router.get('/guidelines', function(req, res, next) {
         fs.readFile(__dirname + "/../config/community_guidelines.md", "utf8", (err, data) => {
             if(err || !data) return next();

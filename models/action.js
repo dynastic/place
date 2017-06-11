@@ -20,7 +20,7 @@ ActionSchema.methods.toInfo = function() {
     var actionLogger = require("../util/ActionLogger");
     return {
         id: this.id,
-        action: actionLogger.infoForAction(this.actionID),
+        action: this.actionID,
         performingUserID: this.performingUserID,
         info: this.info || [],
         moderatingUserID: this.moderatingUserID,

@@ -1,0 +1,31 @@
+<div id="popout-container">
+    <div class="navigation-bar">
+        <span class="title">Chat</span>
+        <div class="buttons">
+            <span class="popout-btn" aria-label="Popout"><i class="fa fa-external-link"></i></span>
+            <span class="close-btn" aria-label="Close"><i class="fa fa-times"></i></span>
+        </div>
+    </div>
+    <div class="content-ctn">
+        <div class="tab-content active chat" data-tab-name="chat">
+            <div class="messages" id="chat-messages"></div>
+            <div class="text-field">
+                <input type="text" maxlength="249" autocomplete="off" placeholder="Send a message" id="chat-input-field" />
+                <a href="javascript:void(0)" class="send-btn" id="chat-send-btn">Send</a>
+            </div>
+        </div>
+        <div class="tab-content" data-tab-name="leaderboard" id="leaderboardTab">
+            <div class="coming-soon">
+                <p>Loading…</p>
+            </div>
+        </div>
+    </div>
+    <div class="tabbar">
+        <div class="tab active" data-tab-name="chat" data-tab-title="Chat">
+            <i class="fa fa-comments"></i>
+        </div>
+        <div class="tab" data-tab-name="leaderboard" data-tab-title="Leaderboard">
+            <i class="fa fa-trophy"></i>
+        </div>
+    </div>
+</div>

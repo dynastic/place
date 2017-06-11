@@ -1,5 +1,5 @@
 <%- include('../admin_header.html') -%>
-<% var jsSnippets = []; %>
+<% var jsSnippets = [`loadRecentActionsIntoContainer($("#actions-ctn"), 10, false, false)`]; %>
 <h1 class="page-header">Dashboard</h1>
 <!-- Status Updates -->
 <div class="row placeholders">
@@ -29,144 +29,68 @@
 <div class="section-heading">
     <h2 class="sub-header">Administrator Actions</h2>
 </div>
-<div id="admin-actions" class="content">Loading...</div>
+<div id="admin-actions" class="content">Loading…</div>
 <% jsSnippets.push(`
     $("#admin-actions").html(renderServerActions())
 `) %>
 <% } %>
 <!-- Recent Actions -->
 <div class="section-heading">
-    <h2 class="sub-header">Recent actions</h2>
+    <h2 class="sub-header">Recent Actions</h2>
     <a href="/admin/actions">See all &raquo;</a>
 </div>
-<h4>eta son</h4>
-<!--<div class="table-responsive">
-<table class="table table-striped">
-    <thead>
-    <tr>
-        <th>#</th>
-        <th>Header</th>
-        <th>Header</th>
-        <th>Header</th>
-        <th>Header</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>1,001</td>
-        <td>Lorem</td>
-        <td>ipsum</td>
-        <td>dolor</td>
-        <td>sit</td>
-    </tr>
-    <tr>
-        <td>1,002</td>
-        <td>amet</td>
-        <td>consectetur</td>
-        <td>adipiscing</td>
-        <td>elit</td>
-    </tr>
-    <tr>
-        <td>1,003</td>
-        <td>Integer</td>
-        <td>nec</td>
-        <td>odio</td>
-        <td>Praesent</td>
-    </tr>
-    <tr>
-        <td>1,003</td>
-        <td>libero</td>
-        <td>Sed</td>
-        <td>cursus</td>
-        <td>ante</td>
-    </tr>
-    <tr>
-        <td>1,004</td>
-        <td>dapibus</td>
-        <td>diam</td>
-        <td>Sed</td>
-        <td>nisi</td>
-    </tr>
-    <tr>
-        <td>1,005</td>
-        <td>Nulla</td>
-        <td>quis</td>
-        <td>sem</td>
-        <td>at</td>
-    </tr>
-    <tr>
-        <td>1,006</td>
-        <td>nibh</td>
-        <td>elementum</td>
-        <td>imperdiet</td>
-        <td>Duis</td>
-    </tr>
-    <tr>
-        <td>1,007</td>
-        <td>sagittis</td>
-        <td>ipsum</td>
-        <td>Praesent</td>
-        <td>mauris</td>
-    </tr>
-    <tr>
-        <td>1,008</td>
-        <td>Fusce</td>
-        <td>nec</td>
-        <td>tellus</td>
-        <td>sed</td>
-    </tr>
-    <tr>
-        <td>1,009</td>
-        <td>augue</td>
-        <td>semper</td>
-        <td>porta</td>
-        <td>Mauris</td>
-    </tr>
-    <tr>
-        <td>1,010</td>
-        <td>massa</td>
-        <td>Vestibulum</td>
-        <td>lacinia</td>
-        <td>arcu</td>
-    </tr>
-    <tr>
-        <td>1,011</td>
-        <td>eget</td>
-        <td>nulla</td>
-        <td>Class</td>
-        <td>aptent</td>
-    </tr>
-    <tr>
-        <td>1,012</td>
-        <td>taciti</td>
-        <td>sociosqu</td>
-        <td>ad</td>
-        <td>litora</td>
-    </tr>
-    <tr>
-        <td>1,013</td>
-        <td>torquent</td>
-        <td>per</td>
-        <td>conubia</td>
-        <td>nostra</td>
-    </tr>
-    <tr>
-        <td>1,014</td>
-        <td>per</td>
-        <td>inceptos</td>
-        <td>himenaeos</td>
-        <td>Curabitur</td>
-    </tr>
-    <tr>
-        <td>1,015</td>
-        <td>sodales</td>
-        <td>ligula</td>
-        <td>in</td>
-        <td>libero</td>
-    </tr>
-    </tbody>
-</table>
-</div>-->
+<div id="actions-ctn" class="dashboard-actions-ctn compact"></div>
+<% if(user.admin) { %>
+<div class="modal fade" id="broadcastModal" tabindex="-1" role="dialog" aria-labelledby="broadcastModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form class="form-horizontal" id="broadcastForm">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="broadcastModalLabel">Admin Broadcast</h4>
+        </div>
+        <div class="modal-body">
+            <p>Send a message to all users currently viewing connected to the websockets.</p>
+            <div class="form-group">
+                <label for="inputBroadcastTitle" class="col-sm-2 control-label">Title</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="inputBroadcastTitle" placeholder="Title (optional)">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputBroadcastMessage" class="col-sm-2 control-label">Message</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="inputBroadcastMessage" placeholder="Message">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputBroadcastStyle" class="col-sm-2 control-label">Style</label>
+                <div class="col-sm-10">
+                    <select id="inputBroadcastStyle" class="selectpicker form-control">
+                        <option value="info">Informative</option>
+                        <option value="success">Success</option>
+                        <option value="warning">Warning</option>
+                        <option value="danger">Danger</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputBroadcastTimeout" class="col-sm-2 control-label">Timeout</label>
+                <div class="col-sm-10">
+                    <input type="number" class="form-control" id="inputBroadcastTimeout" placeholder="Timeout" value="0" aria-describedby="inputBroadcastTimeoutHelpBlock">
+                    <span id="inputBroadcastTimeoutHelpBlock" class="help-block">How long to wait before automatically dismissing the alert in seconds. Enter <strong>0</strong> to never automatically dismiss.</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Broadcast</button>
+        </div>
+        </form>
+    </div>
+  </div>
+</div>
+<% } %>
 <%- include('../admin_footer.html', {
     js: ["/js/build/admin_dashboard.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"],
     jsSnippets: jsSnippets

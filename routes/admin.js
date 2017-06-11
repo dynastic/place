@@ -22,19 +22,11 @@ function AdminRouter(app) {
     });
 
     router.get('/actions', app.modMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
+        return responseFactory.sendRenderedResponse("admin/actions", req, res, {title: "Recent Actions", modOnly: false});
     });
 
-    router.get('/stats', app.modMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
-    });
-
-    router.get('/log', app.adminMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
-    });
-
-    router.get('/pending', app.adminMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
+    router.get('/log', app.modMiddleware, function(req, res) {
+        return responseFactory.sendRenderedResponse("admin/actions", req, res, {title: "Moderator Log", modOnly: true});
     });
 
     router.get('/users', app.modMiddleware, function(req, res) {

@@ -5,6 +5,7 @@
   if(typeof isAdmin === 'undefined') isAdmin = false;
   if(typeof pinnable === 'undefined') pinnable = false;
   if(typeof navbarSupportsTopMode === 'undefined') navbarSupportsTopMode = false;
+  if(typeof isPoppedOut === 'undefined') isPoppedOut = false;
   var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
   var renderNavItem = function(name, itemPath, icon = null) {
       let isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
@@ -51,7 +52,7 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
   </head>
-  <body class="fixed-navbar<% if(user) { %> signed-in<% } %>" data-user-is-mod="<%= userMod %>" data-user-is-admin="<%= userAdmin %>" data-user-id="<%= user ? user._id : ""; %>">
+  <body class="fixed-navbar<% if(user) { %> signed-in<% } %><% if(isPoppedOut) { %> is-popped-out<% } %>" data-user-is-mod="<%= userMod %>" data-user-is-admin="<%= userAdmin %>" data-user-id="<%= user ? user._id : ""; %>">
     <nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %><%= navbarSupportsTopMode ? " supports-top" : "" %>" id="page-nav">
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->

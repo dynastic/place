@@ -1,4 +1,5 @@
 <% if(typeof isAdmin === 'undefined') isAdmin = false;
+if(typeof needsLegit === 'undefined') needsLegit = false;
 if(typeof user === 'undefined') user = null;
 if(typeof js === 'undefined' || !js) js = [];
 if(typeof jsSnippets === 'undefined' || !jsSnippets) jsSnippets = [];
@@ -34,6 +35,6 @@ if(userMod) js.unshift("/js/build/mod_tools.js");
 </script>
 <% } 
 } %>
-<% if(fs.existsSync('./views/legit.html') && !isAdmin) { %><%- include("legit.html") -%><% } %>
+<% if(fs.existsSync('./views/legit.html') && !isAdmin && needsLegit) { %><%- include("legit.html") -%><% } %>
   </body>
 </html>

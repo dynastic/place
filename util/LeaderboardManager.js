@@ -10,7 +10,7 @@ function LeaderboardManager(app) {
 
         update: function() {
             if(!this.needsUpdating) return;
-            console.log("Starting generation of leaderboard data...");
+            console.log("Starting generation of leaderboard data…");
             this.isUpdating = true;
             this.needsUpdating = false;
             var dateBackLastWeek = new Date(new Date().getTime() - (7 * 24 * 60 * 60 * 1000));

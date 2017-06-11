@@ -31,7 +31,9 @@ var actions = {
     place: {
         displayName: "Place pixel",
         inlineDisplayName: "Placed a pixel",
-        category: "gameplay"
+        category: "gameplay",
+        hideInfo: true,
+        sentenceEndTextFormatting: " at <a href=\"/#x=${x}&y=${y}\">(${x}, ${y})</a>"
     },
     sendChatMessage: {
         displayName: "Send chat message",
@@ -94,6 +96,12 @@ var actions = {
         category: "administrative",
         isPrivileged: true
     },
+    sendBroadcast: {
+        displayName: "Broadcast a message to all users",
+        inlineDisplayName: "Broadcasted a message to all users",
+        category: "administrative",
+        isPrivileged: true
+    }
 }
 
 var actionLogger = {
@@ -101,7 +109,7 @@ var actionLogger = {
         Action({
             actionID: actionID,
             performingUserID: performingUser.id,
-            moderatingUser: moderatingUser ? moderatingUser.id : null,
+            moderatingUserID: moderatingUser ? moderatingUser.id : null,
             info: info,
             date: new Date()
         }).save().catch(err => app.reportError("An error occurred while trying to log action: " + err));
@@ -109,6 +117,10 @@ var actionLogger = {
 
     infoForAction: function(actionID) {
         return actions[actionID];
+    },
+
+    getAllActionInfo: function() {
+        return actions;
     },
 
     actionIDsToRetrieve: function(modOnly = false) {

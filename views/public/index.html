@@ -1,8 +1,9 @@
 <%- include('../header.html', {
     css: ["/css/compact.css", "/css/place.css"],
-    pinnable: true
+    pinnable: true,
+    needsLegit: true
 }) -%>
 <%- include("views/place.html") -%>
 <%- include('../footer.html', {
-    js: ["/socket.io/socket.io.js", "/js/interact.min.js", "/js/clipboard.min.js", "/js/build/place.js", "/js/jquery.timeago.js"]
+    js: ["/socket.io/socket.io.js", "/js/interact.min.js", "/js/clipboard.min.js", "/js/build/popout.js", "/js/build/place.js", "/js/jquery.timeago.js"]
 }) -%>

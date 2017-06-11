@@ -159,7 +159,7 @@ function APIRouter(app) {
                 app.reportError("Error fetching leaderboard: " + (err || "Returned null"))     
                 return res.status(500).json({ success: false });
             }
-            res.json({ success: true, leaderboard: leaderboard });
+            res.json({ success: true, leaderboard: leaderboard.splice(0, 25) });
         })
     });
 
@@ -232,6 +232,21 @@ function APIRouter(app) {
     router.get("/admin/reload_config", app.adminMiddleware, function(req, res, next) {
         app.loadConfig();
         ActionLogger.log("reloadConfig", req.user);
+        res.json({success: true});
+    });
+
+    router.post("/admin/broadcast", app.adminMiddleware, function(req, res, next) {
+        if(!req.body.title || !req.body.message || !req.body.timeout) return res.status(400).json({success: false});
+        var timeout = Number.parseInt(req.body.timeout);
+        if(Number.isNaN(timeout)) return res.status(400).json({success: false});
+        var info = {
+            title: req.body.title,
+            message: req.body.message,
+            timeout: Math.max(0, timeout),
+            style: req.body.style || "info"
+        }
+        app.websocketServer.broadcast("admin_broadcast", info);
+        ActionLogger.log("sendBroadcast", req.user, null, info);
         res.json({success: true});
     });
 
@@ -353,20 +368,18 @@ function APIRouter(app) {
     });
 
     router.get('/mod/actions', app.modMiddleware, function(req, res) {
-        var condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === true) } };
-        if (req.query.lastID) condition._id = { $gt: req.query.lastID };
-        Action.find(condition, {}, {_id: 1}).limit(Math.min(250, req.query.limit || 25)).then(actions => {
+        var condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === "true") } };
+        if (req.query.lastID) condition._id = { $lt: req.query.lastID };
+        else if (req.query.firstID) condition._id = { $gt: req.query.firstID };
+        Action.find(condition, null, {sort: {_id: -1}}).limit(Math.min(250, req.query.limit || 25)).then(actions => {
             var lastID = null;
             if(actions.length > 1) lastID = actions[actions.length - 1]._id;
             var promises = actions.map(a => a.getInfo());
-            Promise.all(promises).then(actions => {
-                res.json({ success: true, actions: actions, lastID: lastID })
-            }).catch(err => res.status(500).json({ success: false }))
+            Promise.all(promises).then(actions => res.json({ success: true, actions: actions, lastID: lastID, actionTemplates: ActionLogger.getAllActionInfo() })).catch(err => res.status(500).json({ success: false }))
         }).catch(err => {
             app.reportError("An error occurred while trying to retrieve actions: " + err);
             res.status(500).json({ success: false });
         })
-
     });
 
     // Debug APIs
