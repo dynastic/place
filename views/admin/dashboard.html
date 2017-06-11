@@ -167,7 +167,7 @@
     </tbody>
 </table>
 </div>-->
-<!-- Modal -->
+<% if(user.admin) { %>
 <div class="modal fade" id="broadcastModal" tabindex="-1" role="dialog" aria-labelledby="broadcastModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -217,6 +217,7 @@
     </div>
   </div>
 </div>
+<% } %>
 <%- include('../admin_footer.html', {
     js: ["/js/build/admin_dashboard.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"],
     jsSnippets: jsSnippets
