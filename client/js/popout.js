@@ -124,7 +124,8 @@ var popoutController = {
             app.sendChatMessage();
         })
         $("#chat-input-field").focus(function() {
-            app.scrollToChatBottom();
+            if(!app.ignoreChatFocus) app.scrollToChatBottom();
+            app.ignoreChatFocus = false;
         })
         $("#chat-input-field").keydown(function(e) {
             if((e.keyCode || e.which) != 13) return;
@@ -143,7 +144,8 @@ var popoutController = {
         });
     },
 
-    layoutMessages: function() {
+    layoutMessages: function(alwaysScrollToBottom = true) {
+        console.log("LMAO")
         function getFancyDate(date) {
             var now = new Date();
             var almostSameDate = now.getMonth() == date.getMonth() && now.getFullYear() == date.getFullYear();
@@ -151,7 +153,9 @@ var popoutController = {
             var isYesterday = !isToday && now.getDate() == date.getDate() - 1;
             return `${isToday ? "Today" : (isYesterday ? "Yesterday" : date.toLocaleDateString())}, ${date.toLocaleTimeString()}`
         }
-
+        var prevHeight = null;
+        if(!alwaysScrollToBottom) prevHeight = $("#chat-messages")[0].scrollHeight;
+        var oldScrollTop = $("#chat-messages").scrollTop();
         $("#chat-messages > *").remove();
         var sinceLastTimestamp = 0;
         const maxMessageBlock = 10;
@@ -196,18 +200,21 @@ var popoutController = {
             }
             ctn.appendTo("#chat-messages");
         });
-        this.scrollToChatBottom();
+        this.scrollToChatBottom(prevHeight, oldScrollTop);
     },
 
     addChatMessage: function(message) {
         if(this.messages.map(m => m.id).indexOf(message.id) < 0) {
             this.messages.push(message);
-            this.layoutMessages();
+            this.layoutMessages($("body").data("user-id") == message.userID);
         }
     },
 
-    scrollToChatBottom: function() {
-        $("#chat-messages").scrollTop($("#chat-messages")[0].scrollHeight);
+    scrollToChatBottom: function(checkScrollOffset = null, oldScrollTop = null) {
+        var msgs = $("#chat-messages");
+        if(!checkScrollOffset || oldScrollTop + 100 >= checkScrollOffset - msgs.innerHeight()) {
+            msgs.scrollTop(msgs[0].scrollHeight);
+        }
     },
 
     sendChatMessage: function() {
@@ -229,6 +236,7 @@ var popoutController = {
             y: coords.y
         }).done(function(response) {
             if(!response.success) return alert(parseError(response));
+            app.ignoreChatFocus = true;
             input.val("");
             input.focus();
             if(response.message) app.addChatMessage(response.message);
