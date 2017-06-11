@@ -102,7 +102,7 @@ var renderAction = function(actionName, data = {}, type = "user", dropdown = fal
     var action = actions[type][actionName];
     var title = action.buttonText(data);
     var dropdownItem = null;
-    var btn = $("<a>").attr("href", "javascript:void(0)").addClass(`${type}-action-btn`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
+    var btn = $("<a>").attr("href", "javascript:void(0)").addClass(`${type}-action-btn ${dropdown ? "text" : "btn"}-${action.btnStyle} ${dropdown ? "dropdown" : "btn"}-action`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
     if(typeof action.getAttributes === "function") btn.attr(action.getAttributes(data));
     if(typeof action.type !== "undefined" && action.type == "link") btn.attr("href", action.getLinkURL(data)).removeClass(`${type}-action-btn`);
     setActionDataOnElement(data, btn, action);
@@ -110,7 +110,7 @@ var renderAction = function(actionName, data = {}, type = "user", dropdown = fal
         dropdownItem = $("<li>");
         btn.appendTo(dropdownItem);
     } else {
-        btn.addClass(`btn btn-${action.btnStyle} action-btn`);
+        btn.addClass(`btn action-btn`);
     }
     return dropdown ? dropdownItem : btn;
 }
@@ -120,6 +120,7 @@ var setActionDataOnElement = function(data, elem, action) {
     var isPressed = false;
     var text = title;
     if(typeof action.icon === "function") text = `<i class="fa fa-${action.icon(data)}"></i>`
+    if(elem.hasClass("dropdown-action")) text = `<span class="text-${action.btnStyle}">${text}</span>`
     if(typeof action.isActive === "function") isPressed = action.isActive(data);
     if(isPressed) elem.addClass("active")
     else elem.removeClass("active");
