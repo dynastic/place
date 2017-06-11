@@ -307,7 +307,7 @@ function APIRouter(app) {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.banned = !user.banned;
             user.save().then(user => {
-                // ActionLogger.log(user.banned ? "ban" : "unban", user, req.user);
+                ActionLogger.log(user.banned ? "ban" : "unban", user, req.user);
                 res.json({success: true, banned: user.banned})
             }).catch(err => {
                 app.reportError("Error trying to save banned status on user.");
@@ -370,6 +370,7 @@ function APIRouter(app) {
     router.get('/mod/actions', app.modMiddleware, function(req, res) {
         var condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === "true") } };
         if (req.query.lastID) condition._id = { $lt: req.query.lastID };
+        else if (req.query.firstID) condition._id = { $gt: req.query.firstID };
         Action.find(condition, null, {sort: {_id: -1}}).limit(Math.min(250, req.query.limit || 25)).then(actions => {
             var lastID = null;
             if(actions.length > 1) lastID = actions[actions.length - 1]._id;
