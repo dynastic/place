@@ -29,11 +29,7 @@ function AdminRouter(app) {
         return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
-    router.get('/log', app.adminMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
-    });
-
-    router.get('/pending', app.adminMiddleware, function(req, res) {
+    router.get('/log', app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
