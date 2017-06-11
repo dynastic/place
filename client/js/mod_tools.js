@@ -121,8 +121,8 @@ var renderUserActions = function(user) {
         <a href="/admin/users/similar/${user.id}" class="btn btn-warning">View Similar</a>
         ${renderAction("ban", user)}
         ${renderAction("activation", user)}
-        ${renderAction("mod", user)}
         ${renderAction("editUserNotes", user)}
+        ${renderAction("mod", user)}
     </div>`
 }
 
