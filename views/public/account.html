@@ -23,16 +23,18 @@ var isSelf = user ? user.id == profileUser.id : false;
       <span class="username"><%= profileUser.name %> <%- profileUser.admin || profileUser.moderator ? `<span class="label label-warning badge-label">${profileUser.admin ? "Admin" : "Moderator"}</span>` : "" %></span>
       <div class="subdetails">
         <% var rank = profileUserInfo.statistics.leaderboardRank;
-        if(rank !== null) {%>
-          <div>
-            <span class="value">#<%= profileUserInfo.statistics.leaderboardRank.toLocaleString() -%></span>
-            <span class="name">Global rank</span>
-          </div>
-        <% } %>
+        if(rank !== null) {%><div>
+          <span class="value">#<%= profileUserInfo.statistics.leaderboardRank.toLocaleString() -%></span>
+          <span class="name">Global rank</span>
+        </div><% } %>
         <div>
           <span class="value"><%= profileUser.placeCount.toLocaleString() -%></span>
           <span class="name">pixel<%= profileUser.placeCount == 1 ? "" : "s" -%> placed</span>
         </div>
+        <% if(profileUserInfo.statistics.placesThisWeek !== null) { %><div>
+          <span class="value"><%= profileUserInfo.statistics.placesThisWeek.toLocaleString() -%></span>
+          <span class="name">pixel<%= profileUserInfo.statistics.placesThisWeek == 1 ? "" : "s" -%> this week</span>
+        </div><% } %>
       </div>
     </div>
   </div>
