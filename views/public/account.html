@@ -21,6 +21,7 @@ var isSelf = user ? user.id == profileUser.id : false;
     </div>
     <div class="user-info">
       <span class="username"><%= profileUser.name %> <%- profileUser.admin || profileUser.moderator ? `<span class="label label-warning badge-label">${profileUser.admin ? "Admin" : "Moderator"}</span>` : "" %></span>
+      <span class="username"><%= profileUser.name %> <%- profileUser.admin || profileUser.moderator ? `<span class="label label-warning badge-label">${profileUser.admin ? "Admin" : "Moderator"}</span>` : "" %></span>
       <div class="subdetails">
         <div>
           <span class="value"><%= profileUser.placeCount.toLocaleString() -%></span>
