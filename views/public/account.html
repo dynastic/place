@@ -39,7 +39,7 @@ var isSelf = user ? user.id == profileUser.id : false;
     <p>
       <strong>Joined</strong> <time class="timeago" datetime="<%= profileUser.creationDate.toISOString() %>" title="<%= profileUser.creationDate.toLocaleString() %>"><%= profileUser.creationDate.toLocaleString() %></time>.</p>
     <% if(profileUser.lastPlace) { %><p>
-      <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(isLatestPixel && pixel) { %> at (<%= `${pixel.xPos.toLocaleString()}, ${pixel.yPos.toLocaleString()}` %>)<% } %>.
+      <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(isLatestPixel && pixel) { %> at <a href="<%= `/#x=${pixel.xPos.toLocaleString()}&y=${pixel.yPos.toLocaleString()}` %>">(<%= `${pixel.xPos.toLocaleString()}, ${pixel.yPos.toLocaleString()}` %>)</a><% } %>.
      </p><% } %>
   </div>
   <% if(isSelf) { %>
