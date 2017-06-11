@@ -7,42 +7,64 @@ var actions = {
             url: "mod/toggle_ban",
             btnStyle: "danger",
             getRequestData: function(elem) {
-                if(elem.attr("data-user-banned") === "true") return {};
-                var reason = window.prompt("Enter a reason to ban this user for:", defaultBanReason);
-                if(!reason) return null;
-                if(reason.length <= 3) { window.alert("Your ban reason must be over three characters long."); return null; }
-                return {reason: reason};
+                return new Promise((resolve, reject) => {
+                    if(elem.attr("data-user-banned") === "true") return resolve({});
+                    var reason = window.prompt("Enter a reason to ban this user for:", defaultBanReason);
+                    if(!reason) reject();
+                    if(reason.length <= 3) return reject("Your ban reason must be over three characters long.");
+                    resolve({reason: reason});
+                })
             },
-            callback: function(data, elem) {
-                elem.text(`${data.banned ? "Unban" : "Ban"}`);
-            },
-            buttonText: function(data) {
-                return data.banned ? "Unban" : "Ban";
-            },
+            buttonText: data => data.banned ? "Unban" : "Ban",
             getAttributes: function(data) {
                 return {"data-user-banned": data.banned};
-            }
+            },
         },
         activation: {
             url: "mod/toggle_active",
             btnStyle: "warning",
-            callback: function(data, elem) {
-                elem.text(`${data.deactivated ? "Activate" : "Deactivate"}`);
-            },
-            buttonText: function(data) {
-                return data.deactivated ? "Activate" : "Deactivate";
-            }
+            buttonText: data => data.deactivated ? "Activate" : "Deactivate",
         },
         mod: {
             url: "admin/toggle_mod",
             btnStyle: "info",
             adminOnly: true,
-            callback: function(data, elem) {
-                elem.text(`${data.moderator ? "Remove" : "Give"} Moderator`);
+            buttonText: data => `${data.moderator ? "Remove" : "Give"} Moderator`
+        },
+        editUserNotes: {
+            url: "mod/user_notes",
+            method: "POST",
+            btnStyle: "primary",
+            getRequestData: function(elem) {
+                return new Promise((resolve, reject) => {
+                    $.get("/api/mod/user_notes", {id: elem.parent().attr("data-user-id")}).done(function(res) {
+                        if(!res.success || res.userNotes == null) return reject("Couldn't fetch user notes");
+                        bootbox.prompt({
+                            title: "Edit user notes",
+                            inputType: 'textarea',
+                            value: res.userNotes,
+                            callback: function (result) {
+                                if(result == null) return reject();
+                                resolve({notes: result});
+                            },
+                            buttons: {
+                                confirm: {
+                                    label: 'Save',
+                                    className: 'btn-primary'
+                                },
+                                cancel: {
+                                    label: 'Close',
+                                    className: 'btn-default'
+                                }
+                            },
+                        });
+                    }).fail(() => reject("Couldn't fetch user notes"));
+                })
             },
-            buttonText: function(data) {
-                return `${data.moderator ? "Remove" : "Give"} Moderator`
-            }
+            buttonText: data => "Edit User Notes",
+            getAttributes: function(data) {
+                return {"data-user-banned": data.banned};
+            },
         }
     },
     server: {
@@ -70,9 +92,22 @@ var actions = {
 }
 var renderAction = function(actionName, data = {}, type = "user") {
     var action = actions[type][actionName];
-    var btn = $("<a>").attr("href", "javascript:void(0)").addClass(`btn btn-${action.btnStyle} ${type}-action-btn`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName).text(action.buttonText(data));
+    var title = action.buttonText(data);
+    var btn = $("<a>").attr("href", "javascript:void(0)").addClass(`btn btn-${action.btnStyle} ${type}-action-btn`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
     if(typeof action.getAttributes === "function") btn.attr(action.getAttributes(data));
+    setActionDataOnElement(data, btn, action);
     return btn[0].outerHTML;
+}
+
+var setActionDataOnElement = function(data, elem, action) {
+    var title = action.buttonText(data);
+    var isPressed = false;
+    var text = title;
+    if(typeof action.icon === "function") text = `<i class="fa fa-${action.icon(data)}"></i>`
+    if(typeof action.isActive === "function") isPressed = action.isActive(data);
+    if(isPressed) elem.addClass("active")
+    else elem.removeClass("active");
+    elem.html(text);
 }
 
 var renderUserActions = function(user) {
@@ -87,6 +122,7 @@ var renderUserActions = function(user) {
         ${renderAction("ban", user)}
         ${renderAction("activation", user)}
         ${renderAction("mod", user)}
+        ${renderAction("editUserNotes", user)}
     </div>`
 }
 
@@ -106,25 +142,28 @@ $("body").on("click", ".user-action-btn", function() {
     }
     var userID = $(this).parent().data("user-id");
     var action = actions.user[$(this).data("user-action")];
-    var data = {};
-    if(typeof action.getRequestData === "function") data = action.getRequestData($(this));
-    if(!data) return;
-    data.id = userID;
-    var originalText = $(this).html();
-    $(this).addClass("disabled");
-    $(this).html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
     var elem = $(this);
-    $.get(`/api/${action.url}/`, data).done(function(data) {
-        if(!data.success) return handleError(data);
-        action.callback(data, elem);
-        if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
-    }).fail(function(res) {
-        handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON);
-        if(action.callbackModifiesText !== false) elem.html(originalText);
-    }).always(function() {
-        elem.removeClass("disabled");
-        if(action.callbackModifiesText === false) elem.html(originalText);
-    });
+    var method = "GET";
+    if(typeof action.method !== "undefined") method = action.method;
+    function continueWithRequestData(data) {
+        var originalText = elem.html();
+        elem.addClass("disabled").html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
+        $.ajax({
+            url:`/api/${action.url}/?id=${userID}`,
+            method: method,
+            data: data
+        }).done(function(data) {
+            if(!data.success) return handleError(data);
+            if(typeof action.callback === "function") action.callback(data, elem);
+            setActionDataOnElement(data, elem, action);
+            if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
+        }).fail(res => handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON)).always(function() {
+            elem.removeClass("disabled");
+            if(action.callbackModifiesText === false) elem.html(originalText);
+        });
+    }
+    if(typeof action.getRequestData === "function") action.getRequestData($(this)).then(d => continueWithRequestData(d)).catch(err => { if(err) window.alert(err) });
+    else continueWithRequestData({});
 });
 
 

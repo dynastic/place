@@ -343,6 +343,33 @@ function APIRouter(app) {
         });
     });
 
+    router.get("/mod/user_notes", app.modMiddleware, function(req, res, next) {
+        if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
+        User.findById(req.query.id, {userNotes: 1}).then(user => {
+            res.json({success: true, userNotes: user.userNotes || ""})
+        }).catch(err => {
+            app.reportError("Error trying to get user to retrieve user notes of.");
+            res.status(500).json({success: false});
+        });
+    });
+
+    router.post("/mod/user_notes", app.modMiddleware, function(req, res, next) {
+        if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
+        User.findById(req.query.id).then(user => {
+            user.userNotes = req.body.notes;
+            user.save().then(user => {
+                ActionLogger.log("updateNotes", user, req.user);
+                res.json({success: true})
+            }).catch(err => {
+                app.reportError("Error trying to save user notes.");
+                res.status(500).json({success: false})
+            });
+        }).catch(err => {
+            app.reportError("Error trying to get user to set user notes on.");
+            res.status(500).json({success: false});
+        });
+    });
+
     router.get('/mod/similar_users/:userID', app.modMiddleware, function(req, res) {
         if(!req.params.userID || req.params.userID == "") return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
         User.findById(req.params.userID).then(user => {
