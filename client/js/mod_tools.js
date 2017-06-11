@@ -96,15 +96,22 @@ var actions = {
         }
     }
 }
-var renderAction = function(actionName, data = {}, type = "user") {
+var renderAction = function(actionName, data = {}, type = "user", dropdown = false) {
     console.log(actionName);
     var action = actions[type][actionName];
     var title = action.buttonText(data);
-    var btn = $("<a>").attr("href", "javascript:void(0)").addClass(`btn btn-${action.btnStyle} ${type}-action-btn action-btn`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
+    var dropdownItem = null;
+    var btn = $("<a>").attr("href", "javascript:void(0)").attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
     if(typeof action.getAttributes === "function") btn.attr(action.getAttributes(data));
     if(typeof action.type !== "undefined" && action.type == "link") btn.attr("href", action.getLinkURL(data)).removeClass(`${type}-action-btn`);
     setActionDataOnElement(data, btn, action);
-    return btn;
+    if(dropdown) {
+        dropdownItem = $("<li>");
+        btn.appendTo(dropdownItem);
+    } else {
+        btn.addClass(`btn btn-${action.btnStyle} ${type}-action-btn action-btn`);
+    }
+    return dropdown ? dropdownItem : btn;
 }
 
 var setActionDataOnElement = function(data, elem, action) {
@@ -128,7 +135,7 @@ var renderUserActions = function(user) {
     if(user._id) user.id = user._id;
     if(currentUserID == user.id || !canTouchUser) return ``;
     var actionCtn = $("<div>").addClass("actions-ctn").attr("data-user-id", user.id);
-    actionIDs.forEach(a => renderAction(a, user).appendTo(actionCtn));
+    actionIDs.forEach(a => renderAction(a, user, "user").appendTo(actionCtn));
     return actionCtn[0].outerHTML;
 }
 
@@ -144,6 +151,7 @@ var renderUserActionsDropdown = function(user) {
     var dropdownCtn = $("<div>").addClass("dropdown");
     var btn = $("<a>").addClass("dropdown-toggle").attr({type: "button", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": false}).html("<span class=\"caret\"></span>").appendTo(dropdownCtn);
     var dropdownList = $("<ul>").addClass("dropdown-menu").appendTo(dropdownCtn);
+    actionIDs.forEach(a => renderAction(a, user, "user", true).appendTo(dropdownList));
     return dropdownList[0].outerHTML;
 }
 
