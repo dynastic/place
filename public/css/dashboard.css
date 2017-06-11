@@ -210,3 +210,33 @@ table.filters {
 .content {
   margin-top: 10px;
 }
+
+.dashboard-actions-ctn {
+  padding: 10px 0;
+}
+
+.action {
+  border: 1px solid #eee;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.compact .action {
+  padding: 15px;
+  border-radius: 7px;
+}
+
+.compact .info-collapse-ctn {
+  display: none;
+}
+
+.action > p.text {
+  margin-bottom: 5px;
+}
+
+.action > time {
+  color: #777;
+  font-size: 12px;
+  margin-top: 0;
+}

@@ -366,9 +366,9 @@ function APIRouter(app) {
     });
 
     router.get('/mod/actions', app.modMiddleware, function(req, res) {
-        var condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === true) } };
+        var condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === "true") } };
         if (req.query.lastID) condition._id = { $gt: req.query.lastID };
-        Action.find(condition, {}, {_id: 1}).limit(Math.min(250, req.query.limit || 25)).then(actions => {
+        Action.find(condition, null, {sort: {_id: -1}}).limit(Math.min(250, req.query.limit || 25)).then(actions => {
             var lastID = null;
             if(actions.length > 1) lastID = actions[actions.length - 1]._id;
             var promises = actions.map(a => a.getInfo());
@@ -379,7 +379,6 @@ function APIRouter(app) {
             app.reportError("An error occurred while trying to retrieve actions: " + err);
             res.status(500).json({ success: false });
         })
-
     });
 
     // Debug APIs
