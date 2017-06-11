@@ -239,12 +239,14 @@ function APIRouter(app) {
         if(!req.body.title || !req.body.message || !req.body.timeout) return res.status(400).json({success: false});
         var timeout = Number.parseInt(req.body.timeout);
         if(Number.isNaN(timeout)) return res.status(400).json({success: false});
-        app.websocketServer.broadcast("admin_broadcast", {
+        var info = {
             title: req.body.title,
             message: req.body.message,
             timeout: Math.max(0, timeout),
             style: req.body.style || "info"
-        });
+        }
+        app.websocketServer.broadcast("admin_broadcast", info);
+        ActionLogger.log("sendBroadcast", req.user, null, info);
         res.json({success: true});
     });
 
@@ -367,7 +369,7 @@ function APIRouter(app) {
 
     router.get('/mod/actions', app.modMiddleware, function(req, res) {
         var condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === "true") } };
-        if (req.query.lastID) condition._id = { $gt: req.query.lastID };
+        if (req.query.lastID) condition._id = { $lt: req.query.lastID };
         Action.find(condition, null, {sort: {_id: -1}}).limit(Math.min(250, req.query.limit || 25)).then(actions => {
             var lastID = null;
             if(actions.length > 1) lastID = actions[actions.length - 1]._id;

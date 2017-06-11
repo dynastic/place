@@ -96,6 +96,12 @@ var actions = {
         category: "administrative",
         isPrivileged: true
     },
+    sendBroadcast: {
+        displayName: "Broadcast a message to all users",
+        inlineDisplayName: "Broadcasted a message to all users",
+        category: "administrative",
+        isPrivileged: true
+    }
 }
 
 var actionLogger = {

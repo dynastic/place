@@ -165,7 +165,6 @@ function getRowForAction(action) {
     }
 
     var row = $("<div>").addClass("action").attr("data-action-id", action.id);
-    console.log(action);
     var username = "<strong>Deleted user</strong>";
     var actionTxt = `<span class="action-str" title="${actionTemplate.displayName} - ${actionTemplate.category}">${actionTemplate.inlineDisplayName.toLowerCase()}`;
     if(action.performingUser) username = `<strong><a href="/@${action.performingUser.username}">${action.performingUser.username}</a></strong>`;
@@ -208,17 +207,39 @@ function fetchActions(lastID, modOnly, limit, callback) {
     $.get("/api/mod/actions", {lastID: lastID, limit: limit, modOnly: modOnly}).done(function(data) {
         if(!data.success || !data.actions || !data.actionTemplates) return callback(null);
         actionTemplates = data.actionTemplates;
-        callback(data.actions);
+        callback(data.actions, data.lastID);
     }).fail(function() {
-        callback(null);
+        callback(null, null);
     });
 }
 
+function addToContainerForResponse(container, data, lastID, modOnly, limit, allowsShowMore) {
+    data.forEach(action => getRowForAction(action).appendTo(container));
+    if(allowsShowMore && lastID) {
+        var loading = false;
+        $("<a>").addClass("btn btn-primary btn-xs").text("Load more").appendTo(container).on("click", function() {
+            var btn = $(this);
+            if(!loading) {
+                loading = true;
+                btn.html("<i class=\"fa fa-spin fa-circle-o-notch\"></i> Loading...").addClass("disabled");
+                fetchActions(lastID, modOnly, limit, function(data, lastID) {
+                    if(!data) {
+                        loading = false;
+                        return alert("Couldn't load more actions.")
+                    }
+                    btn.remove();
+                    addToContainerForResponse(container, data, lastID, modOnly, limit, allowsShowMore);
+                })
+            }
+        })
+    }
+}
+
 function loadRecentActionsIntoContainer(container, limit = null, modOnly = false, allowsShowMore = true) {
-    container.text("Loading...");
-    fetchActions(null, modOnly, limit, function(data) { 
+    container.html("<i class=\"fa fa-spin fa-circle-o-notch\"></i> Loading...");
+    fetchActions(null, modOnly, limit, function(data, lastID) { 
         if(!data) return $(container).text("Couldn't load mod actions");
         container.html("");
-        data.forEach(action => getRowForAction(action).appendTo(container));
+        addToContainerForResponse(container, data, lastID, modOnly, limit, allowsShowMore);
     });
 }
