@@ -157,35 +157,46 @@ function getRowForAction(action) {
         }
         return text;
     }
+    function parseActionTemplate(template, action) {
+        return eval('`' + template.replace(/\${/g, '${action.info.') + '`');
+    }
 
     var row = $("<div>").addClass("action").attr("data-action-id", action.id);
     console.log(action);
     var username = "<strong>Deleted user</strong>";
     var actionTxt = `<span class="action-str" title="${action.action.displayName} - ${action.action.category}">${action.action.inlineDisplayName.toLowerCase()}`;
     if(action.performingUser) username = `<strong><a href="/@${action.performingUser.username}">${action.performingUser.username}</a></strong>`;
-    var text = `${username} ${actionTxt}</span>.`
+    var moreInfoCtn = null;
+    var sentenceEnd = "";
+    var otherLines = "";
+    if(Object.keys(action.info).length > 0) {
+        if(typeof action.action.sentenceEndTextFormatting !== 'undefined') sentenceEnd = parseActionTemplate(action.action.sentenceEndTextFormatting, action);
+        if(typeof action.action.otherLinesTextFormatting !== 'undefined') otherLines = "<br>" + parseActionTemplate(action.action.otherLinesTextFormatting, action);
+        if(typeof action.action.hideInfo === 'undefined' || !action.action.hideInfo) {
+            var moreInfoCtn = $("<div>").addClass("info-collapse-ctn");
+            var id = `info-collapse-${randomString(16)}-${action.id}`;
+            var infoCtn = $("<div>").addClass("collapse info-collapse").attr("id", id).appendTo(moreInfoCtn);
+            var infoList = $("<ol>").appendTo(infoCtn);
+            Object.keys(action.info).forEach(key => {
+                var value = action.info[key];
+                if(typeof value !== 'object') {
+                    var thisRow = $("<li>").appendTo(infoList);
+                    $("<code>").text(key).appendTo(thisRow);
+                    $("<span>").text(`: ${value}`).appendTo(thisRow);
+                }
+            })
+            var seeMoreLink = $("<a>").attr("role", "button").addClass("see-more-toggle").attr("data-toggle", "collapse").attr("href", `#${id}`).attr("aria-expanded", "false").attr("aria-controls", id).text("See more").appendTo(moreInfoCtn);
+            infoCtn.on("show.bs.collapse", () => seeMoreLink.text("See less")).on("hide.bs.collapse", () => seeMoreLink.text("See more"))
+        }
+    }
+    var text = `${username} ${actionTxt}${sentenceEnd}</span>.${otherLines}`;
     if(typeof action.action.requiresModerator !== 'undefined' && action.action.requiresModerator) {
         var modUsername = "<strong>Deleted moderator</strong>"
         if(action.moderatingUser) modUsername = `<strong><a href="/@${action.moderatingUser.username}">${action.moderatingUser.username}</a></strong>`;
-        var text = `${modUsername} ${actionTxt} ${username}</span>.`
+        var text = `${modUsername} ${actionTxt} ${username}${sentenceEnd}</span>.${otherLines}`
     }
     $("<p>").addClass("text").html(text).appendTo(row);
-    if(Object.keys(action.info).length > 0) {
-        var moreInfoCtn = $("<div>").addClass("info-collapse-ctn").appendTo(row);
-        var id = `info-collapse-${randomString(16)}-${action.id}`;
-        var infoCtn = $("<div>").addClass("collapse info-collapse").attr("id", id).appendTo(moreInfoCtn);
-        var infoList = $("<ol>").appendTo(infoCtn);
-        Object.keys(action.info).forEach(key => {
-            var value = action.info[key];
-            if(typeof value !== 'object') {
-                var thisRow = $("<li>").appendTo(infoList);
-                $("<code>").text(key).appendTo(thisRow);
-                $("<span>").text(`: ${value}`).appendTo(thisRow);
-            }
-        })
-        var seeMoreLink = $("<a>").attr("role", "button").addClass("see-more-toggle").attr("data-toggle", "collapse").attr("href", `#${id}`).attr("aria-expanded", "false").attr("aria-controls", id).text("See more").appendTo(moreInfoCtn);
-        infoCtn.on("show.bs.collapse", () => seeMoreLink.text("See less")).on("hide.bs.collapse", () => seeMoreLink.text("See more"))
-    }
+    if(moreInfoCtn) moreInfoCtn.appendTo(row);
     $("<time>").addClass("timeago").attr("datetime", action.date).attr("title", new Date(action.date).toLocaleString()).text($.timeago(action.date)).appendTo(row);
     return row;
 }

@@ -31,7 +31,9 @@ var actions = {
     place: {
         displayName: "Place pixel",
         inlineDisplayName: "Placed a pixel",
-        category: "gameplay"
+        category: "gameplay",
+        hideInfo: true,
+        sentenceEndTextFormatting: " at <a href=\"/#x=${x}&y=${y}\">(${x}, ${y})</a>"
     },
     sendChatMessage: {
         displayName: "Send chat message",
@@ -109,6 +111,10 @@ var actionLogger = {
 
     infoForAction: function(actionID) {
         return actions[actionID];
+    },
+
+    getAllActionInfo: function() {
+        return actions;
     },
 
     actionIDsToRetrieve: function(modOnly = false) {

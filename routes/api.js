@@ -305,7 +305,7 @@ function APIRouter(app) {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.banned = !user.banned;
             user.save().then(user => {
-                ActionLogger.log(user.banned ? "ban" : "unban", user, req.user);
+                // ActionLogger.log(user.banned ? "ban" : "unban", user, req.user);
                 res.json({success: true, banned: user.banned})
             }).catch(err => {
                 app.reportError("Error trying to save banned status on user.");
@@ -372,9 +372,7 @@ function APIRouter(app) {
             var lastID = null;
             if(actions.length > 1) lastID = actions[actions.length - 1]._id;
             var promises = actions.map(a => a.getInfo());
-            Promise.all(promises).then(actions => {
-                res.json({ success: true, actions: actions, lastID: lastID })
-            }).catch(err => res.status(500).json({ success: false }))
+            Promise.all(promises).then(actions => res.json({ success: true, actions: actions, lastID: lastID })).catch(err => res.status(500).json({ success: false }))
         }).catch(err => {
             app.reportError("An error occurred while trying to retrieve actions: " + err);
             res.status(500).json({ success: false });
