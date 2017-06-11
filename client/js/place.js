@@ -284,6 +284,9 @@ var place = {
             app.loadLeaderboard();
         }, 30000);
         this.updateAuthLinks();
+
+        this.dismissBtn = $("<button>").attr("type", "button").addClass("close").attr("data-dismiss", "alert").attr("aria-label", "Close");
+        $("<span>").attr("aria-hidden", "true").html("&times;").appendTo(this.dismissBtn);
     },
 
     getCanvasImage: function() {
@@ -431,6 +434,7 @@ var place = {
         socket.on("server_ready", () => this.getCanvasImage());
         socket.onJSON("new_message", this.addChatMessage.bind(this));
         socket.on("user_change", this.userCountChanged.bind(this));
+        socket.onJSON("admin_broadcast", this.adminBroadcastReceived.bind(this));
         socket.on("reload_client", () => window.location.reload());
         return socket;
     },
@@ -444,6 +448,10 @@ var place = {
 
     liveUpdateTile: function (data) {
         this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y);
+    },
+
+    adminBroadcastReceived: function(data) {
+        this.showAdminBroadcast(data.title, data.message, data.style || "info", data.timeout || 0);
     },
 
     userCountChanged: function (data) {
@@ -1153,6 +1161,23 @@ var place = {
             });
         }
         $("<p>").addClass("text-muted").text("Leaderboards are calculated based on the number of pixels you have placed (that someone else hasn't overwritten) over the span of the last week. To get a spot on the leaderboard, start placing!").appendTo(tab);
+    },
+
+    showAdminBroadcast(title, message, style, timeout = 0) {
+        var alert = $("<div>").addClass("floating-alert admin-alert alert alert-block alert-dismissable").addClass("alert-" + style).hide().prependTo($("#floating-alert-ctn"));
+        this.dismissBtn.clone().appendTo(alert);
+        var text = $("<p>").text(message).appendTo(alert);
+        if(title != null && title != "") {
+            $("<span>").text(" ").prependTo(text);
+            $("<strong>").text(title).prependTo(text);
+        }
+        alert.fadeIn(400, function() {
+            if(timeout > 0) {
+                setTimeout(function() {
+                    alert.fadeOut(400, function() { alert.remove(); });
+                }, timeout * 1000);
+            }
+        });
     }
 }
 

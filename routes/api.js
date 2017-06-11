@@ -235,6 +235,19 @@ function APIRouter(app) {
         res.json({success: true});
     });
 
+    router.post("/admin/broadcast", app.adminMiddleware, function(req, res, next) {
+        if(!req.body.title || !req.body.message || !req.body.timeout) return res.status(400).json({success: false});
+        var timeout = Number.parseInt(req.body.timeout);
+        if(Number.isNaN(timeout)) return res.status(400).json({success: false});
+        app.websocketServer.broadcast("admin_broadcast", {
+            title: req.body.title,
+            message: req.body.message,
+            timeout: Math.max(0, timeout),
+            style: req.body.style || "info"
+        });
+        res.json({success: true});
+    });
+
     router.post("/admin/users", app.modMiddleware, function(req, res, next) {
         let searchValue = req.body.search ? req.body.search.value || "" : "";
         var sort = { creationDate: "desc" };

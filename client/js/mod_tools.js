@@ -79,6 +79,7 @@ var renderServerActions = function() {
     return `<div class="actions-ctn">
         ${renderAction("reloadConfig", {}, "server")}
         ${renderAction("refreshClients", {}, "server")}
+        <a href="javascript:void(0);" class="btn btn-info" data-toggle="modal" data-target="#broadcastModal">Broadcast message</button>
     </div>`
 }
 
@@ -129,3 +130,20 @@ $("body").on("click", ".server-action-btn", function() {
         if(action.callbackModifiesText === false) elem.html(originalText);
     });
 });
+
+
+$("#broadcastForm").submit(function(e) {
+    e.preventDefault();
+    $.post("/api/admin/broadcast", {
+        title: $(this).find("#inputBroadcastTitle").val(),
+        message: $(this).find("#inputBroadcastMessage").val(),
+        style: $(this).find("#inputBroadcastStyle").val(),
+        timeout: $(this).find("#inputBroadcastTimeout").val()
+    }).done(function(data) {
+        if(!data.success) return alert("Couldn't send broadcast");
+        $('#broadcastModal').modal('hide');
+        alert("Successfully sent out broadcast to all connected clients.");
+    }).fail(function() {
+        alert("Couldn't send broadcast");
+    })
+})

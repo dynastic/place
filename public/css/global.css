@@ -77,3 +77,20 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
   letter-spacing: 0.8px;
   color: #888;
 }
+
+#floating-alert-ctn {
+  position: fixed;
+  top: 100px;
+  width: 100%;
+  padding: 0 20px;
+  z-index: 99;
+  pointer-events: none;
+}
+
+.floating-alert {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  pointer-events: all;
+  margin-bottom: 5px;
+}
