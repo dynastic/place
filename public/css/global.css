@@ -94,3 +94,11 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
   pointer-events: all;
   margin-bottom: 5px;
 }
+
+.action-btn {
+  margin-right: 3px;
+  margin-top: 3px;
+}
+.action-btn:last-child {
+  margin-right: 0;
+}

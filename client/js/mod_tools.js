@@ -3,6 +3,12 @@ var actionTemplates = null;
 
 var actions = {
     user: {
+        similar: {
+            btnStyle: "warning",
+            type: "link",
+            getLinkURL: data => `/admin/users/similar/${data.id}`,
+            buttonText: data => "View Similar"
+        },
         ban: {
             url: "mod/toggle_ban",
             btnStyle: "danger",
@@ -91,12 +97,14 @@ var actions = {
     }
 }
 var renderAction = function(actionName, data = {}, type = "user") {
+    console.log(actionName);
     var action = actions[type][actionName];
     var title = action.buttonText(data);
-    var btn = $("<a>").attr("href", "javascript:void(0)").addClass(`btn btn-${action.btnStyle} ${type}-action-btn`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
+    var btn = $("<a>").attr("href", "javascript:void(0)").addClass(`btn btn-${action.btnStyle} ${type}-action-btn action-btn`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
     if(typeof action.getAttributes === "function") btn.attr(action.getAttributes(data));
+    if(typeof action.type !== "undefined" && action.type == "link") btn.attr("href", action.getLinkURL(data)).removeClass(`${type}-action-btn`);
     setActionDataOnElement(data, btn, action);
-    return btn[0].outerHTML;
+    return btn;
 }
 
 var setActionDataOnElement = function(data, elem, action) {
@@ -110,6 +118,8 @@ var setActionDataOnElement = function(data, elem, action) {
     elem.html(text);
 }
 
+var actionIDs = ["similar", "ban", "activation", "editUserNotes", "mod"]
+
 var renderUserActions = function(user) {
     var currentUserID = $("body").data("user-id");
     var currentIsAdmin = $("body").data("user-is-admin");
@@ -117,13 +127,9 @@ var renderUserActions = function(user) {
     var canTouchUser = (currentIsMod && !(user.moderator || user.admin)) || (currentIsAdmin && !user.admin);
     if(user._id) user.id = user._id;
     if(currentUserID == user.id || !canTouchUser) return ``;
-    return `<div class="actions-ctn" data-user-id="${user.id}">
-        <a href="/admin/users/similar/${user.id}" class="btn btn-warning">View Similar</a>
-        ${renderAction("ban", user)}
-        ${renderAction("activation", user)}
-        ${renderAction("editUserNotes", user)}
-        ${renderAction("mod", user)}
-    </div>`
+    var actionCtn = $("<div>").addClass("actions-ctn").attr("data-user-id", user.id);
+    actionIDs.forEach(a => renderAction(a, user).appendTo(actionCtn));
+    return actionCtn[0].outerHTML;
 }
 
 var renderServerActions = function() {
@@ -132,6 +138,13 @@ var renderServerActions = function() {
         ${renderAction("refreshClients", {}, "server")}
         <a href="javascript:void(0);" class="btn btn-info" data-toggle="modal" data-target="#broadcastModal">Broadcast message</button>
     </div>`
+}
+
+var renderUserActionsDropdown = function(user) {
+    var dropdownCtn = $("<div>").addClass("dropdown");
+    var btn = $("<a>").addClass("dropdown-toggle").attr({type: "button", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": false}).html("<span class=\"caret\"></span>").appendTo(dropdownCtn);
+    var dropdownList = $("<ul>").addClass("dropdown-menu").appendTo(dropdownCtn);
+    return dropdownList[0].outerHTML;
 }
 
 $("body").on("click", ".user-action-btn", function() {
