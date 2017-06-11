@@ -185,13 +185,16 @@ var popoutController = {
             if(!needsTimestamp) sinceLastTimestamp++;
             if(needsTimestamp) $(`<div class="timestamp"></div>`).text(getFancyDate(new Date(item.date))).appendTo("#chat-messages");
             var ctn = $(`<div class="message-ctn"><div class="clearfix"><div class="message"></div></div></div>`).addClass(outgoing ? "outgoing" : "incoming");
-            var usernameHTML = $(`<a class="username"><span></span></a>`);
+            var usernameHTML = $("<div class=\"username-ctn\"><a class=\"username\"><span></span></a></div>");
             usernameHTML.find("span").text(hasUser ? item.user.username : this.place.getUserStateText(item.userError))
+            if(item.user && typeof renderUserActionsDropdown === "function") {
+                $(renderUserActionsDropdown(item.user)).appendTo(usernameHTML);
+            }
             if(hasUser) {
-                usernameHTML.attr("href", `/@${item.user.username}`);
-                if(item.user.banned || item.user.deactivated) $(`<span class="label label-danger badge-label"></span>`).text(item.user.banned ? "Banned" : "Deactivated").appendTo(usernameHTML);
-                if(item.user.moderator || item.user.admin) $(`<span class="label label-warning badge-label"></span>`).text(item.user.admin ? "Admin" : "Moderator").prependTo(usernameHTML);
-            } else usernameHTML.addClass("deleted-account");
+                usernameHTML.find("a.username").attr("href", `/@${item.user.username}`);
+                if(item.user.banned || item.user.deactivated) $(`<span class="label label-danger badge-label"></span>`).text(item.user.banned ? "Banned" : "Deactivated").appendTo(usernameHTML.find("a.username"));
+                if(item.user.moderator || item.user.admin) $(`<span class="label label-warning badge-label"></span>`).text(item.user.admin ? "Admin" : "Moderator").prependTo(usernameHTML.find("a.username"));
+            } else usernameHTML.find("a.username").addClass("deleted-account");
             if(needsUsername) usernameHTML.prependTo(ctn);
             ctn.find(".message").text(item.text).attr("title", messageDate.toLocaleString());
             if(needsCoordinate) {
