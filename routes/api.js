@@ -287,7 +287,7 @@ function APIRouter(app) {
             user.moderator = !user.moderator;
             user.save().then(user => {
                 ActionLogger.log(user.moderator ? "giveModerator" : "removeModerator", user, req.user);
-                res.json({success: true, moderator: user.moderator})
+                res.json({success: true, user: user.toInfo()})
             }).catch(err => {
                 app.reportError("Error trying to save moderator status on user.");
                 res.status(500).json({success: false});
@@ -314,7 +314,7 @@ function APIRouter(app) {
             user.banned = !user.banned;
             user.save().then(user => {
                 ActionLogger.log(user.banned ? "ban" : "unban", user, req.user, info);
-                res.json({success: true, banned: user.banned})
+                res.json({success: true, user: user.toInfo()})
             }).catch(err => {
                 app.reportError("Error trying to save banned status on user.");
                 res.status(500).json({success: false})
@@ -332,7 +332,7 @@ function APIRouter(app) {
             user.deactivated = !user.deactivated;
             user.save().then(user => {
                 ActionLogger.log(user.deactivated ? "deactivateOther" : "activateOther", user, req.user);
-                res.json({success: true, deactivated: user.deactivated})
+                res.json({success: true, user: user.toInfo()})
             }).catch(err => {
                 app.reportError("Error trying to save activation status on user.");
                 res.status(500).json({success: false})
@@ -359,7 +359,7 @@ function APIRouter(app) {
             user.userNotes = req.body.notes;
             user.save().then(user => {
                 ActionLogger.log("updateNotes", user, req.user);
-                res.json({success: true})
+                res.json({success: true, user: user.toInfo()})
             }).catch(err => {
                 app.reportError("Error trying to save user notes.");
                 res.status(500).json({success: false})

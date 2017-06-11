@@ -43,7 +43,9 @@ var actions = {
             btnStyle: "primary",
             getRequestData: function(elem) {
                 return new Promise((resolve, reject) => {
-                    $.get("/api/mod/user_notes", {id: elem.parent().attr("data-user-id")}).done(function(res) {
+                    var id = elem.parent().attr("data-user-id");
+                    if(!id) id = elem.parent().parent().attr("data-user-id")
+                    $.get("/api/mod/user_notes", {id: id}).done(function(res) {
                         if(!res.success || res.userNotes == null) return reject("Couldn't fetch user notes");
                         bootbox.prompt({
                             title: "Edit user notes",
@@ -97,11 +99,10 @@ var actions = {
     }
 }
 var renderAction = function(actionName, data = {}, type = "user", dropdown = false) {
-    console.log(actionName);
     var action = actions[type][actionName];
     var title = action.buttonText(data);
     var dropdownItem = null;
-    var btn = $("<a>").attr("href", "javascript:void(0)").attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
+    var btn = $("<a>").attr("href", "javascript:void(0)").addClass(`${type}-action-btn`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
     if(typeof action.getAttributes === "function") btn.attr(action.getAttributes(data));
     if(typeof action.type !== "undefined" && action.type == "link") btn.attr("href", action.getLinkURL(data)).removeClass(`${type}-action-btn`);
     setActionDataOnElement(data, btn, action);
@@ -109,7 +110,7 @@ var renderAction = function(actionName, data = {}, type = "user", dropdown = fal
         dropdownItem = $("<li>");
         btn.appendTo(dropdownItem);
     } else {
-        btn.addClass(`btn btn-${action.btnStyle} ${type}-action-btn action-btn`);
+        btn.addClass(`btn btn-${action.btnStyle} action-btn`);
     }
     return dropdown ? dropdownItem : btn;
 }
@@ -127,13 +128,18 @@ var setActionDataOnElement = function(data, elem, action) {
 
 var actionIDs = ["similar", "ban", "activation", "editUserNotes", "mod"]
 
-var renderUserActions = function(user) {
+var canTouchUser = function(user) {
     var currentUserID = $("body").data("user-id");
     var currentIsAdmin = $("body").data("user-is-admin");
     var currentIsMod = $("body").data("user-is-mod");
     var canTouchUser = (currentIsMod && !(user.moderator || user.admin)) || (currentIsAdmin && !user.admin);
     if(user._id) user.id = user._id;
-    if(currentUserID == user.id || !canTouchUser) return ``;
+    return currentUserID != user.id && canTouchUser;
+}
+
+var renderUserActions = function(user) {
+    if(!canTouchUser(user)) return "";
+    if(user._id) user.id = user._id;
     var actionCtn = $("<div>").addClass("actions-ctn").attr("data-user-id", user.id);
     actionIDs.forEach(a => renderAction(a, user, "user").appendTo(actionCtn));
     return actionCtn[0].outerHTML;
@@ -148,11 +154,16 @@ var renderServerActions = function() {
 }
 
 var renderUserActionsDropdown = function(user) {
-    var dropdownCtn = $("<div>").addClass("dropdown");
+    if(!canTouchUser(user)) return "";
+    var dropdownCtn = $("<div>").addClass("dropdown dropdown-inline user-action-dropdown-ctn").attr("data-user-id", user.id);
     var btn = $("<a>").addClass("dropdown-toggle").attr({type: "button", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": false}).html("<span class=\"caret\"></span>").appendTo(dropdownCtn);
-    var dropdownList = $("<ul>").addClass("dropdown-menu").appendTo(dropdownCtn);
+    var dropdownList = $("<ul>").addClass("dropdown-menu").attr("data-user-id", user.id).appendTo(dropdownCtn);
     actionIDs.forEach(a => renderAction(a, user, "user", true).appendTo(dropdownList));
-    return dropdownList[0].outerHTML;
+    return dropdownCtn[0].outerHTML;
+}
+
+var updateUserDropdowns = function(user) {
+    $(`div.user-action-dropdown-ctn[data-user-id='${user.id}']`).html($(renderUserActionsDropdown(user))[0].innerHTML);
 }
 
 $("body").on("click", ".user-action-btn", function() {
@@ -162,6 +173,7 @@ $("body").on("click", ".user-action-btn", function() {
         alert("Couldn't perform action on user: " + error);
     }
     var userID = $(this).parent().data("user-id");
+    if(!userID) userID = $(this).parent().parent().data("user-id");
     var action = actions.user[$(this).data("user-action")];
     var elem = $(this);
     var method = "GET";
@@ -174,9 +186,10 @@ $("body").on("click", ".user-action-btn", function() {
             method: method,
             data: data
         }).done(function(data) {
-            if(!data.success) return handleError(data);
-            if(typeof action.callback === "function") action.callback(data, elem);
-            setActionDataOnElement(data, elem, action);
+            if(!data.success || !data.user) return handleError(data);
+            if(typeof action.callback === "function") action.callback(data.user, elem);
+            setActionDataOnElement(data.user, elem, action);
+            updateUserDropdowns(data.user);
             if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
         }).fail(res => handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON)).always(function() {
             elem.removeClass("disabled");
@@ -186,7 +199,6 @@ $("body").on("click", ".user-action-btn", function() {
     if(typeof action.getRequestData === "function") action.getRequestData($(this)).then(d => continueWithRequestData(d)).catch(err => { if(err) window.alert(err) });
     else continueWithRequestData({});
 });
-
 
 $("body").on("click", ".server-action-btn", function() {
     function handleError(data) {
@@ -245,11 +257,14 @@ function getRowForAction(action) {
     function parseActionTemplate(template, action) {
         return eval('`' + template.replace(/\${/g, '${action.info.') + '`');
     }
+    function renderUsernameText(user) {
+        return `<strong><a href="/@${user.username}">${user.username}</a> ${renderUserActionsDropdown(user)}</strong>`;
+    }
 
     var row = $("<div>").addClass("action").attr("data-action-id", action.id);
     var username = "<strong>Deleted user</strong>";
-    var actionTxt = `<span class="action-str" title="${actionTemplate.displayName} - ${actionTemplate.category}">${actionTemplate.inlineDisplayName.toLowerCase()}`;
-    if(action.performingUser) username = `<strong><a href="/@${action.performingUser.username}">${action.performingUser.username}</a></strong>`;
+    var actionTxt = `<span class="action-str" title="${actionTemplate.displayName} - ${actionTemplate.category}">${actionTemplate.inlineDisplayName.toLowerCase()}</span>`;
+    if(action.performingUser) username = renderUsernameText(action.performingUser);
     var moreInfoCtn = null;
     var sentenceEnd = "";
     var otherLines = "";
@@ -275,7 +290,7 @@ function getRowForAction(action) {
     var text = `${username} ${actionTxt}${sentenceEnd}</span>.${otherLines}`;
     if(typeof actionTemplate.requiresModerator !== 'undefined' && actionTemplate.requiresModerator) {
         var modUsername = "<strong>Deleted moderator</strong>"
-        if(action.moderatingUser) modUsername = `<strong><a href="/@${action.moderatingUser.username}">${action.moderatingUser.username}</a></strong>`;
+        if(action.moderatingUser) modUsername = renderUsernameText(action.moderatingUser);
         var text = `${modUsername} ${actionTxt} ${username}${sentenceEnd}</span>.${otherLines}`
     }
     $("<p>").addClass("text").html(text).appendTo(row);
