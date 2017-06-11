@@ -22,7 +22,8 @@ function PopoutVisibilityController(popoutContainer) {
                 if($("body").hasClass("is-popped-out")) {
                     window.close();
                 } else {
-                    var w = window.open("/popout", "Place_Popout", "directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=350,height=" + window.height);
+                    console.log(p.activeTab);
+                    var w = window.open("/popout#" + p.activeTab, "Place_Popout", "directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=350,height=" + window.height);
                     if (window.focus) {w.focus()}
                     $("body").addClass("popped-out");
                     if(p.visibilityChangeCallback) p.visibilityChangeCallback();
@@ -40,6 +41,7 @@ function PopoutVisibilityController(popoutContainer) {
 
         changeTab: function(name) {
             var p = this;
+            p.activeTab = name;
             $(this.popoutContainer).find(".tab-content.active, .tab.active").removeClass("active");
             $(this.popoutContainer).find(`.tab-content[data-tab-name=${name}], .tab[data-tab-name=${name}]`).addClass("active").each(function() {
                 if($(this).data("tab-title")) {
@@ -48,6 +50,9 @@ function PopoutVisibilityController(popoutContainer) {
                 }
             });
             if(this.tabChangeCallback) this.tabChangeCallback(name);
+            if($("body").hasClass("is-popped-out")) {
+                window.location.hash = "#" + name;
+            }
         },
 
         _adjustTitle: function(title) {
@@ -145,7 +150,6 @@ var popoutController = {
     },
 
     layoutMessages: function(alwaysScrollToBottom = true) {
-        console.log("LMAO")
         function getFancyDate(date) {
             var now = new Date();
             var almostSameDate = now.getMonth() == date.getMonth() && now.getFullYear() == date.getFullYear();
@@ -310,5 +314,12 @@ var popoutController = {
 if($("body").hasClass("is-popped-out")) {
     if(window.opener.place) {
         popoutController.setup(window.opener.place, $("#popout-container")[0]);
+        popoutController.popoutVisibilityController.tabChangeCallback = name => {
+            window.opener.place.popoutController.popoutVisibilityController.changeTab(name);
+        }
     }
+
+    $(document).ready(function(e) {
+        if(window.location.hash && window.location.hash != "#") popoutController.popoutVisibilityController.changeTab(window.location.hash.substring(1));
+    })
 }
