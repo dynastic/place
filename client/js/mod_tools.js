@@ -4,7 +4,7 @@ var actionTemplates = null;
 var actions = {
     user: {
         similar: {
-            btnStyle: "warning",
+            btnStyle: "info",
             type: "link",
             getLinkURL: data => `/admin/users/similar/${data.id}`,
             buttonText: data => "View Similar"
@@ -33,7 +33,7 @@ var actions = {
         },
         mod: {
             url: "admin/toggle_mod",
-            btnStyle: "info",
+            btnStyle: "success",
             adminOnly: true,
             buttonText: data => `${data.moderator ? "Remove" : "Give"} Moderator`
         },
