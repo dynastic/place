@@ -147,8 +147,8 @@ var renderUserActions = function(user) {
 
 var renderServerActions = function() {
     return `<div class="actions-ctn">
-        ${renderAction("reloadConfig", {}, "server")}
-        ${renderAction("refreshClients", {}, "server")}
+        ${renderAction("reloadConfig", {}, "server")[0].outerHTML}
+        ${renderAction("refreshClients", {}, "server")[0].outerHTML}
         <a href="javascript:void(0);" class="btn btn-info" data-toggle="modal" data-target="#broadcastModal">Broadcast message</button>
     </div>`
 }
