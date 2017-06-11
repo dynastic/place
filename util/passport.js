@@ -40,8 +40,10 @@ module.exports = function(passport) {
                     if(user.passwordResetKey == password) return done(null, user);
                 } else {
                     return user.comparePassword(password, function(err, match) {
-                        if (match && !err) return done(null, user);
-                        ActionLogger.log("signIn", user, null, {method: "normal"});
+                        if (match && !err) {
+                            ActionLogger.log("signIn", user, null, {method: "normal"});
+                            return done(null, user);
+                        }
                         done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
                     });
                 }
