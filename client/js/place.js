@@ -122,54 +122,6 @@ var hashHandler = {
     }
 }
 
-function PopoutController(popoutContainer) {
-    var controller = {
-        popoutContainer: popoutContainer,
-        tabChangeCallback: null, visibilityChangeCallback: null,
-
-        _setup: function() {
-            var p = this;
-            $(this.popoutContainer).find(".tabbar > .tab").click(function() {
-                p.changeTab($(this).data("tab-name"));
-            });
-            $(this.popoutContainer).find(".navigation-bar .close-btn").click(function() {
-                p.close();
-            });
-        },
-
-        changeTab: function(name) {
-            var p = this;
-            $(this.popoutContainer).find(".tab-content.active, .tab.active").removeClass("active");
-            $(this.popoutContainer).find(`.tab-content[data-tab-name=${name}], .tab[data-tab-name=${name}]`).addClass("active").each(function() {
-                if($(this).data("tab-title")) {
-                    p._adjustTitle($(this).data("tab-title"));
-                    return false;
-                }
-            });
-            if(this.tabChangeCallback) this.tabChangeCallback(name);
-        },
-
-        _adjustTitle: function(title) {
-            $(this.popoutContainer).find(".navigation-bar > .title").text(title);
-        },
-
-        open: function() {
-            $("body").addClass("popout-open");
-            if(this.visibilityChangeCallback) this.visibilityChangeCallback();
-        },
-        close: function() {
-            $("body").removeClass("popout-open");
-            if(this.visibilityChangeCallback) this.visibilityChangeCallback();
-        },
-        toggle: function() {
-            $("body").toggleClass("popout-open");
-            if(this.visibilityChangeCallback) this.visibilityChangeCallback();
-        }
-    }
-    controller._setup();
-    return controller;
-}
-
 var place = {
     zooming: {
         zoomedIn: false,
@@ -200,17 +152,12 @@ var place = {
     messages: null,
     isOutdated: false,
 
-    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid, popoutContainer) {
+    start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
         this.canvas = canvas; // moved around; hidden
         this.canvasController = canvasController;
         this.canvasController.init(canvas);
         this.grid = grid;
         this.displayCanvas = displayCanvas; // used for display
-        this.popoutController = PopoutController(popoutContainer);
-        this.popoutController.tabChangeCallback = name => {
-            if(name == "chat") this.scrollToChatBottom();
-        }
-        this.popoutController.visibilityChangeCallback = () => app.handleResize();
 
         this.coordinateElement = coordinateElement;
         this.userCountElement = userCountElement;
@@ -276,13 +223,12 @@ var place = {
 
         this.socket = this.startSocketConnection();
 
+        this.popoutController = popoutController;
+        this.popoutController.setup(this, $("#popout-container")[0]);
+        this.popoutController.popoutVisibilityController.visibilityChangeCallback = () => app.handleResize();
+
         setInterval(function() { app.doKeys() }, 15);
 
-        this.setupChat();
-        this.loadLeaderboard();
-        setInterval(function() {
-            app.loadLeaderboard();
-        }, 30000);
         this.updateAuthLinks();
 
         this.dismissBtn = $("<button>").attr("type", "button").addClass("close").attr("data-dismiss", "alert").attr("aria-label", "Close");
@@ -409,7 +355,7 @@ var place = {
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
-    startSocketConnection() {
+    startSocketConnection: function() {
         var socket = io();
 
         socket.onJSON = function(event, listener) {
@@ -432,7 +378,6 @@ var place = {
 
         socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
         socket.on("server_ready", () => this.getCanvasImage());
-        socket.onJSON("new_message", this.addChatMessage.bind(this));
         socket.on("user_change", this.userCountChanged.bind(this));
         socket.onJSON("admin_broadcast", this.adminBroadcastReceived.bind(this));
         socket.on("reload_client", () => window.location.reload());
@@ -973,124 +918,6 @@ var place = {
         }
     },
 
-    loadChatMessages: function() {
-        var app = this;
-        $.get("/api/chat").done(function(response) {
-            if(!response.success || !response.messages) console.log("Failed to load chat messages.");
-            app.messages = response.messages;
-            app.layoutMessages();
-        }).fail(function() {
-            console.log("Failed to load chat messages.");
-        });
-    },
-
-    layoutMessages: function() {
-        function getFancyDate(date) {
-            var now = new Date();
-            var almostSameDate = now.getMonth() == date.getMonth() && now.getFullYear() == date.getFullYear();
-            var isToday = now.getDate() == date.getDate();
-            var isYesterday = !isToday && now.getDate() == date.getDate() - 1;
-            return `${isToday ? "Today" : (isYesterday ? "Yesterday" : date.toLocaleDateString())}, ${date.toLocaleTimeString()}`
-        }
-
-        $("#chat-messages > *").remove();
-        var sinceLastTimestamp = 0;
-        const maxMessageBlock = 10;
-        this.messages.forEach((item, index, arr) => {
-            var outgoing = $("body").data("user-id") == item.userID;
-            // Check if this message is not the first
-            var hasLastMessage = index > 0;
-            // Get the date of the last message, if possible
-            var lastMessageDate = null;
-            if(hasLastMessage) lastMessageDate = new Date(arr[index - 1].date);
-            var messageDate = new Date(item.date);
-            // Check if this message has an attached user
-            var hasUser = !!item.user;
-            if(typeof item.userError === 'undefined') item.userError = null;
-            // Determine if this message should have a timestamp before it (they appear for first messages, every 10 messages without a timestamp, after 3 minute breaks, or if messages were sent on different days)
-            var needsTimestamp = sinceLastTimestamp > 10 || !hasLastMessage || (messageDate - lastMessageDate > 1000 * 60 * 3) || (messageDate.toDateString() !== lastMessageDate.toDateString());
-            // Determine if this message should show a username (checks if its not sent my user and if it is the first message sent, or if the message before it was sent by someone else)
-            var needsUsername = !outgoing && (needsTimestamp || !hasLastMessage || arr[index - 1].userID != item.userID);
-            // Determine if this message should show a coordinate (if its the last message, the previous message was sent by someone else, or separated by three minutes)
-            var needsCoordinate = index >= arr.length - 1 || (arr[index + 1].userID != item.userID || new Date(arr[index + 1].date) - messageDate > 1000 * 60 * 3 || sinceLastTimestamp == 10);
-            // Calculate our maximum message blocks
-            if(sinceLastTimestamp > 10) sinceLastTimestamp = 0;
-            if(!needsTimestamp) sinceLastTimestamp++;
-            if(needsTimestamp) $(`<div class="timestamp"></div>`).text(getFancyDate(new Date(item.date))).appendTo("#chat-messages");
-            var ctn = $(`<div class="message-ctn"><div class="clearfix"><div class="message"></div></div></div>`).addClass(outgoing ? "outgoing" : "incoming");
-            var usernameHTML = $(`<a class="username"><span></span></a>`);
-            usernameHTML.find("span").text(hasUser ? item.user.username : this.getUserStateText(item.userError))
-            if(hasUser) {
-                usernameHTML.attr("href", `/@${item.user.username}`);
-                if(item.user.banned || item.user.deactivated) $(`<span class="label label-danger badge-label"></span>`).text(item.user.banned ? "Banned" : "Deactivated").appendTo(usernameHTML);
-                if(item.user.moderator || item.user.admin) $(`<span class="label label-warning badge-label"></span>`).text(item.user.admin ? "Admin" : "Moderator").prependTo(usernameHTML);
-            } else usernameHTML.addClass("deleted-account");
-            if(needsUsername) usernameHTML.prependTo(ctn);
-            ctn.find(".message").text(item.text).attr("title", messageDate.toLocaleString());
-            if(needsCoordinate) {
-                var coords = $(`<a class="chat-coordinates" href="javascript:void(0);"><i class="fa fa-map-marker"></i> <span></span></a>`).click(() => this.zoomIntoPoint(item.position.x, item.position.y, false));
-                coords.find("span").text(`(${item.position.x.toLocaleString()}, ${item.position.y.toLocaleString()})`);
-                coords.appendTo(ctn);
-            }
-            ctn.appendTo("#chat-messages");
-        });
-        this.scrollToChatBottom();
-    },
-
-    addChatMessage: function(message) {
-        if(this.messages.map(m => m.id).indexOf(message.id) < 0) {
-            this.messages.push(message);
-            this.layoutMessages();
-        }
-    },
-
-    scrollToChatBottom: function() {
-        $("#chat-messages").scrollTop($("#chat-messages")[0].scrollHeight);
-    },
-
-    sendChatMessage: function() {
-        var parseError = function(response) {
-            var data = typeof response.error === "object" ? response : (typeof response.error().responseJSON === 'undefined' ? null : response.error().responseJSON);
-            return data.error.message ? data.error.message : "An error occurred while trying to send your chat message.";
-        }
-        var app = this;
-        var input = $("#chat-input-field");
-        var btn = $("#chat-send-btn");
-        if(input.val().length <= 0) return;
-        btn.text("Sending…").attr("disabled", "disabled");
-        var coords = this.getCoordinates();
-        var text = input.val();
-        $.post("/api/chat", {
-            text: text,
-            x: coords.x,
-            y: coords.y
-        }).done(function(response) {
-            if(!response.success) return alert(parseError(response));
-            input.val("");
-            input.focus();
-            if(response.message) app.addChatMessage(response.message);
-        }).fail(function(response) {
-            alert(parseError(response));
-        }).always(function() {
-            btn.text("Send").removeAttr("disabled");
-        })
-    },
-
-    setupChat: function() {
-        var app = this;
-        this.loadChatMessages();
-        $("#chat-send-btn").click(function() {
-            app.sendChatMessage();
-        })
-        $("#chat-input-field").focus(function() {
-            app.scrollToChatBottom();
-        })
-        $("#chat-input-field").keydown(function(e) {
-            if((e.keyCode || e.which) != 13) return;
-            app.sendChatMessage();
-        })
-    },
-
     updateAuthLinks: function() {
         var redirectURLPart = encodeURIComponent(window.location.pathname.substr(1) + window.location.search + window.location.hash);
         $("#nav-sign-in > a, #overlay-sign-in").attr("href", `/signin?redirectURL=${redirectURLPart}`)
@@ -1102,65 +929,6 @@ var place = {
         if(userState == "ban") return "Banned user";
         if(userState == "deactivated") return "Deactivated user";
         return "Deleted account";
-    },
-
-    showTextOnLeaderboard: function(text) {
-        var tab = $("#leaderboardTab");
-        tab.html("");
-        $("<div>").addClass("coming-soon").text(text).appendTo(tab);
-    },
-
-    loadLeaderboard: function() {
-        var app = this;
-        $.get("/api/leaderboard").done(function(response) {
-            if(!response.success || !response.leaderboard) {
-                console.log("Failed to load leaderboard data.");
-                return app.showTextOnLeaderboard("Failed to load");
-            }
-            app.leaderboard = response.leaderboard;
-            app.layoutLeaderboard();
-        }).fail(function() {
-            console.log("Failed to load leaderboard data.");
-            app.showTextOnLeaderboard("Failed to load");
-        });
-    },
-
-    layoutLeaderboard: function() {
-        function getStatElement(name, value) {
-            var elem = $("<div>");
-            $("<span>").addClass("value").text(value).appendTo(elem);
-            $("<span>").addClass("name").text(name).appendTo(elem);
-            return elem;
-        }
-        var tab = $("#leaderboardTab");
-        tab.find("*").remove();
-        if(!this.leaderboard) return this.showTextOnLeaderboard("Loading…");
-        if(this.leaderboard.length <= 0) return this.showTextOnLeaderboard("No leaderboard data");
-        var topPlace = $(`<div class="top-place"><i class="fa fa-trophy big-icon"></i><span class="info">Leader</span></div>`).appendTo(tab);
-        var userInfo = $("<div>").addClass("leader-info").appendTo(topPlace);
-        $("<a>").addClass("name").attr("href", `/@${this.leaderboard[0].username}`).text(this.leaderboard[0].username).appendTo(userInfo);
-        $("<span>").addClass("pixel-label").text("Pixels placed").appendTo(userInfo);
-        var subdetails = $("<div>").addClass("subdetails row-fluid clearfix").appendTo(userInfo);
-        getStatElement("This week", this.leaderboard[0].statistics.placesThisWeek.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
-        getStatElement("Total", this.leaderboard[0].statistics.totalPlaces.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
-        if(this.leaderboard.length > 1) {
-            var table = $(`<table class="table"></table>`).appendTo(tab);
-            this.leaderboard.forEach((item, index) => {
-                if(index > 0) {
-                    var row = $("<tr>");
-                    $("<td>").addClass("bold").text(`${index + 1}.`).appendTo(row);
-                    $("<a>").text(item.username).attr("href", `/@${item.username}`).appendTo($("<td>").appendTo(row));
-                    var info1 = $("<td>").addClass("stat").appendTo(row);
-                    $("<span>").text(item.statistics.placesThisWeek.toLocaleString()).appendTo(info1);
-                    $("<span>").text("This week").addClass("row-label").appendTo(info1);
-                    var info2 = $("<td>").addClass("stat").appendTo(row);
-                    $("<span>").text(item.statistics.totalPlaces.toLocaleString()).appendTo(info2);
-                    $("<span>").text("Total").addClass("row-label").appendTo(info2);
-                    row.appendTo(table);
-                }
-            });
-        }
-        $("<p>").addClass("text-muted").text("Leaderboards are calculated based on the number of pixels you have placed (that someone else hasn't overwritten) over the span of the last week. To get a spot on the leaderboard, start placing!").appendTo(tab);
     },
 
     showAdminBroadcast(title, message, style, timeout = 0) {
@@ -1181,12 +949,12 @@ var place = {
     }
 }
 
-place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0], $("#popout-container")[0]);
+place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
 place.setZoomButton($("#zoom-button")[0]);
 place.setGridButton($("#grid-button")[0]);
 place.setCoordinatesButton($("#coordinates")[0]);
 
 $(".popout-control").click(function() {
-    place.popoutController.open();
-    place.popoutController.changeTab($(this).data("tab-name"));
+    place.popoutController.popoutVisibilityController.open();
+    place.popoutController.popoutVisibilityController.changeTab($(this).data("tab-name"));
 })

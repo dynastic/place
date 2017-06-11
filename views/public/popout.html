@@ -1,0 +1,9 @@
+<%- include('../header.html', {
+    css: ["/css/compact.css", "/css/place.css", "/css/popout.css"],
+    pageTitle: "Popout",
+    isPoppedOut: true
+}) -%>
+<%- include("views/popout-container.html") -%>
+<%- include('../footer.html', {
+    js: ["/socket.io/socket.io.js", "/js/build/popout.js", "/js/jquery.timeago.js"]
+}) -%>

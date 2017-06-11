@@ -46,7 +46,7 @@ if (typeof app.config.bugSnagKey !== undefined) {
 
 // Get image handler
 app.paintingHandler = PaintingHandler(app);
-console.log("Loading image from the database…")
+console.log("Loading image from the database…");
 app.paintingHandler.loadImageFromDatabase().then((image) => {
     console.log("Successfully loaded image from database.");
 }).catch(err => {

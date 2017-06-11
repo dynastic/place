@@ -511,7 +511,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     display: none;
 }
 
-.popout-open #popout-container {
+.popout-open:not(.popped-out) #popout-container {
     display: flex;
 }
 
@@ -540,12 +540,17 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     color: #333;
 }
 
-#popout-container > .navigation-bar .close-btn {
+#popout-container > .navigation-bar .buttons {
     color: #999;
-    font-size: 20px;
     text-align: right;
     margin-left: auto;
+}
+
+#popout-container > .navigation-bar .buttons > span {
     cursor: pointer;
+    font-size: 20px;
+    margin-left: 5px;
+    display: inline-block;
 }
 
 #popout-container > .tabbar {
@@ -804,7 +809,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
         background: #fff;
     }
 
-    .popout-open #popout-container {
+    .popout-open:not(.popped-out) #popout-container {
         top: 0;
     }
 }

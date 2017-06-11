@@ -1,0 +1,19 @@
+#popout-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    margin: 0;
+    max-width: none;
+    padding: 0;
+}
+
+nav.navbar {
+    display: none;
+}
+
+.popout-btn {
+    transform: rotate(180deg);
+}
