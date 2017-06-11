@@ -41,6 +41,11 @@ function LeaderboardManager(app) {
             User.find({_id: { $in: this.topUsers }}).then(users => {
                 callback(null, users.filter(u => !u.banned && !u.deactivated).sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map(u => u.toInfo(app)))
             }).catch(err => callback(err, null));
+        },
+
+        getUserRank: function(userID) {
+            var index = this.topUsers.indexOf(userID);
+            return index >= 0 ? index + 1 : null;
         }
     }
     manager.update()

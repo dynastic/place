@@ -113,8 +113,12 @@ UserSchema.methods.toInfo = function(app = null) {
         banned: this.banned,
         deactivated: this.deactivated
     }
-    if(app) info.statistics.placesThisWeek = app.leaderboardManager.pixelCounts[this._id];
+    if(app) {
+        info.statistics.placesThisWeek = app.leaderboardManager.pixelCounts[this.id];
+        info.statistics.leaderboardRank = app.leaderboardManager.getUserRank(this.id);
+    }
     if(typeof info.statistics.placesThisWeek === 'undefined') info.statistics.placesThisWeek = null;
+    if(typeof info.statistics.leaderboardRank === 'undefined') info.statistics.leaderboardRank = null;
     return info;
 }
 

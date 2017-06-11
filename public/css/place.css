@@ -381,6 +381,11 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     display: inline-block;
 }
 
+.pixel-data > .summary > .contents > .user-summary > .rank-container {
+    margin-top: 5px;
+    display: none;
+}
+
 .pixel-data > .summary > .contents > .user-summary > .username-container > .username {
     font-size: 24px;
     font-weight: 300;

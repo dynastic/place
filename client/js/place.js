@@ -888,6 +888,12 @@ var place = {
                     getUserInfoDateTableItem("Account created", data.pixel.user.creationDate).appendTo(userInfoCtn);
                     getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
                     popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.user.id}`);
+                    var rank = data.pixel.user.statistics.leaderboardRank;
+                    if(rank !== null) {
+                        popover.find(".rank-container").show();
+                        popover.find(".rank-label").removeClass("label-info label-success").addClass(rank <= 25 ? "label-success" : "label-info").text(`Ranked #${rank.toLocaleString()}`);
+                        
+                    } else popover.find(".rank-container").hide();
                     if (data.pixel.user.admin) popover.find("#pixel-badge").show().text("Admin");
                     else if (data.pixel.user.moderator) popover.find("#pixel-badge").show().text("Moderator");
                     else popover.find("#pixel-badge").hide();
