@@ -883,7 +883,7 @@ var place = {
                     var userInfoCtn = popover.find(".user-info");
                     userInfoCtn.show();
                     userInfoCtn.find(".field").remove();
-                    getUserInfoTableItem("Total tiles placed", data.pixel.user.statistics.totalPlaces.toLocaleString()).appendTo(userInfoCtn);
+                    getUserInfoTableItem("Total pixels placed", data.pixel.user.statistics.totalPlaces.toLocaleString()).appendTo(userInfoCtn);
                     if(data.pixel.user.statistics.placesThisWeek !== null) getUserInfoTableItem("Pixels this week", data.pixel.user.statistics.placesThisWeek.toLocaleString()).appendTo(userInfoCtn);
                     getUserInfoDateTableItem("Account created", data.pixel.user.creationDate).appendTo(userInfoCtn);
                     getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);

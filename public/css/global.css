@@ -69,6 +69,7 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
   font-size: 23px;
   font-weight: 300;
 }
+
 .subdetails > div > span.name {
   font-size: 10px;
   font-weight: 700;
