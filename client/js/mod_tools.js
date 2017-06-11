@@ -178,13 +178,12 @@ function getRowForAction(action) {
             var moreInfoCtn = $("<div>").addClass("info-collapse-ctn");
             var id = `info-collapse-${randomString(16)}-${action.id}`;
             var infoCtn = $("<div>").addClass("collapse info-collapse").attr("id", id).appendTo(moreInfoCtn);
-            var infoList = $("<ol>").appendTo(infoCtn);
+            var infoList = $("<samp>").appendTo(infoCtn);
             Object.keys(action.info).forEach(key => {
                 var value = action.info[key];
                 if(typeof value !== 'object') {
-                    var thisRow = $("<li>").appendTo(infoList);
-                    $("<code>").text(key).appendTo(thisRow);
-                    $("<span>").text(`: ${value}`).appendTo(thisRow);
+                    $("<strong>").text(key + ":").appendTo(infoList);
+                    $("<span>").html(` ${value}<br>`).appendTo(infoList);
                 }
             })
             var seeMoreLink = $("<a>").attr("role", "button").addClass("see-more-toggle").attr("data-toggle", "collapse").attr("href", `#${id}`).attr("aria-expanded", "false").attr("aria-controls", id).text("See more").appendTo(moreInfoCtn);
