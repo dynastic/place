@@ -92,8 +92,8 @@ var actions = {
         isPrivileged: true
     },
     reloadConfig: {
-        displayName: "Reload site config",
-        inlineDisplayName: "Reloaded site config",
+        displayName: "Reload site configuration",
+        inlineDisplayName: "Reloaded site configuration",
         category: "administrative",
         isPrivileged: true
     },
