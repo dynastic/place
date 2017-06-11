@@ -69,6 +69,13 @@ var actions = {
         requiresModerator: true,
         isPrivileged: true
     },
+    updateNotes: {
+        displayName: "Update user notes",
+        inlineDisplayName: "Updated user notes",
+        category: "moderation",
+        requiresModerator: true,
+        isPrivileged: true
+    },
     // Administrative actions
     giveModerator: {
         displayName: "Give moderator",
