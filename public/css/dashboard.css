@@ -235,6 +235,11 @@ table.filters {
 
 .action > p.text {
   margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.action samp {
+  font-size: 13px;
 }
 
 .action > time {
