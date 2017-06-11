@@ -26,19 +26,6 @@
             </div>
         </div>
         <% if(user && (user.moderator || user.admin)) { %><div id="mod-user-action-ctn"></div><% } %>
-        <div class="user-info">
-            <div class="field">
-                <span class="title">Total tiles placed</span>
-                <span class="value" id="pixel-data-user-tile-count"></span>
-            </div>
-            <div class="field">
-                <span class="title">Account created</span>
-                <time class="value timeago" id="pixel-data-user-account-date"></time>
-            </div>
-            <div class="field">
-                <span class="title">Last placed</span>
-                <span class="value timeago" id="pixel-data-user-last-place"></span>
-            </div>
-        </div>
+        <div class="user-info"></div>
     </div>
 </div>

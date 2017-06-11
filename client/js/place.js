@@ -837,6 +837,18 @@ var place = {
     },
 
     canvasClicked: function(x, y, event) {
+        function getUserInfoTableItem(title, value, valueTag = "span") {
+            var ctn = $("<div>").addClass("field");
+            $("<span>").addClass("title").text(title).appendTo(ctn);
+            $(`<${valueTag}>`).addClass("value").text(value).appendTo(ctn);
+            return ctn;
+        }
+        function getUserInfoDateTableItem(title, date) {
+            var ctn = getUserInfoTableItem(title, $.timeago(date), "time");
+            ctn.find(".value").attr("datetime", date).attr("title", new Date(date).toLocaleString());
+            return ctn;
+        }
+
         $(this.pixelDataPopover).hide();
         function failToPost(error) {
             let defaultError = "An error occurred while trying to place your pixel.";
@@ -868,14 +880,11 @@ var place = {
                 popover.find("#pixel-data-x").text(x.toLocaleString());
                 popover.find("#pixel-data-y").text(y.toLocaleString());
                 if(hasUser) {
-                    popover.find(".user-info").show();
-                    popover.find("#pixel-data-user-tile-count").text(data.pixel.user.statistics.totalPlaces.toLocaleString());
-                    popover.find("#pixel-data-user-account-date").text($.timeago(data.pixel.user.creationDate));
-                    popover.find("#pixel-data-user-account-date").attr("datetime", data.pixel.user.creationDate);
-                    popover.find("#pixel-data-user-account-date").attr("title", new Date(data.pixel.user.creationDate).toLocaleString());
-                    popover.find("#pixel-data-user-last-place").text($.timeago(data.pixel.user.statistics.lastPlace));
-                    popover.find("#pixel-data-user-last-place").attr("datetime", data.pixel.user.statistics.lastPlace);
-                    popover.find("#pixel-data-user-last-place").attr("title", new Date(data.pixel.user.statistics.lastPlace).toLocaleString());
+                    var userInfoCtn = popover.find(".user-info");
+                    userInfoCtn.show();
+                    getUserInfoTableItem("Total tiles placed", data.pixel.user.statistics.totalPlaces.toLocaleString()).appendTo(userInfoCtn);
+                    getUserInfoDateTableItem("Account created", data.pixel.user.creationDate).appendTo(userInfoCtn);
+                    getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
                     popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.user.id}`);
                     if (data.pixel.user.admin) popover.find("#pixel-badge").show().text("Admin");
                     else if (data.pixel.user.moderator) popover.find("#pixel-badge").show().text("Moderator");
