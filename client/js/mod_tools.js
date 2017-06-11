@@ -202,8 +202,8 @@ function getRowForAction(action) {
     return row;
 }
 
-function fetchActions(lastID, modOnly, limit, callback) {
-    $.get("/api/mod/actions", {lastID: lastID, limit: limit, modOnly: modOnly}).done(function(data) {
+function fetchActions(lastID, modOnly, limit, firstID, callback) {
+    $.get("/api/mod/actions", {lastID: lastID, firstID: firstID, limit: limit, modOnly: modOnly}).done(function(data) {
         if(!data.success || !data.actions || !data.actionTemplates) return callback(null);
         actionTemplates = data.actionTemplates;
         callback(data.actions, data.lastID);
@@ -221,7 +221,7 @@ function addToContainerForResponse(container, data, lastID, modOnly, limit, allo
             if(!loading) {
                 loading = true;
                 btn.html("<i class=\"fa fa-spin fa-circle-o-notch\"></i> Loading…").addClass("disabled");
-                fetchActions(lastID, modOnly, limit, function(data, lastID) {
+                fetchActions(lastID, modOnly, limit, null, function(data, lastID) {
                     if(!data) {
                         loading = false;
                         return alert("Couldn't load more actions.")
@@ -236,9 +236,16 @@ function addToContainerForResponse(container, data, lastID, modOnly, limit, allo
 
 function loadRecentActionsIntoContainer(container, limit = null, modOnly = false, allowsShowMore = true) {
     container.html("<i class=\"fa fa-spin fa-circle-o-notch\"></i> Loading…");
-    fetchActions(null, modOnly, limit, function(data, lastID) { 
+    fetchActions(null, modOnly, limit, null, function(data, lastID) { 
         if(!data) return $(container).text("Couldn't load mod actions");
         container.html("");
         addToContainerForResponse(container, data, lastID, modOnly, limit, allowsShowMore);
+        var refreshFirstID = data.length > 0 ? data[0].id : null;
+        setInterval(function() {
+            fetchActions(null, modOnly, limit, refreshFirstID, function(data, lastID) {
+                if(data.length > 0) refreshFirstID = data[0].id;
+                data.reverse().forEach(action => getRowForAction(action).prependTo(container));
+            });
+        }, 1000)
     });
 }
