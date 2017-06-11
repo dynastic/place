@@ -71,7 +71,7 @@ var actions = {
     },
     updateNotes: {
         displayName: "Update user notes",
-        inlineDisplayName: "Updated user notes",
+        inlineDisplayName: "Updated user notes for",
         category: "moderation",
         requiresModerator: true,
         isPrivileged: true
