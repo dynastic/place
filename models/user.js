@@ -114,6 +114,7 @@ UserSchema.methods.toInfo = function(app = null) {
         deactivated: this.deactivated
     }
     if(app) info.statistics.placesThisWeek = app.leaderboardManager.pixelCounts[this._id];
+    if(typeof info.statistics.placesThisWeek === 'undefined') info.statistics.placesThisWeek = null;
     return info;
 }
 
