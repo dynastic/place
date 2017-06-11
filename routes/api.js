@@ -44,7 +44,7 @@ function APIRouter(app) {
         passport.authenticate('local', { session: false }, function(err, user, info) {
             if (!user) return res.status(500).json({ success: false, error: info.error || { message: "An unknown error occurred." } });
             let token = jwt.encode(user, config.secret);
-            res.json({ success: true, token: `JWT ${token}`, user: user.toInfo() }); // create and return jwt token here
+            res.json({ success: true, token: `JWT ${token}`, user: user.toInfo(app) }); // create and return jwt token here
         })(req, res, next);
     });
 
@@ -76,7 +76,7 @@ function APIRouter(app) {
     });
 
     router.get('/session', requireUser, function(req, res, next) {
-        res.json({ success: true, user: req.user.toInfo() });
+        res.json({ success: true, user: req.user.toInfo(app) });
     });
 
     router.get('/board-image', function(req, res, next) {
@@ -137,7 +137,7 @@ function APIRouter(app) {
         var overrideDataAccess = req.user && (req.user.moderator || req.user.admin);
         Pixel.find({xPos: req.query.x, yPos: req.query.y}).then(pixels => {
             if (pixels.length <= 0) return res.json({ success: true, pixel: null });
-            pixels[0].getInfo(overrideDataAccess).then(info => {
+            pixels[0].getInfo(overrideDataAccess, app).then(info => {
                 res.json({ success: true, pixel: info })
             }).catch(err => fail(err));
         }).catch(err => fail(err));
@@ -154,10 +154,13 @@ function APIRouter(app) {
     });
 
     router.get('/leaderboard', function(req, res, next) {
-         app.leaderboardManager.getInfo((err, leaderboard) => {
-             if(err || !leaderboard) return res.status(500).json({ success: false });
-             res.json({ success: true, leaderboard: leaderboard });
-         })
+        app.leaderboardManager.getInfo((err, leaderboard) => {
+            if(err || !leaderboard) {
+                app.reportError("Error fetching leaderboard: " + (err || "Returned null"))     
+                return res.status(500).json({ success: false });
+            }
+            res.json({ success: true, leaderboard: leaderboard });
+        })
     });
 
     const chatRatelimit = new Ratelimit(require('../util/RatelimitStore')("Chat"), {
@@ -324,9 +327,9 @@ function APIRouter(app) {
         User.findById(req.params.userID).then(user => {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
             user.findSimilarIPUsers().then(users => {
-                var identifiedAccounts = users.map(user => { return { user: user.toInfo(), reasons: ["ip"] } });
+                var identifiedAccounts = users.map(user => { return { user: user.toInfo(app), reasons: ["ip"] } });
                 function respondIdentifiedAccounts() {
-                    res.json({ success: true, target: user.toInfo(), identifiedAccounts: identifiedAccounts })
+                    res.json({ success: true, target: user.toInfo(app), identifiedAccounts: identifiedAccounts })
                 }
                 if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
                     const legit = require('../util/legit');
@@ -337,7 +340,7 @@ function APIRouter(app) {
                             if(currentUsernames.includes(user.name)) {
                                 var i = currentUsernames.indexOf(user.name);
                                 identifiedAccounts[i].reasons.push(reason);
-                            } else identifiedAccounts.push({ user: user.toInfo(), reasons: [reason] });
+                            } else identifiedAccounts.push({ user: user.toInfo(app), reasons: [reason] });
                         });
                         respondIdentifiedAccounts();
                     }).catch(err => respondIdentifiedAccounts());

@@ -837,6 +837,18 @@ var place = {
     },
 
     canvasClicked: function(x, y, event) {
+        function getUserInfoTableItem(title, value, valueTag = "span") {
+            var ctn = $("<div>").addClass("field");
+            $("<span>").addClass("title").text(title).appendTo(ctn);
+            $(`<${valueTag}>`).addClass("value").text(value).appendTo(ctn);
+            return ctn;
+        }
+        function getUserInfoDateTableItem(title, date) {
+            var ctn = getUserInfoTableItem(title, $.timeago(date), "time");
+            ctn.find(".value").attr("datetime", date).attr("title", new Date(date).toLocaleString());
+            return ctn;
+        }
+
         $(this.pixelDataPopover).hide();
         function failToPost(error) {
             let defaultError = "An error occurred while trying to place your pixel.";
@@ -868,15 +880,20 @@ var place = {
                 popover.find("#pixel-data-x").text(x.toLocaleString());
                 popover.find("#pixel-data-y").text(y.toLocaleString());
                 if(hasUser) {
-                    popover.find(".user-info").show();
-                    popover.find("#pixel-data-user-tile-count").text(data.pixel.user.statistics.totalPlaces.toLocaleString());
-                    popover.find("#pixel-data-user-account-date").text($.timeago(data.pixel.user.creationDate));
-                    popover.find("#pixel-data-user-account-date").attr("datetime", data.pixel.user.creationDate);
-                    popover.find("#pixel-data-user-account-date").attr("title", new Date(data.pixel.user.creationDate).toLocaleString());
-                    popover.find("#pixel-data-user-last-place").text($.timeago(data.pixel.user.statistics.lastPlace));
-                    popover.find("#pixel-data-user-last-place").attr("datetime", data.pixel.user.statistics.lastPlace);
-                    popover.find("#pixel-data-user-last-place").attr("title", new Date(data.pixel.user.statistics.lastPlace).toLocaleString());
+                    var userInfoCtn = popover.find(".user-info");
+                    userInfoCtn.show();
+                    userInfoCtn.find(".field").remove();
+                    getUserInfoTableItem("Total pixels placed", data.pixel.user.statistics.totalPlaces.toLocaleString()).appendTo(userInfoCtn);
+                    if(data.pixel.user.statistics.placesThisWeek !== null) getUserInfoTableItem("Pixels this week", data.pixel.user.statistics.placesThisWeek.toLocaleString()).appendTo(userInfoCtn);
+                    getUserInfoDateTableItem("Account created", data.pixel.user.creationDate).appendTo(userInfoCtn);
+                    getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
                     popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.user.id}`);
+                    var rank = data.pixel.user.statistics.leaderboardRank;
+                    if(rank !== null) {
+                        popover.find(".rank-container").show();
+                        popover.find(".rank-label").removeClass("label-info label-success").addClass(rank <= 25 ? "label-success" : "label-info").text(`Ranked #${rank.toLocaleString()}`);
+                        
+                    } else popover.find(".rank-container").hide();
                     if (data.pixel.user.admin) popover.find("#pixel-badge").show().text("Admin");
                     else if (data.pixel.user.moderator) popover.find("#pixel-badge").show().text("Moderator");
                     else popover.find("#pixel-badge").hide();
@@ -1112,7 +1129,7 @@ var place = {
         $("<a>").addClass("name").attr("href", `/@${this.leaderboard[0].username}`).text(this.leaderboard[0].username).appendTo(userInfo);
         $("<span>").addClass("pixel-label").text("Pixels placed").appendTo(userInfo);
         var subdetails = $("<div>").addClass("subdetails row-fluid clearfix").appendTo(userInfo);
-        getStatElement("This week", this.leaderboard[0].leaderboardCount.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
+        getStatElement("This week", this.leaderboard[0].statistics.placesThisWeek.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
         getStatElement("Total", this.leaderboard[0].statistics.totalPlaces.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
         if(this.leaderboard.length > 1) {
             var table = $(`<table class="table"></table>`).appendTo(tab);
@@ -1122,7 +1139,7 @@ var place = {
                     $("<td>").addClass("bold").text(`${index + 1}.`).appendTo(row);
                     $("<a>").text(item.username).attr("href", `/@${item.username}`).appendTo($("<td>").appendTo(row));
                     var info1 = $("<td>").addClass("stat").appendTo(row);
-                    $("<span>").text(item.leaderboardCount.toLocaleString()).appendTo(info1);
+                    $("<span>").text(item.statistics.placesThisWeek.toLocaleString()).appendTo(info1);
                     $("<span>").text("This week").addClass("row-label").appendTo(info1);
                     var info2 = $("<td>").addClass("stat").appendTo(row);
                     $("<span>").text(item.statistics.totalPlaces.toLocaleString()).appendTo(info2);

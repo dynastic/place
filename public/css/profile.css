@@ -147,6 +147,11 @@ body {
   overflow: hidden;
 }
 
+.profile-info .user-info > .subdetails > div {
+  display: inline-block;
+  width: auto;
+}
+
 @media(min-width: 800px) {
   .profile-info .user-header-info {
     display: flex;

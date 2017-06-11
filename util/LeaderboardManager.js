@@ -21,8 +21,8 @@ function LeaderboardManager(app) {
                 pixelCounts[uid]++;
             }).on("close", () => {
                 this.pixelCounts = pixelCounts;
-                // Get top users from pixel count, put them in sortable array, sort from greatest to least, cut down to 25, then just extract user ID
-                this.topUsers = Object.keys(pixelCounts).map(userID => [userID, pixelCounts[userID]]).sort((a, b) => b[1] - a[1]).slice(0, 25).map(a => a[0]);
+                // Get top users from pixel count, put them in sortable array, sort from greatest to least, then just extract user ID
+                this.topUsers = Object.keys(pixelCounts).map(userID => [userID, pixelCounts[userID]]).sort((a, b) => b[1] - a[1]).map(a => a[0]);
                 this.isUpdating = false;
                 // Finish all waiting for leaderboard
                 this.waitingForUpdate.forEach(callback => this.getInfo(callback));
@@ -39,16 +39,17 @@ function LeaderboardManager(app) {
             if(this.isUpdating) return this.waitingForUpdate.push(callback);
             if(!this.topUsers || !this.pixelCounts) return callback("No leaderboard data loaded", null);
             User.find({_id: { $in: this.topUsers }}).then(users => {
-                callback(null, users.filter(u => !u.banned && !u.deactivated).sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map(u => {
-                    var info = u.toInfo();
-                    info.leaderboardCount = this.pixelCounts[u._id];
-                    return info;
-                }))
+                callback(null, users.filter(u => !u.banned && !u.deactivated).sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map(u => u.toInfo(app)))
             }).catch(err => callback(err, null));
+        },
+
+        getUserRank: function(userID) {
+            var index = this.topUsers.indexOf(userID);
+            return index >= 0 ? index + 1 : null;
         }
     }
     manager.update()
-    setInterval(manager.update, 1000 * 60 * 3); // Update the leaderboard every 15 minutes
+    setInterval(manager.update, 1000 * 60 * 3); // Update the leaderboard every 3 minutes
     return manager;
 }
 

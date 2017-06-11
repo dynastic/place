@@ -5,6 +5,7 @@ place.paw
 public/js/build
 public/css/build
 util/legit.js
+util/legit.*.js
 views/legit.html
 config/community_guidelines.md
 

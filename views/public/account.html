@@ -22,6 +22,13 @@ var isSelf = user ? user.id == profileUser.id : false;
     <div class="user-info">
       <span class="username"><%= profileUser.name %> <%- profileUser.admin || profileUser.moderator ? `<span class="label label-warning badge-label">${profileUser.admin ? "Admin" : "Moderator"}</span>` : "" %></span>
       <div class="subdetails">
+        <% var rank = profileUserInfo.statistics.leaderboardRank;
+        if(rank !== null) {%>
+          <div>
+            <span class="value">#<%= profileUserInfo.statistics.leaderboardRank.toLocaleString() -%></span>
+            <span class="name">Global rank</span>
+          </div>
+        <% } %>
         <div>
           <span class="value"><%= profileUser.placeCount.toLocaleString() -%></span>
           <span class="name">pixel<%= profileUser.placeCount == 1 ? "" : "s" -%> placed</span>
@@ -39,7 +46,7 @@ var isSelf = user ? user.id == profileUser.id : false;
     <p>
       <strong>Joined</strong> <time class="timeago" datetime="<%= profileUser.creationDate.toISOString() %>" title="<%= profileUser.creationDate.toLocaleString() %>"><%= profileUser.creationDate.toLocaleString() %></time>.</p>
     <% if(profileUser.lastPlace) { %><p>
-      <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(isLatestPixel && pixel) { %> at (<%= `${pixel.xPos.toLocaleString()}, ${pixel.yPos.toLocaleString()}` %>)<% } %>.
+      <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(isLatestPixel && pixel) { %> at <a href="<%= `/#x=${pixel.xPos.toLocaleString()}&y=${pixel.yPos.toLocaleString()}` %>">(<%= `${pixel.xPos.toLocaleString()}, ${pixel.yPos.toLocaleString()}` %>)</a><% } %>.
      </p><% } %>
   </div>
   <% if(isSelf) { %>
