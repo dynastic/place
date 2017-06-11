@@ -69,6 +69,13 @@ var actions = {
         requiresModerator: true,
         isPrivileged: true
     },
+    updateNotes: {
+        displayName: "Update user notes",
+        inlineDisplayName: "Updated user notes for",
+        category: "moderation",
+        requiresModerator: true,
+        isPrivileged: true
+    },
     // Administrative actions
     giveModerator: {
         displayName: "Give moderator",
@@ -85,8 +92,8 @@ var actions = {
         isPrivileged: true
     },
     reloadConfig: {
-        displayName: "Reload site config",
-        inlineDisplayName: "Reloaded site config",
+        displayName: "Reload site configuration",
+        inlineDisplayName: "Reloaded site configuration",
         category: "administrative",
         isPrivileged: true
     },

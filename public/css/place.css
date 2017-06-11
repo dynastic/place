@@ -741,8 +741,12 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     font-size: 12px;
     margin-bottom: 5px;
     margin-left: 2px;
-    display: block;
+    display: inline-block;
     text-decoration: none!important;
+}
+
+.chat .username-ctn, .chat .chat-coordinates {
+    display: block;
 }
 
 .chat .chat-coordinates {

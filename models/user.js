@@ -73,6 +73,11 @@ var UserSchema = new Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+    userNotes: {
+        type: String,
+        required: false,
+        default: ""
     }
 });
 

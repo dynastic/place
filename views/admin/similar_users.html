@@ -16,5 +16,6 @@
 </div>
 <script>var userID = "<%- target._id -%>";</script>
 <%- include('../admin_footer.html', {
-    js: ["/js/jquery.timeago.js", "/js/build/admin_similar_users.js"]
+    js: ["/js/jquery.timeago.js", "/js/build/admin_similar_users.js"],
+    jsSnippets: [`var defaultBanReason = "Alternate account of ${target.name}";`]
 }) -%>

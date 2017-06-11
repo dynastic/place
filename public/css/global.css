@@ -94,3 +94,24 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
   pointer-events: all;
   margin-bottom: 5px;
 }
+
+.action-btn {
+  margin-right: 3px;
+  margin-top: 3px;
+}
+.action-btn:last-child {
+  margin-right: 0;
+}
+
+.dropdown-inline {
+  display: inline-block;
+  margin-left: -3px;
+  margin-right: 1px;
+  color: #555;
+}
+
+.dropdown-inline a.dropdown-toggle {
+  padding: 5px;
+  margin-left: -3px;
+  margin-right: -5px;
+}

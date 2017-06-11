@@ -287,7 +287,7 @@ function APIRouter(app) {
             user.moderator = !user.moderator;
             user.save().then(user => {
                 ActionLogger.log(user.moderator ? "giveModerator" : "removeModerator", user, req.user);
-                res.json({success: true, moderator: user.moderator})
+                res.json({success: true, user: user.toInfo()})
             }).catch(err => {
                 app.reportError("Error trying to save moderator status on user.");
                 res.status(500).json({success: false});
@@ -305,10 +305,16 @@ function APIRouter(app) {
         if(req.query.id == req.user.id) return res.status(400).json({success: false, error: {message: "You may not ban yourself.", code: "cant_modify_self"}});
         User.findById(req.query.id).then(user => {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
+            var info = null;
+            if(!user.banned) {
+                // We're trying to ban the user
+                if(!req.query.reason || req.query.reason.length <= 3) return res.status(400).json({success: false, error: {message: "Make sure you have specified a ban reason that is over three characters in length.", code: "invalid_reason"}});
+                info = {reason: req.query.reason};
+            }
             user.banned = !user.banned;
             user.save().then(user => {
-                ActionLogger.log(user.banned ? "ban" : "unban", user, req.user);
-                res.json({success: true, banned: user.banned})
+                ActionLogger.log(user.banned ? "ban" : "unban", user, req.user, info);
+                res.json({success: true, user: user.toInfo()})
             }).catch(err => {
                 app.reportError("Error trying to save banned status on user.");
                 res.status(500).json({success: false})
@@ -326,13 +332,40 @@ function APIRouter(app) {
             user.deactivated = !user.deactivated;
             user.save().then(user => {
                 ActionLogger.log(user.deactivated ? "deactivateOther" : "activateOther", user, req.user);
-                res.json({success: true, deactivated: user.deactivated})
+                res.json({success: true, user: user.toInfo()})
             }).catch(err => {
                 app.reportError("Error trying to save activation status on user.");
                 res.status(500).json({success: false})
             });
         }).catch(err => {
             app.reportError("Error trying to get user to set activation status on.");
+            res.status(500).json({success: false});
+        });
+    });
+
+    router.get("/mod/user_notes", app.modMiddleware, function(req, res, next) {
+        if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
+        User.findById(req.query.id, {userNotes: 1}).then(user => {
+            res.json({success: true, userNotes: user.userNotes || ""})
+        }).catch(err => {
+            app.reportError("Error trying to get user to retrieve user notes of.");
+            res.status(500).json({success: false});
+        });
+    });
+
+    router.post("/mod/user_notes", app.modMiddleware, function(req, res, next) {
+        if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
+        User.findById(req.query.id).then(user => {
+            user.userNotes = req.body.notes;
+            user.save().then(user => {
+                ActionLogger.log("updateNotes", user, req.user);
+                res.json({success: true, user: user.toInfo()})
+            }).catch(err => {
+                app.reportError("Error trying to save user notes.");
+                res.status(500).json({success: false})
+            });
+        }).catch(err => {
+            app.reportError("Error trying to get user to set user notes on.");
             res.status(500).json({success: false});
         });
     });

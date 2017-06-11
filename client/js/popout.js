@@ -22,7 +22,8 @@ function PopoutVisibilityController(popoutContainer) {
                 if($("body").hasClass("is-popped-out")) {
                     window.close();
                 } else {
-                    var w = window.open("/popout", "Place_Popout", "directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=350,height=" + window.height);
+                    console.log(p.activeTab);
+                    var w = window.open("/popout#" + p.activeTab, "Place_Popout", "directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=350,height=" + window.height);
                     if (window.focus) {w.focus()}
                     $("body").addClass("popped-out");
                     if(p.visibilityChangeCallback) p.visibilityChangeCallback();
@@ -40,6 +41,7 @@ function PopoutVisibilityController(popoutContainer) {
 
         changeTab: function(name) {
             var p = this;
+            p.activeTab = name;
             $(this.popoutContainer).find(".tab-content.active, .tab.active").removeClass("active");
             $(this.popoutContainer).find(`.tab-content[data-tab-name=${name}], .tab[data-tab-name=${name}]`).addClass("active").each(function() {
                 if($(this).data("tab-title")) {
@@ -48,6 +50,9 @@ function PopoutVisibilityController(popoutContainer) {
                 }
             });
             if(this.tabChangeCallback) this.tabChangeCallback(name);
+            if($("body").hasClass("is-popped-out")) {
+                window.location.hash = "#" + name;
+            }
         },
 
         _adjustTitle: function(title) {
@@ -124,7 +129,8 @@ var popoutController = {
             app.sendChatMessage();
         })
         $("#chat-input-field").focus(function() {
-            app.scrollToChatBottom();
+            if(!app.ignoreChatFocus) app.scrollToChatBottom();
+            app.ignoreChatFocus = false;
         })
         $("#chat-input-field").keydown(function(e) {
             if((e.keyCode || e.which) != 13) return;
@@ -143,7 +149,7 @@ var popoutController = {
         });
     },
 
-    layoutMessages: function() {
+    layoutMessages: function(alwaysScrollToBottom = true) {
         function getFancyDate(date) {
             var now = new Date();
             var almostSameDate = now.getMonth() == date.getMonth() && now.getFullYear() == date.getFullYear();
@@ -151,7 +157,9 @@ var popoutController = {
             var isYesterday = !isToday && now.getDate() == date.getDate() - 1;
             return `${isToday ? "Today" : (isYesterday ? "Yesterday" : date.toLocaleDateString())}, ${date.toLocaleTimeString()}`
         }
-
+        var prevHeight = null;
+        if(!alwaysScrollToBottom) prevHeight = $("#chat-messages")[0].scrollHeight;
+        var oldScrollTop = $("#chat-messages").scrollTop();
         $("#chat-messages > *").remove();
         var sinceLastTimestamp = 0;
         const maxMessageBlock = 10;
@@ -177,13 +185,16 @@ var popoutController = {
             if(!needsTimestamp) sinceLastTimestamp++;
             if(needsTimestamp) $(`<div class="timestamp"></div>`).text(getFancyDate(new Date(item.date))).appendTo("#chat-messages");
             var ctn = $(`<div class="message-ctn"><div class="clearfix"><div class="message"></div></div></div>`).addClass(outgoing ? "outgoing" : "incoming");
-            var usernameHTML = $(`<a class="username"><span></span></a>`);
+            var usernameHTML = $("<div class=\"username-ctn\"><a class=\"username\"><span></span></a></div>");
             usernameHTML.find("span").text(hasUser ? item.user.username : this.place.getUserStateText(item.userError))
+            if(item.user && typeof renderUserActionsDropdown === "function") {
+                $(renderUserActionsDropdown(item.user)).appendTo(usernameHTML);
+            }
             if(hasUser) {
-                usernameHTML.attr("href", `/@${item.user.username}`);
-                if(item.user.banned || item.user.deactivated) $(`<span class="label label-danger badge-label"></span>`).text(item.user.banned ? "Banned" : "Deactivated").appendTo(usernameHTML);
-                if(item.user.moderator || item.user.admin) $(`<span class="label label-warning badge-label"></span>`).text(item.user.admin ? "Admin" : "Moderator").prependTo(usernameHTML);
-            } else usernameHTML.addClass("deleted-account");
+                usernameHTML.find("a.username").attr("href", `/@${item.user.username}`);
+                if(item.user.banned || item.user.deactivated) $(`<span class="label label-danger badge-label"></span>`).text(item.user.banned ? "Banned" : "Deactivated").appendTo(usernameHTML.find("a.username"));
+                if(item.user.moderator || item.user.admin) $(`<span class="label label-warning badge-label"></span>`).text(item.user.admin ? "Admin" : "Moderator").prependTo(usernameHTML.find("a.username"));
+            } else usernameHTML.find("a.username").addClass("deleted-account");
             if(needsUsername) usernameHTML.prependTo(ctn);
             ctn.find(".message").text(item.text).attr("title", messageDate.toLocaleString());
             if(needsCoordinate) {
@@ -196,18 +207,21 @@ var popoutController = {
             }
             ctn.appendTo("#chat-messages");
         });
-        this.scrollToChatBottom();
+        this.scrollToChatBottom(prevHeight, oldScrollTop);
     },
 
     addChatMessage: function(message) {
         if(this.messages.map(m => m.id).indexOf(message.id) < 0) {
             this.messages.push(message);
-            this.layoutMessages();
+            this.layoutMessages($("body").data("user-id") == message.userID);
         }
     },
 
-    scrollToChatBottom: function() {
-        $("#chat-messages").scrollTop($("#chat-messages")[0].scrollHeight);
+    scrollToChatBottom: function(checkScrollOffset = null, oldScrollTop = null) {
+        var msgs = $("#chat-messages");
+        if(!checkScrollOffset || oldScrollTop + 100 >= checkScrollOffset - msgs.innerHeight()) {
+            msgs.scrollTop(msgs[0].scrollHeight);
+        }
     },
 
     sendChatMessage: function() {
@@ -229,6 +243,7 @@ var popoutController = {
             y: coords.y
         }).done(function(response) {
             if(!response.success) return alert(parseError(response));
+            app.ignoreChatFocus = true;
             input.val("");
             input.focus();
             if(response.message) app.addChatMessage(response.message);
@@ -302,5 +317,17 @@ var popoutController = {
 if($("body").hasClass("is-popped-out")) {
     if(window.opener.place) {
         popoutController.setup(window.opener.place, $("#popout-container")[0]);
+        popoutController.popoutVisibilityController.tabChangeCallback = name => {
+            window.opener.place.popoutController.popoutVisibilityController.changeTab(name);
+        }
+        window.opener.onunload = () => {
+            setTimeout(function() {
+                if(!window.opener || window.opener.closed) window.close();
+            }, 1);
+        }
     }
+
+    $(document).ready(function(e) {
+        if(window.location.hash && window.location.hash != "#") popoutController.popoutVisibilityController.changeTab(window.location.hash.substring(1));
+    })
 }

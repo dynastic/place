@@ -23,10 +23,19 @@ function LeaderboardManager(app) {
                 this.pixelCounts = pixelCounts;
                 // Get top users from pixel count, put them in sortable array, sort from greatest to least, then just extract user ID
                 this.topUsers = Object.keys(pixelCounts).map(userID => [userID, pixelCounts[userID]]).sort((a, b) => b[1] - a[1]).map(a => a[0]);
-                this.isUpdating = false;
-                // Finish all waiting for leaderboard
-                this.waitingForUpdate.forEach(callback => this.getInfo(callback));
-                console.log("Generation of leaderboard data complete.");
+                // Remove banned and deactivated users
+                User.find({_id: { $in: this.topUsers }}, {_id: 1, banned: true, deactivated: true}).then(users => {
+                    this.topUsers = users.filter(u => !u.banned && !u.deactivated).sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map(u => u.id);
+                    this.isUpdating = false;
+                    // Finish all waiting for leaderboard
+                    this.waitingForUpdate.forEach(callback => this.getInfo(callback));
+                    console.log("Generation of leaderboard data complete.");
+                }).catch(err => {
+                    app.reportError("Couldn't update leaderboard: removal operation failed.");
+                    this.topUsers = null;
+                    this.pixelCounts = null;
+                    this.isUpdating = false;                    
+                });
             }).on("error", err => {
                 app.reportError("Couldn't update leaderboard.");
                 this.topUsers = null;
@@ -39,7 +48,7 @@ function LeaderboardManager(app) {
             if(this.isUpdating) return this.waitingForUpdate.push(callback);
             if(!this.topUsers || !this.pixelCounts) return callback("No leaderboard data loaded", null);
             User.find({_id: { $in: this.topUsers }}).then(users => {
-                callback(null, users.filter(u => !u.banned && !u.deactivated).sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map(u => u.toInfo(app)))
+                callback(null, users.sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map(u => u.toInfo(app)))
             }).catch(err => callback(err, null));
         },
 
