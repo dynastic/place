@@ -1,3 +1,4 @@
+var defaultBanReason = "";
 var actionTemplates = null;
 
 var actions = {
@@ -5,11 +6,21 @@ var actions = {
         ban: {
             url: "mod/toggle_ban",
             btnStyle: "danger",
+            getRequestData: function(elem) {
+                if(elem.attr("data-user-banned") === "true") return {};
+                var reason = window.prompt("Enter a reason to ban this user for:", defaultBanReason);
+                if(!reason) return null;
+                if(reason.length <= 3) { window.alert("Your ban reason must be over three characters long."); return null; }
+                return {reason: reason};
+            },
             callback: function(data, elem) {
                 elem.text(`${data.banned ? "Unban" : "Ban"}`);
             },
             buttonText: function(data) {
                 return data.banned ? "Unban" : "Ban";
+            },
+            getAttributes: function(data) {
+                return {"data-user-banned": data.banned};
             }
         },
         activation: {
@@ -59,7 +70,9 @@ var actions = {
 }
 var renderAction = function(actionName, data = {}, type = "user") {
     var action = actions[type][actionName];
-    return `<a href="javascript:void(0)" class="btn btn-${action.btnStyle} ${type}-action-btn" data-admin-only=${action.adminOnly === true} data-${type}-action="${actionName}">${action.buttonText(data)}</a>`;
+    var btn = $("<a>").attr("href", "javascript:void(0)").addClass(`btn btn-${action.btnStyle} ${type}-action-btn`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName).text(action.buttonText(data));
+    if(typeof action.getAttributes === "function") btn.attr(action.getAttributes(data));
+    return btn[0].outerHTML;
 }
 
 var renderUserActions = function(user) {
@@ -93,13 +106,18 @@ $("body").on("click", ".user-action-btn", function() {
     }
     var userID = $(this).parent().data("user-id");
     var action = actions.user[$(this).data("user-action")];
+    var data = {};
+    if(typeof action.getRequestData === "function") data = action.getRequestData($(this));
+    if(!data) return;
+    data.id = userID;
     var originalText = $(this).html();
     $(this).addClass("disabled");
     $(this).html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
     var elem = $(this);
-    $.get(`/api/${action.url}/`, {id: userID}).done(function(data) {
+    $.get(`/api/${action.url}/`, data).done(function(data) {
         if(!data.success) return handleError(data);
         action.callback(data, elem);
+        if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
     }).fail(function(res) {
         handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON);
         if(action.callbackModifiesText !== false) elem.html(originalText);
@@ -117,13 +135,17 @@ $("body").on("click", ".server-action-btn", function() {
         alert("Couldn't perform action: " + error);
     }
     var action = actions.server[$(this).data("server-action")];
+    var data = {};
+    if(typeof action.getRequestData === "function") data = action.getRequestData($(this));
+    if(!data) return;
     var originalText = $(this).html();
     $(this).addClass("disabled");
     $(this).html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
     var elem = $(this);
-    $.get(`/api/${action.url}/`).done(function(data) {
+    $.get(`/api/${action.url}/`, data).done(function(data) {
         if(!data.success) return handleError(data);
         action.callback(data, elem);
+        if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
     }).fail(function(res) {
         handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON);
         if(action.callbackModifiesText !== false) elem.html(originalText);

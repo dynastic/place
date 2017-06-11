@@ -305,9 +305,15 @@ function APIRouter(app) {
         if(req.query.id == req.user.id) return res.status(400).json({success: false, error: {message: "You may not ban yourself.", code: "cant_modify_self"}});
         User.findById(req.query.id).then(user => {
             if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
+            var info = null;
+            if(!user.banned) {
+                // We're trying to ban the user
+                if(!req.query.reason || req.query.reason.length <= 3) return res.status(400).json({success: false, error: {message: "Make sure you have specified a ban reason that is over three characters in length.", code: "invalid_reason"}});
+                info = {reason: req.query.reason};
+            }
             user.banned = !user.banned;
             user.save().then(user => {
-                ActionLogger.log(user.banned ? "ban" : "unban", user, req.user);
+                ActionLogger.log(user.banned ? "ban" : "unban", user, req.user, info);
                 res.json({success: true, banned: user.banned})
             }).catch(err => {
                 app.reportError("Error trying to save banned status on user.");
