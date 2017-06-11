@@ -317,6 +317,11 @@ if($("body").hasClass("is-popped-out")) {
         popoutController.popoutVisibilityController.tabChangeCallback = name => {
             window.opener.place.popoutController.popoutVisibilityController.changeTab(name);
         }
+        window.opener.onunload = () => {
+            setTimeout(function() {
+                if(!window.opener || window.opener.closed) window.close();
+            }, 1);
+        }
     }
 
     $(document).ready(function(e) {
