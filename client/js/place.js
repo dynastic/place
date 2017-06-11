@@ -280,6 +280,9 @@ var place = {
 
         this.setupChat();
         this.loadLeaderboard();
+        setInterval(function() {
+            app.loadLeaderboard();
+        }, 30000);
         this.updateAuthLinks();
     },
 
