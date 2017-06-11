@@ -99,8 +99,8 @@ UserSchema.methods.comparePassword = function(passwd, cb) {
     });
 }
 
-UserSchema.methods.toInfo = function() {
-    return {
+UserSchema.methods.toInfo = function(app = null) {
+    var info = {
         id: this.id,
         username: this.name,
         creationDate: this.creationDate,
@@ -113,6 +113,8 @@ UserSchema.methods.toInfo = function() {
         banned: this.banned,
         deactivated: this.deactivated
     }
+    if(app) info.statistics.placesThisWeek = app.leaderboardManager.pixelCounts[this._id];
+    return info;
 }
 
 UserSchema.methods.loginError = function() {
@@ -256,13 +258,13 @@ UserSchema.methods.getUsernameInitials = function() {
     return getInitials(this.name);
 }
 
-UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false) {
+UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false, app = null) {
     return new Promise((resolve, reject) => {
         var info = {};
         this.findById(userID).then(user => {
             if(!overrideDataAccess && user.banned) info.userError = "ban";
             else if(!overrideDataAccess && user.deactivated) info.userError = "deactivated";
-            else info.user = user.toInfo();
+            else info.user = user.toInfo(app);
             resolve(info);
         }).catch(err => {
             info.userError = "delete";

@@ -1112,7 +1112,7 @@ var place = {
         $("<a>").addClass("name").attr("href", `/@${this.leaderboard[0].username}`).text(this.leaderboard[0].username).appendTo(userInfo);
         $("<span>").addClass("pixel-label").text("Pixels placed").appendTo(userInfo);
         var subdetails = $("<div>").addClass("subdetails row-fluid clearfix").appendTo(userInfo);
-        getStatElement("This week", this.leaderboard[0].leaderboardCount.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
+        getStatElement("This week", this.leaderboard[0].statistics.placesThisWeek.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
         getStatElement("Total", this.leaderboard[0].statistics.totalPlaces.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
         if(this.leaderboard.length > 1) {
             var table = $(`<table class="table"></table>`).appendTo(tab);
@@ -1122,7 +1122,7 @@ var place = {
                     $("<td>").addClass("bold").text(`${index + 1}.`).appendTo(row);
                     $("<a>").text(item.username).attr("href", `/@${item.username}`).appendTo($("<td>").appendTo(row));
                     var info1 = $("<td>").addClass("stat").appendTo(row);
-                    $("<span>").text(item.leaderboardCount.toLocaleString()).appendTo(info1);
+                    $("<span>").text(item.statistics.placesThisWeek.toLocaleString()).appendTo(info1);
                     $("<span>").text("This week").addClass("row-label").appendTo(info1);
                     var info2 = $("<td>").addClass("stat").appendTo(row);
                     $("<span>").text(item.statistics.totalPlaces.toLocaleString()).appendTo(info2);

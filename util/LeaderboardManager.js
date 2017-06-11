@@ -39,16 +39,12 @@ function LeaderboardManager(app) {
             if(this.isUpdating) return this.waitingForUpdate.push(callback);
             if(!this.topUsers || !this.pixelCounts) return callback("No leaderboard data loaded", null);
             User.find({_id: { $in: this.topUsers }}).then(users => {
-                callback(null, users.filter(u => !u.banned && !u.deactivated).sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map(u => {
-                    var info = u.toInfo();
-                    info.leaderboardCount = this.pixelCounts[u._id];
-                    return info;
-                }))
+                callback(null, users.filter(u => !u.banned && !u.deactivated).sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map(u => u.toInfo(app)))
             }).catch(err => callback(err, null));
         }
     }
     manager.update()
-    setInterval(manager.update, 1000 * 60 * 3); // Update the leaderboard every 15 minutes
+    setInterval(manager.update, 1000 * 60 * 3); // Update the leaderboard every 3 minutes
     return manager;
 }
 
