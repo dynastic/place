@@ -1,3 +1,5 @@
+var actionTemplates = null;
+
 var actions = {
     user: {
         ban: {
@@ -149,6 +151,7 @@ $("#broadcastForm").submit(function(e) {
 })
 
 function getRowForAction(action) {
+    var actionTemplate = actionTemplates[action.action];
     var randomString = function(length) {
         var text = "";
         var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -164,15 +167,15 @@ function getRowForAction(action) {
     var row = $("<div>").addClass("action").attr("data-action-id", action.id);
     console.log(action);
     var username = "<strong>Deleted user</strong>";
-    var actionTxt = `<span class="action-str" title="${action.action.displayName} - ${action.action.category}">${action.action.inlineDisplayName.toLowerCase()}`;
+    var actionTxt = `<span class="action-str" title="${actionTemplate.displayName} - ${actionTemplate.category}">${actionTemplate.inlineDisplayName.toLowerCase()}`;
     if(action.performingUser) username = `<strong><a href="/@${action.performingUser.username}">${action.performingUser.username}</a></strong>`;
     var moreInfoCtn = null;
     var sentenceEnd = "";
     var otherLines = "";
     if(Object.keys(action.info).length > 0) {
-        if(typeof action.action.sentenceEndTextFormatting !== 'undefined') sentenceEnd = parseActionTemplate(action.action.sentenceEndTextFormatting, action);
-        if(typeof action.action.otherLinesTextFormatting !== 'undefined') otherLines = "<br>" + parseActionTemplate(action.action.otherLinesTextFormatting, action);
-        if(typeof action.action.hideInfo === 'undefined' || !action.action.hideInfo) {
+        if(typeof actionTemplate.sentenceEndTextFormatting !== 'undefined') sentenceEnd = parseActionTemplate(actionTemplate.sentenceEndTextFormatting, action);
+        if(typeof actionTemplate.otherLinesTextFormatting !== 'undefined') otherLines = "<br>" + parseActionTemplate(actionTemplate.otherLinesTextFormatting, action);
+        if(typeof actionTemplate.hideInfo === 'undefined' || !actionTemplate.hideInfo) {
             var moreInfoCtn = $("<div>").addClass("info-collapse-ctn");
             var id = `info-collapse-${randomString(16)}-${action.id}`;
             var infoCtn = $("<div>").addClass("collapse info-collapse").attr("id", id).appendTo(moreInfoCtn);
@@ -190,7 +193,7 @@ function getRowForAction(action) {
         }
     }
     var text = `${username} ${actionTxt}${sentenceEnd}</span>.${otherLines}`;
-    if(typeof action.action.requiresModerator !== 'undefined' && action.action.requiresModerator) {
+    if(typeof actionTemplate.requiresModerator !== 'undefined' && actionTemplate.requiresModerator) {
         var modUsername = "<strong>Deleted moderator</strong>"
         if(action.moderatingUser) modUsername = `<strong><a href="/@${action.moderatingUser.username}">${action.moderatingUser.username}</a></strong>`;
         var text = `${modUsername} ${actionTxt} ${username}${sentenceEnd}</span>.${otherLines}`
@@ -203,7 +206,8 @@ function getRowForAction(action) {
 
 function fetchActions(lastID, modOnly, limit, callback) {
     $.get("/api/mod/actions", {lastID: lastID, limit: limit, modOnly: modOnly}).done(function(data) {
-        if(!data.success || !data.actions) return callback(null);
+        if(!data.success || !data.actions || !data.actionTemplates) return callback(null);
+        actionTemplates = data.actionTemplates;
         callback(data.actions);
     }).fail(function() {
         callback(null);

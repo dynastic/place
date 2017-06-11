@@ -372,7 +372,7 @@ function APIRouter(app) {
             var lastID = null;
             if(actions.length > 1) lastID = actions[actions.length - 1]._id;
             var promises = actions.map(a => a.getInfo());
-            Promise.all(promises).then(actions => res.json({ success: true, actions: actions, lastID: lastID })).catch(err => res.status(500).json({ success: false }))
+            Promise.all(promises).then(actions => res.json({ success: true, actions: actions, lastID: lastID, actionTemplates: ActionLogger.getAllActionInfo() })).catch(err => res.status(500).json({ success: false }))
         }).catch(err => {
             app.reportError("An error occurred while trying to retrieve actions: " + err);
             res.status(500).json({ success: false });
