@@ -157,6 +157,7 @@ function APIRouter(app) {
         app.leaderboardManager.getInfo((err, leaderboard) => {
             if(err || !leaderboard) {
                 if(err) app.reportError("Error fetching leaderboard: " + err);
+                if(res.headersSent) return null;
                 return res.status(500).json({ success: false });
             }
             res.json({ success: true, leaderboard: leaderboard.splice(0, 25) });
