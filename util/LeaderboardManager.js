@@ -58,7 +58,7 @@ function LeaderboardManager(app) {
         }
     }
     manager.update()
-    setInterval(manager.update, 1000 * 60 * 3); // Update the leaderboard every 3 minutes
+    setInterval(() => manager.update(), 1000 * 60 * 3); // Update the leaderboard every 3 minutes
     return manager;
 }
 
