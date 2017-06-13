@@ -9,6 +9,7 @@ function LeaderboardManager(app) {
         isUpdating: true,
 
         update: function() {
+            var m = this;
             if(!this.needsUpdating) return;
             console.log("Starting generation of leaderboard data…");
             this.isUpdating = true;
@@ -20,27 +21,27 @@ function LeaderboardManager(app) {
                 if(!Object.keys(pixelCounts).includes(uid)) pixelCounts[uid] = 0;
                 pixelCounts[uid]++;
             }).on("close", () => {
-                this.pixelCounts = pixelCounts;
+                m.pixelCounts = pixelCounts;
                 // Get top users from pixel count, put them in sortable array, sort from greatest to least, then just extract user ID
-                this.topUsers = Object.keys(pixelCounts).map(userID => [userID, pixelCounts[userID]]).sort((a, b) => b[1] - a[1]).map(a => a[0]);
+                m.topUsers = Object.keys(pixelCounts).map(userID => [userID, pixelCounts[userID]]).sort((a, b) => b[1] - a[1]).map(a => a[0]);
                 // Remove banned and deactivated users
-                User.find({_id: { $in: this.topUsers }}, {_id: 1, banned: true, deactivated: true}).then(users => {
-                    this.topUsers = users.filter(u => !u.banned && !u.deactivated).sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map(u => u.id);
-                    this.isUpdating = false;
+                User.find({_id: { $in: m.topUsers }}, {_id: 1, banned: true, deactivated: true}).then(users => {
+                    m.topUsers = users.filter(u => !u.banned && !u.deactivated).sort((a, b) => m.pixelCounts[b._id] - m.pixelCounts[a._id]).map(u => u.id);
+                    m.isUpdating = false;
                     // Finish all waiting for leaderboard
-                    this.waitingForUpdate.forEach(callback => this.getInfo(callback));
+                    m.waitingForUpdate.forEach(callback => m.getInfo(callback));
                     console.log("Generation of leaderboard data complete.");
                 }).catch(err => {
-                    app.reportError("Couldn't update leaderboard: removal operation failed.");
-                    this.topUsers = null;
-                    this.pixelCounts = null;
-                    this.isUpdating = false;                    
+                    app.reportError("Couldn't update leaderboard, removal operation failed: " + err);
+                    m.topUsers = null;
+                    m.pixelCounts = null;
+                    m.isUpdating = false;                    
                 });
             }).on("error", err => {
                 app.reportError("Couldn't update leaderboard.");
-                this.topUsers = null;
-                this.pixelCounts = null;
-                this.isUpdating = false;
+                m.topUsers = null;
+                m.pixelCounts = null;
+                m.isUpdating = false;
             });
         },
 
