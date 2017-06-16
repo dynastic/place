@@ -525,17 +525,17 @@ var place = {
     },
 
     _adjustZoomButtonText: function() {
-        if (this.zoomButton) $(this.zoomButton).html(`<i class="fa fa-fw fa-search-${this.zooming.zoomedIn ? "minus" : "plus"}"></i>`).attr("title", this.zooming.zoomedIn ? "Zoom Out" : "Zoom In");
+        if (this.zoomButton) $(this.zoomButton).html(`<i class="fa fa-fw fa-search-${this.zooming.zoomedIn ? "minus" : "plus"}"></i>`).attr("title", (this.zooming.zoomedIn ? "Zoom Out" : "Zoom In") + " (spacebar)");
     },
 
     _adjustGridButtonText: function() {
         var gridShown = $(this.grid).hasClass("show");
-        if (this.gridButton) $(this.gridButton).html(`<i class="fa fa-fw fa-${gridShown ? "square" : "th"}"></i>`).attr("title", gridShown ? "Hide Grid" : "Show Grid");
+        if (this.gridButton) $(this.gridButton).html(`<i class="fa fa-fw fa-${gridShown ? "square" : "th"}"></i>`).attr("title", (gridShown ? "Hide Grid" : "Show Grid") + " (G)");
     },
 
     _adjustFullButtonText: function() {
         var isInFullMode = this.isViewingFullMap();
-        if (this.fullMapButton) $(this.fullMapButton).html(`<i class="fa fa-fw fa-${isInFullMode ? "hand-paper" : "picture"}-o"></i>`).attr("title", isInFullMode ? "Exit Full Map Mode" : "View Full Map");
+        if (this.fullMapButton) $(this.fullMapButton).html(`<i class="fa fa-fw fa-${isInFullMode ? "hand-paper" : "picture"}-o"></i>`).attr("title", (isInFullMode ? "Exit Full Map Mode" : "View Full Map") + " (F)");
     },
 
     setZoomButton: function(btn) {
