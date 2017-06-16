@@ -101,6 +101,7 @@ body {
     top: 20px;
     right: 20px;
     z-index: 2;
+    text-align: right;
 }
 
 #palette-ctn {
@@ -875,7 +876,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     font-weight: 500;
 }
 
-.viewing-full-map #place-canvas, .viewing-full-map #palette, .viewing-full-map #coordinates, .viewing-full-map .control-btns {
+.viewing-full-map #place-canvas, .viewing-full-map #palette, .viewing-full-map #coordinates, .viewing-full-map .control-btns > div:not(.show-in-full-mode) {
     display: none;
 }
 
