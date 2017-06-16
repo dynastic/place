@@ -92,7 +92,7 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
         if (err) return callback(null, { message: "An error occurred while trying to place the pixel." });
         var wasIdentical = colour.r == 255 && colour.g == 255 && colour.b == 255; // set to identical if pixel was white
         if(pixel) { // we have data from the old pixel
-            wasIdentical = pixel.colourR == colour.r && pixel.colourG == colour.g && pixel.colourB == pixel.colourB; // set to identical if colour matched old pixel
+            wasIdentical = pixel.editorID == userID && pixel.colourR == colour.r && pixel.colourG == colour.g && pixel.colourB == pixel.colourB; // set to identical if colour matched old pixel
         }
         return callback(!wasIdentical, null);
     });
