@@ -296,26 +296,30 @@ var place = {
             },
             autoScroll: true,
             onstart: event => {
-                if(event.interaction.downEvent.button == 2) return event.preventDefault();
+                if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
                 $(app.zoomController).addClass("grabbing");
                 $(":focus").blur();
             },
-            onmove: event => app.moveCamera(event.dx, event.dy),
+            onmove: event => {
+            if(app.isViewingFullMap()) return event.preventDefault();
+                app.moveCamera(event.dx, event.dy)
+            },
             onend: event => {
-                if(event.interaction.downEvent.button == 2) return event.preventDefault();
+                if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
                 $(app.zoomController).removeClass("grabbing");
                 var coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
                 app.updateAuthLinks();
             }
         }).on("tap", event => {
-            if(event.interaction.downEvent.button == 2) return event.preventDefault();
+            if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
             if(!this.zooming.zooming) {
                 let zoom = app._getZoomMultiplier();
                 app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom));
             }
             event.preventDefault();
         }).on("doubletap", event => {
+            if(app.isViewingFullMap()) return event.preventDefault();
             if(app.zooming.zoomedIn && this.selectedColour === null) {
                 app.zoomFinished();
                 app.shouldShowPopover = false;
@@ -423,6 +427,16 @@ var place = {
         this.updateDisplayCanvas();
         this.updateGrid();
         this.updateGridHint(this.lastX, this.lastY);
+        this.setFullMapViewScale();
+    },
+
+    setFullMapViewScale: function() {
+        var scale = 1;
+        if(this.isViewingFullMap()) {
+            var canvasContainer = $(this.zoomController).parent();
+            var scale = Math.min(1, Math.min(canvasContainer.height() / size, canvasContainer.width() / size));
+        }
+        $(this.canvas).css({ 'transform': `scale(${scale}, ${scale})` });
     },
 
     setupDisplayCanvas: function(canvas) {
@@ -753,6 +767,7 @@ var place = {
     },
 
     selectColour: function(colourID) {
+        if(this.isViewingFullMap()) return;
         this.deselectColour();
         this.selectedColour = colourID - 1;
         let elem = this.colourPaletteOptionElements[this.selectedColour];
@@ -915,6 +930,8 @@ var place = {
             this.toggleZoom();
         } else if(keycode == 27 && this.selectedColour !== null) { // Esc - Deselect colour
             this.deselectColour();
+        } else if(keycode == 70) { // F - toggle full map view
+            this.toggleViewingFullMap();
         }
     },
 
@@ -954,6 +971,16 @@ var place = {
                 }, timeout * 1000);
             }
         });
+    },
+
+    toggleViewingFullMap: function() {
+        this.deselectColour();
+        $("body").toggleClass("viewing-full-map");
+        this.setFullMapViewScale();
+    },
+
+    isViewingFullMap: function() {
+        return $("body").hasClass("viewing-full-map");
     }
 }
 
