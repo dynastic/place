@@ -127,6 +127,16 @@ UserSchema.methods.toInfo = function(app = null) {
     return info;
 }
 
+UserSchema.methods.getInfo = function(app = null) {
+    return new Promise((resolve, reject) => {
+        var info = this.toInfo(app);
+        this.getLatestAvailablePixel().then(pixel => {
+            info.latestPixel = pixel;
+            resolve(info);
+        }).catch(err => resolve(info));
+    });
+}
+
 UserSchema.methods.loginError = function() {
     if(this.banned === true) return { message: "You are banned from using this service due to violations of the rules.", code: "banned" }
     if(this.deactivated === true) return { message: "Your account has been deactivated. Please contact the moderators via Discord to reactivate your account.", code: "deactivated"}
@@ -233,7 +243,9 @@ UserSchema.methods.getLatestAvailablePixel = function() {
     return new Promise((resolve, reject) => {
         Pixel.findOne({ editorID: this.id }, {}, { sort: { lastModified: -1 } }, function(err, pixel) {
             if(err) resolve(null);
-            resolve(pixel);
+            var info = pixel.toInfo();
+            info.isLatest = pixel ? ~((pixel.lastModified - this.lastPlace) / 1000) <= 3 : false;
+            resolve(info);
         });
     });
 }
@@ -271,14 +283,21 @@ UserSchema.methods.getUsernameInitials = function() {
 UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false, app = null) {
     return new Promise((resolve, reject) => {
         var info = {};
+        function returnInfo(error) {
+            info.userError = error;
+            console.log(info);
+            resolve(info);
+        }
         this.findById(userID).then(user => {
-            if(!overrideDataAccess && user.banned) info.userError = "ban";
-            else if(!overrideDataAccess && user.deactivated) info.userError = "deactivated";
-            else info.user = user.toInfo(app);
-            resolve(info);
+            if(!overrideDataAccess && user.banned) return returnInfo("ban");
+            else if(!overrideDataAccess && user.deactivated) returnInfo("deactivated");
+            user.getInfo(app).then(userInfo => {
+                info.user = userInfo;
+                resolve(info);
+            }).catch(err => returnInfo("delete"));
         }).catch(err => {
-            info.userError = "delete";
-            resolve(info);
+            console.log(err);
+            returnInfo("delete");
         });
     })
 }
