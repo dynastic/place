@@ -301,7 +301,7 @@ var place = {
                 $(":focus").blur();
             },
             onmove: event => {
-            if(app.isViewingFullMap()) return event.preventDefault();
+                if(app.isViewingFullMap()) return event.preventDefault();
                 app.moveCamera(event.dx, event.dy)
             },
             onend: event => {
@@ -533,16 +533,27 @@ var place = {
         if (this.gridButton) $(this.gridButton).html(`<i class="fa fa-fw fa-${gridShown ? "square" : "th"}"></i>`).attr("title", gridShown ? "Hide Grid" : "Show Grid");
     },
 
+    _adjustFullButtonText: function() {
+        var isInFullMode = this.isViewingFullMap();
+        if (this.fullMapButton) $(this.fullMapButton).html(`<i class="fa fa-fw fa-${isInFullMode ? "hand-paper" : "picture"}-o"></i>`).attr("title", isInFullMode ? "Exit Full Map Mode" : "View Full Map");
+    },
+
     setZoomButton: function(btn) {
         this.zoomButton = btn;
         this._adjustZoomButtonText();
-        $(btn).click(this.handleZoomButtonClick.bind(this));
+        $(btn).click(this.toggleZoom.bind(this));
     },
 
     setGridButton: function(btn) {
         this.gridButton = btn;
         this._adjustGridButtonText();
-        $(btn).click(this.handleGridButtonClick.bind(this));
+        $(btn).click(this.toggleGrid.bind(this));
+    },
+
+    setFullMapButton: function(btn) {
+        this.fullMapButton = btn;
+        this._adjustFullButtonText();
+        $(btn).click(this.toggleViewingFullMap.bind(this));
     },
 
     setCoordinatesButton: function(btn) {
@@ -560,14 +571,6 @@ var place = {
                 }, 2500);
             })
         }
-    },
-
-    handleZoomButtonClick: function() {
-        this.toggleZoom();
-    },
-
-    handleGridButtonClick: function() {
-        this.toggleGrid();
     },
 
     moveCamera: function(deltaX, deltaY, softAllowBoundPush = true) {
@@ -975,10 +978,12 @@ var place = {
 
     toggleViewingFullMap: function() {
         this.deselectColour();
+        $(this.pixelDataPopover).hide();
         $("body").toggleClass("viewing-full-map");
         $(this.grid).removeClass("show");
         this._adjustGridButtonText();
         this.setFullMapViewScale();
+        this._adjustFullButtonText();
     },
 
     isViewingFullMap: function() {
@@ -989,6 +994,7 @@ var place = {
 place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
 place.setZoomButton($("#zoom-button")[0]);
 place.setGridButton($("#grid-button")[0]);
+place.setFullMapButton($("#full-map-button")[0]);
 place.setCoordinatesButton($("#coordinates")[0]);
 
 $(".popout-control").click(function() {
