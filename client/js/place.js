@@ -976,6 +976,8 @@ var place = {
     toggleViewingFullMap: function() {
         this.deselectColour();
         $("body").toggleClass("viewing-full-map");
+        $(this.grid).removeClass("show");
+        this._adjustGridButtonText();
         this.setFullMapViewScale();
     },
 
