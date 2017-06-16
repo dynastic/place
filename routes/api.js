@@ -154,12 +154,12 @@ function APIRouter(app) {
     });
 
     router.get('/leaderboard', function(req, res, next) {
-        app.leaderboardManager.getInfo((err, leaderboard) => {
-            if(err || !leaderboard) {
+        app.leaderboardManager.getInfo((err, info) => {
+            if(err || !info) {
                 app.reportError("Error fetching leaderboard: " + (err || "Returned null"))     
                 return res.status(500).json({ success: false });
             }
-            res.json({ success: true, leaderboard: leaderboard.splice(0, 25) });
+            res.json({ success: true, leaderboard: info.leaderboard.splice(0, 25), lastUpdated: info.lastUpdated });
         })
     });
 
