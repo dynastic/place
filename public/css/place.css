@@ -356,6 +356,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 .pixel-data .field > .value {
     float: right;
     margin-left: 15px;
+    text-align: right;
 }
 
 .pixel-data > .summary {
@@ -401,7 +402,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     text-decoration: underline;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username-container > .username.deleted-account {
+.pixel-data > .summary > .contents > .user-summary > .username-container > .username.deleted-account, .secondary-info {
     font-style: italic;
 }
 

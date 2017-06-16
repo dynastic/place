@@ -793,15 +793,16 @@ var place = {
     },
 
     canvasClicked: function(x, y, event) {
-        function getUserInfoTableItem(title, value, valueTag = "span") {
+        var app = this;
+        function getUserInfoTableItem(title, value) {
             var ctn = $("<div>").addClass("field");
             $("<span>").addClass("title").text(title).appendTo(ctn);
-            $(`<${valueTag}>`).addClass("value").text(value).appendTo(ctn);
+            $(`<span>`).addClass("value").html(value).appendTo(ctn);
             return ctn;
         }
         function getUserInfoDateTableItem(title, date) {
-            var ctn = getUserInfoTableItem(title, $.timeago(date), "time");
-            ctn.find(".value").attr("datetime", date).attr("title", new Date(date).toLocaleString());
+            var ctn = getUserInfoTableItem(title, "");
+            $("<time>").attr("datetime", date).attr("title", new Date(date).toLocaleString()).text($.timeago(date)).prependTo(ctn.find(".value"));
             return ctn;
         }
 
@@ -842,7 +843,14 @@ var place = {
                     getUserInfoTableItem("Total pixels placed", data.pixel.user.statistics.totalPlaces.toLocaleString()).appendTo(userInfoCtn);
                     if(data.pixel.user.statistics.placesThisWeek !== null) getUserInfoTableItem("Pixels this week", data.pixel.user.statistics.placesThisWeek.toLocaleString()).appendTo(userInfoCtn);
                     getUserInfoDateTableItem("Account created", data.pixel.user.creationDate).appendTo(userInfoCtn);
-                    getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
+                    var latestCtn = getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
+                    if(data.pixel.user.latestPixel && data.pixel.user.latestPixel.isLatest) {
+                        var latest = data.pixel.user.latestPixel;
+                        var element = $("<div>")
+                        if(data.pixel.point.x == latest.point.x && data.pixel.point.y == latest.point.y) $("<span>").addClass("secondary-info").text("(this pixel)").appendTo(element);
+                        else $("<a>").attr("href", "javascript:void(0)").text(`at (${latest.point.x.toLocaleString()}, ${latest.point.y.toLocaleString()})`).click(() => app.zoomIntoPoint(latest.point.x, latest.point.y, false)).appendTo(element);
+                        element.appendTo(latestCtn.find(".value"));
+                    }
                     popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.user.id}`);
                     var rank = data.pixel.user.statistics.leaderboardRank;
                     if(rank !== null) {
