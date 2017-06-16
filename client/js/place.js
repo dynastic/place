@@ -367,15 +367,18 @@ var place = {
         }
 
         socket.on("error", e => {
-            console.log("Socket error: " + e)
+            console.error("Socket error (will reload pixels on reconnect to socket): " + e);
             this.isOutdated = true;
+        });
+        socket.on("disconnect", () => {
+            console.warn("Socket disconnected from server, remembering to reload pixels on reconnect.")
+            this.isOutdated = true
         });
         socket.on("connect", () => {
             console.log("Socket successfully connected");
             if(this.isOutdated) {
                 this.loadedImage = false;
                 this.getCanvasImage();
-                this.loadChatMessages();
                 this.isOutdated = false;
             }
         });

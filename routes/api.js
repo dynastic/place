@@ -156,9 +156,10 @@ function APIRouter(app) {
     });
 
     router.get('/leaderboard', function(req, res, next) {
-        app.leaderboardManager.getInfo((err, info) => {
-            if(err || !info) {
-                app.reportError("Error fetching leaderboard: " + (err || "Returned null"))     
+        app.leaderboardManager.getInfo((err, leaderboard) => {
+            if(err || !leaderboard) {
+                if(err) app.reportError("Error fetching leaderboard: " + err);
+                if(res.headersSent) return null;
                 return res.status(500).json({ success: false });
             }
             res.json({ success: true, leaderboard: info.leaderboard.splice(0, 25), lastUpdated: info.lastUpdated });
