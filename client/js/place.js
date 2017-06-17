@@ -885,10 +885,10 @@ var place = {
                     if (data.pixel.user.banned) popover.find("#pixel-user-state-badge").show().text("Banned");
                     else if (data.pixel.user.deactivated) popover.find("#pixel-user-state-badge").show().text("Deactivated");
                     else popover.find("#pixel-user-state-badge").hide();
-                    if(popover.find("#mod-user-action-ctn")[0]) popover.find("#mod-user-action-ctn").html(renderUserActions(data.pixel.user));
+                    popover.find("#user-actions-dropdown-ctn").html(renderUserActionsDropdown(data.pixel.user));
                 } else {
                     popover.find(".user-info, #pixel-badge, #pixel-user-state-badge").hide();
-                    popover.find("#mod-user-action-ctn").html("");
+                    popover.find("#user-actions-dropdown-ctn").html("");
                     popover.find("#pixel-data-username").removeAttr("href");
                     popover.find(".rank-container").hide();
                 }

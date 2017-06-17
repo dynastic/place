@@ -387,23 +387,27 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     display: none;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username-container > .username {
+.pixel-data > .summary > .contents > .user-summary > .username-container .username {
     font-size: 24px;
     font-weight: 300;
     line-height: 1.1;
     color: #000;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username-container > .username:hover {
+.pixel-data > .summary > .contents > .user-summary > .username-container .username:hover {
     text-decoration: none;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username-container > .username[href]:hover {
+.pixel-data > .summary > .contents > .user-summary > .username-container .username[href]:hover {
     text-decoration: underline;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username-container > .username.deleted-account, .secondary-info {
+.pixel-data > .summary > .contents > .user-summary > .username-container .username.deleted-account, .secondary-info {
     font-style: italic;
+}
+
+.pixel-data > .summary > .contents > .user-summary > .username-container #username-text-ctn, .pixel-data > .summary > .contents > .user-summary > .username-container #user-actions-dropdown-ctn {
+    display: inline-block;
 }
 
 .pixel-data > .summary > .contents > .user-summary > time {
