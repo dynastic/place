@@ -44,8 +44,8 @@ function PopoutVisibilityController(popoutContainer) {
             p.activeTab = name;
             $(this.popoutContainer).find(".tab-content.active, .tab.active").removeClass("active");
             $(this.popoutContainer).find(`.tab-content[data-tab-name=${name}], .tab[data-tab-name=${name}]`).addClass("active").each(function() {
-                if($(this).data("tab-title")) {
-                    p._adjustTitle($(this).data("tab-title"));
+                if($(this).attr("title")) {
+                    p._adjustTitle($(this).attr("title"));
                     return false;
                 }
             });
