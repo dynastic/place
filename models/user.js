@@ -242,7 +242,7 @@ UserSchema.methods.findSimilarIPUsers = function() {
 UserSchema.methods.getLatestAvailablePixel = function() {
     return new Promise((resolve, reject) => {
         Pixel.findOne({ editorID: this.id }, {}, { sort: { lastModified: -1 } }, function(err, pixel) {
-            if(err || !pixel) resolve(null);
+            if(err || !pixel) return resolve(null);
             var info = pixel.toInfo();
             info.isLatest = pixel ? ~((pixel.lastModified - this.lastPlace) / 1000) <= 3 : false;
             resolve(info);
