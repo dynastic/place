@@ -1,4 +1,4 @@
-const ChatMessage = require("../models/ChatMessage");
+const ChatMessage = require("../models/chatMessage");
 
 exports.getAPIChat = (req, res, next) => {
     ChatMessage.getLatestMessages().then(messages => {
