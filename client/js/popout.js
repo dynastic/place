@@ -120,8 +120,10 @@ var popoutController = {
                 this.isOutdated = false;
             }
         });
-
-        socket.onJSON("new_message", this.addChatMessage.bind(this));
+        socket.onJSON("new_message", data => {
+            this.loadActiveUsers();
+            this.addChatMessage(data);
+        });
         return socket;
     },
 

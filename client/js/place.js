@@ -399,6 +399,7 @@ var place = {
     },
 
     liveUpdateTile: function (data) {
+        this.popoutController.loadActiveUsers();
         this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y);
     },
 
