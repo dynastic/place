@@ -189,11 +189,9 @@ function PublicRouter(app) {
     router.get('/@:username', function(req, res, next) {
         User.findByUsername(req.params.username).then(user => {
             if((user.banned || user.deactivated) && !(req.user.moderator || req.user.admin)) return next();
-            user.getLatestAvailablePixel().then(pixel => {
-                return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, profileUserInfo: user.toInfo(app), pixel: pixel, isLatestPixel: pixel ? ~((pixel.lastModified - user.lastPlace) / 1000) <= 3 : false, hasNewPassword: req.query.hasNewPassword });
-            }).catch(err => {
-                return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, profileUserInfo: user.toInfo(app), pixel: null, isLatestPixel: false, hasNewPassword: req.query.hasNewPassword });            
-            });
+            user.getInfo(app).then(info => {
+                return responseFactory.sendRenderedResponse("public/account", req, res, { profileUser: user, profileUserInfo: info, hasNewPassword: req.query.hasNewPassword });
+            }).catch(err => next());
         }).catch(err => next())
     });
 

@@ -148,19 +148,21 @@ function APIRouter(app) {
             var overrideDataAccess = req.user && (req.user.moderator || req.user.admin);
             var promises = messages.reverse().map(m => m.getInfo(overrideDataAccess));
             Promise.all(promises).then(messages => {
+                // Removed banned users' messages if we're not mod
+                if(overrideDataAccess !== true) messages = messages.filter(m => (!m.user || !m.user.banned) && (m.userError != "ban"));
                 res.json({ success: true, messages: messages });
             }).catch(err => res.status(500).json({ success: false }));
          }).catch(err => res.status(500).json( { success: false }))
     });
 
     router.get('/leaderboard', function(req, res, next) {
-        app.leaderboardManager.getInfo((err, leaderboard) => {
-            if(err || !leaderboard) {
+        app.leaderboardManager.getInfo((err, info) => {
+            if(err || !info) {
                 if(err) app.reportError("Error fetching leaderboard: " + err);
                 if(res.headersSent) return null;
                 return res.status(500).json({ success: false });
             }
-            res.json({ success: true, leaderboard: leaderboard.splice(0, 25) });
+            res.json({ success: true, leaderboard: info.leaderboard.splice(0, 25), lastUpdated: info.lastUpdated });
         })
     });
 

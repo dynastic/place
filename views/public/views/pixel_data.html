@@ -5,7 +5,7 @@
             <div class="contents">
                 <div class="user-summary">
                     <div class="username-container">
-                        <a class="username" id="pixel-data-username"></a>
+                        <div class="username-text-ctn"><a class="username" id="pixel-data-username"></a> <div id="user-actions-dropdown-ctn"></div></div>
                         <span class="label label-warning badge-label" id="pixel-badge"></span>
                         <span class="label label-danger badge-label" id="pixel-user-state-badge"></span>
                     </div>
@@ -28,7 +28,6 @@
                 </div>
             </div>
         </div>
-        <% if(user && (user.moderator || user.admin)) { %><div id="mod-user-action-ctn"></div><% } %>
         <div class="user-info"></div>
     </div>
 </div>

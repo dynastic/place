@@ -100,8 +100,8 @@ body {
     position: absolute;
     top: 20px;
     right: 20px;
-    margin-top: 50px;
     z-index: 2;
+    text-align: right;
 }
 
 #palette-ctn {
@@ -356,6 +356,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 .pixel-data .field > .value {
     float: right;
     margin-left: 15px;
+    text-align: right;
 }
 
 .pixel-data > .summary {
@@ -386,23 +387,27 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     display: none;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username-container > .username {
+.pixel-data > .summary > .contents > .user-summary > .username-container .username {
     font-size: 24px;
     font-weight: 300;
     line-height: 1.1;
     color: #000;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username-container > .username:hover {
+.pixel-data > .summary > .contents > .user-summary > .username-container .username:hover {
     text-decoration: none;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username-container > .username[href]:hover {
+.pixel-data > .summary > .contents > .user-summary > .username-container .username[href]:hover {
     text-decoration: underline;
 }
 
-.pixel-data > .summary > .contents > .user-summary > .username-container > .username.deleted-account {
+.pixel-data > .summary > .contents > .user-summary > .username-container .username.deleted-account, .secondary-info {
     font-style: italic;
+}
+
+.pixel-data > .summary > .contents > .user-summary > .username-container #username-text-ctn, .pixel-data > .summary > .contents > .user-summary > .username-container #user-actions-dropdown-ctn {
+    display: inline-block;
 }
 
 .pixel-data > .summary > .contents > .user-summary > time {
@@ -502,7 +507,6 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 #popout-container {
     width: 100%;
     max-width: 320px;
-    margin-top: 50px;
     background: #fff;
     border-left: 1px solid #eee;
     position: relative;
@@ -874,4 +878,47 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 
 .bold {
     font-weight: 500;
+}
+
+.viewing-full-map #place-canvas, .viewing-full-map #palette, .viewing-full-map #coordinates, .viewing-full-map .control-btns > div:not(.show-in-full-mode) {
+    display: none;
+}
+
+.viewing-full-map #palette-ctn > .ctn-row {
+    align-items: left;
+    justify-content: left;
+}
+
+.viewing-full-map #zoom-controller {
+    transform: scale(1, 1);
+    cursor: default;
+}
+
+.viewing-full-map #camera-controller {
+    top: initial!important;
+    left: initial!important;
+}
+
+.viewing-full-map #place-canvas-draw {
+    transition: 0.2s opacity ease-in-out 0.05s;
+    opacity: 1;
+}
+
+body:not(.viewing-full-map) #place-canvas-draw {
+    transform: scale(1, 1);
+}
+
+.viewing-full-map #place {
+    padding-top: 50px;
+}
+
+body:not(.viewing-full-map) .button-ctn, body:not(.viewing-full-map) #popout-container {
+    margin-top: 50px;
+}
+
+@media(max-width: 600px) {
+    body:not(.viewing-full-map) #popout-container {
+        margin-top: 0;
+        padding-top: 50px;
+    }
 }

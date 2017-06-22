@@ -44,8 +44,8 @@ function PopoutVisibilityController(popoutContainer) {
             p.activeTab = name;
             $(this.popoutContainer).find(".tab-content.active, .tab.active").removeClass("active");
             $(this.popoutContainer).find(`.tab-content[data-tab-name=${name}], .tab[data-tab-name=${name}]`).addClass("active").each(function() {
-                if($(this).data("tab-title")) {
-                    p._adjustTitle($(this).data("tab-title"));
+                if($(this).attr("title")) {
+                    p._adjustTitle($(this).attr("title"));
                     return false;
                 }
             });
@@ -268,6 +268,7 @@ var popoutController = {
                 return app.showTextOnLeaderboard("Failed to load");
             }
             app.leaderboard = response.leaderboard;
+            if(response.lastUpdated) app.leaderboardUpdated = new Date(response.lastUpdated);
             app.layoutLeaderboard();
         }).fail(function() {
             console.log("Failed to load leaderboard data.");
@@ -310,6 +311,7 @@ var popoutController = {
                 }
             });
         }
+        if(this.leaderboardUpdated) $("<small>").text(`Last updated at ${this.leaderboardUpdated.toLocaleString()}.`).appendTo(tab);
         $("<p>").addClass("text-muted").text("Leaderboards are calculated based on the number of pixels you have placed (that someone else hasn't overwritten) over the span of the last week. To get a spot on the leaderboard, start placing!").appendTo(tab);
     },
 }

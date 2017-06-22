@@ -296,26 +296,30 @@ var place = {
             },
             autoScroll: true,
             onstart: event => {
-                if(event.interaction.downEvent.button == 2) return event.preventDefault();
+                if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
                 $(app.zoomController).addClass("grabbing");
                 $(":focus").blur();
             },
-            onmove: event => app.moveCamera(event.dx, event.dy),
+            onmove: event => {
+                if(app.isViewingFullMap()) return event.preventDefault();
+                app.moveCamera(event.dx, event.dy)
+            },
             onend: event => {
-                if(event.interaction.downEvent.button == 2) return event.preventDefault();
+                if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
                 $(app.zoomController).removeClass("grabbing");
                 var coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
                 app.updateAuthLinks();
             }
         }).on("tap", event => {
-            if(event.interaction.downEvent.button == 2) return event.preventDefault();
+            if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
             if(!this.zooming.zooming) {
                 let zoom = app._getZoomMultiplier();
                 app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom));
             }
             event.preventDefault();
         }).on("doubletap", event => {
+            if(app.isViewingFullMap()) return event.preventDefault();
             if(app.zooming.zoomedIn && this.selectedColour === null) {
                 app.zoomFinished();
                 app.shouldShowPopover = false;
@@ -426,6 +430,16 @@ var place = {
         this.updateDisplayCanvas();
         this.updateGrid();
         this.updateGridHint(this.lastX, this.lastY);
+        this.setFullMapViewScale();
+    },
+
+    setFullMapViewScale: function() {
+        var scale = 1;
+        if(this.isViewingFullMap()) {
+            var canvasContainer = $(this.zoomController).parent();
+            var scale = Math.min(1, Math.min(canvasContainer.height() / size, canvasContainer.width() / size));
+        }
+        $(this.canvas).css({ 'transform': `scale(${scale}, ${scale})` });
     },
 
     setupDisplayCanvas: function(canvas) {
@@ -514,24 +528,35 @@ var place = {
     },
 
     _adjustZoomButtonText: function() {
-        if (this.zoomButton) $(this.zoomButton).html(`<i class="fa fa-fw fa-search-${this.zooming.zoomedIn ? "minus" : "plus"}"></i>`).attr("title", this.zooming.zoomedIn ? "Zoom Out" : "Zoom In");
+        if (this.zoomButton) $(this.zoomButton).html(`<i class="fa fa-fw fa-search-${this.zooming.zoomedIn ? "minus" : "plus"}"></i>`).attr("title", (this.zooming.zoomedIn ? "Zoom Out" : "Zoom In") + " (spacebar)");
     },
 
     _adjustGridButtonText: function() {
         var gridShown = $(this.grid).hasClass("show");
-        if (this.gridButton) $(this.gridButton).html(`<i class="fa fa-fw fa-${gridShown ? "square" : "th"}"></i>`).attr("title", gridShown ? "Hide Grid" : "Show Grid");
+        if (this.gridButton) $(this.gridButton).html(`<i class="fa fa-fw fa-${gridShown ? "square" : "th"}"></i>`).attr("title", (gridShown ? "Hide Grid" : "Show Grid") + " (G)");
+    },
+
+    _adjustFullButtonText: function() {
+        var isInFullMode = this.isViewingFullMap();
+        if (this.fullMapButton) $(this.fullMapButton).html(`<i class="fa fa-fw fa-${isInFullMode ? "hand-paper" : "picture"}-o"></i>`).attr("title", (isInFullMode ? "Exit Full Map Mode" : "View Full Map") + " (F)");
     },
 
     setZoomButton: function(btn) {
         this.zoomButton = btn;
         this._adjustZoomButtonText();
-        $(btn).click(this.handleZoomButtonClick.bind(this));
+        $(btn).click(this.toggleZoom.bind(this));
     },
 
     setGridButton: function(btn) {
         this.gridButton = btn;
         this._adjustGridButtonText();
-        $(btn).click(this.handleGridButtonClick.bind(this));
+        $(btn).click(this.toggleGrid.bind(this));
+    },
+
+    setFullMapButton: function(btn) {
+        this.fullMapButton = btn;
+        this._adjustFullButtonText();
+        $(btn).click(this.toggleViewingFullMap.bind(this));
     },
 
     setCoordinatesButton: function(btn) {
@@ -549,14 +574,6 @@ var place = {
                 }, 2500);
             })
         }
-    },
-
-    handleZoomButtonClick: function() {
-        this.toggleZoom();
-    },
-
-    handleGridButtonClick: function() {
-        this.toggleGrid();
     },
 
     moveCamera: function(deltaX, deltaY, softAllowBoundPush = true) {
@@ -756,6 +773,7 @@ var place = {
     },
 
     selectColour: function(colourID) {
+        if(this.isViewingFullMap()) return;
         this.deselectColour();
         this.selectedColour = colourID - 1;
         let elem = this.colourPaletteOptionElements[this.selectedColour];
@@ -796,15 +814,16 @@ var place = {
     },
 
     canvasClicked: function(x, y, event) {
-        function getUserInfoTableItem(title, value, valueTag = "span") {
+        var app = this;
+        function getUserInfoTableItem(title, value) {
             var ctn = $("<div>").addClass("field");
             $("<span>").addClass("title").text(title).appendTo(ctn);
-            $(`<${valueTag}>`).addClass("value").text(value).appendTo(ctn);
+            $(`<span>`).addClass("value").html(value).appendTo(ctn);
             return ctn;
         }
         function getUserInfoDateTableItem(title, date) {
-            var ctn = getUserInfoTableItem(title, $.timeago(date), "time");
-            ctn.find(".value").attr("datetime", date).attr("title", new Date(date).toLocaleString());
+            var ctn = getUserInfoTableItem(title, "");
+            $("<time>").attr("datetime", date).attr("title", new Date(date).toLocaleString()).text($.timeago(date)).prependTo(ctn.find(".value"));
             return ctn;
         }
 
@@ -845,7 +864,14 @@ var place = {
                     getUserInfoTableItem("Total pixels placed", data.pixel.user.statistics.totalPlaces.toLocaleString()).appendTo(userInfoCtn);
                     if(data.pixel.user.statistics.placesThisWeek !== null) getUserInfoTableItem("Pixels this week", data.pixel.user.statistics.placesThisWeek.toLocaleString()).appendTo(userInfoCtn);
                     getUserInfoDateTableItem("Account created", data.pixel.user.creationDate).appendTo(userInfoCtn);
-                    getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
+                    var latestCtn = getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
+                    if(data.pixel.user.latestPixel && data.pixel.user.latestPixel.isLatest) {
+                        var latest = data.pixel.user.latestPixel;
+                        var element = $("<div>")
+                        if(data.pixel.point.x == latest.point.x && data.pixel.point.y == latest.point.y) $("<span>").addClass("secondary-info").text("(this pixel)").appendTo(element);
+                        else $("<a>").attr("href", "javascript:void(0)").text(`at (${latest.point.x.toLocaleString()}, ${latest.point.y.toLocaleString()})`).click(() => app.zoomIntoPoint(latest.point.x, latest.point.y, false)).appendTo(element);
+                        element.appendTo(latestCtn.find(".value"));
+                    }
                     popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.user.id}`);
                     var rank = data.pixel.user.statistics.leaderboardRank;
                     if(rank !== null) {
@@ -859,10 +885,10 @@ var place = {
                     if (data.pixel.user.banned) popover.find("#pixel-user-state-badge").show().text("Banned");
                     else if (data.pixel.user.deactivated) popover.find("#pixel-user-state-badge").show().text("Deactivated");
                     else popover.find("#pixel-user-state-badge").hide();
-                    if(popover.find("#mod-user-action-ctn")[0]) popover.find("#mod-user-action-ctn").html(renderUserActions(data.pixel.user));
+                    popover.find("#user-actions-dropdown-ctn").html(renderUserActionsDropdown(data.pixel.user));
                 } else {
                     popover.find(".user-info, #pixel-badge, #pixel-user-state-badge").hide();
-                    popover.find("#mod-user-action-ctn").html("");
+                    popover.find("#user-actions-dropdown-ctn").html("");
                     popover.find("#pixel-data-username").removeAttr("href");
                     popover.find(".rank-container").hide();
                 }
@@ -910,6 +936,8 @@ var place = {
             this.toggleZoom();
         } else if(keycode == 27 && this.selectedColour !== null) { // Esc - Deselect colour
             this.deselectColour();
+        } else if(keycode == 70) { // F - toggle full map view
+            this.toggleViewingFullMap();
         }
     },
 
@@ -949,12 +977,27 @@ var place = {
                 }, timeout * 1000);
             }
         });
+    },
+
+    toggleViewingFullMap: function() {
+        this.deselectColour();
+        $(this.pixelDataPopover).hide();
+        $("body").toggleClass("viewing-full-map");
+        $(this.grid).removeClass("show");
+        this._adjustGridButtonText();
+        this.setFullMapViewScale();
+        this._adjustFullButtonText();
+    },
+
+    isViewingFullMap: function() {
+        return $("body").hasClass("viewing-full-map");
     }
 }
 
 place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
 place.setZoomButton($("#zoom-button")[0]);
 place.setGridButton($("#grid-button")[0]);
+place.setFullMapButton($("#full-map-button")[0]);
 place.setCoordinatesButton($("#coordinates")[0]);
 
 $(".popout-control").click(function() {
