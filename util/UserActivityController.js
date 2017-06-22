@@ -6,10 +6,10 @@ function UserActivityController(app) {
 
         update: function() {
             var pastTime = new Date().getTime() - (1000 * 60 * 3); // active users last did something in three minute span
-            this.userActivityTimes = Object.keys(this.userActivityTimes).filter(u => this.userActivityTimes[u] > pastTime).reduce((obj, key) => {
+            this.userActivityTimes = Object.keys(this.userActivityTimes).filter(u => this.userActivityTimes[u] > pastTime).splice(0, 25).reduce((obj, key) => {
                 obj[key] = raw[key];
                 return obj;
-            }, {}).splice(0, 25);
+            }, {});
             console.log("Updated user activity controller stored data.")
         },
 
@@ -19,7 +19,7 @@ function UserActivityController(app) {
 
         getInfo: function() {
             return new Promise((resolve, reject) => {
-                User.find({_id: { $in: Object.keys(this.userActivityTimes.splice(0, 25)) }}).then(users => {
+                User.find({_id: { $in: Object.keys(this.userActivityTimes).splice(0, 25) }}).then(users => {
                     var info = users.sort((a, b) => this.userActivityTimes[b._id] > this.userActivityTimes[a._id] ? 1 : -1).map(u => u.toInfo(app));
                     resolve(info);
                 }).catch(err => reject(err));
