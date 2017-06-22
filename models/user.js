@@ -232,7 +232,7 @@ UserSchema.methods.findSimilarIPUsers = function() {
 UserSchema.methods.getLatestAvailablePixel = function() {
     return new Promise((resolve, reject) => {
         Pixel.findOne({ editorID: this.id }, {}, { sort: { lastModified: -1 } }, function(err, pixel) {
-            if(err) resolve(null);
+            if(err || !pixel) resolve(null);
             resolve(pixel);
         });
     });
