@@ -127,13 +127,17 @@ UserSchema.methods.toInfo = function(app = null) {
     return info;
 }
 
-UserSchema.methods.getInfo = function(app = null) {
+UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
         var info = this.toInfo(app);
-        this.getLatestAvailablePixel().then(pixel => {
-            info.latestPixel = pixel;
-            resolve(info);
-        }).catch(err => resolve(info));
+        if(getPixelInfo) {
+            this.getLatestAvailablePixel().then(pixel => {
+                info.latestPixel = pixel;
+                resolve(info);
+            }).catch(err => resolve(info));
+        } else {
+            return resolve(info);
+        }
     });
 }
 
@@ -280,18 +284,17 @@ UserSchema.methods.getUsernameInitials = function() {
     return getInitials(this.name);
 }
 
-UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false, app = null) {
+UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false, app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
         var info = {};
         function returnInfo(error) {
             info.userError = error;
-            console.log(info);
             resolve(info);
         }
         this.findById(userID).then(user => {
             if(!overrideDataAccess && user.banned) return returnInfo("ban");
             else if(!overrideDataAccess && user.deactivated) returnInfo("deactivated");
-            user.getInfo(app).then(userInfo => {
+            user.getInfo(app, getPixelInfo).then(userInfo => {
                 info.user = userInfo;
                 resolve(info);
             }).catch(err => returnInfo("delete"));
