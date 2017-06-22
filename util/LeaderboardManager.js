@@ -32,6 +32,7 @@ function LeaderboardManager(app) {
                     this.lastUpdated = new Date();
                     // Finish all waiting for leaderboard
                     m.waitingForUpdate.forEach(callback => m.getInfo(callback));
+                    m.waitingForUpdate = [];
                     console.log("Generation of leaderboard data complete.");
                 }).catch(err => {
                     app.reportError("Couldn't update leaderboard, removal operation failed: " + err);
