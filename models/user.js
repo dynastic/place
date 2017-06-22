@@ -224,7 +224,7 @@ UserSchema.methods.getPlaceSecondsRemaining = function(app) {
         // Seconds since last place
         let diffSeconds = (current - place) / 1000;
         // Seconds before can place again
-        let remainSeconds = Math.min(config.placeTimeout, Math.max(0, config.placeTimeout - diffSeconds));
+        let remainSeconds = Math.min(app.config.placeTimeout, Math.max(0, app.config.placeTimeout - diffSeconds));
         return Math.ceil(remainSeconds);
     }
     return 0;
