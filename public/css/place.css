@@ -150,7 +150,7 @@ body {
     position: relative;
 }
 
-#coordinates.supported {
+.content.clickable {
     cursor: pointer;
 }
 

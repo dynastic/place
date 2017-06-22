@@ -563,7 +563,7 @@ var place = {
         if(Clipboard.isSupported()) {
             var app = this;
             var clipboard = new Clipboard(btn);
-            $(btn).addClass("supported").tooltip({
+            $(btn).addClass("clickable").tooltip({
                 title: "Copied to clipboard!",
                 trigger: "manual",
             });
@@ -904,6 +904,7 @@ var place = {
                 x: x, y: y, colour: this.selectedColour
             }).done(data => {
                 if(data.success) {
+                    this.popoutController.loadActiveUsers();
                     a.setPixel(a.DEFAULT_COLOURS[a.selectedColour], x, y);
                     a.changeSelectorVisibility(false);
                     if(data.timer) a.doTimer(data.timer);

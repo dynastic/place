@@ -5,7 +5,7 @@ function UserActivityManager(app) {
         userActivityTimes: {},
 
         update: function() {
-            var pastTime = new Date().getTime() - (1000 * 60 * 3); // active users last did something in three minute span
+            var pastTime = new Date().getTime() - (1000 * 60 * 5); // active users last did something in three minute span
             this.userActivityTimes = Object.keys(this.userActivityTimes).filter(u => this.userActivityTimes[u] > pastTime).splice(0, 25).reduce((obj, key) => {
                 obj[key] = this.userActivityTimes[key];
                 return obj;

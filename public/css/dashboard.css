@@ -165,46 +165,6 @@ table.filters {
   margin-bottom: 0;
 }
 
-/* User Display Block */
-.user {
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 20px;
-    margin: 5px 0;
-}
-.user.user-template {
-  display: none;
-}
-.user .username {
-    font-weight: 300;
-    font-size: 19px;
-    margin-bottom: 2px;
-}
-.user span {
-    display: block;
-}
-.user::after {
-    clear: both;
-    content: "";
-    display: block;
-}
-.user .relation {
-    color: #777;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    margin-bottom: 3px;
-    margin-top: -1px;
-}
-.user .user-info {
-    float: left;
-    font-size: 14px;
-    color: #555;
-}
-.user .user-actions {
-    float: right;
-}
-
 .page-header > h1 {
   margin-top: 0;
 }
