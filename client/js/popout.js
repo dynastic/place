@@ -88,6 +88,7 @@ var popoutController = {
         this.popoutVisibilityController = PopoutVisibilityController(popoutContainer);
         this.popoutVisibilityController.tabChangeCallback = name => {
             if(name == "chat") this.scrollToChatBottom();
+            else $(".tab-content.active").scrollTop(0);
         }
         this.place = place;
         var p = this;
