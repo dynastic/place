@@ -43,11 +43,11 @@ function PaintingHandler(app) {
             return new Promise((resolve, reject) => {
                 let image = this.getBlankImage().then(image => {
                     let batch = image.batch();
-                    Pixel.find({}).cursor().eachAsync(pixel => {
+                    Pixel.find({}).stream().on("data", pixel => {
                         var x = pixel.xPos, y = pixel.yPos;
                         var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB }
                         if(x >= 0 && y >= 0 && x < 1000 && y < 1000) batch.setPixel(x, y, colour);
-                    }).then(() => {
+                    }).on("end", () => {
                         batch.exec((err, image) => {
                             if (err) return reject(err);
                             this.hasImage = true;
@@ -56,7 +56,7 @@ function PaintingHandler(app) {
                             app.websocketServer.broadcast("server_ready");
                             resolve(image);
                         });
-                    }).catch(err => reject(err));
+                    }).on("error", err => reject(err));
                 }).catch(err => reject(err));
             });
         },

@@ -17,11 +17,11 @@ function LeaderboardManager(app) {
             this.needsUpdating = false;
             var dateBackLastWeek = new Date(new Date().getTime() - (7 * 24 * 60 * 60 * 1000));
             var pixelCounts = {};
-            Pixel.find({lastModified: {$gt: dateBackLastWeek}}, {editorID: 1}).cursor().eachAsync(pixel => {
+            Pixel.find({lastModified: {$gt: dateBackLastWeek}}, {editorID: 1}).stream().on("data", pixel => {
                 var uid = pixel.editorID.toString();
                 if(!Object.keys(pixelCounts).includes(uid)) pixelCounts[uid] = 0;
                 pixelCounts[uid]++;
-            }).then(() => {
+            }).on("end", () => {
                 m.pixelCounts = pixelCounts;
                 // Get top users from pixel count, put them in sortable array, sort from greatest to least, then just extract user ID
                 m.topUsers = Object.keys(pixelCounts).map(userID => [userID, pixelCounts[userID]]).sort((a, b) => b[1] - a[1]).map(a => a[0]);
@@ -40,7 +40,7 @@ function LeaderboardManager(app) {
                     m.pixelCounts = null;
                     m.isUpdating = false;                    
                 });
-            }).catch(err => {
+            }).on("error", err => {
                 app.reportError("Couldn't update leaderboard.");
                 m.topUsers = null;
                 m.pixelCounts = null;
