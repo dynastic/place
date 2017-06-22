@@ -344,7 +344,7 @@ var popoutController = {
             var row = $("<div>").addClass("user-info").appendTo($("<div>").addClass("user").appendTo(usersCtn));
             $("<a>").text(item.username).addClass("username").attr("href", `/@${item.username}`).appendTo(row);
             var lastSeen = $("<span>").text("Last seen ").addClass("last-seen").appendTo(row);
-            var date = new Date();
+            var date = item.statistics.lastSeenActively;
             $("<time>").attr("datetime", date).attr("title", new Date(date).toLocaleString()).text($.timeago(date)).appendTo($("<strong>").appendTo(lastSeen));
         });
         $("<p>").addClass("text-muted").text("Users that are both logged in and have either placed a pixel or sent a chat message in the last five minutes will appear here.").appendTo(tab);
