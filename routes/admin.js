@@ -1,9 +1,5 @@
 const express = require('express');
-const jwt = require('jwt-simple');
-const passport = require('passport');
-require('../util/passport')(passport);
 const User = require('../models/user');
-const Access = require('../models/access');
 
 function AdminRouter(app) {
     const responseFactory = require("../util/ResponseFactory")(app, "/admin");
