@@ -2,6 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const APIRouter = require('../routes/api');
 const PublicRouter = require('../routes/public');
+const OAuthRouter = require('../routes/oauth');
 const AdminRouter = require('../routes/admin');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
@@ -47,6 +48,12 @@ function HTTPServer(app) {
         server.use(legit.keyMiddleware);
     }
 
+    server.use((req, res, next) => {
+        req.place = app;
+        req.responseFactory = app.responseFactory;
+        next();
+    })
+
     server.use(passport.initialize());
     server.use((req, res, next) => {
         function authUser(user) {
@@ -81,6 +88,7 @@ function HTTPServer(app) {
     // Handle routes
     server.use('/api', APIRouter(app));
     server.use('/admin', AdminRouter(app));
+    server.use('/auth', OAuthRouter(app));
     server.use('/', PublicRouter(app));
 
     if (server.get('env') !== 'development') {
