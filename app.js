@@ -23,8 +23,14 @@ let paths = {
 
 var app = {};
 app.loadConfig = (path = "./config/config") => {
-    delete require.cache[require.resolve(path)]
+    delete require.cache[require.resolve(path)];
+    var oldConfig = app.config;
     app.config = require(path);
+    if(oldConfig && (oldConfig.secret != app.config.secret || oldConfig.database != app.config.database)) {
+        console.log("We are stopping the Place server because the database URL and/or secret has been changed, which will require restarting the entire server.");
+        process.exit(0);
+    }
+    if(oldConfig && (oldConfig.port != app.config.port || oldConfig.onlyListenLocal != app.config.onlyListenLocal)) app.restartServer();
 }
 app.loadConfig();
 app.temporaryUserInfo = TemporaryUserInfo;
@@ -112,4 +118,14 @@ gulp.task('watch', () => gulp.watch(paths.scripts.src, ['scripts']));
 gulp.task('default', ['watch', 'scripts']);
 gulp.start(['watch', 'scripts'])
 
-app.server.listen(app.config.port, app.config.onlyListenLocal ? "127.0.0.1" : null);
+app.restartServer = () => {
+    if(app.server.listening) {
+        console.log("Closing server...")
+        app.server.close();
+        setImmediate(function(){app.server.emit('close')});
+    }
+    app.server.listen(app.config.port, app.config.onlyListenLocal ? "127.0.0.1" : null, null, () => {
+        console.log(`Started Place server on port ${app.config.port}${app.config.onlyListenLocal ? " (only listening locally)" : ""}.`);
+    });
+}
+app.restartServer();
