@@ -4,7 +4,7 @@ const ActionLogger = require("../util/ActionLogger");
 
 const imageSize = 1000;
 
-function PaintingHandler(app) {
+function PaintingManager(app) {
     return {
         hasImage: false,
         imageHasChanged: false,
@@ -125,6 +125,6 @@ function PaintingHandler(app) {
     }
 }
 
-PaintingHandler.prototype = Object.create(PaintingHandler.prototype);
+PaintingManager.prototype = Object.create(PaintingManager.prototype);
 
-module.exports = PaintingHandler;
+module.exports = PaintingManager;

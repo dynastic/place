@@ -5,14 +5,14 @@ const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
 const del = require('del');
-const PaintingHandler = require("./util/PaintingHandler");
+const PaintingManager = require("./util/PaintingManager");
 const ResponseFactory = require("./util/ResponseFactory");
 const HTTPServer = require("./util/HTTPServer");
 const WebsocketServer = require("./util/WebsocketServer");
 const TemporaryUserInfo = require("./util/TemporaryUserInfo");
 const ErrorTracker = require("./util/ErrorTracker");
 const LeaderboardManager = require("./util/LeaderboardManager");
-const UserActivityController = require("./util/UserActivityController");
+const UserActivityManager = require("./util/UserActivityManager");
 
 let paths = {
     scripts: {
@@ -52,9 +52,9 @@ if (typeof app.config.bugSnagKey !== undefined) {
 }
 
 // Get image handler
-app.paintingHandler = PaintingHandler(app);
+app.paintingManager = PaintingManager(app);
 console.log("Loading image from the database…");
-app.paintingHandler.loadImageFromDatabase().then((image) => {
+app.paintingManager.loadImageFromDatabase().then((image) => {
     console.log("Successfully loaded image from database.");
 }).catch(err => {
     app.reportError("Error while loading the image from database: " + err);
@@ -62,7 +62,7 @@ app.paintingHandler.loadImageFromDatabase().then((image) => {
 
 app.leaderboardManager = LeaderboardManager(app);
 app.responseFactory = ResponseFactory(app);
-app.userActivityController = UserActivityController(app);
+app.userActivityController = UserActivityManager(app);
 
 app.enableCaptcha = false;
 if(typeof app.config.recaptcha !== 'undefined') {

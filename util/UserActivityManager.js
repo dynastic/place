@@ -1,16 +1,16 @@
 const User = require("../models/user");
 
-function UserActivityController(app) {
+function UserActivityManager(app) {
     var controller = {
         userActivityTimes: {},
 
         update: function() {
             var pastTime = new Date().getTime() - (1000 * 60 * 3); // active users last did something in three minute span
             this.userActivityTimes = Object.keys(this.userActivityTimes).filter(u => this.userActivityTimes[u] > pastTime).splice(0, 25).reduce((obj, key) => {
-                obj[key] = raw[key];
+                obj[key] = this.userActivityTimes[key];
                 return obj;
             }, {});
-            console.log("Updated user activity controller stored data.")
+            console.log("Updated user activity manager stored data.")
         },
 
         recordActivity: function(user) {
@@ -30,6 +30,6 @@ function UserActivityController(app) {
     return controller;
 }
 
-UserActivityController.prototype = Object.create(UserActivityController.prototype);
+UserActivityManager.prototype = Object.create(UserActivityManager.prototype);
 
-module.exports = UserActivityController;
+module.exports = UserActivityManager;

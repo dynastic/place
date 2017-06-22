@@ -18,7 +18,7 @@ $('form#changePasswordForm').submit(function(e) {
   if(oPassword == "" || nPassword == "" || nCPassword == "") return setAlert(passwordProgressAlert, false, "Please fill out all the fields.");
   if(nPassword !== nCPassword) return setAlert(passwordProgressAlert, false, "The passwords you entered did not match.");
 
-  $.post('/api/user/change_password', {old: oPassword, new: nPassword}).done(function(response) {
+  $.post('/api/user/change-password', {old: oPassword, new: nPassword}).done(function(response) {
     if(!response.success) return setAlert(passwordProgressAlert, false, parseError(response));
     window.location = "/account?hasNewPassword=true";
   }).fail(function(response){

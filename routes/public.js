@@ -2,7 +2,7 @@ const express = require('express');
 const Ratelimit = require('express-brute');
 
 const UsernamePickerController = require("../controllers/UsernamePickerController");
-const PasswordResetController = require("../controllers/PasswordResetController");
+const PasswordChangeController = require("../controllers/PasswordChangeController");
 const GuidelineController = require("../controllers/GuidelineController");
 const SignInController = require("../controllers/SignInController");
 const SignUpController = require("../controllers/SignUpController");
@@ -26,7 +26,7 @@ function PublicRouter(app) {
     });
 
     router.post('/pick-username', UsernamePickerController.postUsername);
-    router.post('/force-pw-reset', PasswordResetController.postPassword);
+    router.post('/force-pw-reset', PasswordChangeController.postSelfServeForcedPassword);
 
     const signupRatelimit = new Ratelimit(require('../util/RatelimitStore')(), {
         freeRetries: 3, // 3 signups per hour
