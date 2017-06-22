@@ -127,6 +127,12 @@ function APIRouter(app) {
         return res.json({ success: true, online: { count: app.websocketServer.connectedClients } });
     });
 
+    router.get('/active-now', function(req, res, next) {
+        app.userActivityController.getInfo().then(info => {
+            return res.json({ success: true, active: info });
+        }).catch(err => res.status(500).json({success: false}))
+    });
+
     router.get('/pixel', function(req, res, next) {
         function fail(err) {
             app.reportError("Pixel data retrieve error: " + err);
@@ -186,6 +192,7 @@ function APIRouter(app) {
          ChatMessage.createMessage(app, req.user.id, req.body.text, req.body.x, req.body.y).then(message => {
              var info = message.getInfo().then(info => {
                 res.json({ success: true, message: info });
+                app.userActivityController.recordActivity(req.user);
                 ActionLogger.log("sendChatMessage", req.user, null, { messageID: info.id });
                 app.websocketServer.broadcast("new_message", info);
              }).catch(err => res.json({ success: true }))

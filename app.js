@@ -1,18 +1,18 @@
-const ResponseFactory = require("./util/ResponseFactory");
 const config = require('./config/config');
 const mongoose = require('mongoose');
-const PaintingHandler = require("./util/PaintingHandler");
 const recaptcha = require('express-recaptcha');
-const HTTPServer = require("./util/HTTPServer");
-const WebsocketServer = require("./util/WebsocketServer");
-const TemporaryUserInfo = require("./util/TemporaryUserInfo");
 const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
 const del = require('del');
-const pump = require('pump');
+const PaintingHandler = require("./util/PaintingHandler");
+const ResponseFactory = require("./util/ResponseFactory");
+const HTTPServer = require("./util/HTTPServer");
+const WebsocketServer = require("./util/WebsocketServer");
+const TemporaryUserInfo = require("./util/TemporaryUserInfo");
 const ErrorTracker = require("./util/ErrorTracker");
 const LeaderboardManager = require("./util/LeaderboardManager");
+const UserActivityController = require("./util/UserActivityController");
 
 let paths = {
     scripts: {
@@ -62,6 +62,7 @@ app.paintingHandler.loadImageFromDatabase().then((image) => {
 
 app.leaderboardManager = LeaderboardManager(app);
 app.responseFactory = ResponseFactory(app);
+app.userActivityController = UserActivityController(app);
 
 app.enableCaptcha = false;
 if(typeof app.config.recaptcha !== 'undefined') {
