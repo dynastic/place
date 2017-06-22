@@ -876,7 +876,7 @@ var place = {
                     var rank = data.pixel.user.statistics.leaderboardRank;
                     if(rank !== null) {
                         popover.find(".rank-container").show();
-                        popover.find(".rank-label").removeClass("label-info label-success").addClass(rank <= 25 ? "label-success" : "label-info").text(`Ranked #${rank.toLocaleString()}`);
+                        popover.find(".rank-label").removeClass("label-info label-success").addClass(`label-${rank <= 25 ? (rank <= 5 ? "danger" : "success") : "info"}`).text(`Ranked #${rank.toLocaleString()}`);
                         
                     } else popover.find(".rank-container").hide();
                     if (data.pixel.user.admin) popover.find("#pixel-badge").show().text("Admin");
