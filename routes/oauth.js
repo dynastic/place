@@ -1,6 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 require('../util/passport')(passport);
+const OAuthController = require("../controllers/OAuthController");
 
 function OAuthRouter(app) {
     let router = express.Router()
