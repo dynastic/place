@@ -3,7 +3,6 @@ const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 const Pixel = require('./pixel');
 const Access = require('./access');
-const config = require("../config/config");
 const dataTables = require("mongoose-datatables");
 
 var UserSchema = new Schema({
@@ -217,7 +216,7 @@ UserSchema.methods.addPixel = function(colour, x, y, callback) {
     });
 }
 
-UserSchema.methods.getPlaceSecondsRemaining = function() {
+UserSchema.methods.getPlaceSecondsRemaining = function(app) {
     if (this.admin) return 0;
     if (this.lastPlace) {
         let current = new Date().getTime();
@@ -231,8 +230,8 @@ UserSchema.methods.getPlaceSecondsRemaining = function() {
     return 0;
 }
 
-UserSchema.methods.canPlace = function() {
-    return this.getPlaceSecondsRemaining() <= 0;
+UserSchema.methods.canPlace = function(app) {
+    return this.getPlaceSecondsRemaining(app) <= 0;
 }
 
 UserSchema.methods.findSimilarIPUsers = function() {

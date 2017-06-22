@@ -40,7 +40,6 @@
     "passport-reddit": "^0.2.4",
     "passport-twitter": "^1.0.4",
     "pump": "^1.0.2",
-    "require-reload": "^0.2.2",
     "socket.io": "^1.7.3"
   }
 }

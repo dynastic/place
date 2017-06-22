@@ -1,5 +1,4 @@
 const express = require('express');
-const config = require('../config/config');
 const jwt = require('jwt-simple');
 const passport = require('passport');
 require('../util/passport')(passport);
@@ -43,7 +42,7 @@ function APIRouter(app) {
         if (!req.body.username || !req.body.password) return res.status(400).json({ success: false, error: { message: 'A username and password are required.', code: 'invalid_parameters' } });
         passport.authenticate('local', { session: false }, function(err, user, info) {
             if (!user) return res.status(500).json({ success: false, error: info.error || { message: "An unknown error occurred." } });
-            let token = jwt.encode(user, config.secret);
+            let token = jwt.encode(user, app.config.secret);
             res.json({ success: true, token: `JWT ${token}`, user: user.toInfo(app) }); // create and return jwt token here
         })(req, res, next);
     });
@@ -95,7 +94,7 @@ function APIRouter(app) {
              if (!legit.verify(req)) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
          }
         function paintWithUser(user) {
-            if (!user.canPlace()) return res.status(429).json({ success: false, error: { message: "You cannot place yet.", code: "slow_down" } });
+            if (!user.canPlace(app)) return res.status(429).json({ success: false, error: { message: "You cannot place yet.", code: "slow_down" } });
             if (!req.body.x || !req.body.y || !req.body.colour) return res.status(400).json({ success: false, error: { message: "You need to include all paramaters", code: "invalid_parameters" } });
             var x = Number.parseInt(req.body.x), y = Number.parseInt(req.body.y);
             if(Number.isNaN(x) || Number.isNaN(y)) return res.status(400).json({ success: false, error: { message: "Your coordinates were incorrectly formatted", code: "invalid_parameters" } });
@@ -103,7 +102,7 @@ function APIRouter(app) {
             if (!rgb) return res.status(400).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
             app.paintingHandler.doPaint(rgb, x, y, user).then(pixel => {
                 return User.findById(user.id).then(user => {
-                    var seconds = user.getPlaceSecondsRemaining();
+                    var seconds = user.getPlaceSecondsRemaining(app);
                     var countData = { canPlace: seconds <= 0, seconds: seconds };
                     return res.json({ success: true, timer: countData })
                 }).catch(err => res.json({ success: true }));
@@ -117,8 +116,8 @@ function APIRouter(app) {
 
     router.get('/timer', requireUser, function(req, res, next) {
         function getTimerPayload(user) {
-            let seconds = user.getPlaceSecondsRemaining();
-            let countData = { canPlace: seconds <= 0, seconds: seconds };
+            var seconds = user.getPlaceSecondsRemaining(app);
+            var countData = { canPlace: seconds <= 0, seconds: seconds };
             return { success: true, timer: countData };
         }
         return res.json(getTimerPayload(req.user));
@@ -178,7 +177,7 @@ function APIRouter(app) {
             return res.status(429).json({ success: false, error: { message: `You're sending messages too fast! To avoid spamming the chat, please get everything into one message if you can. You will be able to chat again in ${seconds.toLocaleString()} second${seconds == 1 ? "" : "s"}.`, code: "rate_limit" } })
         },
         handleStoreError: error => app.reportError("Chat rate limit store error: " + error),
-        proxyDepth: config.trustProxyDepth
+        proxyDepth: app.config.trustProxyDepth
     });
 
     router.post('/chat', [requireUser, chatRatelimit.prevent], function(req, res, next) {
@@ -420,7 +419,7 @@ function APIRouter(app) {
 
     // Debug APIs
 
-    if(config.debug) {
+    if(app.config.debug) {
         router.get("/trigger-error", function(req, res, next) {
             app.reportError("Oh no! An error has happened!");
             res.status(500).json({ success: false, error: { message: "The server done fucked up.", code: "debug" } });

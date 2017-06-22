@@ -13,7 +13,6 @@ const del = require('del');
 const pump = require('pump');
 const ErrorTracker = require("./util/ErrorTracker");
 const LeaderboardManager = require("./util/LeaderboardManager");
-const reload = require('require-reload')(require);
 
 let paths = {
     scripts: {
@@ -23,8 +22,9 @@ let paths = {
 }
 
 var app = {};
-app.loadConfig = () => {
-    app.config = reload('./config/config');
+app.loadConfig = (path = "./config/config") => {
+    delete require.cache[require.resolve(path)]
+    app.config = require(path);
 }
 app.loadConfig();
 app.temporaryUserInfo = TemporaryUserInfo;

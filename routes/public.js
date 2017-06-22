@@ -1,7 +1,6 @@
 const express = require('express');
 const Ratelimit = require('express-brute');
 const ratelimitStore = require('../util/RatelimitStore');
-const config = require('../config/config');
 const jwt = require('jwt-simple');
 const passport = require('passport');
 require('../util/passport')(passport);
@@ -91,7 +90,7 @@ function PublicRouter(app) {
             return renderResponse("You're doing that too fast.");   
         },
         handleStoreError: error => app.reportError("Sign up rate limit store error: " + error),
-        proxyDepth: config.trustProxyDepth
+        proxyDepth: app.config.trustProxyDepth
     });
 
     router.get('/', function(req, res) {
@@ -118,7 +117,7 @@ function PublicRouter(app) {
     });
 
     router.get('/sitemap.xml', function(req, res, next) {
-        if(typeof config.host === undefined) return next();
+        if(typeof app.config.host === undefined) return next();
         return responseFactory.sendRenderedResponse("public/sitemap.xml.html", req, res, null, "text/xml");
     });
 
@@ -195,7 +194,7 @@ function PublicRouter(app) {
         }).catch(err => next())
     });
 
-    if(typeof config.oauth !== 'undefined') {
+    if(typeof app.config.oauth !== 'undefined') {
         router.get('/auth/google', function(req, res, next) {
             passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }, function(err, user, info) {
                 if (!user) return responseFactory.sendRenderedResponse("public/signin", req, res, { error: info.error || { message: "An unknown error occurred." }, username: req.body.username });
@@ -206,13 +205,13 @@ function PublicRouter(app) {
             })(req, res, next);
         })
 
-        if (config.oauth.google.enabled) {
+        if (app.config.oauth.google.enabled) {
             router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), function(req, res) {
                 res.redirect('/?signedin=1');
             });
         }
 
-        if (config.oauth.discord.enabled) {
+        if (app.config.oauth.discord.enabled) {
             router.get('/auth/discord', passport.authenticate('discord'));
             router.get('/auth/discord/callback', passport.authenticate('discord', {
                 failureRedirect: '/signup',
@@ -222,7 +221,7 @@ function PublicRouter(app) {
             });
         }
 
-        if (config.oauth.facebook.enabled) {
+        if (app.config.oauth.facebook.enabled) {
             router.get('/auth/facebook', passport.authenticate('facebook'));
             router.get('/auth/facebook/callback', passport.authenticate('facebook', {
                 failureRedirect: '/signup',
@@ -232,7 +231,7 @@ function PublicRouter(app) {
             });
         }
 
-        if (config.oauth.github.enabled) {
+        if (app.config.oauth.github.enabled) {
             router.get('/auth/github', passport.authenticate('github'));
             router.get('/auth/github/callback', passport.authenticate('github', {
                 failureRedirect: '/signup',
@@ -242,7 +241,7 @@ function PublicRouter(app) {
             });
         }
 
-        if (config.oauth.reddit.enabled) {
+        if (app.config.oauth.reddit.enabled) {
             router.get('/auth/reddit', function(req, res, next){
                 req.session.state = Math.floor(Math.random() * 10000).toString(2);
                 passport.authenticate('reddit', {
@@ -263,7 +262,7 @@ function PublicRouter(app) {
             });
         }
 
-        if (config.oauth.twitter.enabled) {
+        if (app.config.oauth.twitter.enabled) {
             router.get('/auth/twitter', passport.authenticate('twitter'));
             router.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/signup' }), function(req, res) {
                 res.redirect('/?signedin=1');
