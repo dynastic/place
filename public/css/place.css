@@ -880,8 +880,8 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     font-weight: 500;
 }
 
-.viewing-full-map #place-canvas, .viewing-full-map #palette, .viewing-full-map #coordinates, .viewing-full-map .control-btns > div:not(.show-in-full-mode) {
-    display: none;
+.viewing-full-map #place-canvas, .viewing-full-map #palette, .viewing-full-map #coordinates, .viewing-full-map .control-btns > div:not(.show-in-full-mode), .viewing-full-map #grid {
+    display: none!important;
 }
 
 .viewing-full-map #palette-ctn > .ctn-row {

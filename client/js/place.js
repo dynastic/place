@@ -983,8 +983,6 @@ var place = {
         this.deselectColour();
         $(this.pixelDataPopover).hide();
         $("body").toggleClass("viewing-full-map");
-        $(this.grid).removeClass("show");
-        this._adjustGridButtonText();
         this.setFullMapViewScale();
         this._adjustFullButtonText();
     },
@@ -1003,4 +1001,9 @@ place.setCoordinatesButton($("#coordinates")[0]);
 $(".popout-control").click(function() {
     place.popoutController.popoutVisibilityController.open();
     place.popoutController.popoutVisibilityController.changeTab($(this).data("tab-name"));
+})
+
+$("#user-count").click(function() {
+    place.popoutController.popoutVisibilityController.open();
+    place.popoutController.popoutVisibilityController.changeTab("active-users");
 })
