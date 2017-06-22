@@ -3,7 +3,6 @@ const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 const Pixel = require('./pixel');
 const Access = require('./access');
-const config = require("../config/config");
 const dataTables = require("mongoose-datatables");
 
 var UserSchema = new Schema({
@@ -127,13 +126,17 @@ UserSchema.methods.toInfo = function(app = null) {
     return info;
 }
 
-UserSchema.methods.getInfo = function(app = null) {
+UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
         var info = this.toInfo(app);
-        this.getLatestAvailablePixel().then(pixel => {
-            info.latestPixel = pixel;
-            resolve(info);
-        }).catch(err => resolve(info));
+        if(getPixelInfo) {
+            this.getLatestAvailablePixel().then(pixel => {
+                info.latestPixel = pixel;
+                resolve(info);
+            }).catch(err => resolve(info));
+        } else {
+            return resolve(info);
+        }
     });
 }
 
@@ -213,7 +216,7 @@ UserSchema.methods.addPixel = function(colour, x, y, callback) {
     });
 }
 
-UserSchema.methods.getPlaceSecondsRemaining = function() {
+UserSchema.methods.getPlaceSecondsRemaining = function(app) {
     if (this.admin) return 0;
     if (this.lastPlace) {
         let current = new Date().getTime();
@@ -221,14 +224,14 @@ UserSchema.methods.getPlaceSecondsRemaining = function() {
         // Seconds since last place
         let diffSeconds = (current - place) / 1000;
         // Seconds before can place again
-        let remainSeconds = Math.min(config.placeTimeout, Math.max(0, config.placeTimeout - diffSeconds));
+        let remainSeconds = Math.min(app.config.placeTimeout, Math.max(0, app.config.placeTimeout - diffSeconds));
         return Math.ceil(remainSeconds);
     }
     return 0;
 }
 
-UserSchema.methods.canPlace = function() {
-    return this.getPlaceSecondsRemaining() <= 0;
+UserSchema.methods.canPlace = function(app) {
+    return this.getPlaceSecondsRemaining(app) <= 0;
 }
 
 UserSchema.methods.findSimilarIPUsers = function() {
@@ -242,7 +245,7 @@ UserSchema.methods.findSimilarIPUsers = function() {
 UserSchema.methods.getLatestAvailablePixel = function() {
     return new Promise((resolve, reject) => {
         Pixel.findOne({ editorID: this.id }, {}, { sort: { lastModified: -1 } }, function(err, pixel) {
-            if(err) resolve(null);
+            if(err || !pixel) return resolve(null);
             var info = pixel.toInfo();
             info.isLatest = pixel ? ~((pixel.lastModified - this.lastPlace) / 1000) <= 3 : false;
             resolve(info);
@@ -280,18 +283,17 @@ UserSchema.methods.getUsernameInitials = function() {
     return getInitials(this.name);
 }
 
-UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false, app = null) {
+UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false, app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
         var info = {};
         function returnInfo(error) {
             info.userError = error;
-            console.log(info);
             resolve(info);
         }
         this.findById(userID).then(user => {
             if(!overrideDataAccess && user.banned) return returnInfo("ban");
             else if(!overrideDataAccess && user.deactivated) returnInfo("deactivated");
-            user.getInfo(app).then(userInfo => {
+            user.getInfo(app, getPixelInfo).then(userInfo => {
                 info.user = userInfo;
                 resolve(info);
             }).catch(err => returnInfo("delete"));

@@ -15,10 +15,26 @@ var actions = {
             getRequestData: function(elem) {
                 return new Promise((resolve, reject) => {
                     if(elem.attr("data-user-banned") === "true") return resolve({});
-                    var reason = window.prompt("Enter a reason to ban this user for:", defaultBanReason);
-                    if(!reason) reject();
-                    if(reason.length <= 3) return reject("Your ban reason must be over three characters long.");
-                    resolve({reason: reason});
+                    bootbox.prompt({
+                        title: "Enter a ban reason",
+                        value: defaultBanReason,
+                        callback: function (reason) {
+                            if(reason == null) return reject();
+                            if(reason.length <= 3) return reject("Your ban reason must be over three characters long.");
+                            resolve({reason: reason});
+                        },
+                        buttons: {
+                            confirm: {
+                                label: 'Ban',
+                                className: 'btn-danger'
+                            },
+                            cancel: {
+                                label: 'Cancel',
+                                className: 'btn-default'
+                            }
+                        },
+                    });
+
                 })
             },
             buttonText: data => data.banned ? "Unban" : "Ban",
@@ -150,7 +166,7 @@ var renderServerActions = function() {
     return `<div class="actions-ctn">
         ${renderAction("reloadConfig", {}, "server")[0].outerHTML}
         ${renderAction("refreshClients", {}, "server")[0].outerHTML}
-        <a href="javascript:void(0);" class="btn btn-info" data-toggle="modal" data-target="#broadcastModal">Broadcast message</button>
+        <a href="javascript:void(0);" class="server-action-btn btn btn-info action-btn" data-toggle="modal" data-target="#broadcastModal">Broadcast message</button>
     </div>`
 }
 

@@ -4,7 +4,7 @@ const ActionLogger = require("../util/ActionLogger");
 
 const imageSize = 1000;
 
-function PaintingHandler(app) {
+function PaintingManager(app) {
     return {
         hasImage: false,
         imageHasChanged: false,
@@ -47,7 +47,7 @@ function PaintingHandler(app) {
                         var x = pixel.xPos, y = pixel.yPos;
                         var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB }
                         if(x >= 0 && y >= 0 && x < 1000 && y < 1000) batch.setPixel(x, y, colour);
-                    }).on("close", () => {
+                    }).on("end", () => {
                         batch.exec((err, image) => {
                             if (err) return reject(err);
                             this.hasImage = true;
@@ -57,9 +57,7 @@ function PaintingHandler(app) {
                             resolve(image);
                         });
                     }).on("error", err => reject(err));
-                }).catch(err => {
-                    reject(err);
-                })
+                }).catch(err => reject(err));
             });
         },
 
@@ -118,6 +116,7 @@ function PaintingHandler(app) {
                     var info = {x: x, y: y, colour: colour, userID: user.id};
                     app.websocketServer.broadcast("tile_placed", info);
                     ActionLogger.log("place", user, null, info);
+                    app.userActivityController.recordActivity(user);
                     app.leaderboardManager.needsUpdating = true;
                     resolve();
                 });
@@ -126,6 +125,6 @@ function PaintingHandler(app) {
     }
 }
 
-PaintingHandler.prototype = Object.create(PaintingHandler.prototype);
+PaintingManager.prototype = Object.create(PaintingManager.prototype);
 
-module.exports = PaintingHandler;
+module.exports = PaintingManager;

@@ -110,6 +110,10 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
   color: #555;
 }
 
+.dropdown-inline span.caret {
+  border-top-color: #555;
+}
+
 .dropdown-inline a.dropdown-toggle {
   padding: 5px;
   margin-left: -3px;

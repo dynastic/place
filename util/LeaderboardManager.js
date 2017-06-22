@@ -21,7 +21,7 @@ function LeaderboardManager(app) {
                 var uid = pixel.editorID.toString();
                 if(!Object.keys(pixelCounts).includes(uid)) pixelCounts[uid] = 0;
                 pixelCounts[uid]++;
-            }).on("close", () => {
+            }).on("end", () => {
                 m.pixelCounts = pixelCounts;
                 // Get top users from pixel count, put them in sortable array, sort from greatest to least, then just extract user ID
                 m.topUsers = Object.keys(pixelCounts).map(userID => [userID, pixelCounts[userID]]).sort((a, b) => b[1] - a[1]).map(a => a[0]);
@@ -32,6 +32,7 @@ function LeaderboardManager(app) {
                     this.lastUpdated = new Date();
                     // Finish all waiting for leaderboard
                     m.waitingForUpdate.forEach(callback => m.getInfo(callback));
+                    m.waitingForUpdate = [];
                     console.log("Generation of leaderboard data complete.");
                 }).catch(err => {
                     app.reportError("Couldn't update leaderboard, removal operation failed: " + err);

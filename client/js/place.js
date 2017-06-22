@@ -876,7 +876,7 @@ var place = {
                     var rank = data.pixel.user.statistics.leaderboardRank;
                     if(rank !== null) {
                         popover.find(".rank-container").show();
-                        popover.find(".rank-label").removeClass("label-info label-success").addClass(rank <= 25 ? "label-success" : "label-info").text(`Ranked #${rank.toLocaleString()}`);
+                        popover.find(".rank-label").removeClass("label-info label-success").addClass(`label-${rank <= 25 ? (rank <= 5 ? "danger" : "success") : "info"}`).text(`Ranked #${rank.toLocaleString()}`);
                         
                     } else popover.find(".rank-container").hide();
                     if (data.pixel.user.admin) popover.find("#pixel-badge").show().text("Admin");
@@ -885,10 +885,10 @@ var place = {
                     if (data.pixel.user.banned) popover.find("#pixel-user-state-badge").show().text("Banned");
                     else if (data.pixel.user.deactivated) popover.find("#pixel-user-state-badge").show().text("Deactivated");
                     else popover.find("#pixel-user-state-badge").hide();
-                    if(popover.find("#mod-user-action-ctn")[0]) popover.find("#mod-user-action-ctn").html(renderUserActions(data.pixel.user));
+                    popover.find("#user-actions-dropdown-ctn").html(renderUserActionsDropdown(data.pixel.user));
                 } else {
                     popover.find(".user-info, #pixel-badge, #pixel-user-state-badge").hide();
-                    popover.find("#mod-user-action-ctn").html("");
+                    popover.find("#user-actions-dropdown-ctn").html("");
                     popover.find("#pixel-data-username").removeAttr("href");
                     popover.find(".rank-container").hide();
                 }

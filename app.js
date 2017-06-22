@@ -1,18 +1,18 @@
-const ResponseFactory = require("./util/ResponseFactory");
 const config = require('./config/config');
 const mongoose = require('mongoose');
-const PaintingHandler = require("./util/PaintingHandler");
 const recaptcha = require('express-recaptcha');
-const HTTPServer = require("./util/HTTPServer");
-const WebsocketServer = require("./util/WebsocketServer");
-const TemporaryUserInfo = require("./util/TemporaryUserInfo");
 const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
 const del = require('del');
-const pump = require('pump');
+const PaintingManager = require("./util/PaintingManager");
+const ResponseFactory = require("./util/ResponseFactory");
+const HTTPServer = require("./util/HTTPServer");
+const WebsocketServer = require("./util/WebsocketServer");
+const TemporaryUserInfo = require("./util/TemporaryUserInfo");
 const ErrorTracker = require("./util/ErrorTracker");
 const LeaderboardManager = require("./util/LeaderboardManager");
+const UserActivityManager = require("./util/UserActivityManager");
 
 let paths = {
     scripts: {
@@ -22,8 +22,15 @@ let paths = {
 }
 
 var app = {};
-app.loadConfig = () => {
-    app.config = require('./config/config');
+app.loadConfig = (path = "./config/config") => {
+    delete require.cache[require.resolve(path)];
+    var oldConfig = app.config;
+    app.config = require(path);
+    if(oldConfig && (oldConfig.secret != app.config.secret || oldConfig.database != app.config.database)) {
+        console.log("We are stopping the Place server because the database URL and/or secret has been changed, which will require restarting the entire server.");
+        process.exit(0);
+    }
+    if(oldConfig && (oldConfig.port != app.config.port || oldConfig.onlyListenLocal != app.config.onlyListenLocal)) app.restartServer();
 }
 app.loadConfig();
 app.temporaryUserInfo = TemporaryUserInfo;
@@ -45,9 +52,9 @@ if (typeof app.config.bugSnagKey !== undefined) {
 }
 
 // Get image handler
-app.paintingHandler = PaintingHandler(app);
+app.paintingManager = PaintingManager(app);
 console.log("Loading image from the database…");
-app.paintingHandler.loadImageFromDatabase().then((image) => {
+app.paintingManager.loadImageFromDatabase().then((image) => {
     console.log("Successfully loaded image from database.");
 }).catch(err => {
     app.reportError("Error while loading the image from database: " + err);
@@ -55,6 +62,7 @@ app.paintingHandler.loadImageFromDatabase().then((image) => {
 
 app.leaderboardManager = LeaderboardManager(app);
 app.responseFactory = ResponseFactory(app);
+app.userActivityController = UserActivityManager(app);
 
 app.enableCaptcha = false;
 if(typeof app.config.recaptcha !== 'undefined') {
@@ -111,4 +119,14 @@ gulp.task('watch', () => gulp.watch(paths.scripts.src, ['scripts']));
 gulp.task('default', ['watch', 'scripts']);
 gulp.start(['watch', 'scripts'])
 
-app.server.listen(app.config.port, app.config.onlyListenLocal ? "127.0.0.1" : null);
+app.restartServer = () => {
+    if(app.server.listening) {
+        console.log("Closing server...")
+        app.server.close();
+        setImmediate(function(){app.server.emit('close')});
+    }
+    app.server.listen(app.config.port, app.config.onlyListenLocal ? "127.0.0.1" : null, null, () => {
+        console.log(`Started Place server on port ${app.config.port}${app.config.onlyListenLocal ? " (only listening locally)" : ""}.`);
+    });
+}
+app.restartServer();
