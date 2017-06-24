@@ -36,7 +36,7 @@ app.loadConfig();
 app.temporaryUserInfo = TemporaryUserInfo;
 
 // Setup error tracking
-if (typeof app.config.sentryDSN !== undefined) { 
+if (app.config.sentryDSN !== undefined) { 
     app.raven = require('raven');
     app.raven.config(app.config.sentryDSN).install()
 }
