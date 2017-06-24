@@ -1,4 +1,5 @@
 const ChatMessage = require("../models/chatMessage");
+const ActionLogger = require("../util/ActionLogger")
 
 exports.getAPIChat = (req, res, next) => {
     ChatMessage.getLatestMessages().then(messages => {
