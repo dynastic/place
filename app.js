@@ -36,20 +36,17 @@ app.loadConfig();
 app.temporaryUserInfo = TemporaryUserInfo;
 
 // Setup error tracking
+if (typeof app.config.sentryDSN !== undefined) { 
+    app.raven = require('raven');
+    app.raven.config(app.config.sentryDSN).install()
+}
+
 app.errorTracker = ErrorTracker(app);
 app.reportError = app.errorTracker.reportError;
 process.on('uncaughtException', function(err) {
     // Catch all uncaught exceptions and report them
     app.reportError(err);
 });
-
-if (typeof app.config.bugSnagKey !== undefined) {
-    // Configure bugsnag
-    app.bugsnag = require('bugsnag');
-    app.bugsnag.releaseStage = process.env.NODE_ENV;
-    app.bugsnag.notifyReleaseStages = ["production"];
-    app.bugsnag.register(app.config.bugSnagKey);
-}
 
 // Get image handler
 app.paintingManager = PaintingManager(app);

@@ -1,4 +1,4 @@
-var CachetAPI = require('cachet-api');
+const CachetAPI = require('cachet-api');
 
 function ErrorTracker(app) {
     var hasCachet = typeof app.config.cachet !== 'undefined';
@@ -13,6 +13,7 @@ function ErrorTracker(app) {
         reportError: function(error = "Unknown error!") {
             // On error: log it, and record it
             console.error(error);
+	    if (app.raven !== undefined) app.raven.captureException(error);
             errors++;
         },
 
