@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 exports.getSignUp = (req, res, next) => {
     if (req.user) return res.redirect("/");
     return req.responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: req.place.enableCaptcha });
