@@ -95,7 +95,9 @@ var popoutController = {
 
         this.setupChat();
         this.loadLeaderboard();
-        setInterval(function() { p.loadLeaderboard() }, 30000);
+        this.loadActiveUsers();
+        setInterval(function() { p.loadLeaderboard() }, 1000 * 60 * 3);
+        setInterval(function() { p.loadActiveUsers() }, 1000 * 15);
 
         this.startSocketConnection();
     },
@@ -118,8 +120,10 @@ var popoutController = {
                 this.isOutdated = false;
             }
         });
-
-        socket.onJSON("new_message", this.addChatMessage.bind(this));
+        socket.onJSON("new_message", data => {
+            this.loadActiveUsers();
+            this.addChatMessage(data);
+        });
         return socket;
     },
 
@@ -225,6 +229,12 @@ var popoutController = {
         }
     },
 
+    showTextOnTab: function(tabSelector, text) {
+        var tab = $(`.tab-content[data-tab-name=${tabSelector}]`);
+        tab.html("");
+        $("<div>").addClass("coming-soon").text(text).appendTo(tab);
+    },
+
     sendChatMessage: function() {
         var parseError = function(response) {
             var data = typeof response.error === "object" ? response : (typeof response.error().responseJSON === 'undefined' ? null : response.error().responseJSON);
@@ -245,6 +255,7 @@ var popoutController = {
         }).done(function(response) {
             if(!response.success) return alert(parseError(response));
             app.ignoreChatFocus = true;
+            app.loadActiveUsers();
             input.val("");
             input.focus();
             if(response.message) app.addChatMessage(response.message);
@@ -255,25 +266,19 @@ var popoutController = {
         })
     },
 
-    showTextOnLeaderboard: function(text) {
-        var tab = $("#leaderboardTab");
-        tab.html("");
-        $("<div>").addClass("coming-soon").text(text).appendTo(tab);
-    },
-
     loadLeaderboard: function() {
         var app = this;
         $.get("/api/leaderboard").done(function(response) {
             if(!response.success || !response.leaderboard) {
                 console.log("Failed to load leaderboard data.");
-                return app.showTextOnLeaderboard("Failed to load");
+                return app.showTextOnTab("leaderboard", "Failed to load");
             }
             app.leaderboard = response.leaderboard;
             if(response.lastUpdated) app.leaderboardUpdated = new Date(response.lastUpdated);
             app.layoutLeaderboard();
         }).fail(function() {
             console.log("Failed to load leaderboard data.");
-            app.showTextOnLeaderboard("Failed to load");
+            app.showTextOnTab("leaderboard", "Failed to load");
         });
     },
 
@@ -286,8 +291,8 @@ var popoutController = {
         }
         var tab = $("#leaderboardTab");
         tab.find("*").remove();
-        if(!this.leaderboard) return this.showTextOnLeaderboard("Loading…");
-        if(this.leaderboard.length <= 0) return this.showTextOnLeaderboard("No leaderboard data");
+        if(!this.leaderboard) return this.showTextOnTab("leaderboard", "Loading…");
+        if(this.leaderboard.length <= 0) return this.showTextOnTab("leaderboard", "No leaderboard data");
         var topPlace = $(`<div class="top-place"><i class="fa fa-trophy big-icon"></i><span class="info">Leader</span></div>`).appendTo(tab);
         var userInfo = $("<div>").addClass("leader-info").appendTo(topPlace);
         $("<a>").addClass("name").attr("href", `/@${this.leaderboard[0].username}`).text(this.leaderboard[0].username).appendTo(userInfo);
@@ -299,7 +304,7 @@ var popoutController = {
             var table = $(`<table class="table"></table>`).appendTo(tab);
             this.leaderboard.forEach((item, index) => {
                 if(index > 0) {
-                    var row = $("<tr>");
+                    var row = $("<tr>").appendTo(table);
                     $("<td>").addClass("bold").text(`${index + 1}.`).appendTo(row);
                     $("<a>").text(item.username).attr("href", `/@${item.username}`).appendTo($("<td>").appendTo(row));
                     var info1 = $("<td>").addClass("stat").appendTo(row);
@@ -308,13 +313,42 @@ var popoutController = {
                     var info2 = $("<td>").addClass("stat").appendTo(row);
                     $("<span>").text(item.statistics.totalPlaces.toLocaleString()).appendTo(info2);
                     $("<span>").text("Total").addClass("row-label").appendTo(info2);
-                    row.appendTo(table);
                 }
             });
         }
         if(this.leaderboardUpdated) $("<small>").text(`Last updated at ${this.leaderboardUpdated.toLocaleString()}.`).appendTo(tab);
         $("<p>").addClass("text-muted").text("Leaderboards are calculated based on the number of pixels you have placed (that someone else hasn't overwritten) over the span of the last week. To get a spot on the leaderboard, start placing!").appendTo(tab);
     },
+
+    loadActiveUsers: function() {
+        var app = this;
+        $.get("/api/active-now").done(function(response) {
+            if(!response.success || !response.active) {
+                console.log("Failed to load active user data.");
+                return app.showTextOnTab("active-users", "Failed to load");
+            }
+            app.activeUsers = response.active;
+            app.layoutActiveUsers();
+        }).fail(function() {
+            console.log("Failed to load active user data.");
+            app.showTextOnTab("active-users", "Failed to load");
+        });
+    },
+
+    layoutActiveUsers: function() {
+        if(this.activeUsers.length <= 0) return this.showTextOnTab("active-users", "No Active Users");
+        var tab = $("#activeUsersTab");
+        tab.find("*").remove();
+        var usersCtn = $(`<div>`).appendTo(tab);
+        this.activeUsers.forEach((item, index) => {
+            var row = $("<div>").addClass("user-info").appendTo($("<div>").addClass("user").appendTo(usersCtn));
+            $("<a>").text(item.username).addClass("username").attr("href", `/@${item.username}`).appendTo(row);
+            var lastSeen = $("<span>").text("Last seen ").addClass("last-seen").appendTo(row);
+            var date = item.statistics.lastSeenActively;
+            $("<time>").attr("datetime", date).attr("title", new Date(date).toLocaleString()).text($.timeago(date)).appendTo($("<strong>").appendTo(lastSeen));
+        });
+        $("<p>").addClass("text-muted").text("Users that are both logged in and have either placed a pixel or sent a chat message in the last five minutes will appear here.").appendTo(tab);
+    }
 }
 
 if($("body").hasClass("is-popped-out")) {

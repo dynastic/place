@@ -399,6 +399,7 @@ var place = {
     },
 
     liveUpdateTile: function (data) {
+        this.popoutController.loadActiveUsers();
         this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y);
     },
 
@@ -563,7 +564,7 @@ var place = {
         if(Clipboard.isSupported()) {
             var app = this;
             var clipboard = new Clipboard(btn);
-            $(btn).addClass("supported").tooltip({
+            $(btn).addClass("clickable").tooltip({
                 title: "Copied to clipboard!",
                 trigger: "manual",
             });
@@ -904,6 +905,7 @@ var place = {
                 x: x, y: y, colour: this.selectedColour
             }).done(data => {
                 if(data.success) {
+                    this.popoutController.loadActiveUsers();
                     a.setPixel(a.DEFAULT_COLOURS[a.selectedColour], x, y);
                     a.changeSelectorVisibility(false);
                     if(data.timer) a.doTimer(data.timer);
@@ -983,8 +985,6 @@ var place = {
         this.deselectColour();
         $(this.pixelDataPopover).hide();
         $("body").toggleClass("viewing-full-map");
-        $(this.grid).removeClass("show");
-        this._adjustGridButtonText();
         this.setFullMapViewScale();
         this._adjustFullButtonText();
     },
@@ -1003,4 +1003,9 @@ place.setCoordinatesButton($("#coordinates")[0]);
 $(".popout-control").click(function() {
     place.popoutController.popoutVisibilityController.open();
     place.popoutController.popoutVisibilityController.changeTab($(this).data("tab-name"));
+})
+
+$("#user-count").click(function() {
+    place.popoutController.popoutVisibilityController.open();
+    place.popoutController.popoutVisibilityController.changeTab("active-users");
 })

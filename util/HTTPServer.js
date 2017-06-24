@@ -16,6 +16,12 @@ function HTTPServer(app) {
     var server = express();
     var httpServer = require("http").createServer(server);
 
+    // Setup sentry bug reporting
+    if (app.raven !== undefined) {
+        server.use(app.raven.requestHandler());
+        server.use(app.raven.errorHandler());
+    }
+
     // Setup for parameters and bodies
     server.use(bodyParser.urlencoded({extended: false}));
     server.use(bodyParser.json());
@@ -29,11 +35,6 @@ function HTTPServer(app) {
 
     // Log to console
     server.use(morgan('dev'));
-
-    if (typeof app.config.bugSnagKey !== undefined) {
-        server.use(app.bugsnag.requestHandler);
-        server.use(app.bugsnag.errorHandler);
-    }
 
     server.set('trust proxy', typeof app.config.trustProxyDepth === "number" ? app.config.trustProxyDepth : 0);
 
