@@ -638,7 +638,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 .popout-btns {
-    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .popout-open .popout-btns {
