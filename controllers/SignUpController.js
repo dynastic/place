@@ -1,4 +1,5 @@
 const fs = require("fs");
+const User = require('../models/user');
 
 exports.getSignUp = (req, res, next) => {
     if (req.user) return res.redirect("/");
