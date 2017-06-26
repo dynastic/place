@@ -4,7 +4,7 @@ $(document).ready(function() {
         serverSide: true,
         aaSorting: [[2, "desc"]],
         pageLength: 25,
-        ajax: { url: "/api/admin/users", type: "POST", contentType: "application/json", data: d => JSON.stringify(d) },
+        ajax: { url: "/api/admin/users", type: "POST", contentType: "application/json", data: (d) => JSON.stringify(d) },
         columns: [
             { data: "name", defaultContent: "", render: (data) => `<a href="/@${data}">${data}</a>` },
             { data: "creationDate", defaultContent: "", render: (data, type, full) => new Date(data).toLocaleString() },
@@ -22,7 +22,7 @@ $(document).ready(function() {
             style: 'os',
             selector: 'td:not(:first-child)' // no row selection on last column
         },
-        serverParams: data => data.bChunkSearch = true
+        serverParams: (data) => data.bChunkSearch = true
     }).columns().every( function () {
         var that = this;
         $('input[type=search]', this.footer() ).attr("spellcheck", "false").attr("autocomplete", "off").attr("autocorrect", "off").attr("autocapitalize", "off").on( 'keyup change', function () {

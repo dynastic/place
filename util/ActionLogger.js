@@ -112,14 +112,14 @@ var actions = {
 }
 
 var actionLogger = {
-    log: function(actionID, performingUser, moderatingUser = null, info = null) {
+    log: function(app, actionID, performingUser, moderatingUser = null, info = null) {
         Action({
             actionID: actionID,
             performingUserID: performingUser.id,
             moderatingUserID: moderatingUser ? moderatingUser.id : null,
             info: info,
             date: new Date()
-        }).save().catch(err => app.reportError("An error occurred while trying to log action: " + err));
+        }).save().catch((err) => app.reportError("An error occurred while trying to log action: " + err));
     },
 
     infoForAction: function(actionID) {
@@ -131,7 +131,7 @@ var actionLogger = {
     },
 
     actionIDsToRetrieve: function(modOnly = false) {
-        return Object.keys(actions).filter(a => modOnly ? actions[a].isPrivileged : true);
+        return Object.keys(actions).filter((a) => modOnly ? actions[a].isPrivileged : true);
     }
 }
 

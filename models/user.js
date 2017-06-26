@@ -131,10 +131,10 @@ UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
         var info = this.toInfo(app);
         if(getPixelInfo) {
-            this.getLatestAvailablePixel().then(pixel => {
+            this.getLatestAvailablePixel().then((pixel) => {
                 info.latestPixel = pixel;
                 resolve(info);
-            }).catch(err => resolve(info));
+            }).catch((err) => resolve(info));
         } else {
             return resolve(info);
         }
@@ -164,7 +164,7 @@ UserSchema.statics.findByUsername = function(username, callback = null) {
     return this.findOne({name: {$regex: new RegExp(["^", username.toLowerCase(), "$"].join(""), "i") }}, callback)
 }
 
-UserSchema.statics.register = function(username, password, callback, OAuthID, OAuthName) {
+UserSchema.statics.register = function(username, password, app, callback, OAuthID, OAuthName) {
     if (!OAuthID && !this.isValidUsername(username)) return callback(null, { message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
     
     var Schema = this;
@@ -184,7 +184,7 @@ UserSchema.statics.register = function(username, password, callback, OAuthID, OA
         // Save the user
         newUser.save(function(err) {
             if (err) return callback(null, { message: "An account with that username already exists.", code: "username_taken" });
-            require("../util/ActionLogger").log("signUp", newUser);
+            require("../util/ActionLogger").log(app, "signUp", newUser);
             return callback(newUser, null)
         });
     }
@@ -202,9 +202,9 @@ UserSchema.statics.isValidUsername = function(username) {
     return /^[a-zA-Z0-9-_]{3,20}$/.test(username);
 }
 
-UserSchema.methods.addPixel = function(colour, x, y, callback) {
+UserSchema.methods.addPixel = function(colour, x, y, app, callback) {
     var user = this;
-    Pixel.addPixel(colour, x, y, this.id, (changed, error) => {
+    Pixel.addPixel(colour, x, y, this.id, app, (changed, error) => {
         if (changed === null) return callback(null, error);
         if(changed) {
             user.lastPlace = new Date();
@@ -237,7 +237,7 @@ UserSchema.methods.canPlace = function(app) {
 
 UserSchema.methods.findSimilarIPUsers = function() {
     return new Promise((resolve, reject) => {
-        Access.findSimilarIPUserIDs(this).then(userIDs => {
+        Access.findSimilarIPUserIDs(this).then((userIDs) => {
             this.model('User').find({ _id: { $in: userIDs } }).then(resolve).catch(reject);
         }).catch(reject);
     });
@@ -291,14 +291,14 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
             info.userError = error;
             resolve(info);
         }
-        this.findById(userID).then(user => {
+        this.findById(userID).then((user) => {
             if(!overrideDataAccess && user.banned) return returnInfo("ban");
             else if(!overrideDataAccess && user.deactivated) returnInfo("deactivated");
-            user.getInfo(app, getPixelInfo).then(userInfo => {
+            user.getInfo(app, getPixelInfo).then((userInfo) => {
                 info.user = userInfo;
                 resolve(info);
-            }).catch(err => returnInfo("delete"));
-        }).catch(err => {
+            }).catch((err) => returnInfo("delete"));
+        }).catch((err) => {
             console.log(err);
             returnInfo("delete");
         });

@@ -10,35 +10,35 @@ exports.getAPIStats = (req, res, next) => {
         return res.json({ success: true, stats: { online: req.place.websocketServer.connectedClients, signups24h: signups24h, pixelsPlaced24h: pixelsPlaced24h, pixelsPerMin: pixelsPerMin } });
     }
     function doPixelsPerMin() {
-        Pixel.count({lastModified: {$gt: dateBack20m}}).then(c => {
+        Pixel.count({lastModified: {$gt: dateBack20m}}).then((c) => {
             pixelsPerMin = Math.round(c / 20);
             finish()
-        }).catch(err => finish());
+        }).catch((err) => finish());
     }
     function doPixelsPlaced24h() {
-        Pixel.count({lastModified: {$gt: dateBack24h}}).then(c => {
+        Pixel.count({lastModified: {$gt: dateBack24h}}).then((c) => {
             pixelsPlaced24h = c;
             doPixelsPerMin()
-        }).catch(err => doPixelsPerMin());
+        }).catch((err) => doPixelsPerMin());
     }
     function doSignups24h() {
-        User.count({creationDate: {$gt: dateBack24h}}).then(c => {
+        User.count({creationDate: {$gt: dateBack24h}}).then((c) => {
             signups24h = c;
             doPixelsPlaced24h()
-        }).catch(err => doPixelsPlaced24h());
+        }).catch((err) => doPixelsPlaced24h());
     }
     doSignups24h();
 }
 
 exports.apiRefreshClients = (req, res, next) => {
     req.place.websocketServer.broadcast("reload_client");
-    ActionLogger.log("refreshClients", req.user);
+    ActionLogger.log(req.place, "refreshClients", req.user);
     res.json({success: true});
 }
 
 exports.apiReloadConfig = (req, res, next) => {
     req.place.loadConfig();
-    ActionLogger.log("reloadConfig", req.user);
+    ActionLogger.log(req.place, "reloadConfig", req.user);
     res.json({success: true});
 }
 
@@ -53,6 +53,6 @@ exports.apiBroadcastAlert = (req, res, next) => {
         style: req.body.style || "info"
     }
     req.place.websocketServer.broadcast("admin_broadcast", info);
-    ActionLogger.log("sendBroadcast", req.user, null, info);
+    ActionLogger.log(req.place, "sendBroadcast", req.user, null, info);
     res.json({success: true});
 }

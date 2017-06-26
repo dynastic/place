@@ -32,11 +32,11 @@ ActionSchema.methods.getInfo = function() {
     return new Promise((resolve, reject) => {
         var info = this.toInfo();
         if(this.performingUserID) {
-            User.findById(this.performingUserID).then(user => {
+            User.findById(this.performingUserID).then((user) => {
                 info.performingUser = user.toInfo();
                 if(this.moderatingUserID) User.findById(this.moderatingUserID).then(mod => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
                 else resolve(info);
-            }).catch(err => {
+            }).catch((err) => {
                 info.performingUser = null;
                 if(this.moderatingUserID) User.findById(this.moderatingUserID).then(mod => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
                 else resolve(info);

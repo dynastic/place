@@ -58,9 +58,9 @@ function APIRouter(app) {
     });
 
     router.get('/active-now', function(req, res, next) {
-        app.userActivityController.getInfo().then(info => {
+        app.userActivityController.getInfo().then((info) => {
             return res.json({ success: true, active: info });
-        }).catch(err => res.status(500).json({success: false}))
+        }).catch((err) => res.status(500).json({success: false}))
     });
 
     router.get('/pixel', PixelInfoController.getAPIPixelInfo);
@@ -87,7 +87,7 @@ function APIRouter(app) {
             var seconds = Math.round((nextValidRequestDate - new Date()) / 1000);
             return res.status(429).json({ success: false, error: { message: `You're sending messages too fast! To avoid spamming the chat, please get everything into one message if you can. You will be able to chat again in ${seconds.toLocaleString()} second${seconds == 1 ? "" : "s"}.`, code: "rate_limit" } })
         },
-        handleStoreError: error => app.reportError("Chat rate limit store error: " + error),
+        handleStoreError: (error) => app.reportError("Chat rate limit store error: " + error),
         proxyDepth: app.config.trustProxyDepth
     });
 
