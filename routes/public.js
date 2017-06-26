@@ -39,7 +39,7 @@ function PublicRouter(app) {
                 return req.responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
             }
             res.status(429);
-            return renderResponse("You"re doing that too fast.");   
+            return renderResponse("You're doing that too fast.");   
         },
         handleStoreError: (error) => app.reportError("Sign up rate limit store error: " + error),
         proxyDepth: app.config.trustProxyDepth
