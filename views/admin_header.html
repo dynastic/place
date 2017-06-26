@@ -11,7 +11,7 @@ var renderNavItem = function(name, itemPath) {
 %>
 <%- include('header.html', {
     pageTitle: !!pageTitle ? pageTitle + " &middot; Admin" : "Admin",
-    css: ["/css/dashboard.css", "/css/bootstrap-select.min.css"].concat(typeof css === "undefined" ? [] : css),
+    css: ["/css/dashboard.css", "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css"].concat(typeof css === "undefined" ? [] : css),
     isAdmin: true
 }) -%>
 <div class="container-fluid">
