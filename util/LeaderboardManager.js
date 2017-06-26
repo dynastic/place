@@ -61,8 +61,8 @@ function LeaderboardManager(app) {
             var index = this.topUsers.indexOf(userID);
             return index >= 0 ? index + 1 : null;
         }
-    }
-    manager.update()
+    };
+    manager.update();
     setInterval(() => manager.update(), 1000 * 60 * 3); // Update the leaderboard every 3 minutes
     return manager;
 }

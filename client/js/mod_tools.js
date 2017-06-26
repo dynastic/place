@@ -62,7 +62,7 @@ var actions = {
                     var id = elem.parent().attr("data-user-id");
                     if(!id) id = elem.parent().parent().attr("data-user-id")
                     $.get("/api/mod/user_notes", {id: id}).done(function(res) {
-                        if(!res.success || res.userNotes == null) return reject("Couldn"t fetch user notes");
+                        if(!res.success || res.userNotes == null) return reject("Couldn't fetch user notes");
                         bootbox.prompt({
                             title: "Edit user notes",
                             inputType: "textarea",
@@ -113,7 +113,7 @@ var actions = {
             buttonText: (data) => "Refresh All Clients"
         }
     }
-}
+};
 
 var setActionDataOnElement = function(data, elem, action) {
     var title = action.buttonText(data);

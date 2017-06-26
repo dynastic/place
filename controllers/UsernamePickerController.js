@@ -29,4 +29,4 @@ exports.postUsername = (req, res, next) => {
             });
         } else doPickUsername();
     });
-}
+};

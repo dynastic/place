@@ -25,7 +25,7 @@ ActionSchema.methods.toInfo = function() {
         info: this.info || [],
         moderatingUserID: this.moderatingUserID,
         date: this.date
-    }
+    };
 }
 
 ActionSchema.methods.getInfo = function() {
@@ -34,11 +34,11 @@ ActionSchema.methods.getInfo = function() {
         if(this.performingUserID) {
             User.findById(this.performingUserID).then((user) => {
                 info.performingUser = user.toInfo();
-                if(this.moderatingUserID) User.findById(this.moderatingUserID).then(mod => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
+                if(this.moderatingUserID) User.findById(this.moderatingUserID).then((mod) => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
                 else resolve(info);
             }).catch((err) => {
                 info.performingUser = null;
-                if(this.moderatingUserID) User.findById(this.moderatingUserID).then(mod => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
+                if(this.moderatingUserID) User.findById(this.moderatingUserID).then((mod) => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
                 else resolve(info);
             })
         } else {

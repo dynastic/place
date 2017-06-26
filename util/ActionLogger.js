@@ -109,7 +109,7 @@ var actions = {
         category: "administrative",
         isPrivileged: true
     }
-}
+};
 
 var actionLogger = {
     log: function(app, actionID, performingUser, moderatingUser = null, info = null) {
@@ -133,6 +133,6 @@ var actionLogger = {
     actionIDsToRetrieve: function(modOnly = false) {
         return Object.keys(actions).filter((a) => modOnly ? actions[a].isPrivileged : true);
     }
-}
+};
 
 module.exports = actionLogger;

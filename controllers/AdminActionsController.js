@@ -28,19 +28,19 @@ exports.getAPIStats = (req, res, next) => {
         }).catch((err) => doPixelsPlaced24h());
     }
     doSignups24h();
-}
+};
 
 exports.apiRefreshClients = (req, res, next) => {
     req.place.websocketServer.broadcast("reload_client");
     ActionLogger.log(req.place, "refreshClients", req.user);
     res.json({success: true});
-}
+};
 
 exports.apiReloadConfig = (req, res, next) => {
     req.place.loadConfig();
     ActionLogger.log(req.place, "reloadConfig", req.user);
     res.json({success: true});
-}
+};
 
 exports.apiBroadcastAlert = (req, res, next) => {
     if(!req.body.title || !req.body.message || !req.body.timeout) return res.status(400).json({success: false});
@@ -51,8 +51,8 @@ exports.apiBroadcastAlert = (req, res, next) => {
         message: req.body.message,
         timeout: Math.max(0, timeout),
         style: req.body.style || "info"
-    }
+    };
     req.place.websocketServer.broadcast("admin_broadcast", info);
     ActionLogger.log(req.place, "sendBroadcast", req.user, null, info);
     res.json({success: true});
-}
+};

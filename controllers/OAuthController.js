@@ -9,7 +9,7 @@ exports.getGoogle = (req, res, next) => {
             return res.redirect("/?signedin=1");
         });
     })(req, res, next);
-}
+};
 
 exports.getReddit = (req, res, next) => {
     require("../util/passport")(passport, req.place);
@@ -17,7 +17,7 @@ exports.getReddit = (req, res, next) => {
     passport.authenticate("reddit", {
         state: req.session.state
     })(req, res, next);
-}
+};
 
 exports.getRedditCallback = (req, res, next) => {
     require("../util/passport")(passport, req.place);
@@ -29,4 +29,4 @@ exports.getRedditCallback = (req, res, next) => {
         })(req, res, next);
     }
     next( new Error(403) );
-}
+};

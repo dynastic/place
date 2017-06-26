@@ -12,7 +12,7 @@ function ResponseFactory(app, root = "") {
             }
             return res.header("Content-Type", mimeType).render(template, sendData);
         }
-    }
+    };
 }
 
 

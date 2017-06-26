@@ -69,7 +69,7 @@ PixelSchema.methods.toInfo = function() {
             g: this.colourG,
             b: this.colourB
         }
-    }
+    };
 }
 
 PixelSchema.statics.addPixel = function(colour, x, y, userID, app, callback) {

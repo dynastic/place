@@ -31,7 +31,7 @@ exports.getAPIUsersTable = (req, res, next) => {
             res.status(500).json({success: false});
         });
     });
-}
+};
 
 exports.postAPIToggleModerator = (req, res, next) => {
     if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
@@ -50,7 +50,7 @@ exports.postAPIToggleModerator = (req, res, next) => {
         req.place.reportError("Error trying to get user to set moderator status on.");
         res.status(500).json({success: false})
     });
-}
+};
 
 exports.postAPIToggleBan = (req, res, next) => {
     if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
@@ -75,7 +75,7 @@ exports.postAPIToggleBan = (req, res, next) => {
         req.place.reportError("Error trying to get user to set banned status on.");
         res.status(500).json({success: false});
     });
-}
+};
 
 exports.postAPIToggleActive = (req, res, next) => {
     if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
@@ -93,7 +93,7 @@ exports.postAPIToggleActive = (req, res, next) => {
         req.place.reportError("Error trying to get user to set activation status on.");
         res.status(500).json({success: false});
     });
-}
+};
 
 exports.getAPIUserNotes = (req, res, next) => {
     if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
@@ -103,7 +103,7 @@ exports.getAPIUserNotes = (req, res, next) => {
         req.place.reportError("Error trying to get user to retrieve user notes of.");
         res.status(500).json({success: false});
     });
-}
+};
 
 exports.postAPIUserNotes = (req, res, next) => {
     if(!req.query.id) return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
@@ -120,14 +120,14 @@ exports.postAPIUserNotes = (req, res, next) => {
         req.place.reportError("Error trying to get user to set user notes on.");
         res.status(500).json({success: false});
     });
-}
+};
 
 exports.getAPISimilarUsers = (req, res, next) => {
     if(!req.params.userID || req.params.userID == "") return res.status(400).json({success: false, error: {message: "No user ID specified.", code: "bad_request"}});
     User.findById(req.params.userID).then((user) => {
         if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
         user.findSimilarIPUsers().then((users) => {
-            var identifiedAccounts = users.map((user) => { return { user: user.toInfo(req.place), reasons: ["ip"] } });
+            var identifiedAccounts = users.map((user) => { return { user: user.toInfo(req.place), reasons: ["ip"] }; });
             function respondIdentifiedAccounts() {
                 res.json({ success: true, target: user.toInfo(req.place), identifiedAccounts: identifiedAccounts })
             }
@@ -150,7 +150,7 @@ exports.getAPISimilarUsers = (req, res, next) => {
             res.status(500).json({ success: false });
         });
     }).catch((err) => res.status(400).json({success: false, error: {message: "No user with that ID exists.", code: "user_doesnt_exist"}}));
-}
+};
 
 exports.getAPIActions = (req, res, next) => {
     var condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === "true") } };
@@ -165,4 +165,4 @@ exports.getAPIActions = (req, res, next) => {
         req.place.reportError("An error occurred while trying to retrieve actions: " + err);
         res.status(500).json({ success: false });
     });
-}
+};

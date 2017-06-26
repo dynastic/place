@@ -76,7 +76,7 @@ function PopoutVisibilityController(popoutContainer) {
             $("body").toggleClass("popout-open");
             if(this.visibilityChangeCallback) this.visibilityChangeCallback();
         }
-    }
+    };
     controller._setup();
     return controller;
 }
@@ -110,7 +110,7 @@ var popoutController = {
         }
 
         socket.on("error", (e) => {
-            console.log("Socket error: " + e)
+            console.log("Socket error: " + e);
             this.isOutdated = true;
         });
         socket.on("connect", () => {
@@ -349,7 +349,7 @@ var popoutController = {
         });
         $("<p>").addClass("text-muted").text("Users that are both logged in and have either placed a pixel or sent a chat message in the last five minutes will appear here.").appendTo(tab);
     }
-}
+};
 
 if($("body").hasClass("is-popped-out")) {
     if(window.opener.place) {

@@ -9,7 +9,6 @@ function ErrorTracker(app) {
     if(apiKey && site && metricID !== null && apiKey != "" && site != "") cachet = new CachetAPI({ url: site, apiKey: apiKey });
     var errors = 0;
     var tracker = {
-
         reportError: function(error = "Unknown error!") {
             // On error: log it, and record it
             console.error(error);
@@ -29,7 +28,7 @@ function ErrorTracker(app) {
                 }).catch((err) => console.error("Couldn't publish errors to cachet: " + err));
             }
         }
-    }
+    };
     if(cachet) setInterval(tracker.handleErrorCheckingInterval, 1000 * 60);
     return tracker;
 }

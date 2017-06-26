@@ -674,7 +674,7 @@ var place = {
         return {
             x: Math.max(0, Math.min(x, size - 1)),
             y: Math.max(0, Math.min(y, size - 1))
-        }
+        };
     },
 
     contextMenu: function(event) {
@@ -992,7 +992,7 @@ var place = {
     isViewingFullMap: function() {
         return $("body").hasClass("viewing-full-map");
     }
-}
+};
 
 place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
 place.setZoomButton($("#zoom-button")[0]);

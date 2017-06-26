@@ -16,7 +16,7 @@ exports.postSelfServeForcedPassword = (req, res, next) => {
         ActionLogger.log(req.place, "changePassword", req.user);
         res.redirect("/?signedin=1");
     });
-}
+};
 
 exports.postSelfServePassword = (req, res, next) => {
     if (!req.body.old || !req.body.new) return res.status(403).json({success: false, error: {message: "Your old password and new password are required.", code: "invalid_parameters"}});
@@ -32,4 +32,4 @@ exports.postSelfServePassword = (req, res, next) => {
             return res.status(500).json({success: false});
         });
     });
-}
+};

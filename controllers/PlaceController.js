@@ -26,7 +26,7 @@ exports.postAPIPixel = (req, res, next) => {
         });
     }
     paintWithUser(req.user);
-}
+};
 
 exports.getAPITimer = (req, res, next) => {
     function getTimerPayload(user) {
@@ -35,4 +35,4 @@ exports.getAPITimer = (req, res, next) => {
         return { success: true, timer: countData };
     }
     return res.json(getTimerPayload(req.user));
-}
+};
