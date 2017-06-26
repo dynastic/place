@@ -20,7 +20,7 @@ function UserActivityManager(app) {
         getInfo: function() {
             return new Promise((resolve, reject) => {
                 User.find({_id: { $in: Object.keys(this.userActivityTimes).splice(0, 25) }}).then(users => {
-                    var info = users.sort((a, b) => this.userActivityTimes[b._id] > this.userActivityTimes[a._id] ? 1 : -1).map(u => u.toInfo(app));
+                    var info = users.sort((a, b) => this.userActivityTimes[b._id] - this.userActivityTimes[a._id]).map(u => u.toInfo(app));
                     resolve(info);
                 }).catch(err => reject(err));
             });

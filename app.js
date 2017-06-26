@@ -13,6 +13,7 @@ const TemporaryUserInfo = require("./util/TemporaryUserInfo");
 const ErrorTracker = require("./util/ErrorTracker");
 const LeaderboardManager = require("./util/LeaderboardManager");
 const UserActivityManager = require("./util/UserActivityManager");
+const ModuleManager = require("./util/ModuleManager");
 
 let paths = {
     scripts: {
@@ -34,6 +35,9 @@ app.loadConfig = (path = "./config/config") => {
 }
 app.loadConfig();
 app.temporaryUserInfo = TemporaryUserInfo;
+
+app.moduleManager = new ModuleManager(app);
+app.moduleManager.loadAll();
 
 // Setup error tracking
 if (app.config.sentryDSN !== undefined) { 
