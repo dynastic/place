@@ -46,7 +46,7 @@ var notificationHandler = {
 
     setup: function() {
         if(navigator.serviceWorker) {
-            navigator.serviceWorker.register('/js/build/sw.js');
+            navigator.serviceWorker.register("/js/build/sw.js");
             this.supportsNewNotificationAPI = true;
         }
     },
@@ -188,7 +188,7 @@ var place = {
 
         var handleKeyEvents = function(e) {
             var kc = e.keyCode || e.which;
-            app.keyStates[kc] = e.type == 'keydown';
+            app.keyStates[kc] = e.type == "keydown";
         }
 
         document.body.onkeyup = function(e) {
@@ -266,8 +266,8 @@ var place = {
     loadImage: function() {
         return new Promise((resolve, reject) => {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', '/api/board-image', true);
-            xhr.responseType = 'blob';
+            xhr.open("GET", "/api/board-image", true);
+            xhr.responseType = "blob";
             xhr.onload = function(e) {
                 if(xhr.status == 200) {
                     var url = URL.createObjectURL(this.response);
@@ -440,7 +440,7 @@ var place = {
             var canvasContainer = $(this.zoomController).parent();
             var scale = Math.min(1, Math.min(canvasContainer.height() / size, canvasContainer.width() / size));
         }
-        $(this.canvas).css({ 'transform': `scale(${scale}, ${scale})` });
+        $(this.canvas).css({ "transform": `scale(${scale}, ${scale})` });
     },
 
     setupDisplayCanvas: function(canvas) {
@@ -849,7 +849,7 @@ var place = {
                 if(this.zooming.zooming) this.shouldShowPopover = true;
                 else popover.fadeIn(250);
                 var hasUser = !!data.pixel.user;
-                if(typeof data.pixel.userError === 'undefined') data.pixel.userError = null;
+                if(typeof data.pixel.userError === "undefined") data.pixel.userError = null;
                 popover.find("#pixel-data-username").text(hasUser ? data.pixel.user.username : this.getUserStateText(data.pixel.userError));
                 if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account");
                 else popover.find("#pixel-data-username").addClass("deleted-account");

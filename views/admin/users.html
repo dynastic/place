@@ -1,5 +1,5 @@
-<%- include('../admin_header.html', {
-    css: ['https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css']
+<%- include("../admin_header.html", {
+    css: ["https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css"]
 }) -%>
 <h1 class="page-header">Users</h1>
 <table class="table table-striped" id="users">
@@ -20,6 +20,6 @@
         <th>Actions</th>
     </tbody>
 </table>
-<%- include('../admin_footer.html', {
-    js: ["https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js, "https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js", "/js/build/admin_users.js"]
+<%- include("../admin_footer.html", {
+    js: ["https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js", "https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js", "/js/build/admin_users.js"]
 }) -%>

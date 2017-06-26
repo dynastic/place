@@ -25,12 +25,12 @@ var actions = {
                         },
                         buttons: {
                             confirm: {
-                                label: 'Ban',
-                                className: 'btn-danger'
+                                label: "Ban",
+                                className: "btn-danger"
                             },
                             cancel: {
-                                label: 'Cancel',
-                                className: 'btn-default'
+                                label: "Cancel",
+                                className: "btn-default"
                             }
                         },
                     });
@@ -62,10 +62,10 @@ var actions = {
                     var id = elem.parent().attr("data-user-id");
                     if(!id) id = elem.parent().parent().attr("data-user-id")
                     $.get("/api/mod/user_notes", {id: id}).done(function(res) {
-                        if(!res.success || res.userNotes == null) return reject("Couldn't fetch user notes");
+                        if(!res.success || res.userNotes == null) return reject("Couldn"t fetch user notes");
                         bootbox.prompt({
                             title: "Edit user notes",
-                            inputType: 'textarea',
+                            inputType: "textarea",
                             value: res.userNotes,
                             callback: function (result) {
                                 if(result == null) return reject();
@@ -73,12 +73,12 @@ var actions = {
                             },
                             buttons: {
                                 confirm: {
-                                    label: 'Save',
-                                    className: 'btn-primary'
+                                    label: "Save",
+                                    className: "btn-primary"
                                 },
                                 cancel: {
-                                    label: 'Close',
-                                    className: 'btn-default'
+                                    label: "Close",
+                                    className: "btn-default"
                                 }
                             },
                         });
@@ -181,13 +181,13 @@ var renderUserActionsDropdown = function(user) {
 }
 
 var updateUserDropdowns = function(user) {
-    $(`div.user-action-dropdown-ctn[data-user-id='${user.id}']`).html($(renderUserActionsDropdown(user))[0].innerHTML);
+    $(`div.user-action-dropdown-ctn[data-user-id="${user.id}"]`).html($(renderUserActionsDropdown(user))[0].innerHTML);
 }
 
 $("body").on("click", ".user-action-btn", function() {
     function handleError(data) {
         var error = "An unknown error occurred."
-        if(data && typeof data.error !== 'undefined' && data.error.message) error = data.error.message;
+        if(data && typeof data.error !== "undefined" && data.error.message) error = data.error.message;
         alert("Couldn't perform action on user: " + error);
     }
     var userID = $(this).parent().data("user-id");
@@ -209,7 +209,7 @@ $("body").on("click", ".user-action-btn", function() {
             setActionDataOnElement(data.user, elem, action);
             updateUserDropdowns(data.user);
             if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
-        }).fail((res) => handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON)).always(function() {
+        }).fail((res) => handleError(typeof res.responseJSON === "undefined" ? null : res.responseJSON)).always(function() {
             elem.removeClass("disabled");
             if(action.callbackModifiesText === false) elem.html(originalText);
         });
@@ -221,7 +221,7 @@ $("body").on("click", ".user-action-btn", function() {
 $("body").on("click", ".server-action-btn", function() {
     function handleError(data) {
         var error = "An unknown error occurred."
-        if(data && typeof data.error !== 'undefined' && data.error.message) error = data.error.message;
+        if(data && typeof data.error !== "undefined" && data.error.message) error = data.error.message;
         alert("Couldn't perform action: " + error);
     }
     var action = actions.server[$(this).data("server-action")];
@@ -237,7 +237,7 @@ $("body").on("click", ".server-action-btn", function() {
         action.callback(data, elem);
         if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
     }).fail(function(res) {
-        handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON);
+        handleError(typeof res.responseJSON === "undefined" ? null : res.responseJSON);
         if(action.callbackModifiesText !== false) elem.html(originalText);
     }).always(function() {
         elem.removeClass("disabled");
@@ -255,7 +255,7 @@ $("#broadcastForm").submit(function(e) {
         timeout: $(this).find("#inputBroadcastTimeout").val()
     }).done(function(data) {
         if(!data.success) return alert("Couldn't send broadcast");
-        $('#broadcastModal').modal('hide');
+        $("#broadcastModal").modal("hide");
         alert("Successfully sent out broadcast to all connected clients.");
     }).fail(function() {
         alert("Couldn't send broadcast");
@@ -273,7 +273,7 @@ function getRowForAction(action) {
         return text;
     }
     function parseActionTemplate(template, action) {
-        return eval('`' + template.replace(/\${/g, '${action.info.') + '`');
+        return eval("`" + template.replace(/\${/g, "${action.info.") + "`");
     }
     function renderUsernameText(user) {
         return `<strong><a href="/@${user.username}">${user.username}</a> ${renderUserActionsDropdown(user)}</strong>`;
@@ -287,16 +287,16 @@ function getRowForAction(action) {
     var sentenceEnd = "";
     var otherLines = "";
     if(Object.keys(action.info).length > 0) {
-        if(typeof actionTemplate.sentenceEndTextFormatting !== 'undefined') sentenceEnd = parseActionTemplate(actionTemplate.sentenceEndTextFormatting, action);
-        if(typeof actionTemplate.otherLinesTextFormatting !== 'undefined') otherLines = "<br>" + parseActionTemplate(actionTemplate.otherLinesTextFormatting, action);
-        if(typeof actionTemplate.hideInfo === 'undefined' || !actionTemplate.hideInfo) {
+        if(typeof actionTemplate.sentenceEndTextFormatting !== "undefined") sentenceEnd = parseActionTemplate(actionTemplate.sentenceEndTextFormatting, action);
+        if(typeof actionTemplate.otherLinesTextFormatting !== "undefined") otherLines = "<br>" + parseActionTemplate(actionTemplate.otherLinesTextFormatting, action);
+        if(typeof actionTemplate.hideInfo === "undefined" || !actionTemplate.hideInfo) {
             var moreInfoCtn = $("<div>").addClass("info-collapse-ctn");
             var id = `info-collapse-${randomString(16)}-${action.id}`;
             var infoCtn = $("<div>").addClass("collapse info-collapse").attr("id", id).appendTo(moreInfoCtn);
             var infoList = $("<samp>").appendTo(infoCtn);
             Object.keys(action.info).forEach((key) => {
                 var value = action.info[key];
-                if(typeof value !== 'object') {
+                if(typeof value !== "object") {
                     $("<strong>").text(key + ":").appendTo(infoList);
                     $("<span>").html(` ${value}<br>`).appendTo(infoList);
                 }
@@ -306,7 +306,7 @@ function getRowForAction(action) {
         }
     }
     var text = `${username} ${actionTxt}${sentenceEnd}</span>.${otherLines}`;
-    if(typeof actionTemplate.requiresModerator !== 'undefined' && actionTemplate.requiresModerator) {
+    if(typeof actionTemplate.requiresModerator !== "undefined" && actionTemplate.requiresModerator) {
         var modUsername = "<strong>Deleted moderator</strong>"
         if(action.moderatingUser) modUsername = renderUsernameText(action.moderatingUser);
         var text = `${modUsername} ${actionTxt} ${username}${sentenceEnd}</span>.${otherLines}`

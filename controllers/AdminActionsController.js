@@ -1,5 +1,5 @@
-const User = require('../models/user');
-const Pixel = require('../models/pixel');
+const User = require("../models/user");
+const Pixel = require("../models/pixel");
 const ActionLogger = require("../util/ActionLogger");
 
 exports.getAPIStats = (req, res, next) => {
