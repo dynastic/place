@@ -32,13 +32,13 @@ exports.getAPIStats = (req, res, next) => {
 
 exports.apiRefreshClients = (req, res, next) => {
     req.place.websocketServer.broadcast("reload_client");
-    ActionLogger.log("refreshClients", req.user);
+    ActionLogger.log(req.place, "refreshClients", req.user);
     res.json({success: true});
 }
 
 exports.apiReloadConfig = (req, res, next) => {
     req.place.loadConfig();
-    ActionLogger.log("reloadConfig", req.user);
+    ActionLogger.log(req.place, "reloadConfig", req.user);
     res.json({success: true});
 }
 
@@ -53,6 +53,6 @@ exports.apiBroadcastAlert = (req, res, next) => {
         style: req.body.style || "info"
     }
     req.place.websocketServer.broadcast("admin_broadcast", info);
-    ActionLogger.log("sendBroadcast", req.user, null, info);
+    ActionLogger.log(req.place, "sendBroadcast", req.user, null, info);
     res.json({success: true});
 }

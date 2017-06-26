@@ -164,7 +164,7 @@ UserSchema.statics.findByUsername = function(username, callback = null) {
     return this.findOne({name: {$regex: new RegExp(["^", username.toLowerCase(), "$"].join(""), "i") }}, callback)
 }
 
-UserSchema.statics.register = function(username, password, callback, OAuthID, OAuthName) {
+UserSchema.statics.register = function(username, password, app, callback, OAuthID, OAuthName) {
     if (!OAuthID && !this.isValidUsername(username)) return callback(null, { message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
     
     var Schema = this;
@@ -184,7 +184,7 @@ UserSchema.statics.register = function(username, password, callback, OAuthID, OA
         // Save the user
         newUser.save(function(err) {
             if (err) return callback(null, { message: "An account with that username already exists.", code: "username_taken" });
-            require("../util/ActionLogger").log("signUp", newUser);
+            require("../util/ActionLogger").log(app, "signUp", newUser);
             return callback(newUser, null)
         });
     }

@@ -12,7 +12,7 @@ exports.postSignUp = (req, res, next) => {
     }
     var redirectURL = typeof req.query.redirectURL !== 'undefined' ? req.query.redirectURL : null;
     function doSignup() {
-        User.register(req.body.username, req.body.password, function(user, error) {
+        User.register(req.body.username, req.body.password, req.place, function(user, error) {
             if(!user) return renderResponse(error.message);
             req.login(user, function(err) {
                 if (err) return renderResponse(null);

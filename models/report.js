@@ -29,7 +29,7 @@ var ReportSchema = new Schema({
     }
 });
 
-ReportSchema.statics.reportUser = function(reportedUser, reporter, reason, callback)  {
+ReportSchema.statics.reportUser = function(reportedUser, reporter, reason, app, callback)  {
     let report = this({
         offenderID: reportedUser,
         reporterID: reporter,
@@ -38,7 +38,7 @@ ReportSchema.statics.reportUser = function(reportedUser, reporter, reason, callb
 
     report.save(function(err) {
         if (err) return callback(null, { message: "some error fuck off out of here.", code: "fuck_off" });
-        require("../util/ActionLogger").log("report", report);
+        require("../util/ActionLogger").log(app, "report", report);
         return callback(report, null);
     });
 }

@@ -13,7 +13,7 @@ exports.postSelfServeForcedPassword = (req, res, next) => {
     req.user.passwordResetKey = null;
     req.user.save((err) => {
         if(err) return renderResponse("An unknown error occurred while trying to reset your password.");
-        ActionLogger.log("changePassword", req.user);
+        ActionLogger.log(req.place, "changePassword", req.user);
         res.redirect("/?signedin=1");
     });
 }
@@ -25,7 +25,7 @@ exports.postSelfServePassword = (req, res, next) => {
         if(!match || error) return res.status(401).json({success: false, error: {message: "The old password you entered was incorrect.", code: "incorrect_password"}});
         req.user.password = req.body.new;
         req.user.save().then(() => {
-            ActionLogger.log("changePassword", req.user);
+            ActionLogger.log(req.place, "changePassword", req.user);
             return res.json({success: true});
         }).catch((err) => {
             req.place.reportError("Password change error: " + err);

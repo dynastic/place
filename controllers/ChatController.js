@@ -20,7 +20,7 @@ exports.postAPIChatMessage = (req, res, next) => {
             var info = message.getInfo().then((info) => {
             res.json({ success: true, message: info });
             req.place.userActivityController.recordActivity(req.user);
-            ActionLogger.log("sendChatMessage", req.user, null, { messageID: info.id });
+            ActionLogger.log(req.place, "sendChatMessage", req.user, null, { messageID: info.id });
             req.place.websocketServer.broadcast("new_message", info);
             }).catch((err) => res.json({ success: true }))
         }).catch((err) => {

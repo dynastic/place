@@ -112,7 +112,7 @@ var actions = {
 }
 
 var actionLogger = {
-    log: function(actionID, performingUser, moderatingUser = null, info = null) {
+    log: function(app, actionID, performingUser, moderatingUser = null, info = null) {
         Action({
             actionID: actionID,
             performingUserID: performingUser.id,

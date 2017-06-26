@@ -40,7 +40,7 @@ exports.postAPIToggleModerator = (req, res, next) => {
         if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
         user.moderator = !user.moderator;
         user.save().then((user) => {
-            ActionLogger.log(user.moderator ? "giveModerator" : "removeModerator", user, req.user);
+            ActionLogger.log(req.place, user.moderator ? "giveModerator" : "removeModerator", user, req.user);
             res.json({success: true, user: user.toInfo()})
         }).catch((err) => {
             req.place.reportError("Error trying to save moderator status on user.");
@@ -65,7 +65,7 @@ exports.postAPIToggleBan = (req, res, next) => {
         }
         user.banned = !user.banned;
         user.save().then((user) => {
-            ActionLogger.log(user.banned ? "ban" : "unban", user, req.user, info);
+            ActionLogger.log(req.place, user.banned ? "ban" : "unban", user, req.user, info);
             res.json({success: true, user: user.toInfo()})
         }).catch((err) => {
             req.place.reportError("Error trying to save banned status on user.");
@@ -83,7 +83,7 @@ exports.postAPIToggleActive = (req, res, next) => {
         if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
         user.deactivated = !user.deactivated;
         user.save().then((user) => {
-            ActionLogger.log(user.deactivated ? "deactivateOther" : "activateOther", user, req.user);
+            ActionLogger.log(req.place, user.deactivated ? "deactivateOther" : "activateOther", user, req.user);
             res.json({success: true, user: user.toInfo()})
         }).catch((err) => {
             req.place.reportError("Error trying to save activation status on user.");
@@ -110,7 +110,7 @@ exports.postAPIUserNotes = (req, res, next) => {
     User.findById(req.query.id).then((user) => {
         user.userNotes = req.body.notes;
         user.save().then((user) => {
-            ActionLogger.log("updateNotes", user, req.user);
+            ActionLogger.log(req.place, "updateNotes", user, req.user);
             res.json({success: true, user: user.toInfo()})
         }).catch((err) => {
             req.place.reportError("Error trying to save user notes.");
