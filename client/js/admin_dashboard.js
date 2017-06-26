@@ -1,7 +1,3 @@
-$(document).ready(function() {
-    reloadData();
-});
-
 function reloadData() {
     $.get("/api/admin/stats", function(data) {
         $("#users-online").text(data.stats.online.toLocaleString());
@@ -12,3 +8,7 @@ function reloadData() {
         setTimeout(reloadData, 2000);
     });
 }
+
+$(document).ready(function() {
+    reloadData();
+});

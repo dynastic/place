@@ -1,10 +1,10 @@
 const path = require("path");
-const fs = require('fs');
+const fs = require("fs");
 const User = require("../models/user");
 
 exports.postAPIPixel = (req, res, next) => {
-    if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
-        const legit = require('../util/legit');
+    if (fs.existsSync(path.join(__dirname, "../util/", "legit.js"))) {
+        const legit = require("../util/legit");
         if (!legit.verify(req)) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
     }
     function paintWithUser(user) {

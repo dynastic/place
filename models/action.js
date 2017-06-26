@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const User = require('./user');
+const User = require("./user");
 
 var ActionSchema = new Schema({
     actionID: {
@@ -47,4 +47,4 @@ ActionSchema.methods.getInfo = function() {
     })
 }
 
-module.exports = mongoose.model('Action', ActionSchema);
+module.exports = mongoose.model("Action", ActionSchema);

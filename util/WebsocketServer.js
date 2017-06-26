@@ -10,9 +10,9 @@ function WebsocketServer(app, httpServer) {
 
         setup: function() {
             var a = this;
-            this.server.on('connection', (socket) => {
+            this.server.on("connection", (socket) => {
                 a.connectedClients++;
-                socket.on('disconnect', function () {
+                socket.on("disconnect", function () {
                     a.connectedClients--;
                 });
             });

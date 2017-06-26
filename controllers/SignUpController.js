@@ -1,5 +1,5 @@
 const fs = require("fs");
-const User = require('../models/user');
+const User = require("../models/user");
 
 exports.getSignUp = (req, res, next) => {
     if (req.user) return res.redirect("/");
@@ -10,7 +10,7 @@ exports.postSignUp = (req, res, next) => {
     function renderResponse(errorMsg) {
         return req.responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: req.place.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
     }
-    var redirectURL = typeof req.query.redirectURL !== 'undefined' ? req.query.redirectURL : null;
+    var redirectURL = typeof req.query.redirectURL !== "undefined" ? req.query.redirectURL : null;
     function doSignup() {
         User.register(req.body.username, req.body.password, req.place, function(user, error) {
             if(!user) return renderResponse(error.message);

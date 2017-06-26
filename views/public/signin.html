@@ -1,10 +1,10 @@
-<%- include('../header.html', {
+<%- include("../header.html", {
     pageTitle: "Sign in",
     css: ["/css/signin.css"]
 }) -%>
 <%
-if(typeof username === 'undefined') username = "";
-if(typeof error === 'undefined') error = null;
+if(typeof username === "undefined") username = "";
+if(typeof error === "undefined") error = null;
 %>
 <div class="container">
     <form class="form-signin" method="POST">
@@ -18,7 +18,7 @@ if(typeof error === 'undefined') error = null;
         <% if(error) { %>
             <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %></div>
         <% } %>
-        <%- include('views/social-buttons.html') -%>
+        <%- include("views/social-buttons.html") -%>
     </form>
 </div> <!-- /container -->
-<%- include('../footer.html') -%>
+<%- include("../footer.html") -%>

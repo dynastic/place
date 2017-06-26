@@ -1,9 +1,7 @@
-<%- include('../admin_header.html', {
-    css: ['/css/dataTables.bootstrap.min.css']
-}) -%>
+<%- include("../admin_header.html") -%>
 <div class="page-header">
     <h1>Similar Accounts</h1>
-    <p class="lead">Accounts identified to be similar to '<%- target.name -%>'.</p>
+    <p class="lead">Accounts identified to be similar to "<%- target.name -%>".</p>
     <a href="/admin/users">&laquo; Back to users</a>
 </div>
 <div id="data">
@@ -15,7 +13,7 @@
     </div>
 </div>
 <script>var userID = "<%- target._id -%>";</script>
-<%- include('../admin_footer.html', {
-    js: ["/js/jquery.timeago.js", "/js/build/admin_similar_users.js"],
+<%- include("../admin_footer.html", {
+    js: ["https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js", "/js/build/admin_similar_users.js"],
     jsSnippets: [`var defaultBanReason = "Alternate account of ${target.name}";`]
 }) -%>

@@ -1,17 +1,17 @@
-const JwtStrategy = require('passport-jwt').Strategy,
-    LocalStrategy = require('passport-local').Strategy,
-    ExtractJwt = require('passport-jwt').ExtractJwt,
-    GoogleStrategy = require('passport-google-oauth20').Strategy,
-    RedditStrategy = require('passport-reddit').Strategy,
-    DiscordStrategy = require('passport-discord').Strategy,
-    TwitterStrategy = require('passport-twitter').Strategy,
-    GithubStrategy = require('passport-github').Strategy,
-    FacebookStrategy = require('passport-facebook').Strategy;
+const JwtStrategy = require("passport-jwt").Strategy,
+    LocalStrategy = require("passport-local").Strategy,
+    ExtractJwt = require("passport-jwt").ExtractJwt,
+    GoogleStrategy = require("passport-google-oauth20").Strategy,
+    RedditStrategy = require("passport-reddit").Strategy,
+    DiscordStrategy = require("passport-discord").Strategy,
+    TwitterStrategy = require("passport-twitter").Strategy,
+    GithubStrategy = require("passport-github").Strategy,
+    FacebookStrategy = require("passport-facebook").Strategy;
 
 // Get user model
-const User = require('../models/user');
-const config = require('../config/config');
-const ActionLogger = require('../util/ActionLogger');
+const User = require("../models/user");
+const config = require("../config/config");
+const ActionLogger = require("../util/ActionLogger");
 
 module.exports = function(passport, app) {
     var opts = {};
@@ -69,7 +69,7 @@ module.exports = function(passport, app) {
         });
     }
 
-    if(typeof config.oauth !== 'undefined') {
+    if(typeof config.oauth !== "undefined") {
         if (config.oauth.google.enabled) {
             passport.use(new GoogleStrategy({
                 clientID: config.oauth.google.clientID,

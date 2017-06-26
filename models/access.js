@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const User = require('./user');
+const User = require("./user");
 
 var AccessSchema = new Schema({
     userID: {
@@ -66,4 +66,4 @@ AccessSchema.statics.findSimilarIPUserIDs = function(user) {
     });
 }
 
-module.exports = mongoose.model('Access', AccessSchema);
+module.exports = mongoose.model("Access", AccessSchema);

@@ -1,1 +1,1 @@
-$(function(){$('[data-tooltip="yes"]').tooltip()})
+$(function(){$("[data-tooltip=\"yes\"]").tooltip()})

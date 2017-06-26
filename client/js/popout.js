@@ -178,7 +178,7 @@ var popoutController = {
             var messageDate = new Date(item.date);
             // Check if this message has an attached user
             var hasUser = !!item.user;
-            if(typeof item.userError === 'undefined') item.userError = null;
+            if(typeof item.userError === "undefined") item.userError = null;
             // Determine if this message should have a timestamp before it (they appear for first messages, every 10 messages without a timestamp, after 3 minute breaks, or if messages were sent on different days)
             var needsTimestamp = sinceLastTimestamp > 10 || !hasLastMessage || (messageDate - lastMessageDate > 1000 * 60 * 3) || (messageDate.toDateString() !== lastMessageDate.toDateString());
             // Determine if this message should show a username (checks if its not sent my user and if it is the first message sent, or if the message before it was sent by someone else)
@@ -237,7 +237,7 @@ var popoutController = {
 
     sendChatMessage: function() {
         var parseError = function(response) {
-            var data = typeof response.error === "object" ? response : (typeof response.error().responseJSON === 'undefined' ? null : response.error().responseJSON);
+            var data = typeof response.error === "object" ? response : (typeof response.error().responseJSON === "undefined" ? null : response.error().responseJSON);
             return data.error.message ? data.error.message : "An error occurred while trying to send your chat message.";
         }
         var app = this;

@@ -1,7 +1,7 @@
-const CachetAPI = require('cachet-api');
+const CachetAPI = require("cachet-api");
 
 function ErrorTracker(app) {
-    var hasCachet = typeof app.config.cachet !== 'undefined';
+    var hasCachet = typeof app.config.cachet !== "undefined";
     var apiKey = hasCachet ? app.config.cachet.apiKey : null;
     var site = hasCachet ? app.config.cachet.site : null;
     var metricID = hasCachet ? app.config.cachet.metricID : null;
