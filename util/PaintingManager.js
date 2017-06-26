@@ -45,7 +45,7 @@ function PaintingManager(app) {
                     let batch = image.batch();
                     Pixel.find({}).stream().on("data", (pixel) => {
                         var x = pixel.xPos, y = pixel.yPos;
-                        var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB }
+                        var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB };
                         if(x >= 0 && y >= 0 && x < 1000 && y < 1000) batch.setPixel(x, y, colour);
                     }).on("end", () => {
                         batch.exec((err, image) => {

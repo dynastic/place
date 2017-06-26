@@ -51,7 +51,7 @@ exports.apiBroadcastAlert = (req, res, next) => {
         message: req.body.message,
         timeout: Math.max(0, timeout),
         style: req.body.style || "info"
-    }
+    };
     req.place.websocketServer.broadcast("admin_broadcast", info);
     ActionLogger.log(req.place, "sendBroadcast", req.user, null, info);
     res.json({success: true});

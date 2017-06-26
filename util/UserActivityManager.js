@@ -25,7 +25,7 @@ function UserActivityManager(app) {
                 }).catch((err) => reject(err));
             });
         }
-    }
+    };
     setInterval(() => controller.update(), 1000 * 15); // 15 second update intervals
     return controller;
 }

@@ -113,7 +113,7 @@ var actions = {
             buttonText: (data) => "Refresh All Clients"
         }
     }
-}
+};
 
 var setActionDataOnElement = function(data, elem, action) {
     var title = action.buttonText(data);

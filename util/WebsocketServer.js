@@ -39,7 +39,7 @@ function WebsocketServer(app, httpServer) {
                 this.sendConnectedClientBroadcast();
             }
         }
-    }
+    };
     obj.setup();
     return obj;
 }
