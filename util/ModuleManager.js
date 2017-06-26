@@ -100,6 +100,17 @@ class ModuleManager {
         if(!meta.conflicts) meta.conflicts = [];
         return meta;
     }
+
+    // --- Resource Loading ---
+
+    getResourcesFromModules(req) {
+        var resources = { css: [], js: [] };
+        this.modules.forEach((module) => {
+            if(typeof module.getCSSResourceList === "function") resources.css = resources.css.concat(module.getCSSResourceList(req));
+            if(typeof module.getJSResourceList === "function") resources.js = resources.js.concat(module.getJSResourceList(req));
+        });
+        return resources;
+    }
 }
 
 ModuleManager.prototype = Object.create(ModuleManager.prototype);
