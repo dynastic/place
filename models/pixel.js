@@ -106,7 +106,7 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
                 callback(true, null); // report back that we changed the pixel
             }).catch(err => {
                 app.reportError("Error saving pixel for update: " + err);
-                callback(null, { message: "An error occurred while trying to place the pixel. (s2)" })
+                callback(null, { message: "An error occurred while trying to place the pixel." })
             })
         } else {
             // report back that we didn't change the pixel
@@ -114,7 +114,7 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
         }
     }).catch(err => {
         app.reportError("Error reading pixel for update: " + err);
-        callback(null, { message: "An error occurred while trying to place the pixel. (f2)" })
+        callback(null, { message: "An error occurred while trying to place the pixel." })
     });
 }
 
