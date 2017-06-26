@@ -131,7 +131,7 @@ class ModuleManager {
     getAllPublicDirectoriesToRegister() {
         return new Promise((resolve, reject) => {
             var promises = Object.keys(this.moduleMetas).map((module) => this.getRegisteredPublicDirectoriesForModule(this.moduleMetas[module]));
-            Promise.all(promises).then(directories => resolve(directories.filter((o) => !!o))).catch(err => {
+            Promise.all(promises).then((directories) => resolve(directories.filter((o) => !!o))).catch((err) => {
                 this.app.reportError("Error loading public directories for modules: " + err);
                 resolve();
             });
@@ -144,6 +144,39 @@ class ModuleManager {
             fs.stat(publicPath, (err, stat) => {
                 if(err || !stat.isDirectory()) return resolve(null);
                 resolve({root: meta.publicRoot, middleware: express.static(publicPath)});
+            });
+        });
+    }
+
+    // --- Registering More Routes ---
+
+    getRoutesToRegister() {
+        return new Promise((resolve, reject) => {
+            var promises = Object.keys(this.moduleMetas).map((module) => this.getRoutesToRegisterForModule(this.moduleMetas[module]));
+            Promise.all(promises).then((routes) => resolve(routes.filter((o) => !!o))).catch((err) => {
+                this.app.reportError("Error loading routes for modules: " + err);
+                resolve();
+            });
+        });
+    }
+
+    getRoutesToRegisterForModule(meta) {
+        return new Promise((resolve, reject) => {
+            var promises = meta.routes.filter((info) => info.path && info.file).map((info) => this.getRouterForRouterInformationAndMeta(info, meta));
+            Promise.all(promises).then((routes) => resolve(routes)).catch((err) => {
+                this.app.reportError(`Error loading routes for module "${meta.name}" (${meta.identifier}): ${err}`);
+                resolve();
+            });
+        });
+    }
+
+    getRouterForRouterInformationAndMeta(routerInfo, meta) {
+        return new Promise((resolve, reject) => {
+            var routerPath = path.join(path.join(this.modulePaths[meta.identifier], "routes"), routerInfo.file);
+            fs.stat(routerPath, (err, stat) => {
+                if(err || stat.isDirectory()) return resolve(null);
+                var Router = require(routerPath);
+                resolve({root: routerInfo.path, middleware: Router(this.app)});
             });
         });
     }
