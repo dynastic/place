@@ -294,7 +294,7 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
         this.findById(userID).then((user) => {
             if(!overrideDataAccess && user.banned) return returnInfo("ban");
             else if(!overrideDataAccess && user.deactivated) returnInfo("deactivated");
-            user.getInfo(app, getPixelInfo).then((info) => {
+            user.getInfo(app, getPixelInfo).then((userInfo) => {
                 info.user = userInfo;
                 resolve(info);
             }).catch((err) => returnInfo("delete"));

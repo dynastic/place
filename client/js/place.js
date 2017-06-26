@@ -219,7 +219,7 @@ var place = {
         this.changeUserCount(null);
         this.loadUserCount().then((online) => {
             this.userCountChanged(online);
-        }).catch((err) => $(this.userCountElement).hide())
+        }).catch((err) => $(this.userCountElement).hide());
 
         this.socket = this.startSocketConnection();
 
