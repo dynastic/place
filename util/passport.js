@@ -1,19 +1,19 @@
-const JwtStrategy = require('passport-jwt').Strategy,
-    LocalStrategy = require('passport-local').Strategy,
-    ExtractJwt = require('passport-jwt').ExtractJwt,
-    GoogleStrategy = require('passport-google-oauth20').Strategy,
-    RedditStrategy = require('passport-reddit').Strategy,
-    DiscordStrategy = require('passport-discord').Strategy,
-    TwitterStrategy = require('passport-twitter').Strategy,
-    GithubStrategy = require('passport-github').Strategy,
-    FacebookStrategy = require('passport-facebook').Strategy;
+const JwtStrategy = require("passport-jwt").Strategy,
+    LocalStrategy = require("passport-local").Strategy,
+    ExtractJwt = require("passport-jwt").ExtractJwt,
+    GoogleStrategy = require("passport-google-oauth20").Strategy,
+    RedditStrategy = require("passport-reddit").Strategy,
+    DiscordStrategy = require("passport-discord").Strategy,
+    TwitterStrategy = require("passport-twitter").Strategy,
+    GithubStrategy = require("passport-github").Strategy,
+    FacebookStrategy = require("passport-facebook").Strategy;
 
 // Get user model
-const User = require('../models/user');
-const config = require('../config/config');
-const ActionLogger = require('../util/ActionLogger');
+const User = require("../models/user");
+const config = require("../config/config");
+const ActionLogger = require("../util/ActionLogger");
 
-module.exports = function(passport) {
+module.exports = function(passport, app) {
     var opts = {};
     opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
     opts.secretOrKey = config.secret;
@@ -41,7 +41,7 @@ module.exports = function(passport) {
                 } else {
                     return user.comparePassword(password, function(err, match) {
                         if (match && !err) {
-                            ActionLogger.log("signIn", user, null, {method: "normal"});
+                            ActionLogger.log(app, "signIn", user, null, {method: "normal"});
                             return done(null, user);
                         }
                         done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
@@ -58,18 +58,18 @@ module.exports = function(passport) {
             if(err) return done(err, false);
             if(user) {
                 if(user.isOauth !== true) return done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
-                ActionLogger.log("signIn", user, null, {method: "oauth"});
+                ActionLogger.log(app, "signIn", user, null, {method: "oauth"});
                 return done(null, user);
             }
             // Even though we don't use the password field, it's better to set it to *SOMETHING* unique
-            User.register(prefix + "_" + id + "-" + Math.floor(Math.random() * 1000000), prefix + "_" + id, function(user, error) {
+            User.register(prefix + "_" + id + "-" + Math.floor(Math.random() * 1000000), prefix + "_" + id, app, function(user, error) {
                 if(!user) return done(null, false, error);
                 done(null, user);
             }, prefix + "_" + id, name);
         });
     }
 
-    if(typeof config.oauth !== 'undefined') {
+    if(typeof config.oauth !== "undefined") {
         if (config.oauth.google.enabled) {
             passport.use(new GoogleStrategy({
                 clientID: config.oauth.google.clientID,

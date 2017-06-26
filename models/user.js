@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const bcrypt = require('bcrypt');
-const Pixel = require('./pixel');
-const Access = require('./access');
+const bcrypt = require("bcrypt");
+const Pixel = require("./pixel");
+const Access = require("./access");
 const dataTables = require("mongoose-datatables");
 
 var UserSchema = new Schema({
@@ -59,7 +59,7 @@ var UserSchema = new Schema({
         required: true,
         validate: {
             validator: Number.isInteger,
-            message: '{VALUE} is not a valid integer'
+            message: "{VALUE} is not a valid integer"
         },
         default: 0
     },
@@ -80,9 +80,9 @@ var UserSchema = new Schema({
     }
 });
 
-UserSchema.pre('save', function(next) {
+UserSchema.pre("save", function(next) {
     let user = this;
-    if (this.isModified('password') || this.isNew) {
+    if (this.isModified("password") || this.isNew) {
         bcrypt.genSalt(10, function(err, salt) {
             if (err) return next(err);
             bcrypt.hash(user.password, salt, function(err, hash) {
@@ -116,14 +116,14 @@ UserSchema.methods.toInfo = function(app = null) {
         },
         banned: this.banned,
         deactivated: this.deactivated
-    }
+    };
     if(app) {
         info.statistics.placesThisWeek = app.leaderboardManager.pixelCounts[this.id];
         info.statistics.leaderboardRank = app.leaderboardManager.getUserRank(this.id);
         info.statistics.lastSeenActively = app.userActivityController.userActivityTimes[this.id];
     }
-    if(typeof info.statistics.placesThisWeek === 'undefined') info.statistics.placesThisWeek = null;
-    if(typeof info.statistics.leaderboardRank === 'undefined') info.statistics.leaderboardRank = null;
+    if(typeof info.statistics.placesThisWeek === "undefined") info.statistics.placesThisWeek = null;
+    if(typeof info.statistics.leaderboardRank === "undefined") info.statistics.leaderboardRank = null;
     return info;
 }
 
@@ -131,10 +131,10 @@ UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
         var info = this.toInfo(app);
         if(getPixelInfo) {
-            this.getLatestAvailablePixel().then(pixel => {
+            this.getLatestAvailablePixel().then((pixel) => {
                 info.latestPixel = pixel;
                 resolve(info);
-            }).catch(err => resolve(info));
+            }).catch((err) => resolve(info));
         } else {
             return resolve(info);
         }
@@ -142,8 +142,8 @@ UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
 }
 
 UserSchema.methods.loginError = function() {
-    if(this.banned === true) return { message: "You are banned from using this service due to violations of the rules.", code: "banned" }
-    if(this.deactivated === true) return { message: "Your account has been deactivated. Please contact the moderators via Discord to reactivate your account.", code: "deactivated"}
+    if(this.banned === true) return { message: "You are banned from using this service due to violations of the rules.", code: "banned" };
+    if(this.deactivated === true) return { message: "Your account has been deactivated. Please contact the moderators via Discord to reactivate your account.", code: "deactivated"};
     return null;
 }
 UserSchema.methods.setUserName = function(username, callback, usernameSet) {
@@ -164,7 +164,7 @@ UserSchema.statics.findByUsername = function(username, callback = null) {
     return this.findOne({name: {$regex: new RegExp(["^", username.toLowerCase(), "$"].join(""), "i") }}, callback)
 }
 
-UserSchema.statics.register = function(username, password, callback, OAuthID, OAuthName) {
+UserSchema.statics.register = function(username, password, app, callback, OAuthID, OAuthName) {
     if (!OAuthID && !this.isValidUsername(username)) return callback(null, { message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
     
     var Schema = this;
@@ -184,7 +184,7 @@ UserSchema.statics.register = function(username, password, callback, OAuthID, OA
         // Save the user
         newUser.save(function(err) {
             if (err) return callback(null, { message: "An account with that username already exists.", code: "username_taken" });
-            require("../util/ActionLogger").log("signUp", newUser);
+            require("../util/ActionLogger").log(app, "signUp", newUser);
             return callback(newUser, null)
         });
     }
@@ -202,9 +202,9 @@ UserSchema.statics.isValidUsername = function(username) {
     return /^[a-zA-Z0-9-_]{3,20}$/.test(username);
 }
 
-UserSchema.methods.addPixel = function(colour, x, y, callback) {
+UserSchema.methods.addPixel = function(colour, x, y, app, callback) {
     var user = this;
-    Pixel.addPixel(colour, x, y, this.id, (changed, error) => {
+    Pixel.addPixel(colour, x, y, this.id, app, (changed, error) => {
         if (changed === null) return callback(null, error);
         if(changed) {
             user.lastPlace = new Date();
@@ -237,8 +237,8 @@ UserSchema.methods.canPlace = function(app) {
 
 UserSchema.methods.findSimilarIPUsers = function() {
     return new Promise((resolve, reject) => {
-        Access.findSimilarIPUserIDs(this).then(userIDs => {
-            this.model('User').find({ _id: { $in: userIDs } }).then(resolve).catch(reject);
+        Access.findSimilarIPUserIDs(this).then((userIDs) => {
+            this.model("User").find({ _id: { $in: userIDs } }).then(resolve).catch(reject);
         }).catch(reject);
     });
 }
@@ -291,14 +291,14 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
             info.userError = error;
             resolve(info);
         }
-        this.findById(userID).then(user => {
+        this.findById(userID).then((user) => {
             if(!overrideDataAccess && user.banned) return returnInfo("ban");
             else if(!overrideDataAccess && user.deactivated) returnInfo("deactivated");
-            user.getInfo(app, getPixelInfo).then(userInfo => {
+            user.getInfo(app, getPixelInfo).then((userInfo) => {
                 info.user = userInfo;
                 resolve(info);
-            }).catch(err => returnInfo("delete"));
-        }).catch(err => {
+            }).catch((err) => returnInfo("delete"));
+        }).catch((err) => {
             console.log(err);
             returnInfo("delete");
         });
@@ -306,7 +306,7 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
 }
 
 UserSchema.plugin(dataTables, {
-    totalKey: 'recordsFiltered',
+    totalKey: "recordsFiltered",
 });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model("User", UserSchema);

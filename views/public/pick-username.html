@@ -1,10 +1,10 @@
-<%- include('../header.html', {
+<%- include("../header.html", {
     pageTitle: "Pick a Username",
     css: ["/css/signin.css"]
 }) -%>
 <%
-if(typeof username === 'undefined') username = "";
-if(typeof error === 'undefined') error = null;
+if(typeof username === "undefined") username = "";
+if(typeof error === "undefined") error = null;
 %>
 <div class="container">
     <form class="form-signin" method="POST" action="/pick-username">
@@ -12,7 +12,7 @@ if(typeof error === 'undefined') error = null;
         <label for="inputUsername" class="sr-only">Username</label>
         <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="username" value="<%= username %>" required autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <% if(captcha) { %><%- renderCaptcha() %><br><% } %>
-        <% if(fs.existsSync('./config/community_guidelines.md')) { %>
+        <% if(fs.existsSync("./config/community_guidelines.md")) { %>
         <div class="checkbox">
           <label>
             <input type="checkbox" name="agreeToGuidelines"> I agree to abide by the <a href="/guidelines">Community Guidelines</a>.
@@ -25,4 +25,4 @@ if(typeof error === 'undefined') error = null;
         <% } %>
     </form>
 </div> <!-- /container -->
-<%- include('../footer.html') -%>
+<%- include("../footer.html") -%>

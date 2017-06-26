@@ -1,10 +1,10 @@
 const path = require("path");
-const fs = require('fs');
+const fs = require("fs");
 const User = require("../models/user");
 
 exports.postAPIPixel = (req, res, next) => {
-    if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
-        const legit = require('../util/legit');
+    if (fs.existsSync(path.join(__dirname, "../util/", "legit.js"))) {
+        const legit = require("../util/legit");
         if (!legit.verify(req)) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
     }
     function paintWithUser(user) {
@@ -14,19 +14,19 @@ exports.postAPIPixel = (req, res, next) => {
         if(Number.isNaN(x) || Number.isNaN(y)) return res.status(400).json({ success: false, error: { message: "Your coordinates were incorrectly formatted", code: "invalid_parameters" } });
         var rgb = req.place.paintingManager.getColourRGB(req.body.colour);
         if (!rgb) return res.status(400).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
-        req.place.paintingManager.doPaint(rgb, x, y, user).then(pixel => {
-            return User.findById(user.id).then(user => {
+        req.place.paintingManager.doPaint(rgb, x, y, user).then((pixel) => {
+            return User.findById(user.id).then((user) => {
                 var seconds = user.getPlaceSecondsRemaining(req.place);
                 var countData = { canPlace: seconds <= 0, seconds: seconds };
                 return res.json({ success: true, timer: countData })
-            }).catch(err => res.json({ success: true }));
-        }).catch(err => {
+            }).catch((err) => res.json({ success: true }));
+        }).catch((err) => {
             req.place.reportError("Error placing pixel: " + err);
             res.status(500).json({ success: false, error: err })
         });
     }
     paintWithUser(req.user);
-}
+};
 
 exports.getAPITimer = (req, res, next) => {
     function getTimerPayload(user) {
@@ -35,4 +35,4 @@ exports.getAPITimer = (req, res, next) => {
         return { success: true, timer: countData };
     }
     return res.json(getTimerPayload(req.user));
-}
+};

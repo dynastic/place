@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const User = require('./user');
+const User = require("./user");
 
 var ChatMessageSchema = new Schema({
     userID: {
@@ -25,7 +25,7 @@ var ChatMessageSchema = new Schema({
         required: true,
         validate: {
             validator: Number.isInteger,
-            message: '{VALUE} is not an integer value'
+            message: "{VALUE} is not an integer value"
         }
     },
     yPos: {
@@ -33,7 +33,7 @@ var ChatMessageSchema = new Schema({
         required: true,
         validate: {
             validator: Number.isInteger,
-            message: '{VALUE} is not an integer value'
+            message: "{VALUE} is not an integer value"
         }
     }
 });
@@ -48,12 +48,12 @@ ChatMessageSchema.methods.toInfo = function() {
             x: this.xPos,
             y: this.yPos
         }
-    }
+    };
 }
 
 ChatMessageSchema.methods.getInfo = function(overrideDataAccess = false) {
     return new Promise((resolve, reject) => {
-        User.getPubliclyAvailableUserInfo(this.userID, overrideDataAccess, null, false).then(userInfo => resolve(Object.assign(this.toInfo(), userInfo))).catch(err => reject(err));
+        User.getPubliclyAvailableUserInfo(this.userID, overrideDataAccess, null, false).then((userInfo) => resolve(Object.assign(this.toInfo(), userInfo))).catch((err) => reject(err));
     })
 }
 
@@ -71,4 +71,4 @@ ChatMessageSchema.statics.getLatestMessages = function(limit = 50) {
     return this.find({ deleted: { $ne: true } }).sort({ date: -1 }).limit(limit);
 }
 
-module.exports = mongoose.model('ChatMessage', ChatMessageSchema);
+module.exports = mongoose.model("ChatMessage", ChatMessageSchema);

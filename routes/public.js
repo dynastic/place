@@ -1,5 +1,5 @@
-const express = require('express');
-const Ratelimit = require('express-brute');
+const express = require("express");
+const Ratelimit = require("express-brute");
 
 const UsernamePickerController = require("../controllers/UsernamePickerController");
 const PasswordChangeController = require("../controllers/PasswordChangeController");
@@ -25,10 +25,10 @@ function PublicRouter(app) {
         next(); // Otherwise, carry on...
     });
 
-    router.post('/pick-username', UsernamePickerController.postUsername);
-    router.post('/force-pw-reset', PasswordChangeController.postSelfServeForcedPassword);
+    router.post("/pick-username", UsernamePickerController.postUsername);
+    router.post("/force-pw-reset", PasswordChangeController.postSelfServeForcedPassword);
 
-    const signupRatelimit = new Ratelimit(require('../util/RatelimitStore')(), {
+    const signupRatelimit = new Ratelimit(require("../util/RatelimitStore")(), {
         freeRetries: 3, // 3 signups per hour
         attachResetToRequest: false,
         refreshTimeoutOnRequest: false,
@@ -41,37 +41,37 @@ function PublicRouter(app) {
             res.status(429);
             return renderResponse("You're doing that too fast.");   
         },
-        handleStoreError: error => app.reportError("Sign up rate limit store error: " + error),
+        handleStoreError: (error) => app.reportError("Sign up rate limit store error: " + error),
         proxyDepth: app.config.trustProxyDepth
     });
 
-    router.get('/', function(req, res) {
+    router.get("/", function(req, res) {
         return req.responseFactory.sendRenderedResponse("public/index", req, res);
     });
 
-    router.get('/popout', function(req, res) {
+    router.get("/popout", function(req, res) {
         return req.responseFactory.sendRenderedResponse("public/popout", req, res);
     });
 
-    router.get('/guidelines', GuidelineController.getGuidelines);
+    router.get("/guidelines", GuidelineController.getGuidelines);
 
-    router.get('/deactivated', function(req, res) {
+    router.get("/deactivated", function(req, res) {
         if(req.user) res.redirect("/");
         return responseFactory.sendRenderedResponse("public/deactivated", req, res);
     });
 
-    router.get('/sitemap.xml', function(req, res, next) {
+    router.get("/sitemap.xml", function(req, res, next) {
         if(typeof app.config.host === undefined) return next();
         return req.responseFactory.sendRenderedResponse("public/sitemap.xml.html", req, res, null, "text/xml");
     });
 
-    router.route('/signin').get(SignInController.getSignIn).post(SignInController.postSignIn);
-    router.route('/signup').get(SignUpController.getSignUp).post(SignUpController.postSignUp);
-    router.get('/signout', SignOutController.getSignOut);
+    router.route("/signin").get(SignInController.getSignIn).post(SignInController.postSignIn);
+    router.route("/signup").get(SignUpController.getSignUp).post(SignUpController.postSignUp);
+    router.get("/signout", SignOutController.getSignOut);
 
-    router.get('/account', AccountPageController.getOwnAccount);
-    router.get('/user/:userID', AccountPageController.getAccountByID);
-    router.get('/@:username', AccountPageController.getAccount);
+    router.get("/account", AccountPageController.getOwnAccount);
+    router.get("/user/:userID", AccountPageController.getAccountByID);
+    router.get("/@:username", AccountPageController.getAccount);
 
     return router;
 }

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const User = require('./user');
+const User = require("./user");
 
 var ActionSchema = new Schema({
     actionID: {
@@ -25,20 +25,20 @@ ActionSchema.methods.toInfo = function() {
         info: this.info || [],
         moderatingUserID: this.moderatingUserID,
         date: this.date
-    }
+    };
 }
 
 ActionSchema.methods.getInfo = function() {
     return new Promise((resolve, reject) => {
         var info = this.toInfo();
         if(this.performingUserID) {
-            User.findById(this.performingUserID).then(user => {
+            User.findById(this.performingUserID).then((user) => {
                 info.performingUser = user.toInfo();
-                if(this.moderatingUserID) User.findById(this.moderatingUserID).then(mod => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
+                if(this.moderatingUserID) User.findById(this.moderatingUserID).then((mod) => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
                 else resolve(info);
-            }).catch(err => {
+            }).catch((err) => {
                 info.performingUser = null;
-                if(this.moderatingUserID) User.findById(this.moderatingUserID).then(mod => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
+                if(this.moderatingUserID) User.findById(this.moderatingUserID).then((mod) => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
                 else resolve(info);
             })
         } else {
@@ -47,4 +47,4 @@ ActionSchema.methods.getInfo = function() {
     })
 }
 
-module.exports = mongoose.model('Action', ActionSchema);
+module.exports = mongoose.model("Action", ActionSchema);

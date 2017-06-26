@@ -14,4 +14,4 @@ module.exports = {
     isUserPlacing: function(user) {
         return this.usersPlacing.includes(user.id);
     }
-}
+};
