@@ -114,6 +114,19 @@ var actions = {
         }
     }
 }
+
+var setActionDataOnElement = function(data, elem, action) {
+    var title = action.buttonText(data);
+    var isPressed = false;
+    var text = title;
+    if(typeof action.icon === "function") text = `<i class="fa fa-${action.icon(data)}"></i>`
+    if(elem.hasClass("dropdown-action")) text = `<span class="text-${action.btnStyle}">${text}</span>`
+    if(typeof action.isActive === "function") isPressed = action.isActive(data);
+    if(isPressed) elem.addClass("active")
+    else elem.removeClass("active");
+    elem.html(text);
+}
+
 var renderAction = function(actionName, data = {}, type = "user", dropdown = false) {
     var action = actions[type][actionName];
     var title = action.buttonText(data);
@@ -129,18 +142,6 @@ var renderAction = function(actionName, data = {}, type = "user", dropdown = fal
         btn.addClass(`btn action-btn`);
     }
     return dropdown ? dropdownItem : btn;
-}
-
-var setActionDataOnElement = function(data, elem, action) {
-    var title = action.buttonText(data);
-    var isPressed = false;
-    var text = title;
-    if(typeof action.icon === "function") text = `<i class="fa fa-${action.icon(data)}"></i>`
-    if(elem.hasClass("dropdown-action")) text = `<span class="text-${action.btnStyle}">${text}</span>`
-    if(typeof action.isActive === "function") isPressed = action.isActive(data);
-    if(isPressed) elem.addClass("active")
-    else elem.removeClass("active");
-    elem.html(text);
 }
 
 var actionIDs = ["similar", "ban", "activation", "editUserNotes", "mod"]
