@@ -11,7 +11,7 @@ exports.postSelfServeForcedPassword = (req, res, next) => {
     if(req.user.isOauth) return renderResponse("You may not change your password as you are using an external service for login.");
     req.user.password = req.body.password;
     req.user.passwordResetKey = null;
-    req.user.save(err => {
+    req.user.save((err) => {
         if(err) return renderResponse("An unknown error occurred while trying to reset your password.");
         ActionLogger.log("changePassword", req.user);
         res.redirect("/?signedin=1");
@@ -27,7 +27,7 @@ exports.postSelfServePassword = (req, res, next) => {
         req.user.save().then(() => {
             ActionLogger.log("changePassword", req.user);
             return res.json({success: true});
-        }).catch(err => {
+        }).catch((err) => {
             req.place.reportError("Password change error: " + err);
             return res.status(500).json({success: false});
         });

@@ -131,10 +131,10 @@ UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
         var info = this.toInfo(app);
         if(getPixelInfo) {
-            this.getLatestAvailablePixel().then(pixel => {
+            this.getLatestAvailablePixel().then((pixel) => {
                 info.latestPixel = pixel;
                 resolve(info);
-            }).catch(err => resolve(info));
+            }).catch((err) => resolve(info));
         } else {
             return resolve(info);
         }
@@ -237,7 +237,7 @@ UserSchema.methods.canPlace = function(app) {
 
 UserSchema.methods.findSimilarIPUsers = function() {
     return new Promise((resolve, reject) => {
-        Access.findSimilarIPUserIDs(this).then(userIDs => {
+        Access.findSimilarIPUserIDs(this).then((userIDs) => {
             this.model('User').find({ _id: { $in: userIDs } }).then(resolve).catch(reject);
         }).catch(reject);
     });
@@ -291,14 +291,14 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
             info.userError = error;
             resolve(info);
         }
-        this.findById(userID).then(user => {
+        this.findById(userID).then((user) => {
             if(!overrideDataAccess && user.banned) return returnInfo("ban");
             else if(!overrideDataAccess && user.deactivated) returnInfo("deactivated");
-            user.getInfo(app, getPixelInfo).then(userInfo => {
+            user.getInfo(app, getPixelInfo).then((info) => {
                 info.user = userInfo;
                 resolve(info);
-            }).catch(err => returnInfo("delete"));
-        }).catch(err => {
+            }).catch((err) => returnInfo("delete"));
+        }).catch((err) => {
             console.log(err);
             returnInfo("delete");
         });

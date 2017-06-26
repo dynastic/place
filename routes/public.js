@@ -41,7 +41,7 @@ function PublicRouter(app) {
             res.status(429);
             return renderResponse("You're doing that too fast.");   
         },
-        handleStoreError: error => app.reportError("Sign up rate limit store error: " + error),
+        handleStoreError: (error) => app.reportError("Sign up rate limit store error: " + error),
         proxyDepth: app.config.trustProxyDepth
     });
 

@@ -86,7 +86,7 @@ var popoutController = {
 
     setup: function(place, popoutContainer) {
         this.popoutVisibilityController = PopoutVisibilityController(popoutContainer);
-        this.popoutVisibilityController.tabChangeCallback = name => {
+        this.popoutVisibilityController.tabChangeCallback = (name) => {
             if(name == "chat") this.scrollToChatBottom();
             else $(".tab-content.active").scrollTop(0);
         }
@@ -106,10 +106,10 @@ var popoutController = {
         var socket = this.place.socket;
 
         socket.onJSON = function(event, listener) {
-            return this.on(event, data => listener(JSON.parse(data)));
+            return this.on(event, (data) => listener(JSON.parse(data)));
         }
 
-        socket.on("error", e => {
+        socket.on("error", (e) => {
             console.log("Socket error: " + e)
             this.isOutdated = true;
         });
@@ -120,7 +120,7 @@ var popoutController = {
                 this.isOutdated = false;
             }
         });
-        socket.onJSON("new_message", data => {
+        socket.onJSON("new_message", (data) => {
             this.loadActiveUsers();
             this.addChatMessage(data);
         });
@@ -216,7 +216,7 @@ var popoutController = {
     },
 
     addChatMessage: function(message) {
-        if(this.messages.map(m => m.id).indexOf(message.id) < 0) {
+        if(this.messages.map((m) => m.id).indexOf(message.id) < 0) {
             this.messages.push(message);
             this.layoutMessages($("body").data("user-id") == message.userID);
         }
@@ -354,7 +354,7 @@ var popoutController = {
 if($("body").hasClass("is-popped-out")) {
     if(window.opener.place) {
         popoutController.setup(window.opener.place, $("#popout-container")[0]);
-        popoutController.popoutVisibilityController.tabChangeCallback = name => {
+        popoutController.popoutVisibilityController.tabChangeCallback = (name) => {
             window.opener.place.popoutController.popoutVisibilityController.changeTab(name);
         }
         window.opener.onunload = () => {

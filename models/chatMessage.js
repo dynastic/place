@@ -53,7 +53,7 @@ ChatMessageSchema.methods.toInfo = function() {
 
 ChatMessageSchema.methods.getInfo = function(overrideDataAccess = false) {
     return new Promise((resolve, reject) => {
-        User.getPubliclyAvailableUserInfo(this.userID, overrideDataAccess, null, false).then(userInfo => resolve(Object.assign(this.toInfo(), userInfo))).catch(err => reject(err));
+        User.getPubliclyAvailableUserInfo(this.userID, overrideDataAccess, null, false).then(user(info) => resolve(Object.assign(this.toInfo(), userInfo))).catch((err) => reject(err));
     })
 }
 

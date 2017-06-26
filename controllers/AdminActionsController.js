@@ -10,22 +10,22 @@ exports.getAPIStats = (req, res, next) => {
         return res.json({ success: true, stats: { online: req.place.websocketServer.connectedClients, signups24h: signups24h, pixelsPlaced24h: pixelsPlaced24h, pixelsPerMin: pixelsPerMin } });
     }
     function doPixelsPerMin() {
-        Pixel.count({lastModified: {$gt: dateBack20m}}).then(c => {
+        Pixel.count({lastModified: {$gt: dateBack20m}}).then((c) => {
             pixelsPerMin = Math.round(c / 20);
             finish()
-        }).catch(err => finish());
+        }).catch((err) => finish());
     }
     function doPixelsPlaced24h() {
-        Pixel.count({lastModified: {$gt: dateBack24h}}).then(c => {
+        Pixel.count({lastModified: {$gt: dateBack24h}}).then((c) => {
             pixelsPlaced24h = c;
             doPixelsPerMin()
-        }).catch(err => doPixelsPerMin());
+        }).catch((err) => doPixelsPerMin());
     }
     function doSignups24h() {
-        User.count({creationDate: {$gt: dateBack24h}}).then(c => {
+        User.count({creationDate: {$gt: dateBack24h}}).then((c) => {
             signups24h = c;
             doPixelsPlaced24h()
-        }).catch(err => doPixelsPlaced24h());
+        }).catch((err) => doPixelsPlaced24h());
     }
     doSignups24h();
 }

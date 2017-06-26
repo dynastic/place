@@ -6,8 +6,8 @@ var actions = {
         similar: {
             btnStyle: "info",
             type: "link",
-            getLinkURL: data => `/admin/users/similar/${data.id}`,
-            buttonText: data => "View Similar"
+            getLinkURL: (data) => `/admin/users/similar/${data.id}`,
+            buttonText: (data) => "View Similar"
         },
         ban: {
             url: "mod/toggle_ban",
@@ -37,7 +37,7 @@ var actions = {
 
                 })
             },
-            buttonText: data => data.banned ? "Unban" : "Ban",
+            buttonText: (data) => data.banned ? "Unban" : "Ban",
             getAttributes: function(data) {
                 return {"data-user-banned": data.banned};
             },
@@ -45,13 +45,13 @@ var actions = {
         activation: {
             url: "mod/toggle_active",
             btnStyle: "warning",
-            buttonText: data => data.deactivated ? "Activate" : "Deactivate",
+            buttonText: (data) => data.deactivated ? "Activate" : "Deactivate",
         },
         mod: {
             url: "admin/toggle_mod",
             btnStyle: "success",
             adminOnly: true,
-            buttonText: data => `${data.moderator ? "Remove" : "Give"} Moderator`
+            buttonText: (data) => `${data.moderator ? "Remove" : "Give"} Moderator`
         },
         editUserNotes: {
             url: "mod/user_notes",
@@ -85,7 +85,7 @@ var actions = {
                     }).fail(() => reject("Couldn't fetch user notes"));
                 })
             },
-            buttonText: data => "Edit User Notes",
+            buttonText: (data) => "Edit User Notes",
             getAttributes: function(data) {
                 return {"data-user-banned": data.banned};
             },
@@ -100,7 +100,7 @@ var actions = {
                 elem.text(actions.server.reloadConfig.buttonText(data));
                 alert("Successfully reloaded configuration from file.")
             },
-            buttonText: data => "Reload Config"
+            buttonText: (data) => "Reload Config"
         },
         refreshClients: {
             url: "admin/refresh_clients",
@@ -110,7 +110,7 @@ var actions = {
                 elem.text(actions.server.refreshClients.buttonText(data));
                 alert("Successfully refreshed all clients currently connected to websockets.")
             },
-            buttonText: data => "Refresh All Clients"
+            buttonText: (data) => "Refresh All Clients"
         }
     }
 }
@@ -158,7 +158,7 @@ var renderUserActions = function(user) {
     if(!canTouchUser(user)) return "";
     if(user._id) user.id = user._id;
     var actionCtn = $("<div>").addClass("actions-ctn").attr("data-user-id", user.id);
-    actionIDs.forEach(a => renderAction(a, user, "user").appendTo(actionCtn));
+    actionIDs.forEach((a) => renderAction(a, user, "user").appendTo(actionCtn));
     return actionCtn[0].outerHTML;
 }
 
@@ -175,7 +175,7 @@ var renderUserActionsDropdown = function(user) {
     var dropdownCtn = $("<div>").addClass("dropdown dropdown-inline user-action-dropdown-ctn").attr("data-user-id", user.id);
     var btn = $("<a>").addClass("dropdown-toggle").attr({type: "button", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": false}).html("<span class=\"caret\"></span>").appendTo(dropdownCtn);
     var dropdownList = $("<ul>").addClass("dropdown-menu").attr("data-user-id", user.id).appendTo(dropdownCtn);
-    actionIDs.forEach(a => renderAction(a, user, "user", true).appendTo(dropdownList));
+    actionIDs.forEach((a) => renderAction(a, user, "user", true).appendTo(dropdownList));
     return dropdownCtn[0].outerHTML;
 }
 
@@ -208,12 +208,12 @@ $("body").on("click", ".user-action-btn", function() {
             setActionDataOnElement(data.user, elem, action);
             updateUserDropdowns(data.user);
             if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
-        }).fail(res => handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON)).always(function() {
+        }).fail((res) => handleError(typeof res.responseJSON === 'undefined' ? null : res.responseJSON)).always(function() {
             elem.removeClass("disabled");
             if(action.callbackModifiesText === false) elem.html(originalText);
         });
     }
-    if(typeof action.getRequestData === "function") action.getRequestData($(this)).then(d => continueWithRequestData(d)).catch(err => { if(err) window.alert(err) });
+    if(typeof action.getRequestData === "function") action.getRequestData($(this)).then((d) => continueWithRequestData(d)).catch((err) => { if(err) window.alert(err) });
     else continueWithRequestData({});
 });
 
@@ -293,7 +293,7 @@ function getRowForAction(action) {
             var id = `info-collapse-${randomString(16)}-${action.id}`;
             var infoCtn = $("<div>").addClass("collapse info-collapse").attr("id", id).appendTo(moreInfoCtn);
             var infoList = $("<samp>").appendTo(infoCtn);
-            Object.keys(action.info).forEach(key => {
+            Object.keys(action.info).forEach((key) => {
                 var value = action.info[key];
                 if(typeof value !== 'object') {
                     $("<strong>").text(key + ":").appendTo(infoList);
@@ -328,7 +328,7 @@ function fetchActions(lastID, modOnly, limit, firstID, callback) {
 }
 
 function addToContainerForResponse(container, data, lastID, modOnly, limit, allowsShowMore) {
-    data.forEach(action => getRowForAction(action).appendTo(container));
+    data.forEach((action) => getRowForAction(action).appendTo(container));
     if(allowsShowMore && lastID) {
         var loading = false;
         $("<a>").addClass("btn btn-primary btn-xs").text("Load more").appendTo(container).on("click", function() {
@@ -359,7 +359,7 @@ function loadRecentActionsIntoContainer(container, limit = null, modOnly = false
         setInterval(function() {
             fetchActions(null, modOnly, limit, refreshFirstID, function(data, lastID) {
                 if(data.length > 0) refreshFirstID = data[0].id;
-                data.reverse().forEach(action => getRowForAction(action).prependTo(container));
+                data.reverse().forEach((action) => getRowForAction(action).prependTo(container));
             });
         }, 1000)
     });

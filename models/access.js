@@ -51,15 +51,15 @@ AccessSchema.statics.recordAccess = function(app, userID, userAgent, ipAddress, 
 
 AccessSchema.statics.findIPsForUser = function(user) {
     return new Promise((resolve, reject) => {
-        this.find({userID: user._id}).then(accesses => resolve(accesses.map(access => access.ipAddress))).catch(reject);
+        this.find({userID: user._id}).then((accesses) => resolve(accesses.map((access) => access.ipAddress))).catch(reject);
     });
 }
 
 AccessSchema.statics.findSimilarIPUserIDs = function(user) {
     return new Promise((resolve, reject) => {
-        this.findIPsForUser(user).then(ipAddresses => {
-            this.find({ ipAddress: { $in: ipAddresses }, userID: { $ne: user._id } }).then(accesses => {
-                var userIDs = accesses.map(access => String(access.userID));
+        this.findIPsForUser(user).then((ipAddresses) => {
+            this.find({ ipAddress: { $in: ipAddresses }, userID: { $ne: user._id } }).then((accesses) => {
+                var userIDs = accesses.map((access) => String(access.userID));
                 resolve([...new Set(userIDs)]);
             }).catch(reject);
         }).catch(reject);
