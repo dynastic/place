@@ -102,7 +102,7 @@ function PaintingManager(app) {
                 if(app.temporaryUserInfo.isUserPlacing(user)) return reject({message: "You cannot place more than one tile at once.", code: "attempted_overload"});
                 app.temporaryUserInfo.setUserPlacing(user, true);
                 // Add to DB:
-                user.addPixel(colour, x, y, (changed, err) => {
+                user.addPixel(colour, x, y, app, (changed, err) => {
                     app.temporaryUserInfo.setUserPlacing(user, false);
                     if(err) return reject(err);
                     // Paint on live image:

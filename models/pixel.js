@@ -72,7 +72,7 @@ PixelSchema.methods.toInfo = function() {
     }
 }
 
-PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
+PixelSchema.statics.addPixel = function(colour, x, y, userID, app, callback) {
     var pn = this;
     x = parseInt(x), y = parseInt(y);
     if(isNaN(x) || isNaN(y)) return callback(null, { message: "Invalid positions provided." });
@@ -81,7 +81,7 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
     this.find({
         xPos: x,
         yPos: y
-    }).then(pixels => {
+    }).then((pixels) => {
         // Find the pixel at this location
         var pixel = pixels[0];
         var wasIdentical = colour.r == 255 && colour.g == 255 && colour.b == 255; // set to identical if pixel was white
@@ -102,19 +102,19 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
             pixel.colourB = colour.b;
             pixel.lastModified = Date();
             // save the changes
-            pixel.save().then(p => {
+            pixel.save().then((p) => {
                 callback(true, null); // report back that we changed the pixel
-            }).catch(err => {
+            }).catch((err) => {
                 app.reportError("Error saving pixel for update: " + err);
-                callback(null, { message: "An error occurred while trying to place the pixel." })
+                callback(null, { message: "An error occurred while trying to place the pixel." });
             })
         } else {
             // report back that we didn't change the pixel
             return callback(false, null);
         }
-    }).catch(err => {
+    }).catch((err) => {
         app.reportError("Error reading pixel for update: " + err);
-        callback(null, { message: "An error occurred while trying to place the pixel." })
+        callback(null, { message: "An error occurred while trying to place the pixel." });
     });
 }
 
