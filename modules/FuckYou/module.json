@@ -1,0 +1,6 @@
+{
+    "identifier": "co.dynastic.place.module.important",
+    "main": "main.js",
+    "name": "IMPORTANT Module",
+    "priority": 69
+}
