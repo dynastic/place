@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 var colourPieceValidator = function(c) {
@@ -11,7 +11,7 @@ var PixelSchema = new Schema({
         required: true,
         validate: {
             validator: Number.isInteger,
-            message: '{VALUE} is not an integer value'
+            message: "{VALUE} is not an integer value"
         }
     },
     yPos: {
@@ -19,7 +19,7 @@ var PixelSchema = new Schema({
         required: true,
         validate: {
             validator: Number.isInteger,
-            message: '{VALUE} is not an integer value'
+            message: "{VALUE} is not an integer value"
         }
     },
     editorID: {
@@ -35,7 +35,7 @@ var PixelSchema = new Schema({
         required: true,
         validate: {
             validator: colourPieceValidator,
-            message: '{VALUE} is not a valid colour'
+            message: "{VALUE} is not a valid colour"
         }
     },
     colourG: {
@@ -43,7 +43,7 @@ var PixelSchema = new Schema({
         required: true,
         validate: {
             validator: colourPieceValidator,
-            message: '{VALUE} is not a valid colour'
+            message: "{VALUE} is not a valid colour"
         }
     },
     colourB: {
@@ -51,7 +51,7 @@ var PixelSchema = new Schema({
         required: true,
         validate: {
             validator: colourPieceValidator,
-            message: '{VALUE} is not a valid colour'
+            message: "{VALUE} is not a valid colour"
         }
     }
 });
@@ -125,4 +125,4 @@ PixelSchema.methods.getInfo = function(overrideDataAccess = false, app = null) {
     })
 }
 
-module.exports = mongoose.model('Pixel', PixelSchema);
+module.exports = mongoose.model("Pixel", PixelSchema);

@@ -1,7 +1,7 @@
-const User = require('../models/user');
+const User = require("../models/user");
 const ActionLogger = require("../util/ActionLogger");
 const path = require("path");
-const fs = require('fs');
+const fs = require("fs");
 const Action = require("../models/action");
 
 exports.getAPIUsersTable = (req, res, next) => {
@@ -19,7 +19,7 @@ exports.getAPIUsersTable = (req, res, next) => {
         select: ["id", "name", "creationDate", "admin", "moderator", "banned", "deactivated", "lastPlace", "placeCount"],
         search: {
             value: searchValue,
-            fields: ['name']
+            fields: ["name"]
         }, sort: sort
     }, (err, table) => {
         if(err) {
@@ -131,8 +131,8 @@ exports.getAPISimilarUsers = (req, res, next) => {
             function respondIdentifiedAccounts() {
                 res.json({ success: true, target: user.toInfo(req.place), identifiedAccounts: identifiedAccounts })
             }
-            if (fs.existsSync(path.join(__dirname, '../util/', 'legit.js'))) {
-                const legit = require('../util/legit');
+            if (fs.existsSync(path.join(__dirname, "../util/", "legit.js"))) {
+                const legit = require("../util/legit");
                 var currentUsernames = identifiedAccounts.map((i) => i.user.username);
                 legit.findSimilarUsers(user).then((users) => {
                     var reason = legit.similarityAspectName();

@@ -343,7 +343,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 .pixel-data .field::after, .pixel-data > .summary::after {
-    content: '';
+    content: "";
     display: block;
     clear: both;
 }

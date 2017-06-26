@@ -1,5 +1,5 @@
-const lwip = require('pajk-lwip');
-const Pixel = require('../models/pixel');
+const lwip = require("pajk-lwip");
+const Pixel = require("../models/pixel");
 const ActionLogger = require("../util/ActionLogger");
 
 const imageSize = 1000;

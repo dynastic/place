@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const bcrypt = require('bcrypt');
-const Pixel = require('./pixel');
-const Access = require('./access');
+const bcrypt = require("bcrypt");
+const Pixel = require("./pixel");
+const Access = require("./access");
 const dataTables = require("mongoose-datatables");
 
 var UserSchema = new Schema({
@@ -59,7 +59,7 @@ var UserSchema = new Schema({
         required: true,
         validate: {
             validator: Number.isInteger,
-            message: '{VALUE} is not a valid integer'
+            message: "{VALUE} is not a valid integer"
         },
         default: 0
     },
@@ -80,9 +80,9 @@ var UserSchema = new Schema({
     }
 });
 
-UserSchema.pre('save', function(next) {
+UserSchema.pre("save", function(next) {
     let user = this;
-    if (this.isModified('password') || this.isNew) {
+    if (this.isModified("password") || this.isNew) {
         bcrypt.genSalt(10, function(err, salt) {
             if (err) return next(err);
             bcrypt.hash(user.password, salt, function(err, hash) {
@@ -122,8 +122,8 @@ UserSchema.methods.toInfo = function(app = null) {
         info.statistics.leaderboardRank = app.leaderboardManager.getUserRank(this.id);
         info.statistics.lastSeenActively = app.userActivityController.userActivityTimes[this.id];
     }
-    if(typeof info.statistics.placesThisWeek === 'undefined') info.statistics.placesThisWeek = null;
-    if(typeof info.statistics.leaderboardRank === 'undefined') info.statistics.leaderboardRank = null;
+    if(typeof info.statistics.placesThisWeek === "undefined") info.statistics.placesThisWeek = null;
+    if(typeof info.statistics.leaderboardRank === "undefined") info.statistics.leaderboardRank = null;
     return info;
 }
 
@@ -238,7 +238,7 @@ UserSchema.methods.canPlace = function(app) {
 UserSchema.methods.findSimilarIPUsers = function() {
     return new Promise((resolve, reject) => {
         Access.findSimilarIPUserIDs(this).then((userIDs) => {
-            this.model('User').find({ _id: { $in: userIDs } }).then(resolve).catch(reject);
+            this.model("User").find({ _id: { $in: userIDs } }).then(resolve).catch(reject);
         }).catch(reject);
     });
 }
@@ -306,7 +306,7 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
 }
 
 UserSchema.plugin(dataTables, {
-    totalKey: 'recordsFiltered',
+    totalKey: "recordsFiltered",
 });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model("User", UserSchema);

@@ -1,4 +1,4 @@
-<%- include('../admin_header.html') -%>
+<%- include("../admin_header.html") -%>
 <% var jsSnippets = [`loadRecentActionsIntoContainer($("#actions-ctn"), 10, false, false)`]; %>
 <h1 class="page-header">Dashboard</h1>
 <!-- Status Updates -->
@@ -89,7 +89,7 @@
   </div>
 </div>
 <% } %>
-<%- include('../admin_footer.html', {
+<%- include("../admin_footer.html", {
     js: ["/js/build/admin_dashboard.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"],
     jsSnippets: jsSnippets
 }) -%>

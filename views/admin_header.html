@@ -1,6 +1,6 @@
 <%
-if(typeof pageTitle === 'undefined') pageTitle = null;
-if(typeof user === 'undefined') user = null;
+if(typeof pageTitle === "undefined") pageTitle = null;
+if(typeof user === "undefined") user = null;
 var userAdmin = user ? user.admin : false;
 var renderNavItem = function(name, itemPath) {
     let isCurrentPage = itemPath == path;
@@ -9,7 +9,7 @@ var renderNavItem = function(name, itemPath) {
     "</li>";
 }
 %>
-<%- include('header.html', {
+<%- include("header.html", {
     pageTitle: !!pageTitle ? pageTitle + " &middot; Admin" : "Admin",
     css: ["/css/dashboard.css", "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css"].concat(typeof css === "undefined" ? [] : css),
     isAdmin: true

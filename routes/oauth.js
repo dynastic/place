@@ -1,40 +1,40 @@
-const express = require('express');
-const passport = require('passport');
+const express = require("express");
+const passport = require("passport");
 const OAuthController = require("../controllers/OAuthController");
 
 function OAuthRouter(app) {
-    require('../util/passport')(passport, app);
+    require("../util/passport")(passport, app);
     let router = express.Router()
 
-    if(typeof app.config.oauth !== 'undefined') {
+    if(typeof app.config.oauth !== "undefined") {
         if (app.config.oauth.google.enabled) {
-            router.get('/google', OAuthController.getGoogle)
-            router.get('/google/callback', passport.authenticate('google', { successRedirect: '/?signedin=1', failureRedirect: '/signup' }));
+            router.get("/google", OAuthController.getGoogle)
+            router.get("/google/callback", passport.authenticate("google", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
         }
 
         if (app.config.oauth.discord.enabled) {
-            router.get('/discord', passport.authenticate('discord'));
-            router.get('/discord/callback', passport.authenticate('discord', { successRedirect: '/?signedin=1', failureRedirect: '/signup' }));
+            router.get("/discord", passport.authenticate("discord"));
+            router.get("/discord/callback", passport.authenticate("discord", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
         }
 
         if (app.config.oauth.facebook.enabled) {
-            router.get('/facebook', passport.authenticate('facebook'));
-            router.get('/facebook/callback', passport.authenticate('facebook', { successRedirect: '/?signedin=1', failureRedirect: '/signup' }));
+            router.get("/facebook", passport.authenticate("facebook"));
+            router.get("/facebook/callback", passport.authenticate("facebook", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
         }
 
         if (app.config.oauth.github.enabled) {
-            router.get('/github', passport.authenticate('github'));
-            router.get('/github/callback', passport.authenticate('github', { successRedirect: '/?signedin=1', failureRedirect: '/signup' }));
+            router.get("/github", passport.authenticate("github"));
+            router.get("/github/callback", passport.authenticate("github", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
         }
 
         if (app.config.oauth.reddit.enabled) {
-            router.get('/reddit', OAuthController.getReddit);
-            router.get('/reddit/callback', OAuthController.getRedditCallback);
+            router.get("/reddit", OAuthController.getReddit);
+            router.get("/reddit/callback", OAuthController.getRedditCallback);
         }
 
         if (app.config.oauth.twitter.enabled) {
-            router.get('/twitter', passport.authenticate('twitter'));
-            router.get('/twitter/callback', passport.authenticate('twitter', { successRedirect: '/?signedin=1', failureRedirect: '/signup' }));
+            router.get("/twitter", passport.authenticate("twitter"));
+            router.get("/twitter/callback", passport.authenticate("twitter", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
         }
     }
 

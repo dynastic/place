@@ -1,5 +1,5 @@
-const express = require('express');
-const User = require('../models/user');
+const express = require("express");
+const User = require("../models/user");
 
 function AdminRouter(app) {
     const responseFactory = require("../util/ResponseFactory")(app, "/admin");
@@ -12,23 +12,23 @@ function AdminRouter(app) {
         next(); // Otherwise, carry on...
     });
 
-    router.get('/', app.modMiddleware, function(req, res) {
+    router.get("/", app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/dashboard", req, res);
     });
 
-    router.get('/actions', app.modMiddleware, function(req, res) {
+    router.get("/actions", app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/actions", req, res, {title: "Recent Actions", modOnly: false});
     });
 
-    router.get('/log', app.modMiddleware, function(req, res) {
+    router.get("/log", app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/actions", req, res, {title: "Moderator Log", modOnly: true});
     });
 
-    router.get('/users', app.modMiddleware, function(req, res) {
+    router.get("/users", app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/users", req, res);
     });
 
-    router.get('/users/similar/:userID', app.modMiddleware, function(req, res) {
+    router.get("/users/similar/:userID", app.modMiddleware, function(req, res) {
         function renderError(msg = "An unknown error occurred.") {
             return responseFactory.sendRenderedResponse("admin/similar_users_error", req, res, { errorMsg: msg });
         }
@@ -39,11 +39,11 @@ function AdminRouter(app) {
         }).catch((err) => renderError("Could not find a user by that ID."));
     });
 
-    router.get('/pixels', app.modMiddleware, function(req, res) {
+    router.get("/pixels", app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 
-    router.get('/reports', app.modMiddleware, function(req, res) {
+    router.get("/reports", app.modMiddleware, function(req, res) {
         return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
     });
 

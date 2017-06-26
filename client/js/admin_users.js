@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var table = $('#users').DataTable({
+    var table = $("#users").DataTable({
         processing: true,
         serverSide: true,
         aaSorting: [[2, "desc"]],
@@ -13,19 +13,19 @@ $(document).ready(function() {
             { data: "actions", orderable: false }
         ],
         columnDefs: [{
-            'targets': 4,
-            'searchable': false,
-            'orderable': false,
-            'render': (data, type, full, meta) => renderUserActions(full)
+            "targets": 4,
+            "searchable": false,
+            "orderable": false,
+            "render": (data, type, full, meta) => renderUserActions(full)
         }],
         select: {
-            style: 'os',
-            selector: 'td:not(:first-child)' // no row selection on last column
+            style: "os",
+            selector: "td:not(:first-child)" // no row selection on last column
         },
         serverParams: (data) => data.bChunkSearch = true
     }).columns().every( function () {
         var that = this;
-        $('input[type=search]', this.footer() ).attr("spellcheck", "false").attr("autocomplete", "off").attr("autocorrect", "off").attr("autocapitalize", "off").on( 'keyup change', function () {
+        $("input[type=search]", this.footer() ).attr("spellcheck", "false").attr("autocomplete", "off").attr("autocorrect", "off").attr("autocapitalize", "off").on( "keyup change", function () {
             if (that.search() !== this.value) {
                 that.search(this.value, true).draw();
             }
