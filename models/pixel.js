@@ -73,28 +73,48 @@ PixelSchema.methods.toInfo = function() {
 }
 
 PixelSchema.statics.addPixel = function(colour, x, y, userID, callback) {
+    var pn = this;
     x = parseInt(x), y = parseInt(y);
     if(isNaN(x) || isNaN(y)) return callback(null, { message: "Invalid positions provided." });
     // TODO: Get actual position below:
     if(x < 0 || y < 0 || x >= 1000 || y >= 1000) return callback(null, { message: "Position is out of bounds." });
-    this.findOneAndUpdate({
+    this.find({
         xPos: x,
         yPos: y
-    }, {
-        editorID: userID,
-        colourR: colour.r,
-        colourG: colour.g,
-        colourB: colour.b,
-        lastModified: Date()
-    }, {
-        upsert: true
-    }, function(err, pixel) {
-        if (err) return callback(null, { message: "An error occurred while trying to place the pixel." });
+    }).then(pixels => {
+        // Find the pixel at this location
+        var pixel = pixels[0];
         var wasIdentical = colour.r == 255 && colour.g == 255 && colour.b == 255; // set to identical if pixel was white
         if(pixel) { // we have data from the old pixel
             wasIdentical = pixel.editorID == userID && pixel.colourR == colour.r && pixel.colourG == colour.g && pixel.colourB == pixel.colourB; // set to identical if colour matched old pixel
         }
-        return callback(!wasIdentical, null);
+        if(!wasIdentical) { // if the pixel was changed
+            if(!pixel) { // if the spot was blank, create a new one
+                pixel = pn({
+                    xPos: x,
+                    yPos: y
+                });
+            }
+            // change our appropriate fields
+            pixel.editorID = userID;
+            pixel.colourR = colour.r;
+            pixel.colourG = colour.g;
+            pixel.colourB = colour.b;
+            pixel.lastModified = Date();
+            // save the changes
+            pixel.save().then(p => {
+                callback(true, null); // report back that we changed the pixel
+            }).catch(err => {
+                app.reportError("Error saving pixel for update: " + err);
+                callback(null, { message: "An error occurred while trying to place the pixel. (s2)" })
+            })
+        } else {
+            // report back that we didn't change the pixel
+            return callback(false, null);
+        }
+    }).catch(err => {
+        app.reportError("Error reading pixel for update: " + err);
+        callback(null, { message: "An error occurred while trying to place the pixel. (f2)" })
     });
 }
 
