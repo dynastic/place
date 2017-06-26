@@ -13,4 +13,4 @@ exports.getAPIPixelInfo = (req, res, next) => {
             res.json({ success: true, pixel: info })
         }).catch((err) => fail(err));
     }).catch((err) => fail(err));
-}
+};

@@ -120,7 +120,7 @@ function PaintingManager(app) {
                 });
             });
         }
-    }
+    };
 }
 
 PaintingManager.prototype = Object.create(PaintingManager.prototype);

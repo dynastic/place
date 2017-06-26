@@ -19,7 +19,7 @@ let paths = {
         built: "public/js/build",
         src: "client/js/*.js"
     }
-}
+};
 
 var app = {};
 app.loadConfig = (path = "./config/config") => {
@@ -55,7 +55,7 @@ app.paintingManager.loadImageFromDatabase().then((image) => {
     console.log("Successfully loaded image from database.");
 }).catch((err) => {
     app.reportError("Error while loading the image from database: " + err);
-})
+});
 
 app.leaderboardManager = LeaderboardManager(app);
 app.responseFactory = ResponseFactory(app);
@@ -100,7 +100,7 @@ function swallowError(error) {
 // Process JavaScript
 gulp.task("scripts", ["clean"], (cb) => {
     console.log("Processing JavaScript…");
-    let t = gulp.src(paths.scripts.src)
+    var t = gulp.src(paths.scripts.src);
     t = t.pipe(babel({ presets: ["es2015"] }));
     t = t.on("error", swallowError);
     if(!app.config.debug) t = t.pipe(uglify());

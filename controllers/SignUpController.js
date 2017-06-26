@@ -4,7 +4,7 @@ const User = require("../models/user");
 exports.getSignUp = (req, res, next) => {
     if (req.user) return res.redirect("/");
     return req.responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: req.place.enableCaptcha });
-}
+};
 
 exports.postSignUp = (req, res, next) => {
     function renderResponse(errorMsg) {
@@ -32,4 +32,4 @@ exports.postSignUp = (req, res, next) => {
             });
         } else doSignup();
     });
-}
+};

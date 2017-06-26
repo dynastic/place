@@ -114,7 +114,7 @@ function HTTPServer(app) {
     return {
         server: server,
         httpServer: httpServer
-    }
+    };
 }
 
 HTTPServer.prototype = Object.create(HTTPServer.prototype);

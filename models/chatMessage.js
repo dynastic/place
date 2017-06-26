@@ -48,7 +48,7 @@ ChatMessageSchema.methods.toInfo = function() {
             x: this.xPos,
             y: this.yPos
         }
-    }
+    };
 }
 
 ChatMessageSchema.methods.getInfo = function(overrideDataAccess = false) {

@@ -110,7 +110,7 @@ var popoutController = {
         }
 
         socket.on("error", (e) => {
-            console.log("Socket error: " + e)
+            console.log("Socket error: " + e);
             this.isOutdated = true;
         });
         socket.on("connect", () => {

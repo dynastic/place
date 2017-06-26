@@ -9,4 +9,4 @@ exports.postAPIDeactivate = (req, res, next) => {
         req.user.save();
         return res.json({success: true});
     });
-}
+};

@@ -674,7 +674,7 @@ var place = {
         return {
             x: Math.max(0, Math.min(x, size - 1)),
             y: Math.max(0, Math.min(y, size - 1))
-        }
+        };
     },
 
     contextMenu: function(event) {

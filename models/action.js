@@ -25,7 +25,7 @@ ActionSchema.methods.toInfo = function() {
         info: this.info || [],
         moderatingUserID: this.moderatingUserID,
         date: this.date
-    }
+    };
 }
 
 ActionSchema.methods.getInfo = function() {

@@ -9,4 +9,4 @@ exports.identifyAPIUser = (req, res, next) => {
         let token = jwt.encode(user, req.place.config.secret);
         res.json({ success: true, token: `JWT ${token}`, user: user.toInfo(req.place) }); // create and return jwt token here
     })(req, res, next);
-}
+};

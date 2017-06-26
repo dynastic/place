@@ -5,7 +5,7 @@ exports.getSignIn = (req, res, next) => {
     var error = null;
     if(req.query.logintext) error = { message: req.query.logintext };
     return req.responseFactory.sendRenderedResponse("public/signin", req, res, { error: error });
-}
+};
 
 exports.postSignIn = (req, res, next) => {
     require("../util/passport")(passport, req.place);
@@ -19,4 +19,4 @@ exports.postSignIn = (req, res, next) => {
             return res.redirect(`/${(redirectURL == "/" ? "" : redirectURL) || ""}`);
         });
     })(req, res, next);
-}
+};

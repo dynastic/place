@@ -6,4 +6,4 @@ exports.getAPIBoardImage = (req, res, next) => {
         req.place.reportError("Error while serving board image: " + err);
         return res.status(500).json({ success: false, error: { message: "We could not retrieve the current board image.", code: "image_fail" } });
     });
-}
+};

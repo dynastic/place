@@ -29,7 +29,7 @@ AccessSchema.methods.toInfo = function() {
         date: this.date,
         userAgent: this.userAgent,
         ipAddress: this.ipAddress
-    }
+    };
 }
 
 AccessSchema.statics.recordAccess = function(app, userID, userAgent, ipAddress, key) {

@@ -57,7 +57,8 @@ $(document).ready(function() {
 
 $("#page-nav .navbar-collapse").on("hide.bs.collapse", function() {
   $("#page-nav").removeClass("expanded");
-})
+});
+
 $("#page-nav .navbar-collapse").on("show.bs.collapse", function() {
   $("#page-nav").addClass("expanded");
-})
+});
