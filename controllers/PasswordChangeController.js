@@ -11,25 +11,25 @@ exports.postSelfServeForcedPassword = (req, res, next) => {
     if(req.user.isOauth) return renderResponse("You may not change your password as you are using an external service for login.");
     req.user.password = req.body.password;
     req.user.passwordResetKey = null;
-    req.user.save(err => {
+    req.user.save((err) => {
         if(err) return renderResponse("An unknown error occurred while trying to reset your password.");
-        ActionLogger.log("changePassword", req.user);
+        ActionLogger.log(req.place, "changePassword", req.user);
         res.redirect("/?signedin=1");
     });
-}
+};
 
 exports.postSelfServePassword = (req, res, next) => {
-    if (!req.body.old || !req.body.new) return res.status(403).json({success: false, error: {message: 'Your old password and new password are required.', code: 'invalid_parameters'}});
-    if(req.user.isOauth) return res.status(400).json({success: false, error: {message: 'You may not change your password as you are using an external service for login.', code: 'regular_account_only'}});
+    if (!req.body.old || !req.body.new) return res.status(403).json({success: false, error: {message: "Your old password and new password are required.", code: "invalid_parameters"}});
+    if(req.user.isOauth) return res.status(400).json({success: false, error: {message: "You may not change your password as you are using an external service for login.", code: "regular_account_only"}});
     req.user.comparePassword(req.body.old, (error, match) => {
         if(!match || error) return res.status(401).json({success: false, error: {message: "The old password you entered was incorrect.", code: "incorrect_password"}});
         req.user.password = req.body.new;
         req.user.save().then(() => {
-            ActionLogger.log("changePassword", req.user);
+            ActionLogger.log(req.place, "changePassword", req.user);
             return res.json({success: true});
-        }).catch(err => {
+        }).catch((err) => {
             req.place.reportError("Password change error: " + err);
             return res.status(500).json({success: false});
         });
     });
-}
+};

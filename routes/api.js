@@ -1,5 +1,5 @@
-const express = require('express');
-const Ratelimit = require('express-brute');
+const express = require("express");
+const Ratelimit = require("express-brute");
 const PasswordChangeController = require("../controllers/PasswordChangeController");
 const JWTController = require("../controllers/JWTController");
 const DeactivateAccountController = require("../controllers/DeactivateAccountController");
@@ -14,9 +14,9 @@ function APIRouter(app) {
     let router = express.Router();
 
     router.use(function(req, res, next) {
-        res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-        res.header('Expires', '-1');
-        res.header('Pragma', 'no-cache');
+        res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
+        res.header("Expires", "-1");
+        res.header("Pragma", "no-cache");
         next();
     })
 
@@ -33,39 +33,39 @@ function APIRouter(app) {
 
     // Normal APIs
 
-    router.post('/signup', function(req, res) {
+    router.post("/signup", function(req, res) {
         res.status(503).json({ success: false, error: { message: "API signup is no longer available.", code: "unavailable" } });
     });
 
-    router.post('/identify', JWTController.identifyAPIUser);
+    router.post("/identify", JWTController.identifyAPIUser);
 
-    router.post('/user/change-password', requireUser, PasswordChangeController.postSelfServePassword);
+    router.post("/user/change-password", requireUser, PasswordChangeController.postSelfServePassword);
 
-    router.post('/user/deactivate', requireUser, DeactivateAccountController.postAPIDeactivate);
+    router.post("/user/deactivate", requireUser, DeactivateAccountController.postAPIDeactivate);
 
-    router.get('/session', requireUser, function(req, res, next) {
+    router.get("/session", requireUser, function(req, res, next) {
         res.json({ success: true, user: req.user.toInfo(app) });
     });
 
-    router.get('/board-image', BoardImageController.getAPIBoardImage);
+    router.get("/board-image", BoardImageController.getAPIBoardImage);
 
-    router.post('/place', requireUser, PlaceController.postAPIPixel);
+    router.post("/place", requireUser, PlaceController.postAPIPixel);
 
-    router.get('/timer', requireUser, PlaceController.getAPITimer);
+    router.get("/timer", requireUser, PlaceController.getAPITimer);
 
-    router.get('/online', function(req, res, next) {
+    router.get("/online", function(req, res, next) {
         return res.json({ success: true, online: { count: req.place.websocketServer.connectedClients } });
     });
 
-    router.get('/active-now', function(req, res, next) {
-        app.userActivityController.getInfo().then(info => {
+    router.get("/active-now", function(req, res, next) {
+        app.userActivityController.getInfo().then((info) => {
             return res.json({ success: true, active: info });
-        }).catch(err => res.status(500).json({success: false}))
+        }).catch((err) => res.status(500).json({success: false}))
     });
 
-    router.get('/pixel', PixelInfoController.getAPIPixelInfo);
+    router.get("/pixel", PixelInfoController.getAPIPixelInfo);
 
-    router.get('/leaderboard', function(req, res, next) {
+    router.get("/leaderboard", function(req, res, next) {
         app.leaderboardManager.getInfo((err, info) => {
             if(err || !info) {
                 if(err) app.reportError("Error fetching leaderboard: " + err);
@@ -76,7 +76,7 @@ function APIRouter(app) {
         })
     });
 
-    const chatRatelimit = new Ratelimit(require('../util/RatelimitStore')("Chat"), {
+    const chatRatelimit = new Ratelimit(require("../util/RatelimitStore")("Chat"), {
         freeRetries: 7, // 7 messages per 10-15 seconds
         attachResetToRequest: false,
         refreshTimeoutOnRequest: false,
@@ -87,11 +87,11 @@ function APIRouter(app) {
             var seconds = Math.round((nextValidRequestDate - new Date()) / 1000);
             return res.status(429).json({ success: false, error: { message: `You're sending messages too fast! To avoid spamming the chat, please get everything into one message if you can. You will be able to chat again in ${seconds.toLocaleString()} second${seconds == 1 ? "" : "s"}.`, code: "rate_limit" } })
         },
-        handleStoreError: error => app.reportError("Chat rate limit store error: " + error),
+        handleStoreError: (error) => app.reportError("Chat rate limit store error: " + error),
         proxyDepth: app.config.trustProxyDepth
     });
 
-    router.route('/chat').get(ChatController.getAPIChat).post([requireUser, chatRatelimit.prevent], ChatController.postAPIChatMessage)
+    router.route("/chat").get(ChatController.getAPIChat).post([requireUser, chatRatelimit.prevent], ChatController.postAPIChatMessage)
 
     // Admin APIs
 
@@ -108,8 +108,8 @@ function APIRouter(app) {
     router.get("/mod/toggle_ban", app.modMiddleware, ModeratorUserController.postAPIToggleBan);
     router.get("/mod/toggle_active", app.modMiddleware, ModeratorUserController.postAPIToggleActive);
     router.route("/mod/user_notes").get(app.modMiddleware, ModeratorUserController.getAPIUserNotes).post(app.modMiddleware, ModeratorUserController.postAPIUserNotes)
-    router.get('/mod/similar_users/:userID', app.modMiddleware, ModeratorUserController.getAPISimilarUsers);
-    router.get('/mod/actions', app.modMiddleware, ModeratorUserController.getAPIActions);
+    router.get("/mod/similar_users/:userID", app.modMiddleware, ModeratorUserController.getAPISimilarUsers);
+    router.get("/mod/actions", app.modMiddleware, ModeratorUserController.getAPIActions);
 
     // Debug APIs
 

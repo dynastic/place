@@ -20,13 +20,13 @@ exports.postUsername = (req, res, next) => {
             });
         });
     }
-    fs.exists(__dirname + "/../config/community_guidelines.md", exists => {
+    fs.exists(__dirname + "/../config/community_guidelines.md", (exists) => {
         if (!req.body.agreeToGuidelines && exists) return renderResponse("You must agree to the community guidelines to use this service.");
         if(req.place.enableCaptcha) {
-            req.place.recaptcha.verify(req, error => {
+            req.place.recaptcha.verify(req, (error) => {
                 if(error) return renderResponse("Please fill in the captcha properly.");
                 doPickUsername();
             });
         } else doPickUsername();
     });
-}
+};

@@ -1,5 +1,5 @@
-const lwip = require('pajk-lwip');
-const Pixel = require('../models/pixel');
+const lwip = require("pajk-lwip");
+const Pixel = require("../models/pixel");
 const ActionLogger = require("../util/ActionLogger");
 
 const imageSize = 1000;
@@ -41,11 +41,11 @@ function PaintingManager(app) {
 
         loadImageFromDatabase: function() {
             return new Promise((resolve, reject) => {
-                let image = this.getBlankImage().then(image => {
+                let image = this.getBlankImage().then((image) => {
                     let batch = image.batch();
-                    Pixel.find({}).stream().on("data", pixel => {
+                    Pixel.find({}).stream().on("data", (pixel) => {
                         var x = pixel.xPos, y = pixel.yPos;
-                        var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB }
+                        var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB };
                         if(x >= 0 && y >= 0 && x < 1000 && y < 1000) batch.setPixel(x, y, colour);
                     }).on("end", () => {
                         batch.exec((err, image) => {
@@ -56,8 +56,8 @@ function PaintingManager(app) {
                             app.websocketServer.broadcast("server_ready");
                             resolve(image);
                         });
-                    }).on("error", err => reject(err));
-                }).catch(err => reject(err));
+                    }).on("error", (err) => reject(err));
+                }).catch((err) => reject(err));
             });
         },
 
@@ -80,9 +80,7 @@ function PaintingManager(app) {
                     this.imageBatch.toBuffer("png", { compression: "fast", transparency: false }, (err, buffer) => {
                         a.outputImage = buffer;
                         a.imageHasChanged = false;
-                        a.waitingForImages.forEach(callback => {
-                            callback(err, buffer);
-                        })
+                        a.waitingForImages.forEach((callback) => callback(err, buffer));
                         a.waitingForImages = [];
                     })
                 }
@@ -102,7 +100,7 @@ function PaintingManager(app) {
                 if(app.temporaryUserInfo.isUserPlacing(user)) return reject({message: "You cannot place more than one tile at once.", code: "attempted_overload"});
                 app.temporaryUserInfo.setUserPlacing(user, true);
                 // Add to DB:
-                user.addPixel(colour, x, y, (changed, err) => {
+                user.addPixel(colour, x, y, app, (changed, err) => {
                     app.temporaryUserInfo.setUserPlacing(user, false);
                     if(err) return reject(err);
                     // Paint on live image:
@@ -115,14 +113,14 @@ function PaintingManager(app) {
                     // Send notice to all clients:
                     var info = {x: x, y: y, colour: colour, userID: user.id};
                     app.websocketServer.broadcast("tile_placed", info);
-                    ActionLogger.log("place", user, null, info);
+                    ActionLogger.log(app, "place", user, null, info);
                     app.userActivityController.recordActivity(user);
                     app.leaderboardManager.needsUpdating = true;
                     resolve();
                 });
             });
         }
-    }
+    };
 }
 
 PaintingManager.prototype = Object.create(PaintingManager.prototype);

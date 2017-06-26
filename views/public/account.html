@@ -1,4 +1,4 @@
-<%- include('../header.html', {
+<%- include("../header.html", {
     pageTitle: "Account Details",
     css: ["/css/dashboard.css", "/css/profile.css"],
     navbarSupportsTopMode: !!profileUserInfo.latestPixel
@@ -134,7 +134,7 @@ var pixel = profileUserInfo.latestPixel;
     </div>
   </div>
 </div>
-<%- include('../footer.html', {
+<%- include("../footer.html", {
   js: ["/js/tooltip.js", "/js/build/account.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"],
   jsSnippets: [`  $(document).ready(function() {
     $("#profile-mod-tools-ctn").html(renderUserActions(${JSON.stringify(profileUser)}));

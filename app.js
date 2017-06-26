@@ -1,10 +1,10 @@
-const config = require('./config/config');
-const mongoose = require('mongoose');
-const recaptcha = require('express-recaptcha');
-const gulp = require('gulp');
-const uglify = require('gulp-uglify');
-const babel = require('gulp-babel');
-const del = require('del');
+const config = require("./config/config");
+const mongoose = require("mongoose");
+const recaptcha = require("express-recaptcha");
+const gulp = require("gulp");
+const uglify = require("gulp-uglify");
+const babel = require("gulp-babel");
+const del = require("del");
 const PaintingManager = require("./util/PaintingManager");
 const ResponseFactory = require("./util/ResponseFactory");
 const HTTPServer = require("./util/HTTPServer");
@@ -20,7 +20,7 @@ let paths = {
         built: "public/js/build",
         src: "client/js/*.js"
     }
-}
+};
 
 var app = {};
 app.loadConfig = (path = "./config/config") => {
@@ -41,13 +41,13 @@ app.moduleManager.loadAll();
 
 // Setup error tracking
 if (app.config.sentryDSN !== undefined) { 
-    app.raven = require('raven');
+    app.raven = require("raven");
     app.raven.config(app.config.sentryDSN).install()
 }
 
 app.errorTracker = ErrorTracker(app);
 app.reportError = app.errorTracker.reportError;
-process.on('uncaughtException', function(err) {
+process.on("uncaughtException", function(err) {
     // Catch all uncaught exceptions and report them
     app.reportError(err);
 });
@@ -57,17 +57,17 @@ app.paintingManager = PaintingManager(app);
 console.log("Loading image from the database…");
 app.paintingManager.loadImageFromDatabase().then((image) => {
     console.log("Successfully loaded image from database.");
-}).catch(err => {
+}).catch((err) => {
     app.reportError("Error while loading the image from database: " + err);
-})
+});
 
 app.leaderboardManager = LeaderboardManager(app);
 app.responseFactory = ResponseFactory(app);
 app.userActivityController = UserActivityManager(app);
 
 app.enableCaptcha = false;
-if(typeof app.config.recaptcha !== 'undefined') {
-    if(typeof app.config.recaptcha.siteKey !== 'undefined' && typeof app.config.recaptcha.secretKey !== 'undefined') {
+if(typeof app.config.recaptcha !== "undefined") {
+    if(typeof app.config.recaptcha.siteKey !== "undefined" && typeof app.config.recaptcha.secretKey !== "undefined") {
         app.enableCaptcha = app.config.recaptcha.siteKey != "" && app.config.recaptcha.secretKey != "";
     }
 }
@@ -88,13 +88,13 @@ app.modMiddleware = (req, res, next) => {
 };
 
 app.httpServer = new HTTPServer(app);
-app.server = require('http').createServer(app.httpServer.server);
+app.server = require("http").createServer(app.httpServer.server);
 app.websocketServer = new WebsocketServer(app, app.server);
 
 mongoose.connect(app.config.database);
 
 // Clean existing built JS
-gulp.task('clean', () => del(['public/js/build']));
+gulp.task("clean", () => del(["public/js/build"]));
 
 function swallowError(error) {
     app.reportError("Error while processing JavaScript: " + error);
@@ -102,10 +102,10 @@ function swallowError(error) {
 }
 
 // Process JavaScript
-gulp.task('scripts', ['clean'], (cb) => {
+gulp.task("scripts", ["clean"], (cb) => {
     console.log("Processing JavaScript…");
-    let t = gulp.src(paths.scripts.src)
-    t = t.pipe(babel({ presets: ['es2015'] }));
+    var t = gulp.src(paths.scripts.src);
+    t = t.pipe(babel({ presets: ["es2015"] }));
     t = t.on("error", swallowError);
     if(!app.config.debug) t = t.pipe(uglify());
     t = t.on("error", swallowError);
@@ -115,16 +115,16 @@ gulp.task('scripts', ['clean'], (cb) => {
 });
 
 // Rerun the task when a file changes 
-gulp.task('watch', () => gulp.watch(paths.scripts.src, ['scripts']));
+gulp.task("watch", () => gulp.watch(paths.scripts.src, ["scripts"]));
 
-gulp.task('default', ['watch', 'scripts']);
-gulp.start(['watch', 'scripts'])
+gulp.task("default", ["watch", "scripts"]);
+gulp.start(["watch", "scripts"])
 
 app.restartServer = () => {
     if(app.server.listening) {
         console.log("Closing server...")
         app.server.close();
-        setImmediate(function(){app.server.emit('close')});
+        setImmediate(function(){app.server.emit("close")});
     }
     app.server.listen(app.config.port, app.config.onlyListenLocal ? "127.0.0.1" : null, null, () => {
         console.log(`Started Place server on port ${app.config.port}${app.config.onlyListenLocal ? " (only listening locally)" : ""}.`);

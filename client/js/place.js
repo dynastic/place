@@ -46,7 +46,7 @@ var notificationHandler = {
 
     setup: function() {
         if(navigator.serviceWorker) {
-            navigator.serviceWorker.register('/js/build/sw.js');
+            navigator.serviceWorker.register("/js/build/sw.js");
             this.supportsNewNotificationAPI = true;
         }
     },
@@ -63,7 +63,7 @@ var notificationHandler = {
 
     requestPermission: function(callback) {
         if(!this.isAbleToRequestPermission || !this.notificationsSupported) return callback(false);
-        Notification.requestPermission(permission => {
+        Notification.requestPermission((permission) => {
             callback(permission === "granted");
         })
     },
@@ -73,7 +73,7 @@ var notificationHandler = {
         let canSend = this.canNotify;
         if(!canSend && !requesting) return;
         if(!canSend) {
-            return this.requestPermission(granted => {
+            return this.requestPermission((granted) => {
                 if (granted) this.sendNotification(message, requesting);
             });
         }
@@ -184,11 +184,11 @@ var place = {
 
         let controller = $(zoomController).parent()[0];
         canvas.onmousemove = (event) => this.handleMouseMove(event || window.event);
-        canvas.addEventListener("contextmenu", event => this.contextMenu(event));
+        canvas.addEventListener("contextmenu", (event) => this.contextMenu(event));
 
         var handleKeyEvents = function(e) {
             var kc = e.keyCode || e.which;
-            app.keyStates[kc] = e.type == 'keydown';
+            app.keyStates[kc] = e.type == "keydown";
         }
 
         document.body.onkeyup = function(e) {
@@ -217,9 +217,9 @@ var place = {
         this.getCanvasImage();
 
         this.changeUserCount(null);
-        this.loadUserCount().then(online => {
+        this.loadUserCount().then((online) => {
             this.userCountChanged(online);
-        }).catch(err => $(this.userCountElement).hide())
+        }).catch((err) => $(this.userCountElement).hide());
 
         this.socket = this.startSocketConnection();
 
@@ -239,14 +239,14 @@ var place = {
         if(this.loadedImage) return;
         var app = this;
         if(!this.isOutdated) this.adjustLoadingScreen("Loading…");;
-        this.loadImage().then(image => {
+        this.loadImage().then((image) => {
             app.adjustLoadingScreen();
             app.canvasController.clearCanvas();
             app.canvasController.drawImage(image);
             app.updateDisplayCanvas();
             app.displayCtx.imageSmoothingEnabled = false;
             app.loadedImage = true;
-        }).catch(err => {
+        }).catch((err) => {
             console.error("Error loading board image", err);
             if(typeof err.status !== "undefined" && err.status === 503) {
                 app.adjustLoadingScreen("Waiting for server…");
@@ -266,8 +266,8 @@ var place = {
     loadImage: function() {
         return new Promise((resolve, reject) => {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', '/api/board-image', true);
-            xhr.responseType = 'blob';
+            xhr.open("GET", "/api/board-image", true);
+            xhr.responseType = "blob";
             xhr.onload = function(e) {
                 if(xhr.status == 200) {
                     var url = URL.createObjectURL(this.response);
@@ -295,30 +295,30 @@ var place = {
                 endOnly: true
             },
             autoScroll: true,
-            onstart: event => {
+            onstart: (event) => {
                 if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
                 $(app.zoomController).addClass("grabbing");
                 $(":focus").blur();
             },
-            onmove: event => {
+            onmove: (event) => {
                 if(app.isViewingFullMap()) return event.preventDefault();
                 app.moveCamera(event.dx, event.dy)
             },
-            onend: event => {
+            onend: (event) => {
                 if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
                 $(app.zoomController).removeClass("grabbing");
                 var coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
                 app.updateAuthLinks();
             }
-        }).on("tap", event => {
+        }).on("tap", (event) => {
             if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
             if(!this.zooming.zooming) {
                 let zoom = app._getZoomMultiplier();
                 app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom));
             }
             event.preventDefault();
-        }).on("doubletap", event => {
+        }).on("doubletap", (event) => {
             if(app.isViewingFullMap()) return event.preventDefault();
             if(app.zooming.zoomedIn && this.selectedColour === null) {
                 app.zoomFinished();
@@ -331,10 +331,10 @@ var place = {
 
     loadUserCount: function() {
         return new Promise((resolve, reject) => {
-            $.get("/api/online").done(data => {
+            $.get("/api/online").done((data) => {
                 if(data.success && !!data.online) return resolve(data.online.count);
                 reject();
-            }).fail(err => reject(err));
+            }).fail((err) => reject(err));
         });
     },
 
@@ -363,10 +363,10 @@ var place = {
         var socket = io();
 
         socket.onJSON = function(event, listener) {
-            return this.on(event, data => listener(JSON.parse(data)));
+            return this.on(event, (data) => listener(JSON.parse(data)));
         }
 
-        socket.on("error", e => {
+        socket.on("error", (e) => {
             console.error("Socket error (will reload pixels on reconnect to socket): " + e);
             this.isOutdated = true;
         });
@@ -440,7 +440,7 @@ var place = {
             var canvasContainer = $(this.zoomController).parent();
             var scale = Math.min(1, Math.min(canvasContainer.height() / size, canvasContainer.width() / size));
         }
-        $(this.canvas).css({ 'transform': `scale(${scale}, ${scale})` });
+        $(this.canvas).css({ "transform": `scale(${scale}, ${scale})` });
     },
 
     setupDisplayCanvas: function(canvas) {
@@ -674,7 +674,7 @@ var place = {
         return {
             x: Math.max(0, Math.min(x, size - 1)),
             y: Math.max(0, Math.min(y, size - 1))
-        }
+        };
     },
 
     contextMenu: function(event) {
@@ -689,10 +689,10 @@ var place = {
             window.alert(!!error ? error.message || defaultError : defaultError);
             callback(error);
         }
-        return $.get(`/api/pixel?x=${x}&y=${y}`).done(data => {
+        return $.get(`/api/pixel?x=${x}&y=${y}`).done((data) => {
             if(!data.success) return failToPost(data.error);
             callback(null, data);
-        }).fail(err => failToPost(err));
+        }).fail((err) => failToPost(err));
     },
 
     isSignedIn: function() {
@@ -704,7 +704,7 @@ var place = {
             this.changePlaceTimerVisibility(true);
             $(this.placeTimer).children("span").text("Loading…");
             var a = this;
-            return $.get("/api/timer").done(data => {
+            return $.get("/api/timer").done((data) => {
                 if(data.success) return a.doTimer(data.timer);
                 failToPost(data.error);
             }).fail(() => this.changePlaceTimerVisibility(false));
@@ -743,7 +743,7 @@ var place = {
     },
 
     handleNotifyMeClick: function() {
-        if(!this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission()) return this.notificationHandler.requestPermission(success => this.checkSecondsTimer());
+        if(!this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission()) return this.notificationHandler.requestPermission((success) => this.checkSecondsTimer());
         this.checkSecondsTimer();
     },
 
@@ -849,7 +849,7 @@ var place = {
                 if(this.zooming.zooming) this.shouldShowPopover = true;
                 else popover.fadeIn(250);
                 var hasUser = !!data.pixel.user;
-                if(typeof data.pixel.userError === 'undefined') data.pixel.userError = null;
+                if(typeof data.pixel.userError === "undefined") data.pixel.userError = null;
                 popover.find("#pixel-data-username").text(hasUser ? data.pixel.user.username : this.getUserStateText(data.pixel.userError));
                 if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account");
                 else popover.find("#pixel-data-username").addClass("deleted-account");
@@ -903,7 +903,7 @@ var place = {
             this.placing = true;
             $.post("/api/place", {
                 x: x, y: y, colour: this.selectedColour
-            }).done(data => {
+            }).done((data) => {
                 if(data.success) {
                     this.popoutController.loadActiveUsers();
                     a.setPixel(a.DEFAULT_COLOURS[a.selectedColour], x, y);
@@ -911,7 +911,7 @@ var place = {
                     if(data.timer) a.doTimer(data.timer);
                     else a.updatePlaceTimer();
                 } else failToPost(data.error);
-            }).fail(data => failToPost(data.responseJSON.error)).always(() => {
+            }).fail((data) => failToPost(data.responseJSON.error)).always(() => {
                 this.changePlacingModalVisibility(false);
                 this.placing = false;
             });
@@ -924,7 +924,7 @@ var place = {
     },
 
     doKeys: function() {
-        var keys = Object.keys(this.keys).filter(key => this.keys[key].filter(keyCode => this.keyStates[keyCode] === true).length > 0);
+        var keys = Object.keys(this.keys).filter((key) => this.keys[key].filter((keyCode) => this.keyStates[keyCode] === true).length > 0);
         if(keys.indexOf("up") > -1) this.moveCamera(0, 5, false);
         if(keys.indexOf("down") > -1) this.moveCamera(0, -5, false);
         if(keys.indexOf("left") > -1) this.moveCamera(5, 0, false);
@@ -992,7 +992,7 @@ var place = {
     isViewingFullMap: function() {
         return $("body").hasClass("viewing-full-map");
     }
-}
+};
 
 place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
 place.setZoomButton($("#zoom-button")[0]);

@@ -1,7 +1,7 @@
 {
   "name": "place",
   "version": "1.0.0",
-  "description": "A open-source clone of reddit's April Fools joke",
+  "description": "A open-source clone of Reddit's April Fools joke",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

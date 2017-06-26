@@ -1,8 +1,8 @@
-<%- include('../header.html', {
+<%- include("../header.html", {
     pageTitle: "Reset your password",
     css: ["/css/signin.css"]
 }) -%>
-<% if(typeof error === 'undefined') error = null; %>
+<% if(typeof error === "undefined") error = null; %>
 <div class="container">
     <form class="form-signin" method="POST" action="/force-pw-reset">
         <h2 class="form-signin-heading">Reset your password</h2>
@@ -17,4 +17,4 @@
         <% } %>
     </form>
 </div> <!-- /container -->
-<%- include('../footer.html') -%>
+<%- include("../footer.html") -%>

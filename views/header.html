@@ -1,11 +1,11 @@
 <%
-  if(typeof user === 'undefined') user = null;
-  if(typeof css === 'undefined') css = [];
-  if(typeof pageTitle === 'undefined') pageTitle = null;
-  if(typeof isAdmin === 'undefined') isAdmin = false;
-  if(typeof pinnable === 'undefined') pinnable = false;
-  if(typeof navbarSupportsTopMode === 'undefined') navbarSupportsTopMode = false;
-  if(typeof isPoppedOut === 'undefined') isPoppedOut = false;
+  if(typeof user === "undefined") user = null;
+  if(typeof css === "undefined") css = [];
+  if(typeof pageTitle === "undefined") pageTitle = null;
+  if(typeof isAdmin === "undefined") isAdmin = false;
+  if(typeof pinnable === "undefined") pinnable = false;
+  if(typeof navbarSupportsTopMode === "undefined") navbarSupportsTopMode = false;
+  if(typeof isPoppedOut === "undefined") isPoppedOut = false;
   var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
   var renderNavItem = function(name, itemPath, icon = null) {
       let isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
@@ -38,8 +38,8 @@
     <meta property="twitter:card" content="summary">
     <meta property="twitter:title" content="Place 2.0">
 
-    <link href="/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u">
-    <link href="/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
     <link href="/css/global.css" rel="stylesheet">
 
@@ -80,7 +80,7 @@
               </ul>
             </li>
             <%- renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money"); %>
-            <% if(fs.existsSync('./config/community_guidelines.md')) { %><%- renderNavItem("Rules", "/guidelines", "handshake-o"); %><% } %>
+            <% if(fs.existsSync("./config/community_guidelines.md")) { %><%- renderNavItem("Rules", "/guidelines", "handshake-o"); %><% } %>
             <% if(user && userMod) { %><%- renderNavItem(userAdmin ? "Admin" : "Moderator", "/admin", "gavel"); %><% } %>
           </ul>
           <ul class="nav navbar-nav navbar-right">

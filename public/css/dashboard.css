@@ -109,7 +109,7 @@ body {
 }
 
 .section-heading::after {
-    content: '';
+    content: "";
     display: block;
     clear: both;
 }

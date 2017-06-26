@@ -9,4 +9,4 @@ exports.getGuidelines = (req, res, next) => {
             return req.responseFactory.sendRenderedResponse("public/guidelines", req, res, { md: markdown });
         });
     });
-}
+};
