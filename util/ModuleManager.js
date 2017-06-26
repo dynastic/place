@@ -128,15 +128,17 @@ class ModuleManager {
 
     // --- Static File Serving ---
 
-    registerPublicDirectories(server, callback) {
-        var promises = Object.keys(this.moduleMetas).map((module) => this.getRegisteredPublicDirectories(this.moduleMetas[module], server));
-        Promise.all(promises).then(directories => {
-            directories.filter((o) => !!o).forEach((o) => server.use(o.root, o.middleware));
-            callback();
-        }).catch(err => this.app.reportError("Error loading public directories for modules: " + err));
+    getAllPublicDirectoriesToRegister() {
+        return new Promise((resolve, reject) => {
+            var promises = Object.keys(this.moduleMetas).map((module) => this.getRegisteredPublicDirectoriesForModule(this.moduleMetas[module]));
+            Promise.all(promises).then(directories => resolve(directories.filter((o) => !!o))).catch(err => {
+                this.app.reportError("Error loading public directories for modules: " + err);
+                resolve();
+            });
+        });
     }
 
-    getRegisteredPublicDirectories(meta, server) {
+    getRegisteredPublicDirectoriesForModule(meta) {
         return new Promise((resolve, reject) => {
             var publicPath = path.join(this.modulePaths[meta.identifier], "public");
             fs.stat(publicPath, (err, stat) => {

@@ -87,10 +87,6 @@ app.modMiddleware = (req, res, next) => {
     next();
 };
 
-app.httpServer = new HTTPServer(app);
-app.server = require("http").createServer(app.httpServer.server);
-app.websocketServer = new WebsocketServer(app, app.server);
-
 mongoose.connect(app.config.database);
 
 // Clean existing built JS
@@ -130,4 +126,16 @@ app.restartServer = () => {
         console.log(`Started Place server on port ${app.config.port}${app.config.onlyListenLocal ? " (only listening locally)" : ""}.`);
     });
 }
-app.restartServer();
+
+app.moduleManager.fireWhenLoaded((manager) => {
+    function initializeServer(directories, routes = []) {
+        app.httpServer = new HTTPServer(app, directories, routes);
+        app.server = require("http").createServer(app.httpServer.server);
+        app.websocketServer = new WebsocketServer(app, app.server);
+        app.restartServer();
+    }
+    function continueWithServer(directories = []) {
+        initializeServer(directories, []);
+    }
+    manager.getAllPublicDirectoriesToRegister().then((directories) => continueWithServer(directories)).catch(err => continueWithServer())
+});
