@@ -45,7 +45,7 @@ class ModuleManager {
         this.modulePaths[meta.identifier] = path.dirname(mainPath);
         var Module = require(mainPath);
         var newModule = new Module(this.app);
-        this.modules.set(meta.name, newModule);
+        this.modules.set(meta.identifier, newModule);
         console.log(`Loaded module "${meta.name}" (${meta.identifier}).`);
     }
 
@@ -179,6 +179,21 @@ class ModuleManager {
                 resolve({root: routerInfo.path, middleware: Router(this.app)});
             });
         });
+    }
+
+    // --- Middleware ---
+
+    processRequest(req, res, next) {
+        var middlewareFetchers = Array.from(this.modules.values()).filter((module) => typeof module.processRequest === "function").map((module) => module.processRequest);
+        var middlewares = [];
+        middlewareFetchers.forEach((process) => middlewares = middlewares.concat(process(req)));
+        var index = 0;
+        function handleNext() {
+            if(!middlewares[index]) return next();
+            index++;
+            middlewares[index - 1](req, res, () => handleNext());
+        }
+        handleNext();
     }
 }
 

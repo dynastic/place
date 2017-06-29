@@ -88,16 +88,18 @@ function HTTPServer(app) {
             }
             next();
         });
+        
+        server.use((req, res, next) => app.moduleManager.processRequest(req, res, next));
+
+        modulesWithRoutes.forEach((moduleRoutes) => {
+            moduleRoutes.forEach((route) => server.use(route.root, route.middleware));
+        });
 
         // Handle routes
         server.use("/api", APIRouter(app));
         server.use("/admin", AdminRouter(app));
         server.use("/auth", OAuthRouter(app));
         server.use("/", PublicRouter(app));
-        //console.log(routes[0]);
-        modulesWithRoutes.forEach((moduleRoutes) => {
-            moduleRoutes.forEach((route) => server.use(route.root, route.middleware));
-        });
 
         if (server.get("env") !== "development") {
             // Production error handler, no stack traces shown to user
