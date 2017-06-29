@@ -10,6 +10,7 @@
     <footer class="footer">
       <div class="container">
         <p class="text-muted">&copy; Dynastic Development 2017</p>
+        <%- moduleManager.gatherViewExtensions("footer", include); %>
       </div>
     </footer>
 <% if(typeof js === "undefined") js = []; %>

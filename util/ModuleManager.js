@@ -12,12 +12,14 @@ class ModuleManager {
         this.moduleMetas = {};
         this.modulePaths = {};
         this.moduleIdentifiers = [];
+        this.viewExtensions = {};
 
         this.loadingCallbacks = [];
         this.loaded = false;
     }
 
     load(meta, mainPath) {
+        var s = this;
         var validDependencies = true;
         var withoutConflicts = true;
         // Check dependency modules
@@ -41,12 +43,16 @@ class ModuleManager {
         // Make sure there isn't already one loaded
         if(this.modules.has(meta.identifier)) return console.error(`Couldn't load module "${meta.name}" (${meta.identifier}) because another module with the same identifier was already loaded.`);
         // Initialize the module
-        this.moduleMetas[meta.identifier] = meta;
-        this.modulePaths[meta.identifier] = path.dirname(mainPath);
-        var Module = require(mainPath);
-        var newModule = new Module(this.app);
-        this.modules.set(meta.identifier, newModule);
-        console.log(`Loaded module "${meta.name}" (${meta.identifier}).`);
+        s.moduleMetas[meta.identifier] = meta;
+        s.modulePaths[meta.identifier] = path.dirname(mainPath);
+        function finalizeLoad() {
+            var Module = require(mainPath);
+            var newModule = new Module(s.app);
+            s.modules.set(meta.identifier, newModule);
+            console.log(`Loaded module "${meta.name}" (${meta.identifier}).`);
+            console.log(s.viewExtensions);
+        }
+        this.processViewExtensionsForModule(meta, () => finalizeLoad());
     }
 
     loadAll() {
@@ -194,6 +200,31 @@ class ModuleManager {
             middlewares[index - 1](req, res, () => handleNext());
         }
         handleNext();
+    }
+
+    // --- View Extensions ---
+
+    processViewExtensionsForModule(meta, callback) {
+        var vPath = path.join(this.modulePaths[meta.identifier], "views");
+        fs.stat(vPath, (err, stat) => {
+            if(err || !stat.isDirectory()) return callback();
+            fs.readdir(vPath, (err, files) => {
+                files.filter((fn) => path.extname(fn) == ".html").forEach((file) => {
+                    var templateName = file.toLowerCase().slice(0, -5);
+                    if(!this.viewExtensions[templateName]) this.viewExtensions[templateName] = [];
+                    this.viewExtensions[templateName].push(path.join(vPath, file));
+                });
+                callback();
+            });
+        });
+    }
+
+    getViewExtensions(name) {
+        return this.viewExtensions[name] || [];
+    }
+
+    gatherViewExtensions(name, include) {
+        return this.getViewExtensions(name).map((file) => include(file)).join("");
     }
 }
 
