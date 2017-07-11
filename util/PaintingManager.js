@@ -41,7 +41,7 @@ function PaintingManager(app) {
 
         loadImageFromDatabase: function() {
             return new Promise((resolve, reject) => {
-                let image = this.getBlankImage().then((image) => {
+                this.getBlankImage().then((image) => {
                     let batch = image.batch();
                     Pixel.find({}).stream().on("data", (pixel) => {
                         var x = pixel.xPos, y = pixel.yPos;

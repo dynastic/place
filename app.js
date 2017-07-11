@@ -1,4 +1,3 @@
-const config = require("./config/config");
 const mongoose = require("mongoose");
 const recaptcha = require("express-recaptcha");
 const gulp = require("gulp");
