@@ -68,7 +68,6 @@ function HTTPServer(app) {
         }
         // Check session for users
         if(req.session && req.session.passport) {
-            userID = req.session.passport.user;
             User.findById(req.session.passport.user).then((user) => authUser(user)).catch((err) => {
                 app.reportError("Error validating user session: " + err)
                 next();

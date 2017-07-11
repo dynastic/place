@@ -13,13 +13,19 @@ function PublicRouter(app) {
     let router = express.Router()
 
     router.use(function(req, res, next) {
-        if(req.url == "/signout") return next(); // Allow the user to sign out
-        if(req.user && !req.user.usernameSet && req.user.OAuthName) { // If the user has no username...
-            if(req.url == "/pick-username" && req.method == "POST") return next(); // Allow the user to POST their new username
-            return req.responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: req.place.enableCaptcha, username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20), user: {name: ""}}); // Send the username picker
+        if (req.url == "/signout") return next(); // Allow the user to sign out
+        if (req.user && !req.user.usernameSet && req.user.OAuthName) { // If the user has no username...
+            if (req.url == "/pick-username" && req.method == "POST") return next(); // Allow the user to POST their new username
+            return req.responseFactory.sendRenderedResponse("public/pick-username", req, res, {
+                captcha: req.place.enableCaptcha,
+                username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20),
+                user: {
+                    name: ""
+                }
+            }); // Send the username picker
         }
-        if(req.user && req.user.passwordResetKey) {
-            if(req.url == "/force-pw-reset" && req.method == "POST") return next(); // Allow the user to POST their new password
+        if (req.user && req.user.passwordResetKey) {
+            if (req.url == "/force-pw-reset" && req.method == "POST") return next(); // Allow the user to POST their new password
             return req.responseFactory.sendRenderedResponse("public/force-pw-reset", req, res);
         }
         next(); // Otherwise, carry on...
@@ -32,14 +38,20 @@ function PublicRouter(app) {
         freeRetries: 3, // 3 signups per hour
         attachResetToRequest: false,
         refreshTimeoutOnRequest: false,
-        minWait: 60*60*1000, // 1 hour
-        maxWait: 60*60*1000, // 1 hour, 
+        minWait: 60 * 60 * 1000, // 1 hour
+        maxWait: 60 * 60 * 1000, // 1 hour, 
         failCallback: (req, res, next, nextValidRequestDate) => {
             function renderResponse(errorMsg) {
-                return req.responseFactory.sendRenderedResponse("public/signup", req, res, { captcha: app.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username });
+                return req.responseFactory.sendRenderedResponse("public/signup", req, res, {
+                    captcha: app.enableCaptcha,
+                    error: {
+                        message: errorMsg || "An unknown error occurred"
+                    },
+                    username: req.body.username
+                });
             }
             res.status(429);
-            return renderResponse("You're doing that too fast.");   
+            return renderResponse("You're doing that too fast.");
         },
         handleStoreError: (error) => app.reportError("Sign up rate limit store error: " + error),
         proxyDepth: app.config.trustProxyDepth
@@ -56,17 +68,17 @@ function PublicRouter(app) {
     router.get("/guidelines", GuidelineController.getGuidelines);
 
     router.get("/deactivated", function(req, res) {
-        if(req.user) res.redirect("/");
+        if (req.user) res.redirect("/");
         return responseFactory.sendRenderedResponse("public/deactivated", req, res);
     });
 
     router.get("/sitemap.xml", function(req, res, next) {
-        if(typeof app.config.host === undefined) return next();
+        if (typeof app.config.host === undefined) return next();
         return req.responseFactory.sendRenderedResponse("public/sitemap.xml.html", req, res, null, "text/xml");
     });
 
     router.route("/signin").get(SignInController.getSignIn).post(SignInController.postSignIn);
-    router.route("/signup").get(SignUpController.getSignUp).post(SignUpController.postSignUp);
+    router.route("/signup").get(SignUpController.getSignUp).post(signupRatelimit.prevent, SignUpController.postSignUp);
     router.get("/signout", SignOutController.getSignOut);
 
     router.get("/account", AccountPageController.getOwnAccount);

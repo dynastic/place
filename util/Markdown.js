@@ -1,5 +1,5 @@
 const marked = require("marked"),
-      renderer = new marked.Renderer();
+    renderer = new marked.Renderer();
 
 renderer.code = function(code, lang) {
     if (lang == "lead") return "<p class=\"lead\">" + code + "</p>";
