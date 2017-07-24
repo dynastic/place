@@ -81,7 +81,7 @@ function PaintingManager(app) {
                     resolve(buffer);
                 })
                 if(this.waitingForImages.length == 1) {
-                    this.lastPixelUpdate = Date.now();
+                    this.lastPixelUpdate = Math.floor(Date.now() / 1000);
                     this.imageBatch.toBuffer("png", { compression: "fast", transparency: false }, (err, buffer) => {
                         a.outputImage = buffer;
                         a.imageHasChanged = false;
@@ -119,7 +119,7 @@ function PaintingManager(app) {
                         }
                     });
                     // Send notice to all clients:
-                    var info = {x: x, y: y, colour: colour, userID: user.id};
+                    var info = {x: x, y: y, colour: `${colour.r}:${colour.g}:${colour.b}`};
                     app.websocketServer.broadcast("tile_placed", info);
                     ActionLogger.log(app, "place", user, null, info);
                     app.userActivityController.recordActivity(user);
