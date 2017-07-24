@@ -77,7 +77,7 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, app, callback) {
     x = parseInt(x), y = parseInt(y);
     if(isNaN(x) || isNaN(y)) return callback(null, { message: "Invalid positions provided." });
     // TODO: Get actual position below:
-    if(x < 0 || y < 0 || x >= 1000 || y >= 1000) return callback(null, { message: "Position is out of bounds." });
+    if(x < 0 || y < 0 || x >= 1400 || y >= 1400) return callback(null, { message: "Position is out of bounds." });
     this.find({
         xPos: x,
         yPos: y
@@ -122,7 +122,7 @@ PixelSchema.methods.getInfo = function(overrideDataAccess = false, app = null) {
     return new Promise((resolve, reject) => {
         let info = this.toInfo();
         require("./user").getPubliclyAvailableUserInfo(this.editorID, overrideDataAccess, app).then((userInfo) => resolve(Object.assign(info, userInfo))).catch((err) => reject(err));
-    })
+    });
 }
 
 module.exports = mongoose.model("Pixel", PixelSchema);
