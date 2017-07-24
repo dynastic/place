@@ -1,4 +1,5 @@
 const socketIO = require("socket.io");
+const Pixel = require("../models/pixel");
 
 function WebsocketServer(app, httpServer) {
     var server = socketIO(httpServer);
@@ -11,10 +12,29 @@ function WebsocketServer(app, httpServer) {
         setup: function() {
             var a = this;
             this.server.on("connection", (socket) => {
+                var hasRequestedFetch = false;
                 a.connectedClients++;
-                socket.on("disconnect", function () {
+                socket.on("disconnect", () => {
                     a.connectedClients--;
                 });
+                socket.on("fetch_pixels", (ts) => {
+                    var currentTS = Math.floor(Date.now() / 1000);
+                    // Do nothing if request wants older than a minute, or is ahead of the current system time.
+                    if(!ts || ts < currentTS - 60 || ts > currentTS) return;
+                    // Only allow one fetch per socket (no spam pls!)
+                    if(hasRequestedFetch) {
+                        console.log("Disconnected client for requesting fetch more than once.")
+                        return socket.disconnect();
+                    }
+                    hasRequestedFetch = true;
+                    var date = new Date(ts * 1000);
+                    Pixel.find({lastModified: { $gte: date }}).then((pixel) => {
+                        var info = pixel.map((p) => p.getSocketInfo());
+                        socket.emit("tiles_placed", JSON.stringify({pixels: info}));
+                    }).catch((err) => {
+                        app.reportError("Error fetching pixel for websocket client: " + err);
+                    })
+                })
             });
             setInterval(() => a.checkUserCount(), 1000);
         },
