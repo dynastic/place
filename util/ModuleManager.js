@@ -46,7 +46,7 @@ class ModuleManager {
     loadAll() {
         console.log("Starting load of modules...");
         fs.readdir(modulesDirectory, (err, files) => {
-            if(err) return app.reportError("Error loading modules: " + err);
+            if(err) return this.app.reportError("Error loading modules: " + err);
             if(files.length <= 0) return console.log("No modules loaded.");
             // Try and load information about all the modules
             var promises = files.map((file) => this.processModuleLoadingInformation(file));
@@ -55,7 +55,7 @@ class ModuleManager {
                 moduleInfo = moduleInfo.filter((o) => !!o).sort((a, b) => b.priority - a.priority); 
                 this.moduleIdentifiers = moduleInfo.map((info) => info.identifier);
                 moduleInfo.forEach((info) => this.load(info.meta, info.main));
-            }).catch(err => app.reportError("Error loading modules: " + err));
+            }).catch(err => this.app.reportError("Error loading modules: " + err));
         });
     }
 
@@ -64,7 +64,7 @@ class ModuleManager {
             var folderPath = modulesDirectory + path.sep + file;
             fs.stat(folderPath, (err, stat) => {
                 if(err) {
-                    app.reportError("Error loading single module directory: " + err);
+                    this.app.reportError("Error loading single module directory: " + err);
                     return resolve(null);
                 }
                 if(!stat.isDirectory()) return;
