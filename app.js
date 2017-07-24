@@ -55,6 +55,7 @@ process.on("uncaughtException", function(err) {
 app.paintingManager = PaintingManager(app);
 console.log("Loading image from the database…");
 app.paintingManager.loadImageFromDatabase().then((image) => {
+    app.paintingManager.startTimer();
     console.log("Successfully loaded image from database.");
 }).catch((err) => {
     app.reportError("Error while loading the image from database: " + err);

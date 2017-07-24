@@ -107,7 +107,6 @@ function PaintingManager(app) {
                     a.imageBatch.setPixel(x, y, colour).exec((err, image) => {
                         if(image) {
                             a.imageHasChanged = true;
-                            a.generateOutputImage();
                         }
                     });
                     // Send notice to all clients:
@@ -119,6 +118,17 @@ function PaintingManager(app) {
                     resolve();
                 });
             });
+        },
+
+        startTimer: function() {
+            setInterval(() => {
+                if(this.imageHasChanged) {
+                    console.log("Starting board image update...");
+                    this.generateOutputImage();
+                } else {
+                    console.log("Not updating board image, no changes since last update.");
+                }
+            }, 30 * 1000);
         }
     };
 }
