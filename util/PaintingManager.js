@@ -11,6 +11,7 @@ function PaintingManager(app) {
         image: null,
         outputImage: null,
         waitingForImages: [],
+        lastPixelUpdate: null,
         colours: [
             {r: 255, g: 255, b: 255},
             {r: 228, g: 228, b: 228},
@@ -53,6 +54,7 @@ function PaintingManager(app) {
                             this.hasImage = true;
                             this.image = image;
                             this.imageBatch = this.image.batch();
+                            this.generateOutputImage();
                             app.websocketServer.broadcast("server_ready");
                             resolve(image);
                         });
@@ -63,9 +65,10 @@ function PaintingManager(app) {
 
         getOutputImage: function() {
             return new Promise((resolve, reject) => {
-                if (this.outputImage && !this.imageHasChanged) return resolve(this.outputImage);
-                console.log("Generating new output image!");
-                this.generateOutputImage().then((outputImage) => resolve(outputImage)).catch((err) => reject(err));
+                if (this.outputImage) return resolve({image: this.outputImage, hasChanged: this.imageHasChanged, generated: this.lastPixelUpdate});
+                this.waitingForImages.push((err, buffer) => {
+                    this.getOutputImage().then((data) => resolve(data)).catch((err) => reject(err));
+                })
             })
         },
 
@@ -77,6 +80,7 @@ function PaintingManager(app) {
                     resolve(buffer);
                 })
                 if(this.waitingForImages.length == 1) {
+                    this.lastPixelUpdate = Date.now();
                     this.imageBatch.toBuffer("png", { compression: "fast", transparency: false }, (err, buffer) => {
                         a.outputImage = buffer;
                         a.imageHasChanged = false;
