@@ -11,6 +11,9 @@ function PaintingManager(app) {
         image: null,
         outputImage: null,
         waitingForImages: [],
+        lastPixelUpdate: null,
+        firstGenerateAfterLoad: false,
+        pixelsToPaint: [],
         colours: [
             {r: 255, g: 255, b: 255},
             {r: 228, g: 228, b: 228},
@@ -77,6 +80,12 @@ function PaintingManager(app) {
                     resolve(buffer);
                 })
                 if(this.waitingForImages.length == 1) {
+                    this.lastPixelUpdate = Math.floor(Date.now() / 1000);
+                    this.pixelsToPaint.forEach((data) => {
+                        // Paint on live image:
+                        this.imageBatch.setPixel(data.x, data.y, data.colour);
+                    });
+                    this.pixelsToPaint = [];
                     this.imageBatch.toBuffer("png", { compression: "fast", transparency: false }, (err, buffer) => {
                         a.outputImage = buffer;
                         a.imageHasChanged = false;
@@ -103,13 +112,8 @@ function PaintingManager(app) {
                 user.addPixel(colour, x, y, app, (changed, err) => {
                     app.temporaryUserInfo.setUserPlacing(user, false);
                     if(err) return reject(err);
-                    // Paint on live image:
-                    a.imageBatch.setPixel(x, y, colour).exec((err, image) => {
-                        if(image) {
-                            a.imageHasChanged = true;
-                            a.generateOutputImage();
-                        }
-                    });
+                    a.pixelsToPaint.push({x: x, y: y, colour: colour});
+                    a.imageHasChanged = true;
                     // Send notice to all clients:
                     var info = {x: x, y: y, colour: colour, userID: user.id};
                     app.websocketServer.broadcast("tile_placed", info);
