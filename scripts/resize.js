@@ -20,4 +20,5 @@ Pixel.find({}, (err, pixels) => {
         });
     });
     console.log("Done shifting pixels");
+    process.exit();
 });
