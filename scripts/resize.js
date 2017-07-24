@@ -10,14 +10,25 @@ console.log('--------------------------------');
 
 mongoose.connect(config.database).then(() => console.info('Connected to database'));
 
-Pixel.find({}).stream().on("data", (pixel) => {
-    pixel.xPos = pixel.xPos += 200
-    pixel.yPos = pixel.yPos += 200
-    pixel.save((err) => { 
-        if (err) return console.error("Error saving pixel " + err);
-    });
-}).on("end", () => {
-    console.log('Finished migrating pixels');
-    process.exit();
-}).on("error", (err) => console.error(err));
+let cursor = Pixel.find().cursor();
 
+cursor.on('data', (pixel) => {
+    let o = pixel;
+
+    pixel.xPos = o.xPos += 200
+    pixel.yPos = o.yPos += 200
+    
+    pixel.save((err, n) => {
+        if (err) return console.error("Error saving pixel " + err);
+        console.log(`Updated pixel (${o.xPos}, ${o.yPos}) to (${pixel.xPos}, ${pixel.yPos})`);
+    });
+});
+
+cursor.on('close', function() {
+    console.log("Done shifting pixels");
+    process.exit();
+});
+
+cursor.on('error', function(err) {
+    console.error("Error saving pixel " + err);
+});
