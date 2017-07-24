@@ -1,0 +1,21 @@
+{
+    "extends": [
+        "standard",
+        "eslint:recommended"
+    ],
+    "plugins": [
+        "standard",
+        "promise"
+    ],
+    "env": {
+        "node": true
+    },
+    "rules": {
+        "indent": [
+            "error",
+            4
+        ],
+        "no-undef": "off",
+        "no-console": "off"
+    }
+}

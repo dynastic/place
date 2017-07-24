@@ -4,10 +4,17 @@
   "description": "A open-source clone of Reddit's April Fools joke",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "node_modules/eslint/bin/eslint.js ."
   },
   "author": "Dynastic Development",
   "license": "AGPLv3",
+  "devDependencies": {
+    "eslint": "^3.12.2",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-standard": "^2.0.1"
+  },
   "dependencies": {
     "babel-preset-es2015": "^6.24.0",
     "bcrypt": "^1.0.2",
@@ -20,6 +27,7 @@
     "express": "^4.15.2",
     "express-brute-mongoose": "0.0.8",
     "express-recaptcha": "^2.1.0",
+    "fs-extra-promise": "^1.0.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-uglify": "^2.1.2",

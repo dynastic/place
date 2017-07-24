@@ -21,20 +21,44 @@ function APIRouter(app) {
     })
 
     router.use(function(req, res, next) {
-        if(req.user && !req.user.usernameSet && req.user.OAuthName) return res.status(401).json({ success: false, error: { message: "Please create a username for your account before continuing.", code: "oauth_no_username" } })
-        if(req.user && req.user.passwordResetKey) return res.status(401).json({ success: false, error: { message: "Please go to the Place 2.0 website to reset your password.", code: "forced_password_reset" }})
+        if (req.user && !req.user.usernameSet && req.user.OAuthName) return res.status(401).json({
+            success: false,
+            error: {
+                message: "Please create a username for your account before continuing.",
+                code: "oauth_no_username"
+            }
+        })
+        if (req.user && req.user.passwordResetKey) return res.status(401).json({
+            success: false,
+            error: {
+                message: "Please go to the Place 2.0 website to reset your password.",
+                code: "forced_password_reset"
+            }
+        })
         next(); // Otherwise, carry on...
     });
 
     const requireUser = (req, res, next) => {
-        if (!req.user) return res.status(401).json({success: false, error: {message: "You are not signed in.", code: "not_signed_in"}});
+        if (!req.user) return res.status(401).json({
+            success: false,
+            error: {
+                message: "You are not signed in.",
+                code: "not_signed_in"
+            }
+        });
         next()
     }
 
     // Normal APIs
 
     router.post("/signup", function(req, res) {
-        res.status(503).json({ success: false, error: { message: "API signup is no longer available.", code: "unavailable" } });
+        res.status(503).json({
+            success: false,
+            error: {
+                message: "API signup is no longer available.",
+                code: "unavailable"
+            }
+        });
     });
 
     router.post("/identify", JWTController.identifyAPIUser);
@@ -44,7 +68,10 @@ function APIRouter(app) {
     router.post("/user/deactivate", requireUser, DeactivateAccountController.postAPIDeactivate);
 
     router.get("/session", requireUser, function(req, res, next) {
-        res.json({ success: true, user: req.user.toInfo(app) });
+        res.json({
+            success: true,
+            user: req.user.toInfo(app)
+        });
     });
 
     router.get("/board-image", BoardImageController.getAPIBoardImage);
@@ -54,25 +81,41 @@ function APIRouter(app) {
     router.get("/timer", requireUser, PlaceController.getAPITimer);
 
     router.get("/online", function(req, res, next) {
-        return res.json({ success: true, online: { count: req.place.websocketServer.connectedClients } });
+        return res.json({
+            success: true,
+            online: {
+                count: req.place.websocketServer.connectedClients
+            }
+        });
     });
 
     router.get("/active-now", function(req, res, next) {
         app.userActivityController.getInfo().then((info) => {
-            return res.json({ success: true, active: info });
-        }).catch((err) => res.status(500).json({success: false}))
+            return res.json({
+                success: true,
+                active: info
+            });
+        }).catch((err) => res.status(500).json({
+            success: false
+        }))
     });
 
     router.get("/pixel", PixelInfoController.getAPIPixelInfo);
 
     router.get("/leaderboard", function(req, res, next) {
         app.leaderboardManager.getInfo((err, info) => {
-            if(err || !info) {
-                if(err) app.reportError("Error fetching leaderboard: " + err);
-                if(res.headersSent) return null;
-                return res.status(500).json({ success: false });
+            if (err || !info) {
+                if (err) app.reportError("Error fetching leaderboard: " + err);
+                if (res.headersSent) return null;
+                return res.status(500).json({
+                    success: false
+                });
             }
-            res.json({ success: true, leaderboard: info.leaderboard.splice(0, 25), lastUpdated: info.lastUpdated });
+            res.json({
+                success: true,
+                leaderboard: info.leaderboard.splice(0, 25),
+                lastUpdated: info.lastUpdated
+            });
         })
     });
 
@@ -80,12 +123,18 @@ function APIRouter(app) {
         freeRetries: 7, // 7 messages per 10-15 seconds
         attachResetToRequest: false,
         refreshTimeoutOnRequest: false,
-        minWait: 10*1000, // 10 seconds
-        maxWait: 15*1000, // 15 seconds,
+        minWait: 10 * 1000, // 10 seconds
+        maxWait: 15 * 1000, // 15 seconds,
         lifetime: 25, // remember spam for max of 25 seconds
         failCallback: (req, res, next, nextValidRequestDate) => {
             var seconds = Math.round((nextValidRequestDate - new Date()) / 1000);
-            return res.status(429).json({ success: false, error: { message: `You're sending messages too fast! To avoid spamming the chat, please get everything into one message if you can. You will be able to chat again in ${seconds.toLocaleString()} second${seconds == 1 ? "" : "s"}.`, code: "rate_limit" } })
+            return res.status(429).json({
+                success: false,
+                error: {
+                    message: `You're sending messages too fast! To avoid spamming the chat, please get everything into one message if you can. You will be able to chat again in ${seconds.toLocaleString()} second${seconds == 1 ? "" : "s"}.`,
+                    code: "rate_limit"
+                }
+            })
         },
         handleStoreError: (error) => app.reportError("Chat rate limit store error: " + error),
         proxyDepth: app.config.trustProxyDepth
@@ -113,14 +162,22 @@ function APIRouter(app) {
 
     // Debug APIs
 
-    if(app.config.debug) {
+    if (app.config.debug) {
         router.get("/trigger-error", function(req, res, next) {
             app.reportError("Oh no! An error has happened!");
-            res.status(500).json({ success: false, error: { message: "The server done fucked up.", code: "debug" } });
+            res.status(500).json({
+                success: false,
+                error: {
+                    message: "The server done fucked up.",
+                    code: "debug"
+                }
+            });
         });
         router.get("/trigger-error-report", function(req, res, next) {
             app.errorTracker.handleErrorCheckingInterval();
-            res.json({ success: true });
+            res.json({
+                success: true
+            });
         });
     }
 

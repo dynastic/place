@@ -1,4 +1,3 @@
-const config = require("./config/config");
 const mongoose = require("mongoose");
 const recaptcha = require("express-recaptcha");
 const gulp = require("gulp");
@@ -13,6 +12,8 @@ const TemporaryUserInfo = require("./util/TemporaryUserInfo");
 const ErrorTracker = require("./util/ErrorTracker");
 const LeaderboardManager = require("./util/LeaderboardManager");
 const UserActivityManager = require("./util/UserActivityManager");
+const ModuleManager = require("./util/ModuleManager");
+const PixelNotificationManager = require("./util/PixelNotificationManager");
 
 let paths = {
     scripts: {
@@ -35,6 +36,11 @@ app.loadConfig = (path = "./config/config") => {
 app.loadConfig();
 app.temporaryUserInfo = TemporaryUserInfo;
 
+app.pixelNotificationManager = new PixelNotificationManager(app);
+
+app.moduleManager = new ModuleManager(app);
+app.moduleManager.loadAll();
+
 // Setup error tracking
 if (app.config.sentryDSN !== undefined) { 
     app.raven = require("raven");
@@ -52,6 +58,7 @@ process.on("uncaughtException", function(err) {
 app.paintingManager = PaintingManager(app);
 console.log("Loading image from the database…");
 app.paintingManager.loadImageFromDatabase().then((image) => {
+    app.paintingManager.startTimer();
     console.log("Successfully loaded image from database.");
 }).catch((err) => {
     app.reportError("Error while loading the image from database: " + err);
