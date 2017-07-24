@@ -120,7 +120,7 @@ function PaintingManager(app) {
                     });
                     // Send notice to all clients:
                     var info = {x: x, y: y, colour: `${colour.r}:${colour.g}:${colour.b}`};
-                    app.websocketServer.broadcast("tile_placed", info);
+                    app.pixelNotificationManager.pixelChanged(info);
                     ActionLogger.log(app, "place", user, null, info);
                     app.userActivityController.recordActivity(user);
                     app.leaderboardManager.needsUpdating = true;
