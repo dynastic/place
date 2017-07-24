@@ -2,8 +2,11 @@ const fs = require("fs-extra-promise");
 const path = require('path');
 const modulesDirectory = path.resolve(`${__dirname.replace(/\/\w+$/, ``)}/modules/`);
 const express = require("express");
+const DataModelManager = require("./DataModelManager");
 
 // Heavily inspired by EricRabil's work on DDBot.
+
+const DEFAULT_MODEL_OVERRIDE_MANAGER = {fields: [], statics: [], methods: [], hookStatics: [], hookMethods: []};
 
 class ModuleManager {
     constructor(app) {
@@ -50,7 +53,6 @@ class ModuleManager {
             var newModule = new Module(s.app);
             s.modules.set(meta.identifier, newModule);
             console.log(`Loaded module "${meta.name}" (${meta.identifier}).`);
-            console.log(s.viewExtensions);
         }
         this.processViewExtensionsForModule(meta, () => finalizeLoad());
     }
@@ -226,6 +228,24 @@ class ModuleManager {
     gatherViewExtensions(name, include) {
         return this.getViewExtensions(name).map((file) => include(file)).join("");
     }
+
+    // --- Model Extensions ---
+
+    processModelExtensionsForModule(meta, callback) {
+        var mePath = path.join(this.modulePaths[meta.identifier], "model_extensions");
+        fs.stat(mePath, (err, stat) => {
+            if(err || !stat.isDirectory()) return callback();
+            fs.readdir(mePath, (err, files) => {
+                files.filter((fn) => path.extname(fn) == ".js").forEach((file) => {
+                    const Override = require(path.join(mePath, file));
+                    var overrides = Override(this.app, DEFAULT_MODEL_OVERRIDE_MANAGER);
+                    DataModelManager.registerModuleOverrides(file, overrides);
+                });
+                callback();
+            });
+        });
+    }
+
 }
 
 ModuleManager.prototype = Object.create(ModuleManager.prototype);

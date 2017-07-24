@@ -1,3 +1,4 @@
+const DataModelManager = require("../util/DataModelManager");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require("bcrypt");
@@ -309,4 +310,4 @@ UserSchema.plugin(dataTables, {
     totalKey: "recordsFiltered",
 });
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = DataModelManager.registerModel("User", UserSchema);

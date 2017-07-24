@@ -1,3 +1,4 @@
+const DataModelManager = require("../util/DataModelManager");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
@@ -125,4 +126,4 @@ PixelSchema.methods.getInfo = function(overrideDataAccess = false, app = null) {
     })
 }
 
-module.exports = mongoose.model("Pixel", PixelSchema);
+module.exports = DataModelManager.registerModel("Pixel", PixelSchema);

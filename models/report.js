@@ -1,3 +1,4 @@
+const DataModelManager = require("../util/DataModelManager");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
@@ -42,3 +43,5 @@ ReportSchema.statics.reportUser = function(reportedUser, reporter, reason, app, 
         return callback(report, null);
     });
 }
+
+module.exports = DataModelManager.registerModel("Report", ReportSchema);
