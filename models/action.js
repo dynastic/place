@@ -18,7 +18,6 @@ var ActionSchema = new Schema({
 });
 
 ActionSchema.methods.toInfo = function() {
-    var actionLogger = require("../util/ActionLogger");
     return {
         id: this.id,
         action: this.actionID,

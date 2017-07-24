@@ -118,20 +118,20 @@ UserSchema.methods.toInfo = function(app = null) {
         banned: this.banned,
         deactivated: this.deactivated
     };
-    if(app) {
+    if (app) {
         info.statistics.placesThisWeek = app.leaderboardManager.pixelCounts[this.id];
         info.statistics.leaderboardRank = app.leaderboardManager.getUserRank(this.id);
         info.statistics.lastSeenActively = app.userActivityController.userActivityTimes[this.id];
     }
-    if(typeof info.statistics.placesThisWeek === "undefined") info.statistics.placesThisWeek = null;
-    if(typeof info.statistics.leaderboardRank === "undefined") info.statistics.leaderboardRank = null;
+    if (typeof info.statistics.placesThisWeek === "undefined") info.statistics.placesThisWeek = null;
+    if (typeof info.statistics.leaderboardRank === "undefined") info.statistics.leaderboardRank = null;
     return info;
 }
 
 UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
         var info = this.toInfo(app);
-        if(getPixelInfo) {
+        if (getPixelInfo) {
             this.getLatestAvailablePixel().then((pixel) => {
                 info.latestPixel = pixel;
                 resolve(info);
@@ -143,16 +143,28 @@ UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
 }
 
 UserSchema.methods.loginError = function() {
-    if(this.banned === true) return { message: "You are banned from using this service due to violations of the rules.", code: "banned" };
-    if(this.deactivated === true) return { message: "Your account has been deactivated. Please contact the moderators via Discord to reactivate your account.", code: "deactivated"};
+    if (this.banned === true) return {
+        message: "You are banned from using this service due to violations of the rules.",
+        code: "banned"
+    };
+    if (this.deactivated === true) return {
+        message: "Your account has been deactivated. Please contact the moderators via Discord to reactivate your account.",
+        code: "deactivated"
+    };
     return null;
 }
 UserSchema.methods.setUserName = function(username, callback, usernameSet) {
-    if(!UserSchema.statics.isValidUsername(username)) return callback({ message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
+    if (!UserSchema.statics.isValidUsername(username)) return callback({
+        message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.",
+        code: "username_taken"
+    });
     this.name = username;
     this.usernameSet = true;
     this.save(function(err) {
-        if(err) return callback({ message: "That username already exists.", code: "username_taken" });
+        if (err) return callback({
+            message: "That username already exists.",
+            code: "username_taken"
+        });
         return callback();
     });
 }
@@ -162,12 +174,19 @@ UserSchema.methods.recordAccess = function(app, userAgent, ipAddress, key) {
 }
 
 UserSchema.statics.findByUsername = function(username, callback = null) {
-    return this.findOne({name: {$regex: new RegExp(["^", username.toLowerCase(), "$"].join(""), "i") }}, callback)
+    return this.findOne({
+        name: {
+            $regex: new RegExp(["^", username.toLowerCase(), "$"].join(""), "i")
+        }
+    }, callback)
 }
 
 UserSchema.statics.register = function(username, password, app, callback, OAuthID, OAuthName) {
-    if (!OAuthID && !this.isValidUsername(username)) return callback(null, { message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.", code: "username_taken" });
-    
+    if (!OAuthID && !this.isValidUsername(username)) return callback(null, {
+        message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.",
+        code: "username_taken"
+    });
+
     var Schema = this;
 
     function continueWithRegistration() {
@@ -184,17 +203,23 @@ UserSchema.statics.register = function(username, password, app, callback, OAuthI
         });
         // Save the user
         newUser.save(function(err) {
-            if (err) return callback(null, { message: "An account with that username already exists.", code: "username_taken" });
+            if (err) return callback(null, {
+                message: "An account with that username already exists.",
+                code: "username_taken"
+            });
             require("../util/ActionLogger").log(app, "signUp", newUser);
             return callback(newUser, null)
         });
     }
 
-    if(!username) continueWithRegistration()
+    if (!username) continueWithRegistration()
     else {
         this.findByUsername(username, (err, user) => {
-            if(!user) continueWithRegistration();
-            else callback(null, { message: "An account with that username already exists.", code: "username_taken" });
+            if (!user) continueWithRegistration();
+            else callback(null, {
+                message: "An account with that username already exists.",
+                code: "username_taken"
+            });
         });
     }
 }
@@ -207,12 +232,14 @@ UserSchema.methods.addPixel = function(colour, x, y, app, callback) {
     var user = this;
     Pixel.addPixel(colour, x, y, this.id, app, (changed, error) => {
         if (changed === null) return callback(null, error);
-        if(changed) {
+        if (changed) {
             user.lastPlace = new Date();
             user.placeCount++;
         }
         user.save(function(err) {
-            if (err) return callback(null, { message: "An unknown error occurred while trying to place that pixel." });
+            if (err) return callback(null, {
+                message: "An unknown error occurred while trying to place that pixel."
+            });
             return callback(changed, null);
         })
     });
@@ -239,15 +266,25 @@ UserSchema.methods.canPlace = function(app) {
 UserSchema.methods.findSimilarIPUsers = function() {
     return new Promise((resolve, reject) => {
         Access.findSimilarIPUserIDs(this).then((userIDs) => {
-            this.model("User").find({ _id: { $in: userIDs } }).then(resolve).catch(reject);
+            this.model("User").find({
+                _id: {
+                    $in: userIDs
+                }
+            }).then(resolve).catch(reject);
         }).catch(reject);
     });
 }
 
 UserSchema.methods.getLatestAvailablePixel = function() {
     return new Promise((resolve, reject) => {
-        Pixel.findOne({ editorID: this.id }, {}, { sort: { lastModified: -1 } }, function(err, pixel) {
-            if(err || !pixel) return resolve(null);
+        Pixel.findOne({
+            editorID: this.id
+        }, {}, {
+            sort: {
+                lastModified: -1
+            }
+        }, function(err, pixel) {
+            if (err || !pixel) return resolve(null);
             var info = pixel.toInfo();
             info.isLatest = pixel ? ~((pixel.lastModified - this.lastPlace) / 1000) <= 3 : false;
             resolve(info);
@@ -265,20 +302,20 @@ UserSchema.methods.getUsernameInitials = function() {
         var output = "";
         var mustBeUppercase = false;
         var lastCharacterUsed = false;
-        for(var i = 0; i < string.length; i++) {
+        for (var i = 0; i < string.length; i++) {
             // Limit to three characters
-            if(output.length >= 3) break;
+            if (output.length >= 3) break;
             // Check if this character is uppercase, and add to string if so
-            if((string[i].toUpperCase() == string[i] || !mustBeUppercase) && string[i].match(mustBeUppercase ? /[a-z]/i : /[a-z0-9]/i)) {
-            // Don't allow subsequent matches
-                if(!lastCharacterUsed) output += string[i].toUpperCase();
+            if ((string[i].toUpperCase() == string[i] || !mustBeUppercase) && string[i].match(mustBeUppercase ? /[a-z]/i : /[a-z0-9]/i)) {
+                // Don't allow subsequent matches
+                if (!lastCharacterUsed) output += string[i].toUpperCase();
                 lastCharacterUsed = true;
             } else {
                 lastCharacterUsed = false;
             }
             mustBeUppercase = true;
             // Check if this character is a separator, and skip needing to be uppercase if so
-            if([",", " ", "_", "-"].indexOf(string[i]) > -1) mustBeUppercase = false;
+            if ([",", " ", "_", "-"].indexOf(string[i]) > -1) mustBeUppercase = false;
         }
         return output;
     }
@@ -288,13 +325,14 @@ UserSchema.methods.getUsernameInitials = function() {
 UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false, app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
         var info = {};
+
         function returnInfo(error) {
             info.userError = error;
             resolve(info);
         }
         this.findById(userID).then((user) => {
-            if(!overrideDataAccess && user.banned) return returnInfo("ban");
-            else if(!overrideDataAccess && user.deactivated) returnInfo("deactivated");
+            if (!overrideDataAccess && user.banned) return returnInfo("ban");
+            else if (!overrideDataAccess && user.deactivated) returnInfo("deactivated");
             user.getInfo(app, getPixelInfo).then((userInfo) => {
                 info.user = userInfo;
                 resolve(info);

@@ -12,6 +12,7 @@ These instructions will help you get a copy of the project up and running on you
 
 * MongoDB
 * Node 7.6.0 or **higher**
+* Yarn
 * An internet connection
 
 ### Installing
@@ -19,7 +20,7 @@ These instructions will help you get a copy of the project up and running on you
 * Copy config/config.example.js to config/config.js
 * Configure your Place server as you see fit by modifying the values
     * Set a strong secret in the secret field!
-* Run `npm i` to install the dependencies
+* Run `yarn install` to install the dependencies
 * Finally, run `node app.js`
 
 ## Deployment
@@ -71,6 +72,8 @@ server {
 ## Contributing 
 
 Please make a [pull request](/https://github.com/dynasticdevelop/place/pulls). Before making a pull request, come and chat with us on [Discord](https://discord.gg/CgC8FTg) in #contributors.
+
+Ensure that all code lints successfully - we have CI that requires this.
 
 ### Roadmap
 
