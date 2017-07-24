@@ -12,6 +12,7 @@ function PaintingManager(app) {
         outputImage: null,
         waitingForImages: [],
         lastPixelUpdate: null,
+        firstGenerateAfterLoad: false,
         colours: [
             {r: 255, g: 255, b: 255},
             {r: 228, g: 228, b: 228},
@@ -54,8 +55,8 @@ function PaintingManager(app) {
                             this.hasImage = true;
                             this.image = image;
                             this.imageBatch = this.image.batch();
+                            this.firstGenerateAfterLoad = true;
                             this.generateOutputImage();
-                            app.websocketServer.broadcast("server_ready");
                             resolve(image);
                         });
                     }).on("error", (err) => reject(err));
@@ -86,6 +87,10 @@ function PaintingManager(app) {
                         a.imageHasChanged = false;
                         a.waitingForImages.forEach((callback) => callback(err, buffer));
                         a.waitingForImages = [];
+                        if(a.firstGenerateAfterLoad) {
+                            app.websocketServer.broadcast("server_ready");
+                            a.firstGenerateAfterLoad = false;
+                        }
                     })
                 }
             })
