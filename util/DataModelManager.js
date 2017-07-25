@@ -54,6 +54,7 @@ class DataModelManager {
 
     _setupMethodHandler(name, key, isStatic) {
         if(isStatic) return;
+        var m = this;
         mongoose.models[name].prototype[key] = function() {
             return m._getMethodHandler(name, key, false).apply(this, Array.from(arguments));
         }
