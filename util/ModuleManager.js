@@ -62,13 +62,13 @@ class ModuleManager {
         fs.readdir(modulesDirectory, (err, files) => {
             if(err) {
                 if(err.code == "ENOENT") {
-                    console.log("Creaitng modules directory because it doesn't exist...")
+                    console.log("Creating modules directory because it doesn't exist...")
                     fs.mkdirAsync(modulesDirectory);
-                    return;
+                    return this.doneLoading();
                 }
                 return this.app.reportError("Error loading modules: " + err);
             }
-            if(files.length <= 0) return console.log("No modules loaded.");
+            if(files.length <= 0) return this.doneLoading("No modules loaded.");
             // Try and load information about all the modules
             var promises = files.map((file) => this.processModuleLoadingInformation(file));
             Promise.all(promises).then(moduleInfo => {
@@ -76,10 +76,15 @@ class ModuleManager {
                 moduleInfo = moduleInfo.filter((o) => !!o).sort((a, b) => b.priority - a.priority); 
                 this.moduleIdentifiers = moduleInfo.map((info) => info.identifier);
                 moduleInfo.forEach((info) => this.load(info.meta, info.main));
-                this.loaded = true;
-                this.loadingCallbacks.forEach((callback) => callback(this));
+                this.doneLoading()
             }).catch(err => this.app.reportError("Error loading modules: " + err));
         });
+    }
+
+    doneLoading(msg = null) {
+        if(msg) console.log(msg);
+        this.loaded = true;
+        this.loadingCallbacks.forEach((callback) => callback(this));
     }
 
     fireWhenLoaded(callback) {

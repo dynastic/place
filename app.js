@@ -148,6 +148,7 @@ app.restartServer = () => {
 app.restartServer();
 
 app.moduleManager.fireWhenLoaded((manager) => {
+    console.log(manager);
     function initializeServer(directories, routes = []) {
         app.httpServer.setupRoutes(directories, routes);
     }
