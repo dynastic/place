@@ -60,7 +60,14 @@ class ModuleManager {
     loadAll() {
         console.log("Starting load of modules...");
         fs.readdir(modulesDirectory, (err, files) => {
-            if(err) return this.app.reportError("Error loading modules: " + err);
+            if(err) {
+                if(err.code == "ENOENT") {
+                    console.log("Creating modules directory because it doesn't exist...")
+                    fs.mkdirAsync(modulesDirectory);
+                    return this.doneLoading();
+                }
+                return this.app.reportError("Error loading modules: " + err);
+            }
             if(files.length <= 0) return this.doneLoading("No modules loaded.");
             // Try and load information about all the modules
             var promises = files.map((file) => this.processModuleLoadingInformation(file));
