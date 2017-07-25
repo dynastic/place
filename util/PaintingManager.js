@@ -2,7 +2,7 @@ const lwip = require("pajk-lwip");
 const Pixel = require("../models/pixel");
 const ActionLogger = require("../util/ActionLogger");
 
-const imageSize = 1000;
+const imageSize = 1400;
 
 function PaintingManager(app) {
     return {
@@ -11,6 +11,9 @@ function PaintingManager(app) {
         image: null,
         outputImage: null,
         waitingForImages: [],
+        lastPixelUpdate: null,
+        firstGenerateAfterLoad: false,
+        pixelsToPaint: [],
         colours: [
             {r: 255, g: 255, b: 255},
             {r: 228, g: 228, b: 228},
@@ -46,14 +49,15 @@ function PaintingManager(app) {
                     Pixel.find({}).stream().on("data", (pixel) => {
                         var x = pixel.xPos, y = pixel.yPos;
                         var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB };
-                        if(x >= 0 && y >= 0 && x < 1000 && y < 1000) batch.setPixel(x, y, colour);
+                        if(x >= 0 && y >= 0 && x < 1400 && y < 1400) batch.setPixel(x, y, colour);
                     }).on("end", () => {
                         batch.exec((err, image) => {
                             if (err) return reject(err);
                             this.hasImage = true;
                             this.image = image;
                             this.imageBatch = this.image.batch();
-                            app.websocketServer.broadcast("server_ready");
+                            this.firstGenerateAfterLoad = true;
+                            this.generateOutputImage();
                             resolve(image);
                         });
                     }).on("error", (err) => reject(err));
@@ -63,9 +67,10 @@ function PaintingManager(app) {
 
         getOutputImage: function() {
             return new Promise((resolve, reject) => {
-                if (this.outputImage && !this.imageHasChanged) return resolve(this.outputImage);
-                console.log("Generating new output image!");
-                this.generateOutputImage().then((outputImage) => resolve(outputImage)).catch((err) => reject(err));
+                if (this.outputImage) return resolve({image: this.outputImage, hasChanged: this.imageHasChanged, generated: this.lastPixelUpdate});
+                this.waitingForImages.push((err, buffer) => {
+                    this.getOutputImage().then((data) => resolve(data)).catch((err) => reject(err));
+                })
             })
         },
 
@@ -77,11 +82,21 @@ function PaintingManager(app) {
                     resolve(buffer);
                 })
                 if(this.waitingForImages.length == 1) {
+                    this.lastPixelUpdate = Math.floor(Date.now() / 1000);
+                    this.pixelsToPaint.forEach((data) => {
+                        // Paint on live image:
+                        this.imageBatch.setPixel(data.x, data.y, data.colour);
+                    });
+                    this.pixelsToPaint = [];
                     this.imageBatch.toBuffer("png", { compression: "fast", transparency: false }, (err, buffer) => {
                         a.outputImage = buffer;
                         a.imageHasChanged = false;
                         a.waitingForImages.forEach((callback) => callback(err, buffer));
                         a.waitingForImages = [];
+                        if(a.firstGenerateAfterLoad) {
+                            app.websocketServer.broadcast("server_ready");
+                            a.firstGenerateAfterLoad = false;
+                        }
                     })
                 }
             })
@@ -103,22 +118,28 @@ function PaintingManager(app) {
                 user.addPixel(colour, x, y, app, (changed, err) => {
                     app.temporaryUserInfo.setUserPlacing(user, false);
                     if(err) return reject(err);
-                    // Paint on live image:
-                    a.imageBatch.setPixel(x, y, colour).exec((err, image) => {
-                        if(image) {
-                            a.imageHasChanged = true;
-                            a.generateOutputImage();
-                        }
-                    });
+                    a.pixelsToPaint.push({x: x, y: y, colour: colour});
+                    a.imageHasChanged = true;
                     // Send notice to all clients:
-                    var info = {x: x, y: y, colour: colour, userID: user.id};
-                    app.websocketServer.broadcast("tile_placed", info);
+                    var info = {x: x, y: y, colour: `${colour.r}:${colour.g}:${colour.b}`};
+                    app.pixelNotificationManager.pixelChanged(info);
                     ActionLogger.log(app, "place", user, null, info);
                     app.userActivityController.recordActivity(user);
                     app.leaderboardManager.needsUpdating = true;
                     resolve();
                 });
             });
+        },
+
+        startTimer: function() {
+            setInterval(() => {
+                if(this.imageHasChanged) {
+                    console.log("Starting board image update...");
+                    this.generateOutputImage();
+                } else {
+                    console.log("Not updating board image, no changes since last update.");
+                }
+            }, 30 * 1000);
         }
     };
 }

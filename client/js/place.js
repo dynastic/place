@@ -4,7 +4,7 @@
 //  Written by AppleBetas and nullpixel. Inspired by Reddit's /r/place.
 //
 
-var size = 1000;
+var size = 1400;
 
 var canvasController = {
     isDisplayDirty: false,
@@ -264,6 +264,7 @@ var place = {
     },
 
     loadImage: function() {
+        var a = this;
         return new Promise((resolve, reject) => {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "/api/board-image", true);
@@ -274,6 +275,8 @@ var place = {
                     var img = new Image();
                     img.onload = function() {
                         URL.revokeObjectURL(this.src);
+                        var lastImageUpdate = xhr.getResponseHeader("X-Place-Last-Update");
+                        if(lastImageUpdate) a.requestPixelsAfterDate(lastImageUpdate);
                         resolve(img);
                     };
                     img.onerror = () => reject(xhr);
@@ -283,6 +286,20 @@ var place = {
             xhr.onerror = () => reject(xhr);
             xhr.send();
         });
+    },
+
+    neededPixelDate: null,
+    requestPixelsAfterDate: function(date) {
+        if(!this.socket.connected) {
+            this.neededPixelDate = date;
+            this.socket.once("connect", () => {
+                this.requestPixelsAfterDate(this.neededPixelDate);
+                this.neededPixelDate = null;
+            });
+            return;
+        }
+        console.log("Requesting pixels after date " + date + "!");
+        this.socket.emit("fetch_pixels", date);
     },
 
     setupInteraction: function() {
@@ -384,6 +401,7 @@ var place = {
         });
 
         socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
+        socket.onJSON("tiles_placed", this.liveUpdateTiles.bind(this));
         socket.on("server_ready", () => this.getCanvasImage());
         socket.on("user_change", this.userCountChanged.bind(this));
         socket.onJSON("admin_broadcast", this.adminBroadcastReceived.bind(this));
@@ -398,9 +416,20 @@ var place = {
         return {x: getRandomTileNumber(), y: getRandomTileNumber()};
     },
 
+    liveUpdateTiles: function(data) {
+        if(!data.pixels) return;
+        data.pixels.forEach((pixel) => this.liveUpdateTile(pixel));
+    },
+
     liveUpdateTile: function (data) {
         this.popoutController.loadActiveUsers();
-        this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y);
+        if(typeof data.colour == "string") {
+            var colour = data.colour.split(":");
+            if(colour.length != 3) return;
+            this.setPixel(`rgb(${colour[0]}, ${colour[1]}, ${colour[2]})`, data.x, data.y);
+        } else {
+            this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y);
+        }
     },
 
     adminBroadcastReceived: function(data) {
