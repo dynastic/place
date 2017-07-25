@@ -1,3 +1,4 @@
+const DataModelManager = require("../util/DataModelManager");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
@@ -129,4 +130,4 @@ PixelSchema.methods.getSocketInfo = function() {
     return {x: this.xPos, y: this.yPos, colour: `${this.colourR}:${this.colourG}:${this.colourB}`};
 }
 
-module.exports = mongoose.model("Pixel", PixelSchema);
+module.exports = DataModelManager.registerModel("Pixel", PixelSchema);

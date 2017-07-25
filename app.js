@@ -97,7 +97,7 @@ app.modMiddleware = (req, res, next) => {
 
 app.recreateServer = () => {
     app.httpServer = new HTTPServer(app);
-    app.server = require("http").createServer(app.httpServer.server);
+    app.server = app.httpServer.httpServer;
     app.websocketServer = new WebsocketServer(app, app.server);
 }
 app.recreateServer();
@@ -146,3 +146,13 @@ app.restartServer = () => {
     });
 }
 app.restartServer();
+
+app.moduleManager.fireWhenLoaded((manager) => {
+    function initializeServer(directories, routes = []) {
+        app.httpServer.setupRoutes(directories, routes);
+    }
+    function continueWithServer(directories = []) {
+        manager.getRoutesToRegister().then((routes) => initializeServer(directories, routes)).catch((err) => console.error(err))//initializeServer(directories));
+    }
+    manager.getAllPublicDirectoriesToRegister().then((directories) => continueWithServer(directories)).catch((err) => continueWithServer());
+});
