@@ -104,7 +104,6 @@
 	"admin_dashboard_new_accounts": "Nouveaux comptes",
 	"admin_dashboard_last_24hr": "dans les dernières 24 heures",
 	"admin_dashboard_per_minute": "par minute",
-	"admin_dashboard_averaged_last_20m": "(mise en moyenne des 20 dernières minutes)",
 	"admin_dashboard_broadcast": "Diffusion d'administration",
 	"admin_dashboard_broadcast_caption": "Envoyer un message à tous les utilisateurs en ligne et connectés aux websockets.",
 	"admin_dashboard_timeout": "Timeout",
@@ -117,11 +116,11 @@
 	"admin_dashboard_broadcast_style_success": "Succès",
 	"admin_dashboard_broadcast_style_warning": "Attention",
 	"admin_dashboard_broadcast_style_danger": "Danger",
-	"admin_dashboard_broadcast_timeout": "Timeout",
+	"admin_dashboard_broadcast_timeout": "Pause",
 	"admin_similar_accounts": "Comptes similaires",
 	"admin_similar_accounts_identified_caption": "Comptes identifiés d'être similaires avec ",
 	"admin_similar_accounts_back_to_users": "Retour aux utilisateurs",
 	"admin_similar_accounts_loading": "Chargement de comptes similaires…",
-	"admin_dashboard_last_20m": "admin_dashboard_last_20m",
-	"rules": "règles"
+	"admin_dashboard_last_20m": "(mise en moyenne des 20 dernières minutes)",
+	"rules": "Règles"
 }
