@@ -121,6 +121,6 @@
 	"admin_similar_accounts_identified_caption": "Accounts identified to be similar to",
 	"admin_similar_accounts_back_to_users": "Back to users",
 	"admin_similar_accounts_loading": "Loading similar accounts…",
-	"admin_dashboard_last_20m": "admin_dashboard_last_20m",
-	"rules": "rules"
+	"admin_dashboard_last_20m": "(average of last 20 minutes)",
+	"rules": "Rules"
 }
