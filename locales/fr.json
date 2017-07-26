@@ -1,5 +1,6 @@
-
 {
+	"language_name": "Français",
+	"translation_list_suffix": "(de PLoctaux)",
 	"404": "Page non trouvée",
 	"500": "Une erreur inconnue s'est produite",
 	"loading": "Chargement…",
