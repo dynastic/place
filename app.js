@@ -27,6 +27,7 @@ app.loadConfig = (path = "./config/config") => {
     delete require.cache[require.resolve(path)];
     var oldConfig = app.config;
     app.config = require(path);
+    if(!app.config.boardSize) app.config.boardSize = 1400; // default to 1400 if not specified in config
     if(oldConfig && (oldConfig.secret != app.config.secret || oldConfig.database != app.config.database)) {
         console.log("We are stopping the Place server because the database URL and/or secret has been changed, which will require restarting the entire server.");
         process.exit(0);
