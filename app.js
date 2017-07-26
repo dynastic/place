@@ -28,14 +28,15 @@ app.loadConfig = (path = "./config/config") => {
     var oldConfig = app.config;
     app.config = require(path);
     if(!app.config.boardSize) app.config.boardSize = 1400; // default to 1400 if not specified in config
-    if(oldConfig && (oldConfig.secret != app.config.secret || oldConfig.database != app.config.database)) {
-        console.log("We are stopping the Place server because the database URL and/or secret has been changed, which will require restarting the entire server.");
+    if(oldConfig && (oldConfig.secret != app.config.secret || oldConfig.database != app.config.database || oldConfig.boardSize != app.config.boardSize)) {
+        console.log("We are stopping the Place server because the database URL, secret, and/or board image size has been changed, which will require restarting the entire server.");
         process.exit(0);
     }
     if(oldConfig && (oldConfig.oauth != app.config.oauth)) {
         app.stopServer();
         app.recreateServer();
         app.restartServer();
+        app.recreateRoutes();
     }
     if(oldConfig && (oldConfig.port != app.config.port || oldConfig.onlyListenLocal != app.config.onlyListenLocal)) app.restartServer();
 }
@@ -147,14 +148,15 @@ app.restartServer = () => {
     });
 }
 app.restartServer();
-
-app.moduleManager.fireWhenLoaded((manager) => {
-    console.log(manager);
-    function initializeServer(directories, routes = []) {
-        app.httpServer.setupRoutes(directories, routes);
-    }
-    function continueWithServer(directories = []) {
-        manager.getRoutesToRegister().then((routes) => initializeServer(directories, routes)).catch((err) => console.error(err))//initializeServer(directories));
-    }
-    manager.getAllPublicDirectoriesToRegister().then((directories) => continueWithServer(directories)).catch((err) => continueWithServer());
-});
+app.recreateRoutes = () => {
+    app.moduleManager.fireWhenLoaded((manager) => {
+        function initializeServer(directories, routes = []) {
+            app.httpServer.setupRoutes(directories, routes);
+        }
+        function continueWithServer(directories = []) {
+            manager.getRoutesToRegister().then((routes) => initializeServer(directories, routes)).catch((err) => console.error(err))//initializeServer(directories));
+        }
+        manager.getAllPublicDirectoriesToRegister().then((directories) => continueWithServer(directories)).catch((err) => continueWithServer());
+    });
+}
+app.recreateRoutes();
