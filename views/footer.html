@@ -1,14 +1,16 @@
 <% if(typeof isAdmin === "undefined") isAdmin = false;
-if(typeof needsLegit === "undefined") needsLegit = false;
-if(typeof user === "undefined") user = null;
-if(typeof js === "undefined" || !js) js = [];
-if(typeof jsSnippets === "undefined" || !jsSnippets) jsSnippets = [];
-var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
-if(userMod) { js.unshift("/js/bootbox.min.js"); js.unshift("/js/build/mod_tools.js");}
+  if(typeof needsLegit === "undefined") needsLegit = false;
+  if(typeof user === "undefined") user = null;
+  if(typeof js === "undefined" || !js) js = [];
+  if(typeof jsSnippets === "undefined" || !jsSnippets) jsSnippets = [];
+  var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
+  if(userMod) { js.unshift("/js/bootbox.min.js"); js.unshift("/js/build/mod_tools.js");}
+  js = resources.js.concat(js);
   %>
     <footer class="footer">
       <div class="container">
         <p class="text-muted">&copy; <%= __('copyright') %></p>
+        <%- moduleManager.gatherViewExtensions("footer", include); %>
       </div>
     </footer>
 <% if(typeof js === "undefined") js = []; %>
