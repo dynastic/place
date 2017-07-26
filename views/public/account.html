@@ -49,7 +49,7 @@ var pixel = profileUserInfo.latestPixel;
     <p>
       <strong>Joined</strong> <time class="timeago" datetime="<%= profileUser.creationDate.toISOString() %>" title="<%= profileUser.creationDate.toLocaleString() %>"><%= profileUser.creationDate.toLocaleString() %></time>.</p>
     <% if(profileUser.lastPlace) { %><p>
-      <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(pixel && pixel.isLatest) { %> at <a href="<%= `/#x=${pixel.point.x.toLocaleString()}&y=${pixel.point.y.toLocaleString()}` %>">(<%= `${pixel.point.x.toLocaleString()}, ${pixel.point.y.toLocaleString()}` %>)</a><% } %>.
+      <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(pixel && pixel.isLatest) { %> at <a href="<%= `/#x=${pixel.point.x}&y=${pixel.point.y}` %>">(<%= `${pixel.point.x.toLocaleString()}, ${pixel.point.y.toLocaleString()}` %>)</a><% } %>.
      </p><% } %>
   </div>
   <% if(isSelf) { %>
