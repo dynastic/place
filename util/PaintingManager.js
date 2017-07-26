@@ -3,7 +3,7 @@ const Pixel = require("../models/pixel");
 const ActionLogger = require("../util/ActionLogger");
 
 function PaintingManager(app) {
-    const imageSize = 1400;
+    const imageSize = app.config.boardSize;
     return {
         hasImage: false,
         imageHasChanged: false,
