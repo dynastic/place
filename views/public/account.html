@@ -9,7 +9,7 @@ var isSelf = user ? user.id == profileUser.id : false;
 var pixel = profileUserInfo.latestPixel;
 %>
 <% if(pixel) { %>
-<a href="/#<%= `x=${pixel.point.x}&y=${pixel.point.y}` %>"><div class="profile-header" style="background-position: calc(50% - <%= (pixel.point.x - 500) * 4 %>px) <%= -(pixel.point.y * 4) + 175 %>px;">
+<a href="/#<%= `x=${pixel.point.x}&y=${pixel.point.y}` %>"><div class="profile-header" style="background-position: calc(50% - <%= (pixel.point.x - (config.boardSize / 2)) * 4 %>px) <%= -(pixel.point.y * 4) + 175 %>px;">
   <div class="navbar-legibility"></div>
   <div class="overlay"></div>
   <div class="diagonal-obscure"></div>
