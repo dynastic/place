@@ -1,3 +1,4 @@
+const DataModelManager = require("../util/DataModelManager");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
@@ -65,4 +66,4 @@ AccessSchema.statics.findSimilarIPUserIDs = function(user) {
     });
 }
 
-module.exports = mongoose.model("Access", AccessSchema);
+module.exports = DataModelManager.registerModel("Access", AccessSchema);

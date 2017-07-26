@@ -1,3 +1,4 @@
+const DataModelManager = require("../util/DataModelManager");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const User = require("./user");
@@ -71,4 +72,4 @@ ChatMessageSchema.statics.getLatestMessages = function(limit = 50) {
     return this.find({ deleted: { $ne: true } }).sort({ date: -1 }).limit(limit);
 }
 
-module.exports = mongoose.model("ChatMessage", ChatMessageSchema);
+module.exports = DataModelManager.registerModel("ChatMessage", ChatMessageSchema);

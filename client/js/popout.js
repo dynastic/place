@@ -97,7 +97,7 @@ var popoutController = {
         this.loadLeaderboard();
         this.loadActiveUsers();
         setInterval(function() { p.loadLeaderboard() }, 1000 * 60 * 3);
-        setInterval(function() { p.loadActiveUsers() }, 1000 * 15);
+        setInterval(function() { p.loadActiveUsers() }, 90000);
 
         this.startSocketConnection();
     },
@@ -324,13 +324,13 @@ var popoutController = {
         var app = this;
         $.get("/api/active-now").done(function(response) {
             if(!response.success || !response.active) {
-                console.log("Failed to load active user data.");
+                console.error("Failed to load active user data.");
                 return app.showTextOnTab("active-users", "Failed to load");
             }
             app.activeUsers = response.active;
             app.layoutActiveUsers();
         }).fail(function() {
-            console.log("Failed to load active user data.");
+            console.error("Failed to load active user data.");
             app.showTextOnTab("active-users", "Failed to load");
         });
     },
@@ -348,6 +348,10 @@ var popoutController = {
             $("<time>").attr("datetime", date).attr("title", new Date(date).toLocaleString()).text($.timeago(date)).appendTo($("<strong>").appendTo(lastSeen));
         });
         $("<p>").addClass("text-muted").text("Users that are both logged in and have either placed a pixel or sent a chat message in the last five minutes will appear here.").appendTo(tab);
+    },
+
+    isInPopOutWindow: function() {
+        return $("body").hasClass("is-popped-out");
     }
 };
 
