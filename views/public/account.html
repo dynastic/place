@@ -33,7 +33,7 @@ var pixel = profileUserInfo.latestPixel;
                   <% } %>
                     <div>
                       <span class="value"><%= profileUser.placeCount.toLocaleString() -%></span>
-                      <span class="name"><%= __(profileUser.placeCount == 1 ? 'pixel' : 'pixels').toLowerCase() %> placed</span>
+                      <span class="name"><%= __(profileUser.placeCount == 1 ? 'pixel_placed' : 'pixels_placed').toLowerCase() %></span>
                     </div>
                     <% if(profileUserInfo.statistics.placesThisWeek !== null) { %>
                       <div>

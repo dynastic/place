@@ -1,11 +1,11 @@
 <%- include("../admin_header.html") -%>
 <div class="page-header">
-    <h1>Similar Accounts</h1>
-    <p class="lead">Accounts identified to be similar to "<%- target.name -%>".</p>
-    <a href="/admin/users">&laquo; Back to users</a>
+    <h1><%= __('admin_similar_accounts') %></h1>
+    <p class="lead"><%= __('admin_similar_accounts_identified_caption') %> "<%- target.name -%>".</p>
+    <a href="/admin/users">&laquo; <%= __('admin_similar_accounts_back_to_users') %></a>
 </div>
 <div id="data">
-    <div id="loading"><i class="fa fa-circle-o-notch fa-spin"></i> Loading similar accounts…</div>
+    <div id="loading"><i class="fa fa-circle-o-notch fa-spin"></i> <%= __('admin_similar_accounts_loading') %></div>
     <div id="target-ctn"></div><br>
     <div id="similar-ctn">
         <div class="heading"></div>
@@ -15,5 +15,5 @@
 <script>var userID = "<%- target._id -%>";</script>
 <%- include("../admin_footer.html", {
     js: ["https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js", "/js/build/admin_similar_users.js"],
-    jsSnippets: [`var defaultBanReason = "Alternate account of ${target.name}";`]
+    jsSnippets: [`var defaultBanReason = "${__('default_ban_reason')} ${target.name}";`]
 }) -%>

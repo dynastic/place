@@ -1,41 +1,41 @@
 <%- include("../admin_header.html") -%>
 <% var jsSnippets = [`loadRecentActionsIntoContainer($("#actions-ctn"), 10, false, false)`]; %>
-<h1 class="page-header">Dashboard</h1>
+<h1 class="page-header"><%= __('admin_dashboard') %></h1>
 <!-- Status Updates -->
 <div class="row placeholders">
     <div class="col-xs-6 col-sm-3 placeholder">
         <div class="admin-stat" id="users-online"><span><i class="fa fa-circle-o-notch fa-spin"></i></span></div>
-        <h4>Users online</h4>
-        <span class="text-muted">right now</span>
+        <h4><%= __('admin_dashboard_users_online') %></h4>
+        <span class="text-muted"><%= __('admin_dashboard_right_now') %></span>
     </div>
     <div class="col-xs-6 col-sm-3 placeholder">
         <div class="admin-stat" id="new-accounts"><span><i class="fa fa-circle-o-notch fa-spin"></i></span></div>
-        <h4>New accounts</h4>
-        <span class="text-muted">in the last 24 hours</span>
+        <h4><%= __('admin_dashboard_new_accounts') %></h4>
+        <span class="text-muted"><%= __('admin_dashboard_last_24hr') %></span>
     </div>
     <div class="col-xs-6 col-sm-3 placeholder">
         <div class="admin-stat" id="pixels-placed"><span><i class="fa fa-circle-o-notch fa-spin"></i></span></div>
-        <h4>Pixels placed</h4>
-        <span class="text-muted">in the last 24 hours</span>
+        <h4><%= __('pixels_placed') %></h4>
+        <span class="text-muted"><%= __('admin_dashboard_last_24hr') %></span>
     </div>
     <div class="col-xs-6 col-sm-3 placeholder">
         <div class="admin-stat" id="pixels-placed-2"><span><i class="fa fa-circle-o-notch fa-spin"></i></span></div>
-        <h4>Pixels placed</h4>
-        <span class="text-muted">per minute<br><small>(averaged from last 20 minutes)</small></span>
+        <h4><%= __('pixels_placed') %></h4>
+        <span class="text-muted"><%= __('admin_dashboard_per_minute') %><br><small><%= __('admin_dashboard_last_20m') %></small></span>
     </div>
 </div>
 <% if(user.admin) { %>
 <!-- Administrator Actions -->
 <div class="section-heading">
-    <h2 class="sub-header">Administrator Actions</h2>
+    <h2 class="sub-header"><%= __('admin_actions') %></h2>
 </div>
-<div id="admin-actions" class="content">Loading…</div>
+<div id="admin-actions" class="content"><%= __('loading') %></div>
 <% jsSnippets.push(`$("#admin-actions").html(renderServerActions())`) %>
 <% } %>
 <!-- Recent Actions -->
 <div class="section-heading">
-    <h2 class="sub-header">Recent Actions</h2>
-    <a href="/admin/actions">See all &raquo;</a>
+    <h2 class="sub-header"><%= __('admin_recent_actions') %></h2>
+    <a href="/admin/actions"><%= __('see_all') %> &raquo;</a>
 </div>
 <div id="actions-ctn" class="dashboard-actions-ctn compact"></div>
 <% if(user.admin) { %>
@@ -45,44 +45,44 @@
       <form class="form-horizontal" id="broadcastForm">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="broadcastModalLabel">Admin Broadcast</h4>
+            <h4 class="modal-title" id="broadcastModalLabel"><%= __('admin_dashboard_broadcast') %></h4>
         </div>
         <div class="modal-body">
-            <p>Send a message to all users currently viewing connected to the websockets.</p>
+            <p><%= __('admin_dashboard_broadcast_caption') %></p>
             <div class="form-group">
-                <label for="inputBroadcastTitle" class="col-sm-2 control-label">Title</label>
+                <label for="inputBroadcastTitle" class="col-sm-2 control-label"><%= __('title') %></label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="inputBroadcastTitle" placeholder="Title (optional)">
+                    <input type="text" class="form-control" id="inputBroadcastTitle" placeholder="<%= __('title') %> <%= __('optional') %>">
                 </div>
             </div>
             <div class="form-group">
-                <label for="inputBroadcastMessage" class="col-sm-2 control-label">Message</label>
+                <label for="inputBroadcastMessage" class="col-sm-2 control-label"><%= __('message') %></label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="inputBroadcastMessage" placeholder="Message">
+                    <input type="text" class="form-control" id="inputBroadcastMessage" placeholder="<%= __('message') %>">
                 </div>
             </div>
             <div class="form-group">
-                <label for="inputBroadcastStyle" class="col-sm-2 control-label">Style</label>
+                <label for="inputBroadcastStyle" class="col-sm-2 control-label"><%= __('admin_dashboard_broadcast_style') %></label>
                 <div class="col-sm-10">
                     <select id="inputBroadcastStyle" class="selectpicker form-control">
-                        <option value="info">Informative</option>
-                        <option value="success">Success</option>
-                        <option value="warning">Warning</option>
-                        <option value="danger">Danger</option>
+                        <option value="info"><%= __('admin_dashboard_broadcast_style_informative') %></option>
+                        <option value="success"><%= __('admin_dashboard_broadcast_style_success') %></option>
+                        <option value="warning"><%= __('admin_dashboard_broadcast_style_warning') %></option>
+                        <option value="danger"><%= __('admin_dashboard_broadcast_style_danger') %></option>
                     </select>
                 </div>
             </div>
             <div class="form-group">
-                <label for="inputBroadcastTimeout" class="col-sm-2 control-label">Timeout</label>
+                <label for="inputBroadcastTimeout" class="col-sm-2 control-label"><%= __('admin_dashboard_broadcast_timeout') %></label>
                 <div class="col-sm-10">
-                    <input type="number" class="form-control" id="inputBroadcastTimeout" placeholder="Timeout" value="0" aria-describedby="inputBroadcastTimeoutHelpBlock">
-                    <span id="inputBroadcastTimeoutHelpBlock" class="help-block">How long to wait before automatically dismissing the alert in seconds. Enter <strong>0</strong> to never automatically dismiss.</span>
+                    <input type="number" class="form-control" id="inputBroadcastTimeout" placeholder="<%= __('admin_dashboard_broadcast_timeout') %>" value="0" aria-describedby="inputBroadcastTimeoutHelpBlock">
+                    <span id="inputBroadcastTimeoutHelpBlock" class="help-block"><%= __('admin_dashboard_timeout_caption') %> <strong><%= __('admin_dashboard_timeout_caption_1') %></strong> <%= __('admin_dashboard_timeout_caption_2') %></span>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Broadcast</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal"><%= __('cancel') %></button>
+            <button type="submit" class="btn btn-primary"><%= __('admin_dashboard_broadcast_submit') %></button>
         </div>
         </form>
     </div>

@@ -1,9 +1,9 @@
 <%- include("../header.html", {
-    pageTitle: "An unknown error occured"
+    pageTitle: __('500')
 }) -%>
 <div class="container">
-    <h1>An unknown error occured :(</h1>
-    <p class="text-muted">We're sorry, but we had trouble handling that request. Please try making it again, or <a href="https://github.com/dynasticdevelop/place/issues/new">open an issue</a> if it persists.</p>
-    <a href="/">&laquo; Go to home page</a>
+    <h1><%= __('500') %></h1>
+    <p class="text-muted"><%= __('500_explanation_1') %> <a href="https://github.com/dynasticdevelop/place/issues/new"><%= __('open_issue') %></a> <%= __('500_explanation_2') %></p>
+    <a href="/">&laquo; <%= __('go_home') %></a>
 </div>
 <%- include("../footer.html") -%>
