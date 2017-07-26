@@ -1,3 +1,25 @@
 {
-    "Place 2.0": "SMD HO"
+	"website_name": "Place 2.0",
+	"sign_in": "Sign in",
+	"sign_up": "Sign up",
+	"account_details": "Account details",
+	"sign_out": "Sign out",
+	"official_subreddit": "Official Subreddit",
+	"join_discord": "Chat on Discord",
+	"timelapses": "Timelapses",
+	"source_code": "Source Code",
+	"donate": "Donate",
+	"home": "Home",
+    "copyright": "Dynastic Development 2017",
+    "admin": "Admin",
+    "moderator": "Moderator",
+    "admin_dashboard": "Dashboard",
+    "admin_recent_actions": "Recent Actions",
+    "admin_modlog": "Moderator Log",
+    "admin_users": "Users",
+    "admin_reports": "Reports",
+    "admin_pixels": "Pixels",
+    "global_rank": "Global rank",
+    "pixel": "Pixel",
+    "pixels": "Pixels"
 }
