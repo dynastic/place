@@ -2,9 +2,8 @@ const lwip = require("pajk-lwip");
 const Pixel = require("../models/pixel");
 const ActionLogger = require("../util/ActionLogger");
 
-const imageSize = 1400;
-
 function PaintingManager(app) {
+    const imageSize = 1400;
     return {
         hasImage: false,
         imageHasChanged: false,
@@ -49,7 +48,7 @@ function PaintingManager(app) {
                     Pixel.find({}).stream().on("data", (pixel) => {
                         var x = pixel.xPos, y = pixel.yPos;
                         var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB };
-                        if(x >= 0 && y >= 0 && x < 1400 && y < 1400) batch.setPixel(x, y, colour);
+                        if(x >= 0 && y >= 0 && x < imageSize && y < imageSize) batch.setPixel(x, y, colour);
                     }).on("end", () => {
                         batch.exec((err, image) => {
                             if (err) return reject(err);
