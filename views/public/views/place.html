@@ -3,7 +3,7 @@
     <div id="loading">
         <div class="content">
             <img src="https://www.dynastic.co/img/dd-big.png" height="75" class="icon">
-            <span class="text">Loading…</span>
+            <span class="text"><%= __('loading') %></span>
         </div>
     </div>
     <div class="canvas-container">
@@ -31,10 +31,10 @@
             <div class="ctn-row">
                 <div id="palette" class="content">
                     <div class="overlay" id="sign-in-reminder">
-                        <span><a href="/signin?redirectURL=<%= redirectURLPart %>" id="overlay-sign-in">Sign in</a> or <a href="/signup?redirectURL=<%= redirectURLPart %>" id="overlay-sign-up">sign up</a> to start placing!</span>
+                        <span><a href="/signin?redirectURL=<%= redirectURLPart %>" id="overlay-sign-in"><%= __('sign_in') %></a> <%= __('or') %> <a href="/signup?redirectURL=<%= redirectURLPart %>" id="overlay-sign-up"><%= __('sign_up').toLowerCase() %></a> <%= __('to_start_placing').toLowerCase() %></span>
                     </div>
                     <div class="overlay" id="placing-modal">
-                        <span>Placing…<span>
+                        <span><%= __('placing') %><span>
                     </div>
                     <div class="overlay" id="place-timer"><span></span></div>
                 </div>

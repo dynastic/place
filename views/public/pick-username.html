@@ -1,5 +1,5 @@
 <%- include("../header.html", {
-    pageTitle: "Pick a Username",
+    pageTitle: __('pick_username'),
     css: ["/css/signin.css"]
 }) -%>
 <%
@@ -8,20 +8,20 @@ if(typeof error === "undefined") error = null;
 %>
 <div class="container">
     <form class="form-signin" method="POST" action="/pick-username">
-        <h2 class="form-signin-heading">Pick a username</h2>
-        <label for="inputUsername" class="sr-only">Username</label>
-        <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="username" value="<%= username %>" required autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <h2 class="form-signin-heading"><%= __('pick_username') %></h2>
+        <label for="inputUsername" class="sr-only"><%= __('username') %></label>
+        <input type="text" id="inputUsername" class="form-control" placeholder="<%= __('username') %>" name="username" value="<%= username %>" required autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <% if(captcha) { %><%- renderCaptcha() %><br><% } %>
         <% if(fs.existsSync("./config/community_guidelines.md")) { %>
         <div class="checkbox">
           <label>
-            <input type="checkbox" name="agreeToGuidelines"> I agree to abide by the <a href="/guidelines">Community Guidelines</a>.
+            <input type="checkbox" name="agreeToGuidelines"> <%= __('community_guidelines_agreement') %> <a href="/guidelines"><%= __('community_guidelines') %></a>
           </label>
         </div>
         <% } %>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Save</button>
+        <button class="btn btn-lg btn-primary btn-block" type="submit"><%= __('save') %></button>
         <% if(error) { %>
-            <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %></div>
+            <br><div class="alert alert-danger"><strong><%= __('error') %></strong> <%= error.message %></div>
         <% } %>
     </form>
 </div> <!-- /container -->

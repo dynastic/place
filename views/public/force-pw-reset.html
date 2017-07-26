@@ -9,8 +9,8 @@
         <p><%= __('reset_password_forced') %></p><br>
         <label for="inputPassword" class="sr-only"><%= __('password') %></label>
         <input type="password" id="inputPassword" class="form-control" placeholder="<%= __('password') %>" name="password" required autofocus>
-        <label for="inputPasswordC" class="sr-only"><%= __('reset_password_form_password_confirm') %></label>
-        <input type="password" id="inputPasswordC" class="form-control" placeholder="<%= __('reset_password_form_password_confirm') %>" name="confirmPassword" required>
+        <label for="inputPasswordC" class="sr-only"><%= __('password_repeat') %></label>
+        <input type="password" id="inputPasswordC" class="form-control" placeholder="<%= __('password_repeat') %>" name="confirmPassword" required>
         <button class="btn btn-lg btn-primary btn-block" type="submit"><%= __('reset_password_form_submit') %></button>
         <% if(error) { %>
             <br><div class="alert alert-danger"><strong><%= __('error') %></strong> <%= error.message %></div>
