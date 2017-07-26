@@ -44,6 +44,7 @@
     "passport-google-oauth20": "^1.0.0",
     "passport-jwt": "^2.2.1",
     "passport-local": "^1.0.0",
+    "passport-microsoft": "^0.0.5",
     "passport-reddit": "^0.2.4",
     "passport-twitter": "^1.0.4",
     "pump": "^1.0.2",

@@ -36,6 +36,11 @@ function OAuthRouter(app) {
             router.get("/twitter", passport.authenticate("twitter"));
             router.get("/twitter/callback", passport.authenticate("twitter", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
         }
+
+        if (app.config.oauth.microsoft.enabled) {
+            router.get('/microsoft', passport.authenticate("microsoft"));
+            router.get("/microsoft/callback", passport.authenticate("microsoft", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
+        }
     }
 
     return router;
