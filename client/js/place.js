@@ -4,7 +4,7 @@
 //  Written by AppleBetas and nullpixel. Inspired by Reddit's /r/place.
 //
 
-var size = 1400;
+var size = 1000;
 
 var canvasController = {
     isDisplayDirty: false,
@@ -153,6 +153,7 @@ var place = {
     isOutdated: false,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
+        size = canvas.height;
         this.canvas = canvas; // moved around; hidden
         this.canvasController = canvasController;
         this.canvasController.init(canvas);
