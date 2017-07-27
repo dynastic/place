@@ -83,7 +83,7 @@
 	"deactivate_account_confirm": "האם את/ה בטוח/ה שאת/ה רוצה להשבית את המנוי שלך?",
 	"deactivate_account_todo": "לפני שאת/ה עושה את זה:",
 	"deactivate_account_irreversable": "לא יכול להיות משוחזר ידנית.",
-	"deactivate_account_what_happens": "הפיקסלים שלך ישארו, אבל המשתמש יוצג כ-/משתמש מושבת/".",
+    "deactivate_account_what_happens": "הפיקסלים שלך ישארו, אבל המשתמש יוצג כ-/משתמש מושבת/.",
 	"deactivate_account_enter_password_to_confirm": "אם את/ה עדיין בטוח/ה, הכנס מחדש את הסיסמה של המנוי כדי להשבית אותו.",
 	"deactivate_account_success": "מצטערים לראות אותך עוזב/ת! המנוי שלך הושבת בהצלחה. תודה על השימוש ב-Place 2.0!",
 	"reset_password": "איפוס הסיסמה",
