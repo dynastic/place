@@ -106,7 +106,7 @@
 	"admin_dashboard_last_24hr": "in the last 24 hours",
 	"admin_dashboard_per_minute": "per minute",
 	"admin_dashboard_broadcast": "Admin Broadcast",
-	"admin_dashboard_broadcast_caption": "Send a message to all users currently viewing connected to the websockets.",
+	"admin_dashboard_broadcast_caption": "Send a message to all users currently connected to the websockets.",
 	"admin_dashboard_timeout": "Timeout",
 	"admin_dashboard_timeout_caption": "How long to wait before automatically dismissing the alert in seconds. Enter ",
 	"admin_dashboard_timeout_caption_1": "0",
