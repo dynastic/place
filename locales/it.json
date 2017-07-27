@@ -82,7 +82,7 @@
 	"deactivate_account_confirm": "Sei sicuro di voler disabilitare il tuo account?",
 	"deactivate_account_todo": "Prima che te ne vada:",
 	"deactivate_account_irreversable": "Non potrà essere recuperato.",
-	"deactivate_account_what_happens": "I tuoi pixel rimarranno, ma saranno mostrati sotto l'utente \"Account Disabilitato\"."
+	"deactivate_account_what_happens": "I tuoi pixel rimarranno, ma saranno mostrati sotto l'utente \"Account Disabilitato\".",
 	"deactivate_account_enter_password_to_confirm": "Se sei ancora sicuro, inserisci la tua password corrente per disabilitare l'account.",
 	"deactivate_account_success": "Ci dispiace vederti andare! Il tuo account è stato disabilitato con successo. Grazie per aver usato Place 2.0!",
 	"reset_password": "Ripristino Password",
