@@ -97,7 +97,7 @@
 	"to_start_placing": "To start placing!",
 	"instant_messaging_form_message_input": "Send a message",
 	"404_explanation": "We're sorry, but we could not find that page on our server. It may have been moved, deleted, or never existed in the first place. If you believe this is in error, please",
-	"500_explanation_1": "We're sorry, but we had trouble hadnling that request. Please try making it again, or",
+	"500_explanation_1": "We're sorry, but we an issue occurred on our end while trying to retrieve this page. You can try loading it again, or",
 	"500_explanation_2": "if it persists",
 	"admin_dashboard_users_online": "Users online",
 	"admin_dashboard_right_now": "Right now",
