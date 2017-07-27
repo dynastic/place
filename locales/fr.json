@@ -1,6 +1,6 @@
 {
 	"language_name": "Français",
-	"translation_list_suffix": "(de philippeloctaux & AppleBetas)",
+	"translation_list_suffix": "(de philippeloctaux, AppleBetas, lululombard)",
 	"404": "Page non trouvée",
 	"500": "Une erreur inconnue s'est produite",
 	"loading": "Chargement…",
@@ -122,6 +122,6 @@
 	"admin_similar_accounts_identified_caption": "Comptes identifiés d'être similaires avec ",
 	"admin_similar_accounts_back_to_users": "Retour aux utilisateurs",
 	"admin_similar_accounts_loading": "Chargement de comptes similaires…",
-	"admin_dashboard_last_20m": "(mise en moyenne des 20 dernières minutes)",
+	"admin_dashboard_last_20m": "(moyenne des 20 dernières minutes)",
 	"rules": "Règles"
 }
