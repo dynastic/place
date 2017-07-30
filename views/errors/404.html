@@ -1,9 +1,9 @@
 <%- include("../header.html", {
-    pageTitle: "Page not found"
+    pageTitle: __('404')
 }) -%>
 <div class="container">
-    <h1>Page not found!</h1>
-    <p class="text-muted">We're sorry, but we could not find that page on our server. It may have been moved, deleted, or never existed in the first place. If you believe this is in error, please <a href="mailto:hello@dynastic.co">contact us</a>.</p>
-    <a href="/">&laquo; Go to home page</a>
+    <h1><%= __('404') %></h1>
+    <p class="text-muted"><%= __('404_explanation') %> <a href="mailto:hello@dynastic.co"><%= __('contact_us').toLowerCase() %></a></p>
+    <a href="/">&laquo; <%= __('go_home') %></a>
 </div>
 <%- include("../footer.html") -%>

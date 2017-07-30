@@ -10,37 +10,37 @@
         <div class="tab-content active chat" data-tab-name="chat">
             <div class="messages" id="chat-messages"></div>
             <div class="text-field">
-                <input type="text" maxlength="249" autocomplete="off" placeholder="Send a message" id="chat-input-field" />
-                <a href="javascript:void(0)" class="send-btn" id="chat-send-btn">Send</a>
+                <input type="text" maxlength="249" autocomplete="off" placeholder="<%= __('instant_messaging_form_message_input') %>" id="chat-input-field" />
+                <a href="javascript:void(0)" class="send-btn" id="chat-send-btn"><%= __('send') %></a>
             </div>
         </div>
         <div class="tab-content" data-tab-name="leaderboard" id="leaderboardTab">
             <div class="coming-soon">
-                <p>Loading…</p>
+                <p><%= __('loading') %></p>
             </div>
         </div>
         <div class="tab-content" data-tab-name="achievements" id="achievementsTab">
             <div class="coming-soon">
-                <p>Coming Soon</p>
+                <p><%= __('coming_soon') %></p>
             </div>
         </div>
         <div class="tab-content" data-tab-name="active-users" id="activeUsersTab">
             <div class="coming-soon">
-                <p>Loading…</p>
+                <p><%= __('loading') %></p>
             </div>
         </div>
     </div>
     <div class="tabbar">
-        <div class="tab active" data-tab-name="chat" title="Chat">
+        <div class="tab active" data-tab-name="chat" title="<%= __('chat') %>">
             <i class="fa fa-comments"></i>
         </div>
-        <div class="tab" data-tab-name="leaderboard" title="Leaderboard">
+        <div class="tab" data-tab-name="leaderboard" title="<%= __('leaderboard') %>">
             <i class="fa fa-trophy"></i>
         </div>
-        <div class="tab" data-tab-name="achievements" title="Achievements">
+        <div class="tab" data-tab-name="achievements" title="<%= __('achievements') %>">
             <i class="fa fa-star"></i>
         </div>
-        <div class="tab" data-tab-name="active-users" title="Active Users">
+        <div class="tab" data-tab-name="active-users" title="<%= __('active_users') %>">
             <i class="fa fa-users"></i>
         </div>
     </div>

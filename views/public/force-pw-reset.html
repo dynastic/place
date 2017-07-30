@@ -1,19 +1,19 @@
 <%- include("../header.html", {
-    pageTitle: "Reset your password",
+    pageTitle: __('reset_password'),
     css: ["/css/signin.css"]
 }) -%>
 <% if(typeof error === "undefined") error = null; %>
 <div class="container">
     <form class="form-signin" method="POST" action="/force-pw-reset">
-        <h2 class="form-signin-heading">Reset your password</h2>
-        <p>You are required to change your password to continue using Place 2.0.</p><br>
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required autofocus>
-        <label for="inputPasswordC" class="sr-only">Password (again)</label>
-        <input type="password" id="inputPasswordC" class="form-control" placeholder="Password (again)" name="confirmPassword" required>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Reset Password</button>
+        <h2 class="form-signin-heading"><%= __('reset_password') %></h2>
+        <p><%= __('reset_password_forced') %></p><br>
+        <label for="inputPassword" class="sr-only"><%= __('password') %></label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="<%= __('password') %>" name="password" required autofocus>
+        <label for="inputPasswordC" class="sr-only"><%= __('password_repeat') %></label>
+        <input type="password" id="inputPasswordC" class="form-control" placeholder="<%= __('password_repeat') %>" name="confirmPassword" required>
+        <button class="btn btn-lg btn-primary btn-block" type="submit"><%= __('reset_password_form_submit') %></button>
         <% if(error) { %>
-            <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %></div>
+            <br><div class="alert alert-danger"><strong><%= __('error') %></strong> <%= error.message %></div>
         <% } %>
     </form>
 </div> <!-- /container -->

@@ -22,7 +22,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title><% if(pageTitle) { %><%= pageTitle %> &middot; <% } %>Place 2.0</title>
+    <title><% if(pageTitle) { %><%= pageTitle %> &middot; <% } %><%= __('website_name') %></title>
 
     <link rel="apple-touch-icon" href="/img/apple-touch-icon.png"/>
     <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
@@ -73,21 +73,20 @@
         <div class="collapse navbar-collapse" id="navbar-collapse">
           <ul class="nav navbar-nav">
             <%- moduleManager.gatherViewExtensions("nav_left", include); %>
-            <%- renderNavItem("Home", "/", "home"); %>
+            <%- renderNavItem(__("home"), "/", "home"); %>
             <%- moduleManager.gatherViewExtensions("nav_inside", include); %>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-users fa-fw"></i>Community <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <%- renderNavItem("Official Subreddit", "https://www.reddit.com/r/place20", "reddit-alien"); %>
-                <%- renderNavItem("Chat on Discord", "https://discord.gg/CgC8FTg", "comments"); %>
-                <%- renderNavItem("Internet World Congress", "https://discord.gg/nQ4m2Gv", "globe"); %>
-                <%- renderNavItem("Timelapses", "https://disk.ph1l3r.fr/place20/", "clock-o"); %>
-                <%- renderNavItem("Source Code", "https://www.github.com/dynasticdevelop/place", "github"); %>
+                <%- renderNavItem(__("official_subreddit"), "https://www.reddit.com/r/place20", "reddit-alien"); %>
+                <%- renderNavItem(__("join_discord"), "https://discord.gg/CgC8FTg", "comments"); %>
+                <%- renderNavItem(__("timelapses"), "https://disk.ph1l3r.fr/place20/", "clock-o"); %>
+                <%- renderNavItem(__("source_code"), "https://www.github.com/dynasticdevelop/place", "github"); %>
               </ul>
             </li>
-            <%- renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money"); %>
-            <% if(fs.existsSync("./config/community_guidelines.md")) { %><%- renderNavItem("Rules", "/guidelines", "handshake-o"); %><% } %>
-            <% if(user && userMod) { %><%- renderNavItem(userAdmin ? "Admin" : "Moderator", "/admin", "gavel"); %><% } %>
+            <%- renderNavItem(__("donate"), "https://www.paypal.me/AppleBetasPay", "money"); %>
+            <% if(fs.existsSync("./config/community_guidelines.md")) { %><%- renderNavItem(__("rules"), "/guidelines", "handshake-o"); %><% } %>
+            <% if(user && userMod) { %><%- renderNavItem(__(userAdmin ? "admin" : "moderator"), "/admin", "gavel"); %><% } %>
             <%- moduleManager.gatherViewExtensions("nav_right", include); %>
           </ul>
           <ul class="nav navbar-nav navbar-right">
@@ -96,14 +95,14 @@
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user fa-fw"></i><span name="user-dropdown"><%= user.usernameSet ? user.name : "" %></span> <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                  <%- renderNavItem("Account details", "/account", "pencil-square-o"); %>
+                  <%- renderNavItem(__("account_details"), "/account", "pencil-square-o"); %>
                   <li role="separator" class="divider"></li>
-                  <%- renderNavItem("Sign out", `/signout?redirectURL=${redirectURLPart}`, "sign-out"); %>
+                  <%- renderNavItem(__("sign_out"), `/signout?redirectURL=${redirectURLPart}`, "sign-out"); %>
                 </ul>
               </li>
             <% } else { %>
-              <%- renderNavItem("Sign in", `/signin?redirectURL=${redirectURLPart}`, "sign-in"); %>
-              <%- renderNavItem("Sign up", `/signup?redirectURL=${redirectURLPart}`, "user-plus"); %>
+              <%- renderNavItem(__("sign_in"), `/signin?redirectURL=${redirectURLPart}`, "sign-in"); %>
+              <%- renderNavItem(__("sign_up"), `/signup?redirectURL=${redirectURLPart}`, "user-plus"); %>
             <% } %>
             <%- moduleManager.gatherViewExtensions("nav_user_right", include); %>
           </ul>

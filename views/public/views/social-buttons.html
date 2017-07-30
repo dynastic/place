@@ -8,32 +8,32 @@
 <div class="social-buttons">
     <% if (config.oauth.google.enabled) { %>
     <a href="/auth/google" class="btn btn-block btn-social btn-google">
-        <span class="fa fa-google"></span> Sign in with Google
+        <span class="fa fa-google"></span> <%= __('oauth_sign_in_with') %> Google
     </a>
     <% } %>
     <% if (config.oauth.reddit.enabled) { %>
     <a href="/auth/reddit" class="btn btn-block btn-social btn-reddit">
-        <span class="fa fa-reddit"></span> Sign in with Reddit
+        <span class="fa fa-reddit"></span> <%= __('oauth_sign_in_with') %> Reddit
     </a>
      <% } %>
     <% if (config.oauth.discord.enabled) { %>
     <a href="/auth/discord" class="btn btn-block btn-social btn-discord">
-        <img src="https://discordapp.com/assets/28174a34e77bb5e5310ced9f95cb480b.png"> Sign in with Discord
+        <img src="https://discordapp.com/assets/28174a34e77bb5e5310ced9f95cb480b.png"> <%= __('oauth_sign_in_with') %> Discord
     </a>
     <% } %>
     <% if (config.oauth.twitter.enabled) { %>
     <a href="/auth/twitter" class="btn btn-block btn-social btn-twitter">
-        <span class="fa fa-twitter"></span> Sign in with Twitter
+        <span class="fa fa-twitter"></span> <%= __('oauth_sign_in_with') %> Twitter
     </a>
     <% } %>
     <% if (config.oauth.github.enabled) { %>
     <a href="/auth/github" class="btn btn-block btn-social btn-github">
-        <span class="fa fa-github"></span> Sign in with Github
+        <span class="fa fa-github"></span> <%= __('oauth_sign_in_with') %> Github
     </a>
     <% } %>
     <% if (config.oauth.facebook.enabled) { %> 
     <a href="/auth/facebook" class="btn btn-block btn-social btn-facebook">
-        <span class="fa fa-facebook"></span> Sign in with Facebook
+        <span class="fa fa-facebook"></span> <%= __('oauth_sign_in_with') %> Facebook
     </a>
     <% } %>
     <% if (config.oauth.microsoft.enabled) { %>

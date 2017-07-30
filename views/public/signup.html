@@ -1,5 +1,5 @@
 <%- include("../header.html", {
-    pageTitle: "Sign up",
+    pageTitle: __('sign_up'),
     css: ["/css/signin.css"]
 }) -%>
 <%
@@ -8,25 +8,25 @@ if(typeof error === "undefined") error = null;
 %>
 <div class="container">
     <form class="form-signin" method="POST">
-        <h2 class="form-signin-heading">Sign up for Place 2.0</h2>
-        <label for="inputUsername" class="sr-only">Username</label>
-        <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="username" value="<%= username %>" required autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
-        <label for="inputPassword2" class="sr-only">Password (again)</label>
-        <input type="password" id="inputPassword2" class="form-control" placeholder="Password (again)" name="passwordverify" required>
+        <h2 class="form-signin-heading"><%= __('sign_up_heading') %></h2>
+        <label for="inputUsername" class="sr-only"><%= __('username') %></label>
+        <input type="text" id="inputUsername" class="form-control" placeholder="<%= __('username') %>" name="username" value="<%= username %>" required autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <label for="inputPassword" class="sr-only"><%= __('password') %></label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="<%= __('password') %>" name="password" required>
+        <label for="inputPassword2" class="sr-only"><%= __('password_repeat') %></label>
+        <input type="password" id="inputPassword2" class="form-control" placeholder="<%= __('password_repeat') %>" name="passwordverify" required>
         <% if(captcha) { %><%- renderCaptcha() %><br><% } %>
         <% if(fs.existsSync("./config/community_guidelines.md")) { %>
         <div class="checkbox">
           <label>
-            <input type="checkbox" name="agreeToGuidelines"> I agree to abide by the <a href="/guidelines">Community Guidelines</a>.
+            <input type="checkbox" name="agreeToGuidelines"> <%= __('community_guidelines_agreement') %> <a href="/guidelines"><%= __('community_guidelines') %></a>
           </label>
         </div>
         <% } %>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
-        <a href="/signin" class="form-signin-link">I already have an account &raquo;</a>
+        <button class="btn btn-lg btn-primary btn-block" type="submit"><%= __('sign_up') %></button>
+        <a href="/signin" class="form-signin-link"><%= __('sign_up_have_account') %> &raquo;</a>
         <% if(error) { %>
-            <br><div class="alert alert-danger"><strong>Uh oh!</strong> <%= error.message %></div>
+            <br><div class="alert alert-danger"><strong><%= __('error') %></strong> <%= error.message %></div>
         <% } %>
         <%- include("views/social-buttons.html") -%>
     </form>

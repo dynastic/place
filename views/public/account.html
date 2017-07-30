@@ -1,10 +1,10 @@
 <%- include("../header.html", {
-    pageTitle: "Account Details",
+    pageTitle: __('account_details'),
     css: ["/css/dashboard.css", "/css/profile.css"],
     navbarSupportsTopMode: !!profileUserInfo.latestPixel
 });
  -%>
-<%
+  <%
 var isSelf = user ? user.id == profileUser.id : false;
 var pixel = profileUserInfo.latestPixel;
 var boardImageCorrection = (1000 / config.boardSize) * 4;
@@ -15,127 +15,147 @@ var boardImageCorrection = (1000 / config.boardSize) * 4;
   <div class="overlay"></div>
   <div class="diagonal-obscure"></div>
 </div></a>
-<% } %>
-<div class="container profile-info<%= pixel ? " has-pixel" : "" %>">
-  <div class="user-header-info">
-    <div class="avatar">
-      <span><%= profileUser.getUsernameInitials() %></span>
-    </div>
-    <div class="user-info">
-      <span class="username"><%= profileUser.name %> <%- profileUser.admin || profileUser.moderator ? `<span class="label label-warning badge-label">${profileUser.admin ? "Admin" : "Moderator"}</span>` : "" %></span>
-      <div class="subdetails">
-        <% var rank = profileUserInfo.statistics.leaderboardRank;
-        if(rank !== null) {%><div>
-          <span class="value">#<%= profileUserInfo.statistics.leaderboardRank.toLocaleString() -%></span>
-          <span class="name">Global rank</span>
-        </div><% } %>
-        <div>
-          <span class="value"><%= profileUser.placeCount.toLocaleString() -%></span>
-          <span class="name">pixel<%= profileUser.placeCount == 1 ? "" : "s" -%> placed</span>
-        </div>
-        <% if(profileUserInfo.statistics.placesThisWeek !== null) { %><div>
-          <span class="value"><%= profileUserInfo.statistics.placesThisWeek.toLocaleString() -%></span>
-          <span class="name">pixel<%= profileUserInfo.statistics.placesThisWeek == 1 ? "" : "s" -%> this week</span>
-        </div><% } %>
-      </div>
-    </div>
-  </div>
-  <hr>
-  <% if(hasNewPassword) { %>
-  <div class="alert alert-success"><strong>Success!</strong> Your password has been successfully changed!</div>
-  <hr>
-  <% } %>
-  <h1>About <%= isSelf ? "me" : "them" %></h1>
-  <div class="user-details">
-    <p>
-      <strong>Joined</strong> <time class="timeago" datetime="<%= profileUser.creationDate.toISOString() %>" title="<%= profileUser.creationDate.toLocaleString() %>"><%= profileUser.creationDate.toLocaleString() %></time>.</p>
-    <% if(profileUser.lastPlace) { %><p>
-      <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(pixel && pixel.isLatest) { %> at <a href="<%= `/#x=${pixel.point.x}&y=${pixel.point.y}` %>">(<%= `${pixel.point.x.toLocaleString()}, ${pixel.point.y.toLocaleString()}` %>)</a><% } %>.
-     </p><% } %>
-  </div>
-  <% if(isSelf) { %>
-  <hr>
-  <h1>My account</h1>
-  <% if(!profileUser.isOauth) { %><a class="btn btn-info" data-toggle="modal" data-target="#changePassword">Change Password</a><% } %>
-  <a class="btn btn-danger" data-toggle="modal" data-target="#deactivateAccount">Deactivate Account</a>
-  <% } %>
-  <% if(user && user.canPerformActionsOnUser(profileUser)) { %>
-  <hr>
-  <h1>Moderator tools</h1>
-  <div id="profile-mod-tools-ctn"></div>
-  <% } %>
-</div>
-<div class="modal fade" id="changePassword" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <form class="form-horizontal" id="changePasswordForm">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Change Password</h4>
-        </div>
-        <div class="modal-body">
-          <p>Change your password using your current password. <strong>Make sure you remember the new password, as this cannot be undone without it.</strong></p>
-          <div class="alert hidden" role="alert" name="changePasswordProgressAlert"></div>
-          <div class="form-group">
-            <label for="inputChangePasswordCurrent" class="col-sm-3 control-label">Password</label>
-            <div class="col-sm-9">
-              <input type="password" class="form-control" id="inputChangePasswordCurrent" placeholder="Current Password" name="password">
+      <% } %>
+        <div class="container profile-info<%= pixel ? " has-pixel " : " " %>">
+          <div class="user-header-info">
+            <div class="avatar">
+              <span><%= profileUser.getUsernameInitials() %></span>
+            </div>
+            <div class="user-info">
+              <span class="username"><%= profileUser.name %> <%- profileUser.admin || profileUser.moderator ? `<span class="label label-warning badge-label">${__(profileUser.admin ? "admin" : "moderator")}</span>`
+              : "" %></span>
+              <div class="subdetails">
+                <% var rank = profileUserInfo.statistics.leaderboardRank;
+        if(rank !== null) {%>
+                  <div>
+                    <span class="value">#<%= profileUserInfo.statistics.leaderboardRank.toLocaleString() -%></span>
+                    <span class="name"><%= __('global_rank') %></span>
+                  </div>
+                  <% } %>
+                    <div>
+                      <span class="value"><%= profileUser.placeCount.toLocaleString() -%></span>
+                      <span class="name"><%= __(profileUser.placeCount == 1 ? 'pixel_placed' : 'pixels_placed').toLowerCase() %></span>
+                    </div>
+                    <% if(profileUserInfo.statistics.placesThisWeek !== null) { %>
+                      <div>
+                        <span class="value"><%= profileUserInfo.statistics.placesThisWeek.toLocaleString() -%></span>
+                        <span class="name"><%= profileUserInfo.statistics.placesThisWeek == 1 ? __('pixel_this_week') : __('pixels_this_week') -%></span>
+                      </div>
+                      <% } %>
+              </div>
             </div>
           </div>
-          <div class="form-group">
-            <label for="inputChangePasswordNew" class="col-sm-3 control-label">New Password</label>
-            <div class="col-sm-9">
-              <input type="password" class="form-control" id="inputChangePasswordNew" placeholder="New Password" name="newPassword">
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="col-sm-9 col-sm-offset-3">
-              <input type="password" class="form-control" id="inputChangePasswordNew2" placeholder="New Password (again)" name="newConfPassword">
+          <hr>
+          <% if(hasNewPassword) { %>
+            <div class="alert alert-success"><strong><%= __('success') %></strong> <%= __('password_changed') %></div>
+            <hr>
+            <% } %>
+              <h1>
+                <%= __(isSelf ? "about_me" : "about_them") %>
+              </h1>
+              <div class="user-details">
+                <p>
+                  <strong><%= __('joined') %></strong>
+                  <time class="timeago" datetime="<%= profileUser.creationDate.toISOString() %>"
+                    title="<%= profileUser.creationDate.toLocaleString() %>">
+                    <%= profileUser.creationDate.toLocaleString() %>
+                  </time>.</p>
+                <% if(profileUser.lastPlace) { %>
+                  <p>
+                    <strong><%= __('last_placed') %></strong>
+                    <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>"
+                      title="<%= profileUser.lastPlace.toLocaleString() %>">
+                      <%= profileUser.lastPlace.toLocaleString() %>
+                    </time>
+                    <% if(pixel && pixel.isLatest) { %> at <a href="<%= `/#x=${pixel.point.x}&y=${pixel.point.y}` %>">(<%= `${pixel.point.x.toLocaleString()}, ${pixel.point.y.toLocaleString()}` %>)</a>
+                      <% } %>.
+                  </p>
+                  <% } %>
+              </div>
+              <% if(isSelf) { %>
+                <hr>
+                <h1><%= __('my_account') %></h1>
+                <% if(profileUser.isOauth) { %><a class="btn btn-info" data-toggle="modal" data-target="#changePassword"><%= __('change_password') %></a>
+                  <% } %>
+                    <a class="btn btn-danger" data-toggle="modal" data-target="#deactivateAccount"><%= __('deactivate_account') %></a>
+                    <% } %>
+                      <% if(user && user.canPerformActionsOnUser(profileUser)) { %>
+                        <hr>
+                        <h1><%= __('moderator_tools') %></h1>
+                        <div id="profile-mod-tools-ctn"></div>
+                        <% } %>
+        </div>
+        <div class="modal fade" id="changePassword" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <form class="form-horizontal" id="changePasswordForm">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title"><%= __('change_password') %></h4>
+                </div>
+                <div class="modal-body">
+                  <p><%= __('change_password_use_current_password') %> <strong><%= __('change_password_irreversable_reminder') %></strong></p>
+                  <div class="alert hidden" role="alert" name="changePasswordProgressAlert"></div>
+                  <div class="form-group">
+                    <label for="inputChangePasswordCurrent" class="col-sm-3 control-label"><%= __('password') %></label>
+                    <div class="col-sm-9">
+                      <input type="password" class="form-control" id="inputChangePasswordCurrent" placeholder="<%= __('change_password_form_current_password') %>" name="password">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="inputChangePasswordNew" class="col-sm-3 control-label"><%= __('change_password_form_new_password') %></label>
+                    <div class="col-sm-9">
+                      <input type="password" class="form-control" id="inputChangePasswordNew" placeholder="<%= __('change_password_form_new_password') %>" name="newPassword">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="col-sm-9 col-sm-offset-3">
+                      <input type="password" class="form-control" id="inputChangePasswordNew2" placeholder="<%= __('change_password_form_new_password_confirm') %>" name="newConfPassword">
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal"><%= __('cancel') %></button>
+                  <button type="submit" class="btn btn-primary"><%= __('change_password') %></button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Change Password</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 
-<div class="modal fade" id="deactivateAccount" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <form class="form-horizontal" id="deactivateAccountForm">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Deactivate Account</h4>
-        </div>
-        <div class="modal-body">
-          <p>Are you sure you want to deactivate your account?</p>
-          <p>Before you do so:</p>
-          <ul>
-            <li>Deactivated accounts <strong>cannot be manually recovered.</strong></li>
-            <li>Your pixels will remain, but the user will be shown as "Deactivated account".</li>
-            </ul>
-          <p>If you are still sure, re-enter your account's current password to deactivate it.</p>
-          <div class="alert hidden" role="alert" name="deactivateAccountProgressAlert"></div>
-          <div class="form-group">
-            <label for="inputDeactivatePassword" class="col-sm-2 control-label">Password</label>
-            <div class="col-sm-10">
-              <input type="password" class="form-control" id="inputDeactivatePassword" placeholder="Password" name="password">
+        <div class="modal fade" id="deactivateAccount" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <form class="form-horizontal" id="deactivateAccountForm">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title"><%= __('deactivate_account') %></h4>
+                </div>
+                <div class="modal-body">
+                  <p><%= __('deactivate_account_confirm') %></p>
+                  <p><%= __('deactivate_account_todo') %></p>
+                  <ul>
+                    <li><%= __('deactivated_accounts') %> <strong><%= __('deactivate_account_irreversable').toLowerCase() %></strong></li>
+                    <li><%= __('deactivate_account_what_happens') %></li>
+                  </ul>
+                  <p><%= __('deactivate_account_enter_password_to_confirm') %></p>
+                  <div class="alert hidden" role="alert" name="deactivateAccountProgressAlert"></div>
+                  <div class="form-group">
+                    <label for="inputDeactivatePassword" class="col-sm-2 control-label"><%= __('password') %></label>
+                    <div class="col-sm-10">
+                      <input type="password" class="form-control" id="inputDeactivatePassword" placeholder="<%= __('password') %>" name="password">
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal"><%= __('cancel') %></button>
+                  <button type="submit" class="btn btn-danger"><%= __('deactivate') %></button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger">Deactivate</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<%- include("../footer.html", {
+        <%- include("../footer.html", {
   js: ["/js/tooltip.js", "/js/build/account.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"],
   jsSnippets: [`  $(document).ready(function() {
     $("#profile-mod-tools-ctn").html(renderUserActions(${JSON.stringify(profileUser)}));

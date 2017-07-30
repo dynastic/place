@@ -10,7 +10,7 @@ var renderNavItem = function(name, itemPath) {
 }
 %>
 <%- include("header.html", {
-    pageTitle: !!pageTitle ? pageTitle + " &middot; Admin" : "Admin",
+    pageTitle: !!pageTitle ? pageTitle + " &middot; " + __('admin') : __('admin'),
     css: ["/css/dashboard.css", "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css"].concat(typeof css === "undefined" ? [] : css),
     isAdmin: true
 }) -%>
@@ -18,14 +18,14 @@ var renderNavItem = function(name, itemPath) {
     <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
             <ul class="nav nav-sidebar">
-                <%- renderNavItem("Dashboard", "/admin/"); %>
-                <%- renderNavItem("Recent Actions", "/admin/actions"); %>
-                <%- renderNavItem("Moderator Log", "/admin/log"); %>
+                <%- renderNavItem(__('admin_dashboard'), "/admin/"); %>
+                <%- renderNavItem(__('admin_recent_actions'), "/admin/actions"); %>
+                <%- renderNavItem(__('admin_modlog'), "/admin/log"); %>
             </ul>
             <ul class="nav nav-sidebar">
-                <%- renderNavItem("Users", "/admin/users"); %>
-                <%- renderNavItem("Reports", "/admin/reports"); %>
-                <%- renderNavItem("Pixels", "/admin/pixels"); %>
+                <%- renderNavItem(__('admin_users'), "/admin/users"); %>
+                <%- renderNavItem(__('admin_reports'), "/admin/reports"); %>
+                <%- renderNavItem(__('admin_pixels'), "/admin/pixels"); %>
             </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

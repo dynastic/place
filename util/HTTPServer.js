@@ -11,10 +11,19 @@ const User = require("../models/user");
 const session = require("cookie-session");
 const fs = require("fs");
 const path = require("path");
+const i18n = require("i18n");
 
 function HTTPServer(app) {
     var server = express();
     var httpServer = require("http").createServer(server);
+
+    i18n.configure({
+        locales: ['en'],
+        cookie: 'gmlang',
+        queryParameter: 'lang',
+        directory: path.join(process.cwd(), 'locales'),
+        defaultLocale: 'en'
+    });
 
     // Setup sentry bug reporting
     if (app.raven !== undefined) {
@@ -57,6 +66,8 @@ function HTTPServer(app) {
             req.responseFactory = app.responseFactory;
             next();
         })
+
+        server.use(i18n.init);
 
         server.use(passport.initialize());
         server.use((req, res, next) => {
