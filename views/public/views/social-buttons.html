@@ -36,5 +36,10 @@
         <span class="fa fa-facebook"></span> Sign in with Facebook
     </a>
     <% } %>
+    <% if (config.oauth.microsoft.enabled) { %>
+    <a href="/auth/microsoft" class="btn btn-block btn-social btn-microsoft">
+        <span class="fa fa-windows"></span> Sign in with Microsoft
+    </a>
+    <% } %>
 </div>
 <% } %>

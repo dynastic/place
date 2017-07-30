@@ -52,6 +52,11 @@ module.exports = {
             "enabled": false,
             "clientID": "",
             "clientSecret": ""
-        }
+        },
+        "microsoft": {
+            "enabled": false,
+            "clientID": "",
+            "clientSecret": ""
+        },
     }
 };
