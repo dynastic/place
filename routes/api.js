@@ -109,6 +109,7 @@ function APIRouter(app) {
     });
 
     router.get("/pixel", PixelInfoController.getAPIPixelInfo);
+    router.get("/pos-info", PixelInfoController.getAPIPixelInfo);
 
     router.get("/leaderboard", function(req, res, next) {
         app.leaderboardManager.getInfo((err, info) => {

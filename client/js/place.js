@@ -849,7 +849,7 @@ var place = {
             window.alert(!!error ? error.message || defaultError : defaultError);
             callback(error);
         }
-        return $.get(`/api/pixel?x=${x}&y=${y}`).done((data) => {
+        return $.get(`/api/pos-info?x=${x}&y=${y}`).done((data) => {
             if(!data.success) return failToPost(data.error);
             callback(null, data);
         }).fail((err) => failToPost(err));
