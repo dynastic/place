@@ -2,6 +2,7 @@
 <% if (Object.keys(config.oauth).find((key) => config.oauth[key].enabled)) { %>
 <div class="separator"></div>
 <% } %>
+<div class="oauth-btns">
 <% if (config.oauth.google.enabled) { %>
 <a href="/auth/google" class="btn btn-popping btn-popping-alt btn-oauth btn-oauth-google" title="Sign in with Google">
 <span class="fa fa-google"></span>
@@ -37,4 +38,5 @@
 <span class="fa fa-windows"></span>
 </a>
 <% } %>
+</div>
 <% } %>

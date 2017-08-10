@@ -592,6 +592,8 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
 
 .dialog .send-section {
     padding-top: 10px;
+    display: flex;
+    align-items: center;
 }
 
 .dialog .send-section .separator {
@@ -599,9 +601,24 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     width: 1px;
     background: #E9E9E9;
     display: inline-block;
-    top: 11px;
-    position: relative;
     margin: 0 12px;
+}
+
+.dialog .send-section .oauth-btns {
+    overflow-y: hidden;
+    overflow-x: auto;
+    height: 34px;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+.dialog .send-section .oauth-btns > .btn {
+    margin-right: 2px;
+    display: inline-block;
+}
+
+.dialog .send-section .oauth-btns > .btn:last-child {
+    margin-right: 0;
 }
 
 .btn.btn-oauth {
