@@ -7,9 +7,10 @@
 <%
 var isSelf = user ? user.id == profileUser.id : false;
 var pixel = profileUserInfo.latestPixel;
+var boardImageCorrection = (1000 / config.boardSize) * 4;
 %>
 <% if(pixel) { %>
-<a href="/#<%= `x=${pixel.point.x}&y=${pixel.point.y}` %>"><div class="profile-header" style="background-position: calc(50% - <%= (pixel.point.x - 500) * 4 %>px) <%= -(pixel.point.y * 4) + 175 %>px;">
+<a href="/#<%= `x=${pixel.point.x}&y=${pixel.point.y}` %>"><div class="profile-header" style="background-position: calc(50% - <%= (pixel.point.x - (config.boardSize / 2)) * boardImageCorrection %>px) <%= -(pixel.point.y * boardImageCorrection) + 175 %>px;">
   <div class="navbar-legibility"></div>
   <div class="overlay"></div>
   <div class="diagonal-obscure"></div>
@@ -49,13 +50,13 @@ var pixel = profileUserInfo.latestPixel;
     <p>
       <strong>Joined</strong> <time class="timeago" datetime="<%= profileUser.creationDate.toISOString() %>" title="<%= profileUser.creationDate.toLocaleString() %>"><%= profileUser.creationDate.toLocaleString() %></time>.</p>
     <% if(profileUser.lastPlace) { %><p>
-      <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(pixel && pixel.isLatest) { %> at <a href="<%= `/#x=${pixel.point.x.toLocaleString()}&y=${pixel.point.y.toLocaleString()}` %>">(<%= `${pixel.point.x.toLocaleString()}, ${pixel.point.y.toLocaleString()}` %>)</a><% } %>.
+      <strong>Last placed</strong> <time class="timeago" datetime="<%= profileUser.lastPlace.toISOString() %>" title="<%= profileUser.lastPlace.toLocaleString() %>"><%= profileUser.lastPlace.toLocaleString() %></time><% if(pixel && pixel.isLatest) { %> at <a href="<%= `/#x=${pixel.point.x}&y=${pixel.point.y}` %>">(<%= `${pixel.point.x.toLocaleString()}, ${pixel.point.y.toLocaleString()}` %>)</a><% } %>.
      </p><% } %>
   </div>
   <% if(isSelf) { %>
   <hr>
   <h1>My account</h1>
-  <% if(profileUser.isOauth) { %><a class="btn btn-info" data-toggle="modal" data-target="#changePassword">Change Password</a><% } %>
+  <% if(!profileUser.isOauth) { %><a class="btn btn-info" data-toggle="modal" data-target="#changePassword">Change Password</a><% } %>
   <a class="btn btn-danger" data-toggle="modal" data-target="#deactivateAccount">Deactivate Account</a>
   <% } %>
   <% if(user && user.canPerformActionsOnUser(profileUser)) { %>

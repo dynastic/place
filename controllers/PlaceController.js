@@ -13,7 +13,7 @@ exports.postAPIPixel = (req, res, next) => {
         var x = Number.parseInt(req.body.x), y = Number.parseInt(req.body.y);
         if(Number.isNaN(x) || Number.isNaN(y)) return res.status(400).json({ success: false, error: { message: "Your coordinates were incorrectly formatted", code: "invalid_parameters" } });
         var rgb = req.place.paintingManager.getColourRGB(req.body.colour);
-        if (!rgb) return res.status(400).json({ success: false, error: { message: "Invalid color code specified.", code: "invalid_parameters" } });
+        if (!rgb) return res.status(400).json({ success: false, error: { message: "Invalid colour code specified.", code: "invalid_parameters" } });
         req.place.paintingManager.doPaint(rgb, x, y, user).then((pixel) => {
             return User.findById(user.id).then((user) => {
                 var seconds = user.getPlaceSecondsRemaining(req.place);

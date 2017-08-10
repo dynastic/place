@@ -53,8 +53,8 @@ class DataModelManager {
     }
 
     _setupMethodHandler(name, key, isStatic) {
-        if(isStatic) return;
-        var m = this;
+        if (isStatic) return;
+        let m = this;
         mongoose.models[name].prototype[key] = function() {
             return m._getMethodHandler(name, key, false).apply(this, Array.from(arguments));
         }
@@ -65,7 +65,7 @@ class DataModelManager {
     }
 
     _getMethodHandler(model, name, isStatic) {
-        console.log(`Getting method handler ${model}/${name} (${isStatic ? "static" : "instance"})`)
+        // console.log(`Getting method handler ${model}/${name} (${isStatic ? "static" : "instance"})`)
         return this._getList(isStatic)[model][name];
     }
 

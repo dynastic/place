@@ -6,7 +6,8 @@ const JwtStrategy = require("passport-jwt").Strategy,
     DiscordStrategy = require("passport-discord").Strategy,
     TwitterStrategy = require("passport-twitter").Strategy,
     GithubStrategy = require("passport-github").Strategy,
-    FacebookStrategy = require("passport-facebook").Strategy;
+    FacebookStrategy = require("passport-facebook").Strategy,
+    MicrosoftStrategy = require("passport-microsoft").Strategy;
 
 // Get user model
 const User = require("../models/user");
@@ -128,6 +129,18 @@ module.exports = function(passport, app) {
                 callbackURL: config.host + "/auth/twitter/callback"
             }, function(token, tokenSecret, profile, done) {
                 OAuthLogin("twitter", profile.username, profile.id, done);
+            }));
+        }
+
+        if (config.oauth.microsoft.enabled) {
+            passport.use(new MicrosoftStrategy({
+                clientID: config.oauth.microsoft.clientID,
+                clientSecret: config.oauth.microsoft.clientSecret,
+                callbackURL: config.host + '/auth/microsoft/callback',
+                scope: ['openid']
+            },
+            function(accessToken, refreshToken, profile, done) {
+                OAuthLogin("microsoft", profile.username, profile.id, done);
             }));
         }
     }
