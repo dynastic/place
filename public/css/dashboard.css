@@ -62,7 +62,7 @@ body {
   transition: 0.15s box-shadow ease-in-out;
   position: relative;
   z-index: 21;
-  border-radius: 0 5px 5px 0;
+  border-radius: 0 3px 3px 0;
 }
 .nav-sidebar > li > a:hover,
 .nav-sidebar > li > a:focus {
@@ -74,8 +74,8 @@ body {
 .nav-sidebar > .active > a:focus {
   color: #fff;
   background-color: #009ef7;
-  margin-right: -6px;
-  padding-right: 6px;
+  margin-right: -4px;
+  padding-right: 4px;
   box-shadow: 0 2px 12px 1px rgba(0,0,0,0.18);
   z-index: 22;
 }

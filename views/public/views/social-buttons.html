@@ -32,4 +32,9 @@
 <span class="fa fa-facebook"></span>
 </a>
 <% } %>
+<% if (config.oauth.microsoft.enabled) { %> 
+<a href="/auth/microsoft" class="btn btn-popping btn-popping-alt btn-oauth btn-oauth-microsoft" title="Sign in with Microsoft account">
+<span class="fa fa-windows"></span>
+</a>
+<% } %>
 <% } %>

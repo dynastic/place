@@ -104,7 +104,7 @@
               </li>
             <% } else { %>
               <li id="nav-auth-link">
-                <a class="btn btn-sm btn-nav-auth-link" href="<%= (path == "/" ? "javascript:void(0)" : "/#signup") %>" data-place-trigger="openAuthDialog">Get started</a>
+                <a class="btn btn-sm btn-nav-auth-link" href="<%= (path == "/" ? "javascript:void(0)" : `/#signup&redirectURL=${redirectURLPart}`) %>" data-place-trigger="openAuthDialog">Get started</a>
               </li>
             <% } %>
             <%- moduleManager.gatherViewExtensions("nav_user_right", include); %>

@@ -5,7 +5,7 @@ body.fixed-navbar {
 
 @supports (backdrop-filter:none) or (-webkit-backdrop-filter:none) {
     nav.navbar {
-        background: rgba(255,255,255,0.8);
+        background: rgba(255,255,255,0.8)!important;
         -webkit-backdrop-filter: blur(12px);
         backdrop-filter: blur(12px);
     }
@@ -34,9 +34,16 @@ body {
     display: flex;
     justify-content: center;
     overflow: hidden;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     bottom: 0;
-    width: 100%;
+    right: 0;
+    transition: 0.25s right ease-out;
+}
+
+.popout-open:not(.popped-out) .canvas-container {
+    right: 320px;
 }
 
 #place-canvas {
@@ -130,7 +137,6 @@ body {
 
 #palette-ctn > .ctn-row > .content {
     width: auto;
-    border-radius: 10px 10px 0 0;
     z-index: 2;
     padding: 10px;
     box-sizing: content-box;
@@ -189,6 +195,15 @@ body {
     margin: 4px;
     display: inline-block;
     cursor: pointer;
+    transition: 0.1s transform ease-in-out, 0.1s box-shadow ease-in-out;
+    position: relative;
+    z-index: 1;
+}
+
+.colour-option.selected {
+    transform: scale(1.3);
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.2);
+    z-index: 2;
 }
 
 .colour-option.is-white {
@@ -221,6 +236,7 @@ body {
     justify-content: center;
     align-items: center;
     cursor: default;
+    z-index: 2;
 }
 
 body.signed-in #palette > #sign-in-reminder, #palette > #placing-modal, #palette > #place-timer {
@@ -295,10 +311,9 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 .pixel-data {
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #d3d3d3;
-    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.1);
+    background: #f8f9fd;
+    border-radius: 4px;
+    box-shadow: 0 5px 20px 3px rgba(0,0,0,0.2);
     min-width: 275px;
     max-width: 500px;
 	position: relative;
@@ -317,13 +332,13 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 
 .pixel-data:after {
 	border-color: rgba(255, 255, 255, 0);
-	border-right-color: #ffffff;
+	border-right-color: #f8f9fd;
 	border-width: 10px;
 	margin-top: -10px;
 }
 .pixel-data:before {
 	border-color: rgba(211, 211, 211, 0);
-	border-right-color: #d3d3d3;
+	border-right-color: #f8f9fd;
 	border-width: 11px;
 	margin-top: -11px;
 }
@@ -337,13 +352,13 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 
     .pixel-data:after {
         border-right-color: transparent;
-        border-bottom-color: #ffffff;
+        border-bottom-color: #f8f9fd;
         margin-top: initial;
         margin-left: -10px;
     }
     .pixel-data:before {
         border-right-color: transparent;
-        border-bottom-color: #d3d3d3;
+        border-bottom-color: #f8f9fd;
         margin-top: initial;
         margin-left: -11px;
     }
@@ -361,6 +376,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 .pixel-data .field {
     font-size: 15px;
     font-weight: 300;
+    vertical-align: middle;
 }
 
 .pixel-data .field::after, .pixel-data > .summary::after {
@@ -370,14 +386,21 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 .pixel-data .field > .title {
-    font-weight: 600;
+    font-weight: 700;
     float: left;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #696969;
+    position: relative;
+    top: 1.5px;
 }
 
 .pixel-data .field > .value {
     float: right;
     margin-left: 15px;
     text-align: right;
+    color: #333;
 }
 
 .pixel-data > .summary {
@@ -441,13 +464,13 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 .pixel-data > .user-info {
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 4px 4px;
 }
 
 .pixel-data > .user-info, .pixel-data > #mod-user-action-ctn > .actions-ctn  {
     padding: 14px 24px;
-    border-top: 1px solid #eaeaea;
-    background: #FAFAF7;
+    border-top: 1px solid #efefef;
+    background: #fff;
 }
 
 .pixel-data > #mod-user-action-ctn > .actions-ctn {
@@ -528,12 +551,17 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 #popout-container {
     width: 100%;
     max-width: 320px;
+    position: absolute;
     background: #fff;
     border-left: 1px solid #eee;
-    position: relative;
     flex-direction: column;
     justify-content: stretch;
-    display: none;
+    display: flex;
+    right: -320px;
+    height: 100%;
+    z-index: 99;
+    margin: 0;
+    transition: 0.25s right ease-out;
 }
 
 #popout-container > .content-ctn {
@@ -545,7 +573,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 .popout-open:not(.popped-out) #popout-container {
-    display: flex;
+    right: 0;
 }
 
 #popout-container > .navigation-bar, #popout-container > .tabbar {
@@ -584,7 +612,12 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     cursor: pointer;
     font-size: 20px;
     margin-left: 5px;
+    position: relative;
     display: inline-block;
+}
+
+#popout-container > .navigation-bar .buttons > span.popout-btn {
+    top: 1.5px;
 }
 
 #popout-container > .tabbar {
@@ -666,13 +699,14 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 }
 
 #place {
-    display: flex;
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
     width: 100%;
+    display: block;
+    overflow: hidden;
 }
 
 .popout-btns {
@@ -845,18 +879,17 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 
     .canvas-container {
         height: 100%;
-        width: 100%;
+        transition: none;
+    }
+
+    .popout-open:not(.popped-out) .canvas-container {
+        right: 0;
     }
 
     #popout-container {
-        position: absolute;
-        display: flex;
         transition: 0.25s top ease-out;
         top: 100%;
         max-width: none;
-        z-index: 99;
-        margin: 0;
-        height: 100%;
         padding-top: 50px;
         background: none;
     }
@@ -940,9 +973,22 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     display: none!important;
 }
 
+.viewing-full-map #palette-ctn {
+    left: 0;
+    right: 0;
+}
+
 .viewing-full-map #palette-ctn > .ctn-row {
     align-items: left;
     justify-content: left;
+}
+
+.viewing-full-map #palette-ctn > .ctn-row > .content {
+    border-radius: 0 10px 0 0;
+}
+
+.viewing-full-map #palette-ctn > .ctn-row > .content.compact {
+    border-radius: 0 5px 0 0;
 }
 
 .viewing-full-map #zoom-controller {
@@ -964,11 +1010,11 @@ body:not(.viewing-full-map) #place-canvas-draw {
     transform: scale(1, 1);
 }
 
-.viewing-full-map #place {
-    padding-top: 50px;
+.viewing-full-map .canvas-container {
+    top: 50px;
 }
 
-body:not(.viewing-full-map) .button-ctn, body:not(.viewing-full-map) #popout-container {
+body:not(.viewing-full-map) .button-ctn, body #popout-container {
     padding-top: 50px;
 }
 
@@ -977,4 +1023,10 @@ body:not(.viewing-full-map) .button-ctn, body:not(.viewing-full-map) #popout-con
         margin-top: 0;
         padding-top: 50px;
     }
+}
+
+.last-update {
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 700;
 }

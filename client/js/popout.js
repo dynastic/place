@@ -317,7 +317,7 @@ var popoutController = {
                 }
             });
         }
-        if(this.leaderboardUpdated) $("<small>").text(`Last updated at ${this.leaderboardUpdated.toLocaleString()}.`).appendTo(tab);
+        if(this.leaderboardUpdated) $("<small>").addClass("last-update").text(`Last updated at ${this.leaderboardUpdated.toLocaleString()}.`).appendTo(tab);
         $("<p>").addClass("text-muted").text("Leaderboards are calculated based on the number of pixels you have placed (that someone else hasn't overwritten) over the span of the last week. To get a spot on the leaderboard, start placing!").appendTo(tab);
     },
 

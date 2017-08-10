@@ -2,8 +2,8 @@
     <div class="navigation-bar">
         <span class="title"></span>
         <div class="buttons">
-            <span class="popout-btn" aria-label="Popout"><i class="fa fa-external-link"></i></span>
-            <span class="close-btn" aria-label="Close"><i class="fa fa-times"></i></span>
+            <span class="popout-btn" aria-label="Popout">&#x2197;</span>
+            <span class="close-btn" aria-label="Close">&times;</span>
         </div>
     </div>
     <div class="content-ctn">
@@ -19,11 +19,11 @@
                 <p>Loading…</p>
             </div>
         </div>
-        <div class="tab-content" data-tab-name="achievements" id="achievementsTab">
+        <% if(user) { %><div class="tab-content" data-tab-name="achievements" id="achievementsTab">
             <div class="coming-soon">
                 <p>Coming Soon</p>
             </div>
-        </div>
+        </div><% } %>
         <div class="tab-content" data-tab-name="active-users" id="activeUsersTab">
             <div class="coming-soon">
                 <p>Loading…</p>
@@ -37,9 +37,9 @@
         <div class="tab" data-tab-name="leaderboard" title="Leaderboard">
             <i class="fa fa-trophy"></i>
         </div>
-        <div class="tab" data-tab-name="achievements" title="Achievements">
+        <% if(user) { %><div class="tab" data-tab-name="achievements" title="Achievements">
             <i class="fa fa-star"></i>
-        </div>
+        </div><% } %>
         <div class="tab" data-tab-name="active-users" title="Active Users">
             <i class="fa fa-users"></i>
         </div>

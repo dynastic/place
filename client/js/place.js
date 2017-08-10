@@ -39,7 +39,12 @@ var SignInDialogController = {
             form.data("submitting", true);
             $.post("/api" + call, data).done(function(data) {
                 if(data.success) {
-                    window.location.reload();
+                    var hash = hashHandler.getHash();
+                    if(hash["redirectURL"] != null) {
+                        window.location = hash["redirectURL"];
+                    } else {
+                        window.location.reload();
+                    }
                 } else {
                     me.shake();
                     var error = "An unknown error occurred while attempting to authenticate you.";
@@ -349,7 +354,13 @@ var place = {
 
         this.popoutController = popoutController;
         this.popoutController.setup(this, $("#popout-container")[0]);
-        this.popoutController.popoutVisibilityController.visibilityChangeCallback = () => app.handleResize();
+        this.popoutController.popoutVisibilityController.visibilityChangeCallback = () => {
+            var start = new Date();
+            var interval = setInterval(function() {
+                app.handleResize();
+                if((new Date() - start) > 250) clearInterval(interval);
+            }, 1);
+        }
 
         setInterval(function() { app.doKeys() }, 15);
 
@@ -928,6 +939,7 @@ var place = {
         this.selectedColour = colourID - 1;
         let elem = this.colourPaletteOptionElements[this.selectedColour];
         this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
+        $(elem).addClass("selected");
         $(this.zoomController).addClass("selected");
         $(this.gridHint).show();
     },
@@ -935,6 +947,7 @@ var place = {
     deselectColour: function() {
         this.selectedColour = null;
         $(this.handElement).remove();
+        $(this.colourPaletteOptionElements).removeClass("selected");
         $(this.zoomController).removeClass("selected");
         $(this.gridHint).hide();
     },
@@ -1152,12 +1165,12 @@ $("#user-count").click(function() {
     place.popoutController.popoutVisibilityController.changeTab("active-users");
 });
 
-if(window.location.hash == "#signin") {
+if(Object.keys(hashHandler.getHash()).includes("signin")) {
     SignInDialogController.show("sign-in");
-    window.location.hash = "";
-} else if(window.location.hash == "#signup") {
+    hashHandler.deleteHashKey("signin");
+} else if(Object.keys(hashHandler.getHash()).includes("signup")) {
     SignInDialogController.show("sign-up");
-    window.location.hash = "";
+    hashHandler.deleteHashKey("signup");
 }
 
 $("*[data-place-trigger]").click(function() {
