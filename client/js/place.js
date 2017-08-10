@@ -6,6 +6,123 @@
 
 var size = 1400;
 
+var SignInDialogController = {
+    dialog: $("#sign-in-dialog"),
+    currentTab: null,
+    isAnimating: false,
+
+    setup: function() {
+        var me = this;
+        me.dialog.parent().find(".dialog .close, .dialog-overlay").click(function() {
+            me.hide();
+        });
+        me.dialog.find(".switchers > div").click(function() {
+            var id = $(this).attr("tab-name");
+            me.switchTab(id);
+        });
+        $(document).keydown(function(e) {
+            if(me.isShowing() && e.keyCode == 27) { // escape
+                e.preventDefault();
+                me.hide();
+            }
+        })
+        me.dialog.find("form.form-signin").submit(function(e) {
+            var form = $(this);
+            var call = form.attr("action");
+            var tab = form.parent().attr("tab-name");
+            var data = form.serialize();
+            e.preventDefault();
+            if(form.data("submitting")) return;
+            var submitButton = form.find("input[type=submit], button[type=submit]");
+            var origSubmitButtonText = submitButton.text();
+            submitButton.text("Loading").attr("disabled", "disabled");
+            form.data("submitting", true);
+            $.post("/api" + call, data).done(function(data) {
+                if(data.success) {
+                    window.location.reload();
+                } else {
+                    me.shake();
+                    var error = "An unknown error occurred while attempting to authenticate you.";
+                    if(data.error && data.error.message) {
+                        error = data.error.message;
+                    }
+                    me.showErrorOnTab(tab, error);
+                }
+            }).fail(function() {
+                me.shake();
+                me.showErrorOnTab(tab, "An error occurred while trying to communicate with Place to authenticate you.");
+            }).always(function() {
+                submitButton.removeAttr("disabled");
+                if(origSubmitButtonText) submitButton.text(origSubmitButtonText);
+                form.data("submitting", false);
+            });
+        });
+        return me;
+    },
+
+    isShowing: function() {
+        return this.dialog.parent().hasClass("show");
+    },
+
+    shake: function() {                
+        this.dialog.addClass("shake");
+        setTimeout(() => { this.dialog.removeClass("shake"); }, 500);
+    },
+
+    showErrorOnTab: function(tab, text = null) {
+        var tabContent = this.dialog.find(`.pages > div[tab-name=${tab}]`);
+        if(text) {
+            // show error
+            var existing = tabContent.find(".tab-error");
+            if(existing.length > 0) {
+                existing.find("span").text(text);
+                return;
+            }
+            var alert = $("<div>").addClass("tab-error alert alert-danger").hide().appendTo(tabContent).fadeIn();
+            $("<strong>").text("Uh oh! ").appendTo(alert);
+            $("<span>").text(text).appendTo(alert);
+        } else {
+            tabContent.find(".tab-error").remove();
+        }
+    },
+
+    switchTab: function(tab, animated = true) {
+        if(tab == this.currentTab || this.isAnimating) return;
+        this.currentTab = tab;
+        this.isAnimating = true;
+        var applyClasses = () => {
+            this.isAnimating = false;
+            this.dialog.find(".pages > div.active, .switchers > div.active").removeClass("active");
+            this.dialog.find(`.pages > div[tab-name=${tab}], .switchers > div[tab-name=${tab}]`).addClass("active");
+        }
+        if(animated) {
+            const animDuration = 250;
+            var toHide = $(`.pages > div.active, .switchers > div[tab-name=${tab}]`).animate({opacity: 0}, {duration: animDuration, queue: false}).slideUp({duration: animDuration, queue: false, complete: function() {
+                $(this).attr("style", "");
+                applyClasses();
+            }});
+            $(`.pages > div[tab-name=${tab}], .switchers > div.active`).css({opacity: 1}).slideDown(animDuration, function() {
+                $(this).attr("style", "");
+            });
+        } else {
+            applyClasses();
+        }
+    },
+
+    show: function(tab = null) {
+        if(this.isShowing()) return;
+        if(tab) this.switchTab(tab, false);
+        this.dialog.parent().addClass("show");
+        hashHandler.modifyHash({"d": 1});
+    },
+
+    hide: function(){ 
+        this.dialog.find("form").trigger("reset");
+        this.dialog.parent().removeClass("show");
+        hashHandler.deleteHashKey("d");
+    }
+}.setup();
+
 var canvasController = {
     isDisplayDirty: false,
 
@@ -94,14 +211,21 @@ var hashHandler = {
     },
 
     setHash: function(hash) {
-        let encodedHash = this.encodeHash(hash);
-        if("history" in window) window.history.replaceState(null, null, "#" + encodedHash);
-        else window.location.hash = encodedHash;
+        var encodedHash = this.encodeHash(hash);
+        if("history" in window) window.history.replaceState(undefined, undefined, "#" + encodedHash);
+        else location.replace("#" + encodedHash);
     },
 
     modifyHash: function(newHash) {
-        Object.assign(this.getHash(), newHash);
-        this.setHash(newHash);
+        this.setHash(Object.assign(this.getHash(), newHash));
+    },
+
+    deleteHashKey: function(keys) {
+        var keysToUse = keys;
+        if(typeof keys == "string") keysToUse = [keys];
+        var hash = this.getHash();
+        keysToUse.forEach((key) => delete hash[key]);
+        this.setHash(hash);
     },
 
     decodeHash: function(hashString) {
@@ -229,8 +353,6 @@ var place = {
 
         setInterval(function() { app.doKeys() }, 15);
 
-        this.updateAuthLinks();
-
         this.dismissBtn = $("<button>").attr("type", "button").addClass("close").attr("data-dismiss", "alert").attr("aria-label", "Close");
         $("<span>").attr("aria-hidden", "true").html("&times;").appendTo(this.dismissBtn);
     },
@@ -326,7 +448,6 @@ var place = {
                 $(app.zoomController).removeClass("grabbing");
                 var coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
-                app.updateAuthLinks();
             }
         }).on("tap", (event) => {
             if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
@@ -437,7 +558,7 @@ var place = {
     },
 
     userCountChanged: function (data) {
-        if(data) this.changeUserCount(data);
+        if(data !== null) this.changeUserCount(data);
     },
 
     setupColours: function() {
@@ -525,7 +646,6 @@ var place = {
         clearInterval(this.zooming.zoomHandle);
         let coord = this.getCoordinates();
         this.hashHandler.modifyHash(coord);
-        this.updateAuthLinks();
         this.zooming.zoomHandle = null;
         this.zooming.fastZoom = false;
     },
@@ -980,13 +1100,6 @@ var place = {
         }
     },
 
-    updateAuthLinks: function() {
-        var redirectURLPart = encodeURIComponent(window.location.pathname.substr(1) + window.location.search + window.location.hash);
-        $("#nav-sign-in > a, #overlay-sign-in").attr("href", `/signin?redirectURL=${redirectURLPart}`)
-        $("#nav-sign-up > a, #overlay-sign-up").attr("href", `/signup?redirectURL=${redirectURLPart}`)
-        $("#nav-sign-out > a").attr("href", `/signout?redirectURL=${redirectURLPart}`)
-    },
-
     getUserStateText: function(userState) {
         if(userState == "ban") return "Banned user";
         if(userState == "deactivated") return "Deactivated user";
@@ -1037,4 +1150,23 @@ $(".popout-control").click(function() {
 $("#user-count").click(function() {
     place.popoutController.popoutVisibilityController.open();
     place.popoutController.popoutVisibilityController.changeTab("active-users");
-})
+});
+
+if(window.location.hash == "#signin") {
+    SignInDialogController.show("sign-in");
+    window.location.hash = "";
+} else if(window.location.hash == "#signup") {
+    SignInDialogController.show("sign-up");
+    window.location.hash = "";
+}
+
+$("*[data-place-trigger]").click(function() {
+    var trigger = $(this).data("place-trigger");
+    if(trigger == "openSignInDialog") {
+        SignInDialogController.show("sign-in");
+    } else if(trigger == "openSignUpDialog") {
+        SignInDialogController.show("sign-up");
+    } else if(trigger == "openAuthDialog") {
+        SignInDialogController.show();
+    }
+});

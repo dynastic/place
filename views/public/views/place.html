@@ -26,13 +26,15 @@
         <div id="grid-hint"></div>
         <div id="palette-ctn">
             <div class="ctn-row">
-                <div id="user-count" class="content compact clickable" style="display: none;"><i class="fa fa-user fa-fw"></i><span class="count"></span><i class="fa fa-circle-o-notch fa-spin fa-fw loading"></i></div>
-                <button id="coordinates" class="content compact" style="display: none;"><i class="fa fa-map-marker fa-fw"></i>(<span></span>, <span></span>)</button>
+                <div class="content compact">
+                    <div id="user-count" class="section clickable" style="display: none;"><i class="fa fa-user fa-fw"></i><span class="count"></span><i class="fa fa-circle-o-notch fa-spin fa-fw loading"></i></div>
+                    <button id="coordinates" class="section" style="display: none;"><i class="fa fa-map-marker fa-fw"></i>(<span></span>, <span></span>)</button>
+                </div>
             </div>
             <div class="ctn-row">
                 <div id="palette" class="content">
                     <div class="overlay" id="sign-in-reminder">
-                        <span><a href="/signin?redirectURL=<%= redirectURLPart %>" id="overlay-sign-in">Sign in</a> or <a href="/signup?redirectURL=<%= redirectURLPart %>" id="overlay-sign-up">sign up</a> to start placing!</span>
+                        <span><a data-place-trigger="openSignInDialog" href="javascript:void(0)" id="overlay-sign-in">Sign in</a> or <a data-place-trigger="openSignUpDialog" href="javascript:void(0)" id="overlay-sign-up">sign up</a> to start placing!</span>
                     </div>
                     <div class="overlay" id="placing-modal">
                         <span>Placing…<span>

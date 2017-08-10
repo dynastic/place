@@ -9,6 +9,8 @@ const PixelInfoController = require("../controllers/PixelInfoController");
 const ChatController = require("../controllers/ChatController");
 const AdminActionsController = require("../controllers/AdminActionsController");
 const ModeratorUserController = require("../controllers/ModeratorUserController");
+const SignInController = require("../controllers/SignInController");
+const SignUpController = require("../controllers/SignUpController");
 
 function APIRouter(app) {
     let router = express.Router();
@@ -51,15 +53,21 @@ function APIRouter(app) {
 
     // Normal APIs
 
-    router.post("/signup", function(req, res) {
-        res.status(503).json({
-            success: false,
-            error: {
-                message: "API signup is no longer available.",
-                code: "unavailable"
-            }
-        });
+    const signupRatelimit = new Ratelimit(require("../util/RatelimitStore")(), {
+        freeRetries: 3, // 3 signups per hour
+        attachResetToRequest: false,
+        refreshTimeoutOnRequest: false,
+        minWait: 60 * 60 * 1000, // 1 hour
+        maxWait: 60 * 60 * 1000, // 1 hour, 
+        failCallback: (req, res, next, nextValidRequestDate) => {
+            res.status(429).json({success: false, error:{message: "You're doing that too fast."}});
+        },
+        handleStoreError: (error) => app.reportError("Sign up rate limit store error: " + error),
+        proxyDepth: app.config.trustProxyDepth
     });
+
+    router.post("/signin", SignInController.postSignIn);
+    router.post("/signup", signupRatelimit.prevent, SignUpController.postSignUp);
 
     router.post("/identify", JWTController.identifyAPIUser);
 

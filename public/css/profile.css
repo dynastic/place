@@ -4,6 +4,7 @@
 
 .navbar.supports-top.top:not(.expanded) {
   background: none;
+  box-shadow: none;
 }
 
 .navbar.supports-top.top:not(.expanded) .navbar-brand, .navbar.supports-top.top:not(.expanded) .navbar-brand:focus, .navbar.supports-top.top:not(.expanded) .navbar-brand:hover, .navbar.supports-top.top:not(.expanded) .navbar-nav > li > a, .navbar.supports-top.top:not(.expanded) .navbar-nav > li > a:hover, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:focus, .navbar.supports-top.top:not(.expanded) .navbar-nav>.open>a:hover {
@@ -74,7 +75,7 @@ body {
   width: 100%;
   right: 0;
   height: 209px;
-  background: linear-gradient(to top left, white 50%, transparent 0) no-repeat;
+  background: linear-gradient(to top left, #f8f9fd 50%, transparent 0) no-repeat;
   z-index: 7;
   pointer-events: none;
 }

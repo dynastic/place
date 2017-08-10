@@ -1,11 +1,8 @@
 const express = require("express");
-const Ratelimit = require("express-brute");
 
 const UsernamePickerController = require("../controllers/UsernamePickerController");
 const PasswordChangeController = require("../controllers/PasswordChangeController");
 const GuidelineController = require("../controllers/GuidelineController");
-const SignInController = require("../controllers/SignInController");
-const SignUpController = require("../controllers/SignUpController");
 const AccountPageController = require("../controllers/AccountPageController");
 const SignOutController = require("../controllers/SignOutController");
 
@@ -34,29 +31,6 @@ function PublicRouter(app) {
     router.post("/pick-username", UsernamePickerController.postUsername);
     router.post("/force-pw-reset", PasswordChangeController.postSelfServeForcedPassword);
 
-    const signupRatelimit = new Ratelimit(require("../util/RatelimitStore")(), {
-        freeRetries: 3, // 3 signups per hour
-        attachResetToRequest: false,
-        refreshTimeoutOnRequest: false,
-        minWait: 60 * 60 * 1000, // 1 hour
-        maxWait: 60 * 60 * 1000, // 1 hour, 
-        failCallback: (req, res, next, nextValidRequestDate) => {
-            function renderResponse(errorMsg) {
-                return req.responseFactory.sendRenderedResponse("public/signup", req, res, {
-                    captcha: app.enableCaptcha,
-                    error: {
-                        message: errorMsg || "An unknown error occurred"
-                    },
-                    username: req.body.username
-                });
-            }
-            res.status(429);
-            return renderResponse("You're doing that too fast.");
-        },
-        handleStoreError: (error) => app.reportError("Sign up rate limit store error: " + error),
-        proxyDepth: app.config.trustProxyDepth
-    });
-
     router.get("/", function(req, res) {
         return req.responseFactory.sendRenderedResponse("public/index", req, res);
     });
@@ -77,8 +51,13 @@ function PublicRouter(app) {
         return req.responseFactory.sendRenderedResponse("public/sitemap.xml.html", req, res, null, "text/xml");
     });
 
-    router.route("/signin").get(SignInController.getSignIn).post(SignInController.postSignIn);
-    router.route("/signup").get(SignUpController.getSignUp).post(signupRatelimit.prevent, SignUpController.postSignUp);
+    router.get("/signin", function(req, res, next) {
+        res.redirect("/#signin");
+    });
+
+    router.get("/signup", function(req, res, next) {
+        res.redirect("/#signup");
+    });
     router.get("/signout", SignOutController.getSignOut);
 
     router.get("/account", AccountPageController.getOwnAccount);

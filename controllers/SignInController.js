@@ -1,22 +1,15 @@
 const passport = require("passport");
 
-exports.getSignIn = (req, res, next) => {
-    if (req.user) return res.redirect("/");
-    var error = null;
-    if(req.query.logintext) error = { message: req.query.logintext };
-    return req.responseFactory.sendRenderedResponse("public/signin", req, res, { error: error });
-};
-
 exports.postSignIn = (req, res, next) => {
     require("../util/passport")(passport, req.place);
     if (req.user) return res.redirect("/");
-    if (!req.body.username || !req.body.password) return req.responseFactory.sendRenderedResponse("public/signin", req, res, { error: { message: "A username and password are required." }, username: req.body.username });
+    if (!req.body.username || !req.body.password) return res.json({success: false, error: {message: "A username and password are required."}});
     var redirectURL = typeof req.query.redirectURL !== "undefined" ? req.query.redirectURL : null;
     passport.authenticate("local", function(err, user, info) {
-        if (!user) return req.responseFactory.sendRenderedResponse("public/signin", req, res, { error: info.error || { message: "An unknown error occurred." }, username: req.body.username });
+        if (!user) return res.json({success: false, error: info.error || {message: "A username and password are required."}});
         req.login(user, function(err) {
-            if (err) return req.responseFactory.sendRenderedResponse("public/signin", req, res, { error: { message: "An unknown error occurred." }, username: req.body.username });
-            return res.redirect(`/${(redirectURL == "/" ? "" : redirectURL) || ""}`);
+            if (err) return res.json({success: true, error: {message: "An unknown error occurred."}});
+            return res.json({success: true});
         });
     })(req, res, next);
 };
