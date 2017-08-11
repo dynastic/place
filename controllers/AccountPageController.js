@@ -1,7 +1,6 @@
 const User = require("../models/user");
 
 exports.getOwnAccount = (req, res, next) => {
-    if (!req.user) return res.redirect("/signin");
     res.redirect("/@" + req.user.name);
 };
 

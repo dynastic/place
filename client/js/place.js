@@ -1165,10 +1165,15 @@ $("#user-count").click(function() {
     place.popoutController.popoutVisibilityController.changeTab("active-users");
 });
 
-if(Object.keys(hashHandler.getHash()).includes("signin")) {
+var hash = hashHandler.getHash();
+var hashKeys = Object.keys(hash);
+if(hashKeys.includes("signin") || hashKeys.includes("logintext")) {
+    if(hashKeys.includes("logintext")) {
+        SignInDialogController.showErrorOnTab("sign-in", hash["logintext"])
+    }
     SignInDialogController.show("sign-in");
     hashHandler.deleteHashKey("signin");
-} else if(Object.keys(hashHandler.getHash()).includes("signup")) {
+} else if(hashKeys.includes("signup")) {
     SignInDialogController.show("sign-up");
     hashHandler.deleteHashKey("signup");
 }

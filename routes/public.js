@@ -7,7 +7,11 @@ const AccountPageController = require("../controllers/AccountPageController");
 const SignOutController = require("../controllers/SignOutController");
 
 function PublicRouter(app) {
-    let router = express.Router()
+    let router = express.Router();
+
+    const requireUser = (req, res, next) => {
+        if (!req.user) return res.status(401).redirect("/#signin");
+    }
 
     router.use(function(req, res, next) {
         if (req.url == "/signout") return next(); // Allow the user to sign out
@@ -28,8 +32,8 @@ function PublicRouter(app) {
         next(); // Otherwise, carry on...
     });
 
-    router.post("/pick-username", UsernamePickerController.postUsername);
-    router.post("/force-pw-reset", PasswordChangeController.postSelfServeForcedPassword);
+    router.post("/pick-username", [requireUser, UsernamePickerController.postUsername]);
+    router.post("/force-pw-reset", [requireUser, PasswordChangeController.postSelfServeForcedPassword]);
 
     router.get("/", function(req, res) {
         return req.responseFactory.sendRenderedResponse("public/index", req, res, { captcha: req.place.enableCaptcha });
@@ -43,7 +47,7 @@ function PublicRouter(app) {
 
     router.get("/deactivated", function(req, res) {
         if (req.user) res.redirect("/");
-        return responseFactory.sendRenderedResponse("public/deactivated", req, res);
+        return req.responseFactory.sendRenderedResponse("public/deactivated", req, res);
     });
 
     router.get("/sitemap.xml", function(req, res, next) {
@@ -58,9 +62,9 @@ function PublicRouter(app) {
     router.get("/signup", function(req, res, next) {
         res.redirect("/#signup");
     });
-    router.get("/signout", SignOutController.getSignOut);
+    router.get("/signout", [requireUser, SignOutController.getSignOut]);
 
-    router.get("/account", AccountPageController.getOwnAccount);
+    router.get("/account", [requireUser, AccountPageController.getOwnAccount]);
     router.get("/user/:userID", AccountPageController.getAccountByID);
     router.get("/@:username", AccountPageController.getAccount);
 
