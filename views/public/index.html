@@ -24,7 +24,7 @@
                     <input type="password" id="inputPassword" class="form-control form-merge-top" placeholder="Password" name="password" required>
                     <label for="inputPassword2" class="sr-only">Password (again)</label>
                     <input type="password" id="inputPassword2" class="form-control form-merge-bottom" placeholder="Password (again)" name="passwordverify" required>
-                    <% if(captcha) { %><%- renderCaptcha() %><br><% } %>
+                    <% if(captcha) { %><%- renderCaptcha() %><% } %>
                     <% if(fs.existsSync("./config/community_guidelines.md")) { %>
                     <div class="checkbox">
                         <label><input type="checkbox" name="agreeToGuidelines"> <span>I agree to abide by the <a href="/guidelines">Community Guidelines</a>.</span></label>
