@@ -32,7 +32,7 @@ function PublicRouter(app) {
     router.post("/force-pw-reset", PasswordChangeController.postSelfServeForcedPassword);
 
     router.get("/", function(req, res) {
-        return req.responseFactory.sendRenderedResponse("public/index", req, res);
+        return req.responseFactory.sendRenderedResponse("public/index", req, res, { captcha: req.place.enableCaptcha });
     });
 
     router.get("/popout", function(req, res) {

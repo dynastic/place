@@ -113,8 +113,8 @@ body {
 #palette-ctn {
     position: absolute;
     bottom: 0;
-    left: 30px;
-    right: 30px;
+    left: 10px;
+    right: 10px;
     z-index: 2;
     margin: 0;
     padding: 0;
