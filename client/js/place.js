@@ -1037,7 +1037,7 @@ var place = {
                         else $("<a>").attr("href", "javascript:void(0)").text(`at (${latest.point.x.toLocaleString()}, ${latest.point.y.toLocaleString()})`).click(() => app.zoomIntoPoint(latest.point.x, latest.point.y, false)).appendTo(element);
                         element.appendTo(latestCtn.find(".value"));
                     }
-                    popover.find("#pixel-data-username").attr("href", `/@${data.pixel.username}`);
+                    popover.find("#pixel-data-username").attr("href", `/@${data.pixel.user.username}`);
                     var rank = data.pixel.user.statistics.leaderboardRank;
                     if(rank !== null) {
                         popover.find(".rank-container").show();
