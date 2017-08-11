@@ -93,6 +93,7 @@ var SignInDialogController = {
 
     switchTab: function(tab, animated = true) {
         if(tab == this.currentTab || this.isAnimating) return;
+        this.dialog.find(`.pages > div:not([tab-name=${tab}]) .tab-error`).remove();
         this.currentTab = tab;
         this.isAnimating = true;
         var applyClasses = () => {
@@ -122,6 +123,7 @@ var SignInDialogController = {
     },
 
     hide: function(){ 
+        this.dialog.find(".tab-error").remove();
         this.dialog.find("form").trigger("reset");
         this.dialog.parent().removeClass("show");
         hashHandler.deleteHashKey("d");
@@ -1170,6 +1172,7 @@ var hashKeys = Object.keys(hash);
 if(hashKeys.includes("signin") || hashKeys.includes("logintext")) {
     if(hashKeys.includes("logintext")) {
         SignInDialogController.showErrorOnTab("sign-in", hash["logintext"])
+        hashHandler.deleteHashKey("logintext");
     }
     SignInDialogController.show("sign-in");
     hashHandler.deleteHashKey("signin");
