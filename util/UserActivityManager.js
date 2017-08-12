@@ -10,7 +10,7 @@ function UserActivityManager(app) {
                 obj[key] = this.userActivityTimes[key];
                 return obj;
             }, {});
-            console.log("Updated user activity manager stored data.")
+            app.logger.log('USER ACTIVITY', "Updated user activity manager stored data.")
         },
 
         recordActivity: function(user) {

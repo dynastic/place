@@ -15,13 +15,7 @@ const path = require("path");
 function HTTPServer(app) {
     var server = express();
     var httpServer = require("http").createServer(server);
-
-    // Setup sentry bug reporting
-    if (app.raven !== undefined) {
-        server.use(app.raven.requestHandler());
-        server.use(app.raven.errorHandler());
-    }
-
+    
     // Setup for parameters and bodies
     server.use(bodyParser.urlencoded({extended: false}));
     server.use(bodyParser.json());
@@ -41,6 +35,9 @@ function HTTPServer(app) {
 
         server.set("trust proxy", typeof app.config.trustProxyDepth === "number" ? app.config.trustProxyDepth : 0);
 
+        if (app.logger.raven) server.use(app.logger.raven.requestHandler());
+        if (app.logger.bugsnag) server.use(app.logger.bugsnag.requestHandler);
+        
         // Setup passport for auth
         server.use(session({
             secret: app.config.secret,
@@ -100,6 +97,9 @@ function HTTPServer(app) {
         server.use("/admin", AdminRouter(app));
         server.use("/auth", OAuthRouter(app));
         server.use("/", PublicRouter(app));
+
+        if (app.logger.bugsnag) server.use(app.logger.bugsnag.errorHandler);
+        if (app.logger.raven) server.use(app.logger.raven.errorHandler());
 
         if (server.get("env") !== "development") {
             // Production error handler, no stack traces shown to user

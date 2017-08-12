@@ -21,7 +21,7 @@ exports.postAPIPixel = (req, res, next) => {
                 return res.json({ success: true, timer: countData })
             }).catch((err) => res.json({ success: true }));
         }).catch((err) => {
-            req.place.reportError("Error placing pixel: " + err);
+            req.place.logger.capture(`Error placing pixel: ${err.message}`, { user: { id: user._id }, req: req });
             res.status(500).json({ success: false, error: err })
         });
     }

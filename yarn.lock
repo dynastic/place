@@ -3259,6 +3259,13 @@ passport-local@^1.0.0:
   dependencies:
     passport-strategy "1.x.x"
 
+passport-microsoft@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/passport-microsoft/-/passport-microsoft-0.0.5.tgz#34e916b4ea42fadbc0132aec05459acbe464ce15"
+  dependencies:
+    passport-oauth2 "1.2.0"
+    pkginfo "0.2.x"
+
 passport-oauth1@1.x.x:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/passport-oauth1/-/passport-oauth1-1.1.0.tgz#a7de988a211f9cf4687377130ea74df32730c918"
@@ -3266,6 +3273,14 @@ passport-oauth1@1.x.x:
     oauth "0.9.x"
     passport-strategy "1.x.x"
     utils-merge "1.x.x"
+
+passport-oauth2@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/passport-oauth2/-/passport-oauth2-1.2.0.tgz#49613a3eca85c7a1e65bf1019e2b6b80a10c8ac2"
+  dependencies:
+    oauth "0.9.x"
+    passport-strategy "1.x.x"
+    uid2 "0.0.x"
 
 passport-oauth2@1.x.x, passport-oauth2@^1.2.0:
   version "1.4.0"
@@ -3373,6 +3388,10 @@ pinkie-promise@^2.0.0:
 pinkie@^2.0.0:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/pinkie/-/pinkie-2.0.4.tgz#72556b80cfa0d48a974e80e77248e80ed4f7f870"
+
+pkginfo@0.2.x:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/pkginfo/-/pkginfo-0.2.3.tgz#7239c42a5ef6c30b8f328439d9b9ff71042490f8"
 
 pkginfo@0.3.x:
   version "0.3.1"
