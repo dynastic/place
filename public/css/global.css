@@ -663,8 +663,8 @@ nav.navbar.navbar-inverse {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
 }
 
-.btn-nav-auth-link {
-  background-color: #00C853;
+.btn-nav-auth-link, .btn-nav-auth-link:focus {
+  background-color: #00C853!important;
   color: #fff!important;
   text-transform: uppercase;
   font-weight: 600;
@@ -740,6 +740,6 @@ table.table.table-contained, td {
   border: none!important;
 }
 
-.btn:not(.btn.btn-popping) {
+.btn:not(.btn-popping) {
     background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%);
 }
