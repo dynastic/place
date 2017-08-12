@@ -18,7 +18,7 @@ function PublicRouter(app) {
         if (req.url == "/signout") return next(); // Allow the user to sign out
         if (req.user && !req.user.usernameSet && req.user.OAuthName) { // If the user has no username...
             if (req.url == "/pick-username" && req.method == "POST") return next(); // Allow the user to POST their new username
-            return req.responseFactory.sendRenderedResponse("public/pick-username", req, res, {
+            return req.responseFactory.sendRenderedResponse("public/pick-username", {
                 captcha: req.place.enableCaptcha,
                 username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20),
                 user: {
@@ -28,7 +28,7 @@ function PublicRouter(app) {
         }
         if (req.user && req.user.passwordResetKey) {
             if (req.url == "/force-pw-reset" && req.method == "POST") return next(); // Allow the user to POST their new password
-            return req.responseFactory.sendRenderedResponse("public/force-pw-reset", req, res);
+            return req.responseFactory.sendRenderedResponse("public/force-pw-reset");
         }
         next(); // Otherwise, carry on...
     });
@@ -37,23 +37,23 @@ function PublicRouter(app) {
     router.post("/force-pw-reset", [requireUser, PasswordChangeController.postSelfServeForcedPassword]);
 
     router.get("/", function(req, res) {
-        return req.responseFactory.sendRenderedResponse("public/index", req, res, { captcha: req.place.enableCaptcha });
+        req.responseFactory.sendRenderedResponse("public/index", { captcha: req.place.enableCaptcha });
     });
 
     router.get("/popout", function(req, res) {
-        return req.responseFactory.sendRenderedResponse("public/popout", req, res);
+        req.responseFactory.sendRenderedResponse("public/popout");
     });
 
     router.get("/guidelines", GuidelineController.getGuidelines);
 
     router.get("/deactivated", function(req, res) {
-        if (req.user) res.redirect("/");
-        return req.responseFactory.sendRenderedResponse("public/deactivated", req, res);
+        if (req.user) return res.redirect("/");
+        req.responseFactory.sendRenderedResponse("public/deactivated");
     });
 
     router.get("/sitemap.xml", function(req, res, next) {
         if (typeof app.config.host === undefined) return next();
-        return req.responseFactory.sendRenderedResponse("public/sitemap.xml.html", req, res, null, "text/xml");
+        req.responseFactory.sendRenderedResponse("public/sitemap.xml.html", null, "text/xml");
     });
 
     router.get("/signin", function(req, res, next) {

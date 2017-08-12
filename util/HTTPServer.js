@@ -51,7 +51,7 @@ function HTTPServer(app) {
 
         server.use((req, res, next) => {
             req.place = app;
-            req.responseFactory = app.responseFactory;
+            req.responseFactory = app.responseFactory(req, res);
             next();
         })
 
@@ -107,7 +107,7 @@ function HTTPServer(app) {
                 res.status(err.status || 500);
                 app.reportError(err);
                 if (req.accepts("json") && !req.accepts("html")) return res.send({ success: false, error: { message: "An unknown error occured.", code: "internal_server_error" } });
-                app.responseFactory.sendRenderedResponse("errors/500", req, res);
+                app.responseFactory(req, res).sendRenderedResponse("errors/500");
             });
         }
 
@@ -117,7 +117,7 @@ function HTTPServer(app) {
             // respond with json
             if (req.accepts("json") && !req.accepts("html")) return res.send({ success: false, error: { message: "Page not found", code: "not_found" } });
             // send HTML
-            app.responseFactory.sendRenderedResponse("errors/404", req, res);
+            app.responseFactory(req, res).sendRenderedResponse("errors/404");
         });
     }
 

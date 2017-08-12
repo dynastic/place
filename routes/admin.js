@@ -2,8 +2,6 @@ const express = require("express");
 const User = require("../models/user");
 
 function AdminRouter(app) {
-    const responseFactory = require("../util/ResponseFactory")(app, "/admin");
-
     let router = express.Router()
     
     router.use(function(req, res, next) {
@@ -13,38 +11,38 @@ function AdminRouter(app) {
     });
 
     router.get("/", app.modMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/dashboard", req, res);
+        req.responseFactory.sendRenderedResponse("admin/dashboard");
     });
 
     router.get("/actions", app.modMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/actions", req, res, {title: "Recent Actions", modOnly: false});
+        req.responseFactory.sendRenderedResponse("admin/actions", {title: "Recent Actions", modOnly: false});
     });
 
     router.get("/log", app.modMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/actions", req, res, {title: "Moderator Log", modOnly: true});
+        req.responseFactory.sendRenderedResponse("admin/actions", {title: "Moderator Log", modOnly: true});
     });
 
     router.get("/users", app.modMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/users", req, res);
+        req.responseFactory.sendRenderedResponse("admin/users");
     });
 
     router.get("/users/similar/:userID", app.modMiddleware, function(req, res) {
         function renderError(msg = "An unknown error occurred.") {
-            return responseFactory.sendRenderedResponse("admin/similar_users_error", req, res, { errorMsg: msg });
+            req.responseFactory.sendRenderedResponse("admin/similar_users_error", { errorMsg: msg });
         }
         if(!req.params.userID || req.params.userID == "") return renderError("You did not specify a user ID to look up.");
         User.findById(req.params.userID).then((user) => {
             if(!req.user.canPerformActionsOnUser(user)) return renderError("You may not perform actions on this user.");
-            return responseFactory.sendRenderedResponse("admin/similar_users", req, res, { target: user });
+            req.responseFactory.sendRenderedResponse("admin/similar_users", { target: user });
         }).catch((err) => renderError("Could not find a user by that ID."));
     });
 
     router.get("/pixels", app.modMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
+        req.responseFactory.sendRenderedResponse("admin/coming_soon");
     });
 
     router.get("/reports", app.modMiddleware, function(req, res) {
-        return responseFactory.sendRenderedResponse("admin/coming_soon", req, res);
+        req.responseFactory.sendRenderedResponse("admin/coming_soon");
     });
 
     return router;

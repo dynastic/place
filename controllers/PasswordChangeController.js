@@ -2,7 +2,7 @@ const ActionLogger = require("../util/ActionLogger");
 
 exports.postSelfServeForcedPassword = (req, res, next) => {
     function renderResponse(errorMsg) {
-        return req.responseFactory.sendRenderedResponse("public/force-pw-reset", req, res, { error: { message: errorMsg || "An unknown error occurred" } });
+        return req.responseFactory.sendRenderedResponse("public/force-pw-reset", { error: { message: errorMsg || "An unknown error occurred" } });
     }
     if(!req.user.passwordResetKey) res.redirect("/");
     if(!req.body.password) return renderResponse("Please enter your new password.");

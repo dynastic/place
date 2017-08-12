@@ -7,9 +7,9 @@ const babel = require("gulp-babel");
 const sourcemaps = require('gulp-sourcemaps');
 const del = require("del");
 const PaintingManager = require("./util/PaintingManager");
-const ResponseFactory = require("./util/ResponseFactory");
 const HTTPServer = require("./util/HTTPServer");
 const WebsocketServer = require("./util/WebsocketServer");
+const ResponseFactory = require("./util/ResponseFactory");
 const TemporaryUserInfo = require("./util/TemporaryUserInfo");
 const LeaderboardManager = require("./util/LeaderboardManager");
 const UserActivityManager = require("./util/UserActivityManager");
@@ -46,6 +46,7 @@ app.loadConfig = (path = "./config/config") => {
 }
 app.loadConfig();
 app.temporaryUserInfo = TemporaryUserInfo;
+app.responseFactory = (req, res) => new ResponseFactory(app, req, res);
 
 app.pixelNotificationManager = new PixelNotificationManager(app);
 
@@ -70,7 +71,6 @@ app.paintingManager.loadImageFromDatabase().then((image) => {
 });
 
 app.leaderboardManager = LeaderboardManager(app);
-app.responseFactory = ResponseFactory(app);
 app.userActivityController = UserActivityManager(app);
 
 app.enableCaptcha = false;
