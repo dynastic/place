@@ -4,7 +4,7 @@
 //  Written by AppleBetas and nullpixel. Inspired by Reddit's /r/place.
 //
 
-var size = 1000;
+var size;
 
 var SignInDialogController = {
     dialog: $("#sign-in-dialog"),
