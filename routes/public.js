@@ -11,6 +11,7 @@ function PublicRouter(app) {
 
     const requireUser = (req, res, next) => {
         if (!req.user) return res.status(401).redirect("/#signin");
+        next();
     }
 
     router.use(function(req, res, next) {
