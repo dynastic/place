@@ -15,9 +15,9 @@ function PublicRouter(app) {
     }
 
     router.use(function(req, res, next) {
-        if (req.url == "/signout") return next(); // Allow the user to sign out
+        if (req.path == "/signout") return next(); // Allow the user to sign out
         if (req.user && !req.user.usernameSet && req.user.OAuthName) { // If the user has no username...
-            if (req.url == "/pick-username" && req.method == "POST") return next(); // Allow the user to POST their new username
+            if (req.path == "/pick-username" && req.method == "POST") return next(); // Allow the user to POST their new username
             return req.responseFactory.sendRenderedResponse("public/pick-username", {
                 captcha: req.place.enableCaptcha,
                 username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20),
@@ -27,7 +27,7 @@ function PublicRouter(app) {
             }); // Send the username picker
         }
         if (req.user && req.user.passwordResetKey) {
-            if (req.url == "/force-pw-reset" && req.method == "POST") return next(); // Allow the user to POST their new password
+            if (req.path == "/force-pw-reset" && req.method == "POST") return next(); // Allow the user to POST their new password
             return req.responseFactory.sendRenderedResponse("public/force-pw-reset");
         }
         next(); // Otherwise, carry on...
