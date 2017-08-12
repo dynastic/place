@@ -127,7 +127,20 @@ PixelSchema.methods.getInfo = function(overrideDataAccess = false, app = null) {
 }
 
 PixelSchema.methods.getSocketInfo = function() {
-    return {x: this.xPos, y: this.yPos, colour: `${this.colourR}:${this.colourG}:${this.colourB}`};
+    return {x: this.xPos, y: this.yPos, colour: this.getHexColour()};
+}
+
+PixelSchema.methods.getHexColour = function() {
+    return PixelSchema.statics.getHexFromRGB(this.colourR, this.colourG, this.colourB);
+}
+
+PixelSchema.statics.getHexFromRGB = function(r, g, b) {
+    // Borrowed partly from: https://stackoverflow.com/a/5624139
+    function componentToHex(c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+    return componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
 module.exports = DataModelManager.registerModel("Pixel", PixelSchema);

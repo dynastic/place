@@ -562,13 +562,7 @@ var place = {
 
     liveUpdateTile: function (data) {
         this.popoutController.loadActiveUsers();
-        if(typeof data.colour == "string") {
-            var colour = data.colour.split(":");
-            if(colour.length != 3) return;
-            this.setPixel(`rgb(${colour[0]}, ${colour[1]}, ${colour[2]})`, data.x, data.y);
-        } else {
-            this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y);
-        }
+        this.setPixel(`#${data.colour}`, data.x, data.y);
     },
 
     adminBroadcastReceived: function(data) {
