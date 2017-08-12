@@ -278,7 +278,7 @@ var place = {
     placing: false, shouldShowPopover: false,
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
-    selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null}, loadedImage: false,
+    selectedColour: null, handElement: null, unlockTime: null, fullUnlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null}, loadedImage: false,
     notificationHandler: notificationHandler, hashHandler: hashHandler,
     messages: null,
     isOutdated: false,
@@ -364,7 +364,7 @@ var place = {
             }, 1);
         }
 
-        // Check canvas size after chat sidebar animation
+        // Check canvas size after chat animation
         $(".canvas-container").on('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', () => {
             this.handleResize();
         });
@@ -884,6 +884,7 @@ var place = {
         if(data.canPlace) return this.changePlaceTimerVisibility(false);
         this.deselectColour();
         this.unlockTime = (new Date().getTime() / 1000) + data.seconds;
+        this.fullUnlockTime = data.seconds;
         this.secondTimer = setInterval(() => this.checkSecondsTimer(), 1000);
         this.checkSecondsTimer();
     },
@@ -892,7 +893,7 @@ var place = {
         function padLeft(str, pad, length) {
             return (new Array(length + 1).join(pad) + str).slice(-length);
         }
-        if(this.unlockTime && this.secondTimer) {
+        if(this.unlockTime && this.secondTimer && this.fullUnlockTime) {
             let time = Math.round(this.unlockTime - new Date().getTime() / 1000);
             if(time > 0) {
                 let minutes = ~~(time / 60), seconds = time - minutes * 60;
@@ -900,12 +901,12 @@ var place = {
                 let shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
-            } else {
+            } else if(this.fullUnlockTime > 5) { // only notify if full countdown exceeds 5 seconds
                 this.notificationHandler.sendNotification("Place 2.0", "You may now place!");
             }
         }
         if(this.secondTimer) clearInterval(this.secondTimer);
-        this.secondTimer = null, this.unlockTime = null;
+        this.secondTimer = null, this.unlockTime = null, this.fullUnlockTime = null;
         this.changePlaceTimerVisibility(false);
     },
 
