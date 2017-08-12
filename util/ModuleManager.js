@@ -11,6 +11,7 @@ const DEFAULT_MODEL_OVERRIDE_MANAGER = {fields: [], statics: [], methods: [], ho
 class ModuleManager {
     constructor(app) {
         this.app = app;
+        this.logger = app.logger;
         this.modules = new Map();
         this.moduleMetas = {};
         this.modulePaths = {};
@@ -33,7 +34,7 @@ class ModuleManager {
             }
             return true;
         });
-        if(!validDependencies) return console.error(`Couldn't load module "${meta.name}" (${meta.identifier}) because it depends on a module with the identifier "${meta.identifier}."`);
+        if(!validDependencies) return this.logger.capture(`Couldn't load module "${meta.name}" (${meta.identifier}) because it depends on a module with the identifier "${meta.identifier}."`);
         // Check conflicting modules
         meta.conflicts.every((conflict) => {
             if(this.moduleIdentifiers.includes(directory)) {
@@ -42,9 +43,9 @@ class ModuleManager {
             }
             return true;
         })
-        if(!withoutConflicts) return console.error(`Couldn't load module "${meta.name}" (${meta.identifier}) because it conflicts with a module with the identifier "${meta.identifier}".`);
+        if(!withoutConflicts) return this.logger.capture(`Couldn't load module "${meta.name}" (${meta.identifier}) because it conflicts with a module with the identifier "${meta.identifier}".`);
         // Make sure there isn't already one loaded
-        if(this.modules.has(meta.identifier)) return console.error(`Couldn't load module "${meta.name}" (${meta.identifier}) because another module with the same identifier was already loaded.`);
+        if(this.modules.has(meta.identifier)) return this.logger.error(`Couldn't load module "${meta.name}" (${meta.identifier}) because another module with the same identifier was already loaded.`);
         // Initialize the module
         s.moduleMetas[meta.identifier] = meta;
         s.modulePaths[meta.identifier] = path.dirname(mainPath);
@@ -52,21 +53,21 @@ class ModuleManager {
             var Module = require(mainPath);
             var newModule = new Module(s.app);
             s.modules.set(meta.identifier, newModule);
-            console.log(`Loaded module "${meta.name}" (${meta.identifier}).`);
+            this.logger.log('MODULE MANAGER', `Loaded module "${meta.name}" (${meta.identifier}).`);
         }
         this.processViewExtensionsForModule(meta, () => finalizeLoad());
     }
 
     loadAll() {
-        console.log("Starting load of modules...");
+        this.logger.log('MODULE MANAGER', "Starting load of modules...");
         fs.readdir(modulesDirectory, (err, files) => {
             if(err) {
                 if(err.code == "ENOENT") {
-                    console.log("Creating modules directory because it doesn't exist...")
+                    this.logger.log('MODULE MANAGER', "Creating modules directory because it doesn't exist...")
                     fs.mkdirAsync(modulesDirectory);
                     return this.doneLoading();
                 }
-                return this.app.reportError("Error loading modules: " + err);
+                return this.logger.capture("Error loading modules: " + err);
             }
             if(files.length <= 0) return this.doneLoading("No modules loaded.");
             // Try and load information about all the modules
@@ -77,12 +78,12 @@ class ModuleManager {
                 this.moduleIdentifiers = moduleInfo.map((info) => info.identifier);
                 moduleInfo.forEach((info) => this.load(info.meta, info.main));
                 this.doneLoading()
-            }).catch(err => this.app.reportError("Error loading modules: " + err));
+            }).catch(err => this.logger.capture("Error loading modules: " + err));
         });
     }
 
     doneLoading(msg = null) {
-        if(msg) console.log(msg);
+        if(msg) this.logger.log('MODULE MANAGER', msg);
         this.loaded = true;
         this.loadingCallbacks.forEach((callback) => callback(this));
     }
@@ -97,7 +98,7 @@ class ModuleManager {
             var folderPath = path.join(modulesDirectory, file);
             fs.stat(folderPath, (err, stat) => {
                 if(err) {
-                    this.app.reportError("Error loading single module directory: " + err);
+                    this.logger.capture("Error loading single module directory: " + err);
                     return resolve(null);
                 }
                 if(!stat.isDirectory()) return;
@@ -106,16 +107,16 @@ class ModuleManager {
                 // Attempt to stat module.json
                 fs.stat(path.join(nicePath, "module.json"), (err) => {
                     if(err) {
-                        console.error(`Skipping malformed module "${folder.name}" (error loading module.json).`);
+                        this.logger.capture(`Skipping malformed module "${folder.name}" (error loading module.json).`);
                         return resolve(null);
                     }
                     var moduleMeta = require(path.join(nicePath, "module.json"));
-                    if(!moduleMeta.main || !moduleMeta.identifier || !moduleMeta.name) return console.error(`Skipping malformed module "${folder.name}" (invalid module.json).`);
+                    if(!moduleMeta.main || !moduleMeta.identifier || !moduleMeta.name) return this.logger.capture(`Skipping malformed module "${folder.name}" (invalid module.json).`);
                     moduleMeta = this.addMetaDefaults(moduleMeta);
                     // Attempt to stat main module JS file
                     fs.stat(path.join(nicePath, moduleMeta.main), (err) => {
                         if(err) {
-                            console.error(`Skipping malformed module "${folder.name}" (error loading main file).`);
+                            this.logger.capture(`Skipping malformed module "${folder.name}" (error loading main file).`);
                             return resolve(null);
                         }
                         // Success, load it

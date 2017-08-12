@@ -11,7 +11,7 @@ These instructions will help you get a copy of the project up and running on you
 ### Prerequisites
 
 * MongoDB
-* Node 7.6.0 or **higher**
+* Node 8 or **higher**
 * Yarn
 * An internet connection
 
