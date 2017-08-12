@@ -1081,7 +1081,9 @@ var place = {
                     if(data.timer) a.doTimer(data.timer);
                     else a.updatePlaceTimer();
                 } else failToPost(data.error);
-            }).fail((data) => failToPost(data.responseJSON.error)).always(() => {
+            }).fail((data) => {
+                failToPost(data.responseJSON != null ? data.responseJSON.error : null);
+            }).always(() => {
                 this.changePlacingModalVisibility(false);
                 this.placing = false;
             });
