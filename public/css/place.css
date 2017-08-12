@@ -236,7 +236,7 @@ body {
     justify-content: center;
     align-items: center;
     cursor: default;
-    z-index: 2;
+    z-index: 3;
 }
 
 body.signed-in #palette > #sign-in-reminder, #palette > #placing-modal, #palette > #place-timer {
