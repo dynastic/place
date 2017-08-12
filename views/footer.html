@@ -5,6 +5,7 @@
   if(typeof jsSnippets === "undefined" || !jsSnippets) jsSnippets = [];
   var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
   if(userMod) { js.unshift("/js/bootbox.min.js"); js.unshift("/js/build/mod_tools.js");}
+  if(typeof jsModSnippets === "undefined" || !jsModSnippets || !userMod) jsModSnippets = [];
   js = resources.js.concat(js);
   %>
     <footer class="footer">
@@ -29,6 +30,9 @@
       <script src="<%= jsFilename %>"></script>
     <% }) %>
     <% jsSnippets.forEach(function(jsSnippet) { %>
+      <script><%- jsSnippet %></script>
+    <% }) %>
+    <% jsModSnippets.forEach(function(jsSnippet) { %>
       <script><%- jsSnippet %></script>
     <% }) %>
 <% if(typeof config.googleAnalyticsTrackingID !== "undefined") {
