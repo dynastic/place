@@ -338,7 +338,7 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
                 resolve(info);
             }).catch((err) => returnInfo("delete"));
         }).catch((err) => {
-            app.logger.capture("Error getting user info: " + err, { user: { id: userID } });
+            app.logger.capture("Error getting user info: " + err, { user: { _id: userID } });
             returnInfo("delete");
         });
     })
