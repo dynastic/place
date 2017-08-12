@@ -3,7 +3,7 @@ const Pixel = require("../models/pixel");
 
 function WebsocketServer(app, httpServer) {
     var server = socketIO(httpServer);
-    console.log("Websocket server attached to HTTP server.");
+    app.logger.log('WEBSOCKET SERVER', "Attached to HTTP server.");
 
     let obj = {
         server: server,
@@ -23,7 +23,7 @@ function WebsocketServer(app, httpServer) {
                     if(!ts || ts < currentTS - 60 || ts > currentTS) return;
                     // Only allow one fetch per socket (no spam pls!)
                     if(hasRequestedFetch) {
-                        console.log("Disconnected client for requesting fetch more than once.")
+                        app.logger.info('WEBSOCKET SERVER', "Disconnected client for requesting fetch more than once.")
                         return socket.disconnect();
                     }
                     hasRequestedFetch = true;
@@ -32,7 +32,7 @@ function WebsocketServer(app, httpServer) {
                         var info = pixel.map((p) => p.getSocketInfo());
                         socket.emit("tiles_placed", JSON.stringify({pixels: info}));
                     }).catch((err) => {
-                        app.reportError("Error fetching pixel for websocket client: " + err);
+                        app.logger.capture("Error fetching pixel for websocket client: " + err);
                     })
                 })
             });

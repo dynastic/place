@@ -5,6 +5,82 @@
 }) -%>
 <%- moduleManager.gatherViewExtensions("main", include); %>
 <%- include("views/place.html") -%>
+<% if(!user) { %>
+<div class="dialog-ctn">
+    <div class="dialog-overlay"></div>
+    <div class="dialog" id="sign-in-dialog">
+        <div class="close">&times;</div>
+        <div class="pages">
+            <div tab-name="sign-up" class="active">
+                <div class="heading">
+                    <span class="site">Place 2.0</span>
+                    <h1>Become a member</h1>
+                    <p class="subhead">Join the Place 2.0 community today to start placing.</p>
+                </div>
+                <form class="form-signin" action="/signup">
+                    <label for="inputUsername" class="sr-only">Username</label>
+                    <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="username" required autofocus autocorrect="off" autocapitalize="off" spellcheck="false">
+                    <label for="inputPassword" class="sr-only">Password</label>
+                    <input type="password" id="inputPassword" class="form-control form-merge-top" placeholder="Password" name="password" required>
+                    <label for="inputPassword2" class="sr-only">Password (again)</label>
+                    <input type="password" id="inputPassword2" class="form-control form-merge-bottom" placeholder="Password (again)" name="passwordverify" required>
+                    <% if(captcha) { %><%- renderCaptcha() %><% } %>
+                    <% if(fs.existsSync("./config/community_guidelines.md")) { %>
+                    <div class="checkbox">
+                        <label><input type="checkbox" name="agreeToGuidelines"> <span>I agree to abide by the <a href="/guidelines">Community Guidelines</a>.</span></label>
+                    </div>
+                    <% } %>
+                    <div class="send-section">
+                        <button class="btn btn-popping" type="submit">Sign up</button>
+                        <%- include("views/social-buttons.html") -%>
+                    </div>
+                </form>
+            </div>
+            <div tab-name="sign-in">
+                <div class="heading">
+                    <span class="site">Place 2.0</span>
+                    <h1>Welcome back</h1>
+                    <p class="subhead">Sign in to your account to continue placing and save your stats.</p>
+                </div>
+                <form class="form-signin" action="/signin"> 
+                    <label for="inputUsername" class="sr-only">Username</label>
+                    <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="username" required autofocus autocorrect="off" autocapitalize="off" spellcheck="false">
+                    <label for="inputPassword" class="sr-only">Password</label>
+                    <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
+                    <div class="send-section">
+                        <button class="btn btn-popping" type="submit">Sign in</button>
+                        <%- include("views/social-buttons.html") -%>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="switchers">
+                <div tab-name="sign-up" class="active">
+                    <div>
+                        <div class="description">
+                            <span class="headline">Need an account?</span>
+                            <span class="action-label">Sign up for an account</span>
+                        </div>
+                        <div class="call-to-action">
+                            <a class="btn btn-popping btn-arrow">Sign up</a>
+                        </div>
+                    </div>
+                </div>
+                <div tab-name="sign-in">
+                    <div>
+                        <div class="description">
+                            <span class="headline">Already a member?</span>
+                            <span class="action-label">Sign in to your account</span>
+                        </div>
+                        <div class="call-to-action">
+                            <a class="btn btn-popping btn-arrow">Sign in</a>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+<% } %>
 <%- include("../footer.html", {
     js: ["/socket.io/socket.io.js", "https://cdn.jsdelivr.net/interact.js/1.2.6/interact.min.js", "https://cdn.jsdelivr.net/clipboard.js/1.6.0/clipboard.min.js", "/js/build/popout.js", "/js/build/place.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"]
 }) -%>

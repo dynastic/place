@@ -332,7 +332,7 @@ function addToContainerForResponse(container, data, lastID, modOnly, limit, allo
     data.forEach((action) => getRowForAction(action).appendTo(container));
     if(allowsShowMore && lastID) {
         var loading = false;
-        $("<a>").addClass("btn btn-primary btn-xs").text("Load more").appendTo(container).on("click", function() {
+        $("<a>").addClass("btn btn-popping btn-xs").text("Load more").appendTo(container).on("click", function() {
             var btn = $(this);
             if(!loading) {
                 loading = true;

@@ -39,6 +39,7 @@
     <meta property="twitter:card" content="summary">
     <meta property="twitter:title" content="Place 2.0">
 
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
@@ -102,8 +103,9 @@
                 </ul>
               </li>
             <% } else { %>
-              <%- renderNavItem("Sign in", `/signin?redirectURL=${redirectURLPart}`, "sign-in"); %>
-              <%- renderNavItem("Sign up", `/signup?redirectURL=${redirectURLPart}`, "user-plus"); %>
+              <li id="nav-auth-link">
+                <a class="btn btn-sm btn-nav-auth-link" href="<%= (path == "/" ? "javascript:void(0)" : `/#signup&redirectURL=${redirectURLPart}`) %>" data-place-trigger="openAuthDialog">Get started</a>
+              </li>
             <% } %>
             <%- moduleManager.gatherViewExtensions("nav_user_right", include); %>
           </ul>

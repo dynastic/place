@@ -2,9 +2,8 @@ const fs = require("fs");
 
 exports.postUsername = (req, res, next) => {
     function renderResponse(errorMsg) {
-        return req.responseFactory.sendRenderedResponse("public/pick-username", req, res, { captcha: req.place.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username, user: {name: ""} });
+        return req.responseFactory.sendRenderedResponse("public/pick-username", { captcha: req.place.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username, user: {name: ""} });
     }
-    if(!req.user) res.redirect("/signup");
     if(req.user.usernameSet) res.redirect("/");
     let user = req.user;
     user.name = req.body.username;

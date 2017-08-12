@@ -1,21 +1,27 @@
 const fs = require("fs");
 
-function ResponseFactory(app, root = "") {
-    return {
-        sendRenderedResponse: function(template, req, res, data, mimeType = "text/html") {
-            var resources = req.place.moduleManager.getResourcesFromModules(req);
-            var path = root + req.path;
-            var redirectURLPart = req.path == "/signin" || req.path == "/signup" ? "" : encodeURIComponent(req.url.substr(1));
-            var sendData = { url: req.url, path: path, config: app.config, fs: fs, renderCaptcha: () => app.recaptcha.render(), redirectURLPart: redirectURLPart, moduleManager: req.place.moduleManager, resources: resources };
-            if (typeof req.user !== undefined) sendData.user = req.user;
-            if (typeof data !== "undefined") {
-                if (data) sendData = Object.assign({}, sendData, data);
-            }
-            return res.header("Content-Type", mimeType).render(template, sendData);
-        }
-    };
-}
+class ResponseFactory {
+    constructor(app, req, res) {
+        this.app = app;
+        this.req = req;
+        this.res = res;
+    }
 
+    sendRenderedResponse(template, data = null, mimeType = "text/html") {
+        var sendData = this.getAutomaticTemplateData();
+        if (data) sendData = Object.assign({}, sendData, data);
+        return this.res.header("Content-Type", mimeType).render(template, sendData);
+    }
+
+    getAutomaticTemplateData() {
+        var resources = this.req.place.moduleManager.getResourcesFromModules(this.req);
+        var redirectURLPart = this.req.path == "/signin" || this.req.path == "/signup" ? "" : encodeURIComponent(this.req.url.substr(1));
+        var path = this.req.baseUrl + this.req.path;
+        var data = { url: this.req.url, path: path, config: this.app.config, fs: fs, renderCaptcha: () => this.app.recaptcha.render(), redirectURLPart: redirectURLPart, moduleManager: this.req.place.moduleManager, resources: resources };
+        if (typeof this.req.user !== undefined && this.req.user) data.user = this.req.user;
+        return data;
+    }
+}
 
 ResponseFactory.prototype = Object.create(ResponseFactory.prototype);
 

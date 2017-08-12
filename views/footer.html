@@ -5,6 +5,7 @@
   if(typeof jsSnippets === "undefined" || !jsSnippets) jsSnippets = [];
   var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
   if(userMod) { js.unshift("/js/bootbox.min.js"); js.unshift("/js/build/mod_tools.js");}
+  if(typeof jsModSnippets === "undefined" || !jsModSnippets || !userMod) jsModSnippets = [];
   js = resources.js.concat(js);
   %>
     <footer class="footer">
@@ -17,11 +18,21 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
+    <script src="https://cdn.ravenjs.com/3.17.0/raven.min.js" crossorigin="anonymous"></script>
+    <script>
+      Raven.config('https://d067712e632c4c36a3ab1ffe4b540833@sentry.io/183264').install();
+      window.onerror = () => {
+        if (Raven.isSetup()) Raven.showReportDialog();
+      }
+    </script>
     <script src="/js/build/site.js"></script>
     <% js.forEach(function(jsFilename) { %>
       <script src="<%= jsFilename %>"></script>
     <% }) %>
     <% jsSnippets.forEach(function(jsSnippet) { %>
+      <script><%- jsSnippet %></script>
+    <% }) %>
+    <% jsModSnippets.forEach(function(jsSnippet) { %>
       <script><%- jsSnippet %></script>
     <% }) %>
 <% if(typeof config.googleAnalyticsTrackingID !== "undefined") {

@@ -1,40 +1,42 @@
 <% if(typeof config.oauth !== "undefined") { %>
 <% if (Object.keys(config.oauth).find((key) => config.oauth[key].enabled)) { %>
-<div class="separator-text">
-    <div class="text">Or use</div>
-    <div class="separator"></div>
-</div>
+<div class="separator"></div>
 <% } %>
-<div class="social-buttons">
-    <% if (config.oauth.google.enabled) { %>
-    <a href="/auth/google" class="btn btn-block btn-social btn-google">
-        <span class="fa fa-google"></span> Sign in with Google
-    </a>
-    <% } %>
-    <% if (config.oauth.reddit.enabled) { %>
-    <a href="/auth/reddit" class="btn btn-block btn-social btn-reddit">
-        <span class="fa fa-reddit"></span> Sign in with Reddit
-    </a>
-     <% } %>
-    <% if (config.oauth.discord.enabled) { %>
-    <a href="/auth/discord" class="btn btn-block btn-social btn-discord">
-        <img src="https://discordapp.com/assets/28174a34e77bb5e5310ced9f95cb480b.png"> Sign in with Discord
-    </a>
-    <% } %>
-    <% if (config.oauth.twitter.enabled) { %>
-    <a href="/auth/twitter" class="btn btn-block btn-social btn-twitter">
-        <span class="fa fa-twitter"></span> Sign in with Twitter
-    </a>
-    <% } %>
-    <% if (config.oauth.github.enabled) { %>
-    <a href="/auth/github" class="btn btn-block btn-social btn-github">
-        <span class="fa fa-github"></span> Sign in with Github
-    </a>
-    <% } %>
-    <% if (config.oauth.facebook.enabled) { %> 
-    <a href="/auth/facebook" class="btn btn-block btn-social btn-facebook">
-        <span class="fa fa-facebook"></span> Sign in with Facebook
-    </a>
-    <% } %>
+<div class="oauth-btns">
+<% if (config.oauth.google.enabled) { %>
+<a href="/auth/google" class="btn btn-popping btn-popping-alt btn-oauth btn-oauth-google" title="Sign in with Google">
+<span class="fa fa-google"></span>
+</a>
+<% } %>
+<% if (config.oauth.reddit.enabled) { %>
+<a href="/auth/reddit" class="btn btn-popping btn-popping-alt btn-oauth btn-oauth-reddit" title="Sign in with Reddit">
+<span class="fa fa-reddit-alien"></span>
+</a>
+<% } %>
+<% if (config.oauth.discord.enabled) { %>
+<a href="/auth/discord" class="btn btn-popping btn-popping-alt btn-oauth btn-oauth-discord" title="Sign in with Discord">
+<img src="https://discordapp.com/assets/28174a34e77bb5e5310ced9f95cb480b.png" width="15">
+</a>
+<% } %>
+<% if (config.oauth.twitter.enabled) { %>
+<a href="/auth/twitter" class="btn btn-popping btn-popping-alt btn-oauth btn-oauth-twitter" title="Sign in with Twitter">
+<span class="fa fa-twitter"></span>
+</a>
+<% } %>
+<% if (config.oauth.github.enabled) { %>
+<a href="/auth/github" class="btn btn-popping btn-popping-alt btn-oauth btn-oauth-github" title="Sign in with GitHub">
+<span class="fa fa-github"></span>
+</a>
+<% } %>
+<% if (config.oauth.facebook.enabled) { %> 
+<a href="/auth/facebook" class="btn btn-popping btn-popping-alt btn-oauth btn-oauth-facebook" title="Sign in with Facebook">
+<span class="fa fa-facebook"></span>
+</a>
+<% } %>
+<% if (config.oauth.microsoft.enabled) { %> 
+<a href="/auth/microsoft" class="btn btn-popping btn-popping-alt btn-oauth btn-oauth-microsoft" title="Sign in with Microsoft account">
+<span class="fa fa-windows"></span>
+</a>
+<% } %>
 </div>
 <% } %>

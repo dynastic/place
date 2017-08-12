@@ -120,7 +120,7 @@ function PaintingManager(app) {
                     a.pixelsToPaint.push({x: x, y: y, colour: colour});
                     a.imageHasChanged = true;
                     // Send notice to all clients:
-                    var info = {x: x, y: y, colour: `${colour.r}:${colour.g}:${colour.b}`};
+                    var info = {x: x, y: y, colour: Pixel.getHexFromRGB(colour.r, colour.g, colour.b)};
                     app.pixelNotificationManager.pixelChanged(info);
                     ActionLogger.log(app, "place", user, null, info);
                     app.userActivityController.recordActivity(user);
@@ -133,10 +133,10 @@ function PaintingManager(app) {
         startTimer: function() {
             setInterval(() => {
                 if(this.imageHasChanged) {
-                    console.log("Starting board image update...");
+                    app.logger.log('PAINTING MANAGER', "Starting board image update...");
                     this.generateOutputImage();
                 } else {
-                    console.log("Not updating board image, no changes since last update.");
+                    app.logger.log('PAINTING MANAGER', "Not updating board image, no changes since last update.");
                 }
             }, 30 * 1000);
         }

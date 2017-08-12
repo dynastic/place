@@ -6,6 +6,130 @@
 
 var size = 1000;
 
+var SignInDialogController = {
+    dialog: $("#sign-in-dialog"),
+    currentTab: null,
+    isAnimating: false,
+
+    setup: function() {
+        var me = this;
+        me.dialog.parent().find(".dialog .close, .dialog-overlay").click(function() {
+            me.hide();
+        });
+        me.dialog.find(".switchers > div").click(function() {
+            var id = $(this).attr("tab-name");
+            me.switchTab(id);
+        });
+        $(document).keydown(function(e) {
+            if(me.isShowing() && e.keyCode == 27) { // escape
+                e.preventDefault();
+                me.hide();
+            }
+        })
+        me.dialog.find("form.form-signin").submit(function(e) {
+            var form = $(this);
+            var call = form.attr("action");
+            var tab = form.parent().attr("tab-name");
+            var data = form.serialize();
+            e.preventDefault();
+            if(form.data("submitting")) return;
+            var submitButton = form.find("input[type=submit], button[type=submit]");
+            var origSubmitButtonText = submitButton.text();
+            submitButton.text("Loading").attr("disabled", "disabled");
+            form.data("submitting", true);
+            $.post("/api" + call, data).done(function(data) {
+                if(data.success) {
+                    var hash = hashHandler.getHash();
+                    if(hash["redirectURL"] != null) {
+                        window.location = hash["redirectURL"];
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    me.shake();
+                    var error = "An unknown error occurred while attempting to authenticate you.";
+                    if(data.error && data.error.message) {
+                        error = data.error.message;
+                    }
+                    me.showErrorOnTab(tab, error);
+                }
+            }).fail(function() {
+                me.shake();
+                me.showErrorOnTab(tab, "An error occurred while trying to communicate with Place to authenticate you.");
+            }).always(function() {
+                submitButton.removeAttr("disabled");
+                if(origSubmitButtonText) submitButton.text(origSubmitButtonText);
+                form.data("submitting", false);
+            });
+        });
+        return me;
+    },
+
+    isShowing: function() {
+        return this.dialog.parent().hasClass("show");
+    },
+
+    shake: function() {                
+        this.dialog.addClass("shake");
+        setTimeout(() => { this.dialog.removeClass("shake"); }, 500);
+    },
+
+    showErrorOnTab: function(tab, text = null) {
+        var tabContent = this.dialog.find(`.pages > div[tab-name=${tab}]`);
+        if(text) {
+            // show error
+            var existing = tabContent.find(".tab-error");
+            if(existing.length > 0) {
+                existing.find("span").text(text);
+                return;
+            }
+            var alert = $("<div>").addClass("tab-error alert alert-danger").hide().appendTo(tabContent).fadeIn();
+            $("<strong>").text("Uh oh! ").appendTo(alert);
+            $("<span>").text(text).appendTo(alert);
+        } else {
+            tabContent.find(".tab-error").remove();
+        }
+    },
+
+    switchTab: function(tab, animated = true) {
+        if(tab == this.currentTab || this.isAnimating) return;
+        this.dialog.find(`.pages > div:not([tab-name=${tab}]) .tab-error`).remove();
+        this.currentTab = tab;
+        this.isAnimating = true;
+        var applyClasses = () => {
+            this.isAnimating = false;
+            this.dialog.find(".pages > div.active, .switchers > div.active").removeClass("active");
+            this.dialog.find(`.pages > div[tab-name=${tab}], .switchers > div[tab-name=${tab}]`).addClass("active");
+        }
+        if(animated) {
+            const animDuration = 250;
+            var toHide = $(`.pages > div.active, .switchers > div[tab-name=${tab}]`).animate({opacity: 0}, {duration: animDuration, queue: false}).slideUp({duration: animDuration, queue: false, complete: function() {
+                $(this).attr("style", "");
+                applyClasses();
+            }});
+            $(`.pages > div[tab-name=${tab}], .switchers > div.active`).css({opacity: 1}).slideDown(animDuration, function() {
+                $(this).attr("style", "");
+            });
+        } else {
+            applyClasses();
+        }
+    },
+
+    show: function(tab = null) {
+        if(this.isShowing()) return;
+        if(tab) this.switchTab(tab, false);
+        this.dialog.parent().addClass("show");
+        hashHandler.modifyHash({"d": 1});
+    },
+
+    hide: function(){ 
+        this.dialog.find(".tab-error").remove();
+        this.dialog.find("form").trigger("reset");
+        this.dialog.parent().removeClass("show");
+        hashHandler.deleteHashKey("d");
+    }
+}.setup();
+
 var canvasController = {
     isDisplayDirty: false,
 
@@ -94,14 +218,21 @@ var hashHandler = {
     },
 
     setHash: function(hash) {
-        let encodedHash = this.encodeHash(hash);
-        if("history" in window) window.history.replaceState(null, null, "#" + encodedHash);
-        else window.location.hash = encodedHash;
+        var encodedHash = this.encodeHash(hash);
+        if("history" in window) window.history.replaceState(undefined, undefined, "#" + encodedHash);
+        else location.replace("#" + encodedHash);
     },
 
     modifyHash: function(newHash) {
-        Object.assign(this.getHash(), newHash);
-        this.setHash(newHash);
+        this.setHash(Object.assign(this.getHash(), newHash));
+    },
+
+    deleteHashKey: function(keys) {
+        var keysToUse = keys;
+        if(typeof keys == "string") keysToUse = [keys];
+        var hash = this.getHash();
+        keysToUse.forEach((key) => delete hash[key]);
+        this.setHash(hash);
     },
 
     decodeHash: function(hashString) {
@@ -147,10 +278,10 @@ var place = {
     placing: false, shouldShowPopover: false,
     panX: 0, panY: 0,
     DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
-    selectedColour: null, handElement: null, unlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null}, loadedImage: false,
+    selectedColour: null, handElement: null, unlockTime: null, fullUnlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null}, loadedImage: false,
     notificationHandler: notificationHandler, hashHandler: hashHandler,
     messages: null,
-    isOutdated: false,
+    isOutdated: false, lastPixelUpdate: null,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
         size = canvas.height;
@@ -226,11 +357,20 @@ var place = {
 
         this.popoutController = popoutController;
         this.popoutController.setup(this, $("#popout-container")[0]);
-        this.popoutController.popoutVisibilityController.visibilityChangeCallback = () => app.handleResize();
+        this.popoutController.popoutVisibilityController.visibilityChangeCallback = () => {
+            var start = new Date();
+            var interval = setInterval(function() {
+                app.handleResize();
+                if((new Date() - start) > 250) clearInterval(interval);
+            }, 1);
+        }
+
+        // Check canvas size after chat animation
+        $(".canvas-container").on('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', () => {
+            this.handleResize();
+        });
 
         setInterval(function() { app.doKeys() }, 15);
-
-        this.updateAuthLinks();
 
         this.dismissBtn = $("<button>").attr("type", "button").addClass("close").attr("data-dismiss", "alert").attr("aria-label", "Close");
         $("<span>").attr("aria-hidden", "true").html("&times;").appendTo(this.dismissBtn);
@@ -239,7 +379,7 @@ var place = {
     getCanvasImage: function() {
         if(this.loadedImage) return;
         var app = this;
-        if(!this.isOutdated) this.adjustLoadingScreen("Loading…");;
+        this.adjustLoadingScreen("Loading…");;
         this.loadImage().then((image) => {
             app.adjustLoadingScreen();
             app.canvasController.clearCanvas();
@@ -247,6 +387,7 @@ var place = {
             app.updateDisplayCanvas();
             app.displayCtx.imageSmoothingEnabled = false;
             app.loadedImage = true;
+            app.lastPixelUpdate = Date.now() / 1000;
         }).catch((err) => {
             console.error("Error loading board image", err);
             if(typeof err.status !== "undefined" && err.status === 503) {
@@ -327,7 +468,6 @@ var place = {
                 $(app.zoomController).removeClass("grabbing");
                 var coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
-                app.updateAuthLinks();
             }
         }).on("tap", (event) => {
             if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
@@ -394,10 +534,16 @@ var place = {
         });
         socket.on("connect", () => {
             console.log("Socket successfully connected");
-            if(this.isOutdated) {
+            if(!this.isOutdated) return;
+            if(Date.now() / 1000 - this.lastPixelUpdate > 60) {
+                // 1 minute has passed
+                console.log("We'll need to get the entire board image because the last update was over a minute ago.");
                 this.loadedImage = false;
                 this.getCanvasImage();
                 this.isOutdated = false;
+            } else {
+                console.log("The last request was a minute or less ago, we can just get the changed pixels over websocket.")
+                this.requestPixelsAfterDate(this.lastPixelUpdate)
             }
         });
 
@@ -423,14 +569,9 @@ var place = {
     },
 
     liveUpdateTile: function (data) {
+        this.lastPixelUpdate = Date.now() / 1000;
         this.popoutController.loadActiveUsers();
-        if(typeof data.colour == "string") {
-            var colour = data.colour.split(":");
-            if(colour.length != 3) return;
-            this.setPixel(`rgb(${colour[0]}, ${colour[1]}, ${colour[2]})`, data.x, data.y);
-        } else {
-            this.setPixel(`rgb(${data.colour.r}, ${data.colour.g}, ${data.colour.b})`, data.x, data.y);
-        }
+        this.setPixel(`#${data.colour}`, data.x, data.y);
     },
 
     adminBroadcastReceived: function(data) {
@@ -438,7 +579,7 @@ var place = {
     },
 
     userCountChanged: function (data) {
-        if(data) this.changeUserCount(data);
+        if(data !== null) this.changeUserCount(data);
     },
 
     setupColours: function() {
@@ -526,7 +667,6 @@ var place = {
         clearInterval(this.zooming.zoomHandle);
         let coord = this.getCoordinates();
         this.hashHandler.modifyHash(coord);
-        this.updateAuthLinks();
         this.zooming.zoomHandle = null;
         this.zooming.fastZoom = false;
     },
@@ -719,7 +859,7 @@ var place = {
             window.alert(!!error ? error.message || defaultError : defaultError);
             callback(error);
         }
-        return $.get(`/api/pixel?x=${x}&y=${y}`).done((data) => {
+        return $.get(`/api/pos-info?x=${x}&y=${y}`).done((data) => {
             if(!data.success) return failToPost(data.error);
             callback(null, data);
         }).fail((err) => failToPost(err));
@@ -747,6 +887,7 @@ var place = {
         if(data.canPlace) return this.changePlaceTimerVisibility(false);
         this.deselectColour();
         this.unlockTime = (new Date().getTime() / 1000) + data.seconds;
+        this.fullUnlockTime = data.seconds;
         this.secondTimer = setInterval(() => this.checkSecondsTimer(), 1000);
         this.checkSecondsTimer();
     },
@@ -755,7 +896,7 @@ var place = {
         function padLeft(str, pad, length) {
             return (new Array(length + 1).join(pad) + str).slice(-length);
         }
-        if(this.unlockTime && this.secondTimer) {
+        if(this.unlockTime && this.secondTimer && this.fullUnlockTime) {
             let time = Math.round(this.unlockTime - new Date().getTime() / 1000);
             if(time > 0) {
                 let minutes = ~~(time / 60), seconds = time - minutes * 60;
@@ -763,12 +904,12 @@ var place = {
                 let shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
-            } else {
+            } else if(this.fullUnlockTime > 5) { // only notify if full countdown exceeds 5 seconds
                 this.notificationHandler.sendNotification("Place 2.0", "You may now place!");
             }
         }
         if(this.secondTimer) clearInterval(this.secondTimer);
-        this.secondTimer = null, this.unlockTime = null;
+        this.secondTimer = null, this.unlockTime = null, this.fullUnlockTime = null;
         this.changePlaceTimerVisibility(false);
     },
 
@@ -809,6 +950,7 @@ var place = {
         this.selectedColour = colourID - 1;
         let elem = this.colourPaletteOptionElements[this.selectedColour];
         this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
+        $(elem).addClass("selected");
         $(this.zoomController).addClass("selected");
         $(this.gridHint).show();
     },
@@ -816,6 +958,7 @@ var place = {
     deselectColour: function() {
         this.selectedColour = null;
         $(this.handElement).remove();
+        $(this.colourPaletteOptionElements).removeClass("selected");
         $(this.zoomController).removeClass("selected");
         $(this.gridHint).hide();
     },
@@ -903,7 +1046,7 @@ var place = {
                         else $("<a>").attr("href", "javascript:void(0)").text(`at (${latest.point.x.toLocaleString()}, ${latest.point.y.toLocaleString()})`).click(() => app.zoomIntoPoint(latest.point.x, latest.point.y, false)).appendTo(element);
                         element.appendTo(latestCtn.find(".value"));
                     }
-                    popover.find("#pixel-data-username").attr("href", `/user/${data.pixel.user.id}`);
+                    popover.find("#pixel-data-username").attr("href", `/@${data.pixel.user.username}`);
                     var rank = data.pixel.user.statistics.leaderboardRank;
                     if(rank !== null) {
                         popover.find(".rank-container").show();
@@ -941,7 +1084,9 @@ var place = {
                     if(data.timer) a.doTimer(data.timer);
                     else a.updatePlaceTimer();
                 } else failToPost(data.error);
-            }).fail((data) => failToPost(data.responseJSON.error)).always(() => {
+            }).fail((data) => {
+                failToPost(data.responseJSON != null ? data.responseJSON.error : null);
+            }).always(() => {
                 this.changePlacingModalVisibility(false);
                 this.placing = false;
             });
@@ -979,13 +1124,6 @@ var place = {
         } else {
             $("#loading").fadeOut();
         }
-    },
-
-    updateAuthLinks: function() {
-        var redirectURLPart = encodeURIComponent(window.location.pathname.substr(1) + window.location.search + window.location.hash);
-        $("#nav-sign-in > a, #overlay-sign-in").attr("href", `/signin?redirectURL=${redirectURLPart}`)
-        $("#nav-sign-up > a, #overlay-sign-up").attr("href", `/signup?redirectURL=${redirectURLPart}`)
-        $("#nav-sign-out > a").attr("href", `/signout?redirectURL=${redirectURLPart}`)
     },
 
     getUserStateText: function(userState) {
@@ -1038,4 +1176,29 @@ $(".popout-control").click(function() {
 $("#user-count").click(function() {
     place.popoutController.popoutVisibilityController.open();
     place.popoutController.popoutVisibilityController.changeTab("active-users");
-})
+});
+
+var hash = hashHandler.getHash();
+var hashKeys = Object.keys(hash);
+if(hashKeys.includes("signin") || hashKeys.includes("logintext")) {
+    if(hashKeys.includes("logintext")) {
+        SignInDialogController.showErrorOnTab("sign-in", hash["logintext"])
+        hashHandler.deleteHashKey("logintext");
+    }
+    SignInDialogController.show("sign-in");
+    hashHandler.deleteHashKey("signin");
+} else if(hashKeys.includes("signup")) {
+    SignInDialogController.show("sign-up");
+    hashHandler.deleteHashKey("signup");
+}
+
+$("*[data-place-trigger]").click(function() {
+    var trigger = $(this).data("place-trigger");
+    if(trigger == "openSignInDialog") {
+        SignInDialogController.show("sign-in");
+    } else if(trigger == "openSignUpDialog") {
+        SignInDialogController.show("sign-up");
+    } else if(trigger == "openAuthDialog") {
+        SignInDialogController.show();
+    }
+});

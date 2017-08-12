@@ -15,13 +15,7 @@ const path = require("path");
 function HTTPServer(app) {
     var server = express();
     var httpServer = require("http").createServer(server);
-
-    // Setup sentry bug reporting
-    if (app.raven !== undefined) {
-        server.use(app.raven.requestHandler());
-        server.use(app.raven.errorHandler());
-    }
-
+    
     // Setup for parameters and bodies
     server.use(bodyParser.urlencoded({extended: false}));
     server.use(bodyParser.json());
@@ -41,6 +35,9 @@ function HTTPServer(app) {
 
         server.set("trust proxy", typeof app.config.trustProxyDepth === "number" ? app.config.trustProxyDepth : 0);
 
+        if (app.logger.raven) server.use(app.logger.raven.requestHandler());
+        if (app.logger.bugsnag) server.use(app.logger.bugsnag.requestHandler);
+        
         // Setup passport for auth
         server.use(session({
             secret: app.config.secret,
@@ -54,7 +51,7 @@ function HTTPServer(app) {
 
         server.use((req, res, next) => {
             req.place = app;
-            req.responseFactory = app.responseFactory;
+            req.responseFactory = app.responseFactory(req, res);
             next();
         })
 
@@ -63,7 +60,7 @@ function HTTPServer(app) {
             function authUser(user) {
                 if(user && user.loginError()) {
                     req.session.passport = null;
-                    return res.redirect("/signin?loginerror=1&logintext=" + encodeURIComponent(user.loginError().message));
+                    return res.redirect("/#signin&loginerror=1&logintext=" + encodeURIComponent(user.loginError().message));
                 }
                 if(user) user.recordAccess(app, req.get("User-Agent"), req.get("X-Forwarded-For") || req.connection.remoteAddress, (typeof req.key !== "undefined" ? req.key : null));
                 req.user = user;
@@ -101,13 +98,16 @@ function HTTPServer(app) {
         server.use("/auth", OAuthRouter(app));
         server.use("/", PublicRouter(app));
 
+        if (app.logger.bugsnag) server.use(app.logger.bugsnag.errorHandler);
+        if (app.logger.raven) server.use(app.logger.raven.errorHandler());
+
         if (server.get("env") !== "development") {
             // Production error handler, no stack traces shown to user
             server.use((err, req, res, next) => {
                 res.status(err.status || 500);
                 app.reportError(err);
                 if (req.accepts("json") && !req.accepts("html")) return res.send({ success: false, error: { message: "An unknown error occured.", code: "internal_server_error" } });
-                app.responseFactory.sendRenderedResponse("errors/500", req, res);
+                app.responseFactory(req, res).sendRenderedResponse("errors/500");
             });
         }
 
@@ -117,7 +117,7 @@ function HTTPServer(app) {
             // respond with json
             if (req.accepts("json") && !req.accepts("html")) return res.send({ success: false, error: { message: "Page not found", code: "not_found" } });
             // send HTML
-            app.responseFactory.sendRenderedResponse("errors/404", req, res);
+            app.responseFactory(req, res).sendRenderedResponse("errors/404");
         });
     }
 

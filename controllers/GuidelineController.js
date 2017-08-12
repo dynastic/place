@@ -6,7 +6,7 @@ exports.getGuidelines = (req, res, next) => {
         if(err || !data) return next();
         marked(data, (err, markdown) => {
             if(err || !markdown) return next();
-            return req.responseFactory.sendRenderedResponse("public/guidelines", req, res, { md: markdown });
+            return req.responseFactory.sendRenderedResponse("public/guidelines", { md: markdown });
         });
     });
 };

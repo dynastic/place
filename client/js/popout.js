@@ -43,6 +43,7 @@ function PopoutVisibilityController(popoutContainer) {
             var p = this;
             p.activeTab = name;
             $(this.popoutContainer).find(".tab-content.active, .tab.active").removeClass("active");
+            $(this.popoutContainer).attr("data-selected-tab", name);
             $(this.popoutContainer).find(`.tab-content[data-tab-name=${name}], .tab[data-tab-name=${name}]`).addClass("active").each(function() {
                 if($(this).attr("title")) {
                     p._adjustTitle($(this).attr("title"));
@@ -301,9 +302,9 @@ var popoutController = {
         getStatElement("This week", this.leaderboard[0].statistics.placesThisWeek.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
         getStatElement("Total", this.leaderboard[0].statistics.totalPlaces.toLocaleString()).addClass("col-xs-6").appendTo(subdetails);
         if(this.leaderboard.length > 1) {
-            var table = $(`<table class="table"></table>`).appendTo(tab);
             this.leaderboard.forEach((item, index) => {
                 if(index > 0) {
+                    var table = $("<table>").addClass("table table-contained").appendTo($("<div>").addClass("user compact").appendTo($("<a>").attr("href", `/@${item.username}`).appendTo(tab)));
                     var row = $("<tr>").appendTo(table);
                     $("<td>").addClass("bold").text(`${index + 1}.`).appendTo(row);
                     $("<a>").text(item.username).attr("href", `/@${item.username}`).appendTo($("<td>").appendTo(row));
@@ -316,7 +317,7 @@ var popoutController = {
                 }
             });
         }
-        if(this.leaderboardUpdated) $("<small>").text(`Last updated at ${this.leaderboardUpdated.toLocaleString()}.`).appendTo(tab);
+        if(this.leaderboardUpdated) $("<small>").addClass("last-update").text(`Last updated at ${this.leaderboardUpdated.toLocaleString()}.`).appendTo(tab);
         $("<p>").addClass("text-muted").text("Leaderboards are calculated based on the number of pixels you have placed (that someone else hasn't overwritten) over the span of the last week. To get a spot on the leaderboard, start placing!").appendTo(tab);
     },
 

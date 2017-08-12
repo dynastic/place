@@ -12,7 +12,7 @@ function LeaderboardManager(app) {
         update: function() {
             var m = this;
             if(!this.needsUpdating) return;
-            console.log("Starting generation of leaderboard data…");
+            app.logger.log('LEADERBOARD', "Starting generation of leaderboard data…");
             this.isUpdating = true;
             this.needsUpdating = false;
             var dateBackLastWeek = new Date(new Date().getTime() - (7 * 24 * 60 * 60 * 1000));
@@ -33,15 +33,15 @@ function LeaderboardManager(app) {
                     // Finish all waiting for leaderboard
                     m.waitingForUpdate.forEach((callback) => m.getInfo(callback));
                     m.waitingForUpdate = [];
-                    console.log("Generation of leaderboard data complete.");
+                    app.logger.log('LEADERBOARD', "Generation of leaderboard data complete.");
                 }).catch((err) => {
-                    app.reportError("Couldn't update leaderboard, removal operation failed: " + err);
+                    app.logger.capture("Couldn't update leaderboard, removal operation failed: " + err);
                     m.topUsers = null;
                     m.pixelCounts = null;
                     m.isUpdating = false;                    
                 });
             }).on("error", (err) => {
-                app.reportError("Couldn't update leaderboard.");
+                app.logger.capture("Couldn't update leaderboard, " + err);
                 m.topUsers = null;
                 m.pixelCounts = null;
                 m.isUpdating = false;
