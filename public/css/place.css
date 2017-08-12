@@ -889,6 +889,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     #popout-container {
         transition: 0.25s top ease-out;
         top: 100%;
+        right: 0;
         max-width: none;
         padding-top: 50px;
         background: none;
