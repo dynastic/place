@@ -2,6 +2,7 @@
   if(typeof user === "undefined") user = null;
   if(typeof css === "undefined") css = [];
   if(typeof pageTitle === "undefined") pageTitle = null;
+  if(typeof pageDesc === "undefined") pageDesc = null;
   if(typeof isAdmin === "undefined") isAdmin = false;
   if(typeof pinnable === "undefined") pinnable = false;
   if(typeof navbarSupportsTopMode === "undefined") navbarSupportsTopMode = false;
@@ -22,9 +23,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title><% if(pageTitle) { %><%= pageTitle %> &middot; <% } %>Place 2.0</title>
+    <title><%- pageTitle != null ? `${pageTitle} &middot; ` : "" %>Place 2.0</title>
 
-    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png"/>
+    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="/img/favicon-96x96.png">
@@ -34,10 +35,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <% } %>
 
-    <meta property="og:title" content="Place 2.0">
-    <meta property="og:url" content="https://place.dynastic.co">
-    <meta property="twitter:card" content="summary">
-    <meta property="twitter:title" content="Place 2.0">
+    <meta property="og:title" content="<%= pageTitle || "Place 2.0" %>" />
+    <% if(pageTitle) { %><meta property="og:site_name" content="Place 2.0" /><% } %>
+    <meta property="og:url" content="https://place.dynastic.co" />
+    <meta property="og:image" content="/img/apple-touch-icon.png" />
+    <meta property="twitter:card" content="summary" />
+    <meta property="twitter:title" content="Place 2.0<%= pageTitle != null ? `: ${pageTitle}` : "" %>" />
+    <meta property="twitter:image" content="/img/apple-touch-icon.png" />
+    <% if(pageDesc) { %><meta property="og:description" content="<%= pageDesc %>" />
+    <meta property="twitter:description" content="<%= pageDesc %>" /><% } %>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
