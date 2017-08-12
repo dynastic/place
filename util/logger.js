@@ -43,7 +43,7 @@ if (config.cachet && config.cachet.site && config.cachet.apiKey && config.cachet
         
     setInterval(() => {
         cachet.publishMetricPoint({
-            id: metricID,
+            id: config.cachet.metricID,
             value: errors
         }).then((response) => {
             errors = 0;
@@ -60,5 +60,5 @@ exports.capture = (error, extra) => {
     if (exports.raven) exports.raven.captureException(error, extra);
     if (exports.bugsnag) exports.bugnsnag.notify(new Error(error), extra);
 
-    exports.error('ERROR', error, extra);
+    exports.error('ERROR', error);
 }

@@ -4,6 +4,7 @@ const recaptcha = require("express-recaptcha");
 const gulp = require("gulp");
 const uglify = require("gulp-uglify");
 const babel = require("gulp-babel");
+const sourcemaps = require('gulp-sourcemaps');
 const del = require("del");
 const PaintingManager = require("./util/PaintingManager");
 const ResponseFactory = require("./util/ResponseFactory");
@@ -115,10 +116,12 @@ function swallowError(error) {
 gulp.task("scripts", ["clean"], (cb) => {
     app.logger.info('BABEL', "Processing JavaScript…");
     var t = gulp.src(paths.scripts.src);
+    t = t.pipe(sourcemaps.init());
     t = t.pipe(babel({ presets: ["es2015"] }));
     t = t.on("error", swallowError);
     if(!app.config.debug) t = t.pipe(uglify());
     t = t.on("error", swallowError);
+    t = t.pipe(sourcemaps.write('.'));
     t = t.pipe(gulp.dest(paths.scripts.built));
     t = t.on("end", () => app.logger.info('BABEL', "Finished processing JavaScript."));
     return t;
