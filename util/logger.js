@@ -19,6 +19,12 @@ if (config.raven) {
         sendTimeout: 5,
         release: childProcess.execSync('git rev-parse HEAD').toString().trim(),
         environment: process.env.NODE_ENV || 'production',
+        parseUser: function(req) {
+            return {
+                username: req.user.username,
+                id: req.user._id
+            }
+        }
     }).install((err, sendErrFailed, eventId) => {
         if (sendErrFailed) exports.error('SENTRY FAIL', eventId, err.stack);
     });
