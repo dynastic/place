@@ -2,9 +2,18 @@ const config = require('../config/config');
 
 let errors = 0;
 
+const topicColour = "\x1b[34m"; // blue
+const resetColour = "\x1b[0m";
+const methodColours = {
+    log: "\x1b[35m", // magenta
+    info: "\x1b[32m", // green
+    warn: "\x1b[33m", // yellow
+    error: "\x1b[31m" // red
+}
+
 for (const method of Object.keys(console)) {
     exports[method] = function log(topic, ...args) {
-        console[method](new Date().toISOString(), `[${topic}]`, ...args);
+        console[method](new Date().toISOString(), `${methodColours[method] || ""}${method.toUpperCase()}:`, `${topicColour}[${topic}]${resetColour}`, ...args);
     };
 }
 
