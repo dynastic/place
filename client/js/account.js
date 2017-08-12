@@ -42,3 +42,7 @@ $("form#deactivateAccountForm").submit(function(e) {
 $("#changePassword, #deactivateAccount").on("hidden.bs.modal", function() {
   $(this).find(".alert").attr("class", "").addClass("hidden").text("");
 });
+
+$(document).ready(function() {
+  $(".timeago").timeago();
+});
