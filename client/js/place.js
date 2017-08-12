@@ -4,7 +4,131 @@
 //  Written by AppleBetas and nullpixel. Inspired by Reddit's /r/place.
 //
 
-var size = 1400;
+var size;
+
+var SignInDialogController = {
+    dialog: $("#sign-in-dialog"),
+    currentTab: null,
+    isAnimating: false,
+
+    setup: function() {
+        var me = this;
+        me.dialog.parent().find(".dialog .close, .dialog-overlay").click(function() {
+            me.hide();
+        });
+        me.dialog.find(".switchers > div").click(function() {
+            var id = $(this).attr("tab-name");
+            me.switchTab(id);
+        });
+        $(document).keydown(function(e) {
+            if(me.isShowing() && e.keyCode == 27) { // escape
+                e.preventDefault();
+                me.hide();
+            }
+        })
+        me.dialog.find("form.form-signin").submit(function(e) {
+            var form = $(this);
+            var call = form.attr("action");
+            var tab = form.parent().attr("tab-name");
+            var data = form.serialize();
+            e.preventDefault();
+            if(form.data("submitting")) return;
+            var submitButton = form.find("input[type=submit], button[type=submit]");
+            var origSubmitButtonText = submitButton.text();
+            submitButton.text("Loading").attr("disabled", "disabled");
+            form.data("submitting", true);
+            $.post("/api" + call, data).done(function(data) {
+                if(data.success) {
+                    var hash = hashHandler.getHash();
+                    if(hash["redirectURL"] != null) {
+                        window.location = hash["redirectURL"];
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    me.shake();
+                    var error = "An unknown error occurred while attempting to authenticate you.";
+                    if(data.error && data.error.message) {
+                        error = data.error.message;
+                    }
+                    me.showErrorOnTab(tab, error);
+                }
+            }).fail(function() {
+                me.shake();
+                me.showErrorOnTab(tab, "An error occurred while trying to communicate with Place to authenticate you.");
+            }).always(function() {
+                submitButton.removeAttr("disabled");
+                if(origSubmitButtonText) submitButton.text(origSubmitButtonText);
+                form.data("submitting", false);
+            });
+        });
+        return me;
+    },
+
+    isShowing: function() {
+        return this.dialog.parent().hasClass("show");
+    },
+
+    shake: function() {                
+        this.dialog.addClass("shake");
+        setTimeout(() => { this.dialog.removeClass("shake"); }, 500);
+    },
+
+    showErrorOnTab: function(tab, text = null) {
+        var tabContent = this.dialog.find(`.pages > div[tab-name=${tab}]`);
+        if(text) {
+            // show error
+            var existing = tabContent.find(".tab-error");
+            if(existing.length > 0) {
+                existing.find("span").text(text);
+                return;
+            }
+            var alert = $("<div>").addClass("tab-error alert alert-danger").hide().appendTo(tabContent).fadeIn();
+            $("<strong>").text("Uh oh! ").appendTo(alert);
+            $("<span>").text(text).appendTo(alert);
+        } else {
+            tabContent.find(".tab-error").remove();
+        }
+    },
+
+    switchTab: function(tab, animated = true) {
+        if(tab == this.currentTab || this.isAnimating) return;
+        this.dialog.find(`.pages > div:not([tab-name=${tab}]) .tab-error`).remove();
+        this.currentTab = tab;
+        this.isAnimating = true;
+        var applyClasses = () => {
+            this.isAnimating = false;
+            this.dialog.find(".pages > div.active, .switchers > div.active").removeClass("active");
+            this.dialog.find(`.pages > div[tab-name=${tab}], .switchers > div[tab-name=${tab}]`).addClass("active");
+        }
+        if(animated) {
+            const animDuration = 250;
+            var toHide = $(`.pages > div.active, .switchers > div[tab-name=${tab}]`).animate({opacity: 0}, {duration: animDuration, queue: false}).slideUp({duration: animDuration, queue: false, complete: function() {
+                $(this).attr("style", "");
+                applyClasses();
+            }});
+            $(`.pages > div[tab-name=${tab}], .switchers > div.active`).css({opacity: 1}).slideDown(animDuration, function() {
+                $(this).attr("style", "");
+            });
+        } else {
+            applyClasses();
+        }
+    },
+
+    show: function(tab = null) {
+        if(this.isShowing()) return;
+        if(tab) this.switchTab(tab, false);
+        this.dialog.parent().addClass("show");
+        hashHandler.modifyHash({"d": 1});
+    },
+
+    hide: function(){ 
+        this.dialog.find(".tab-error").remove();
+        this.dialog.find("form").trigger("reset");
+        this.dialog.parent().removeClass("show");
+        hashHandler.deleteHashKey("d");
+    }
+}.setup();
 
 var SignInDialogController = {
     dialog: $("#sign-in-dialog"),
@@ -284,6 +408,7 @@ var place = {
     isOutdated: false, lastPixelUpdate: null,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
+        size = canvas.height;
         this.canvas = canvas; // moved around; hidden
         this.canvasController = canvasController;
         this.canvasController.init(canvas);
