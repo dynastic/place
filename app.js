@@ -53,8 +53,6 @@ app.moduleManager.loadAll();
 
 app.reportError = app.logger.capture;
 
-app.logger.capture('We are test shutting down')
-
 process.on("uncaughtException", (err) => {
     // Catch all uncaught exceptions and report them
     app.reportError(err);

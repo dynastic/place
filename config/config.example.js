@@ -9,7 +9,8 @@ module.exports = {
     "googleAnalyticsTrackingID": "", // UA-XXXXXXXX-XX
     "host": "http://place.dynastic.co", // the publicly accessible URL of the site
     "placeTimeout": 60,
-    //"sentryDSN": "", UNCOMMENT IF YOU HAVE A KEY
+    //"raven": "", 
+    // "bugsnag": "",
     "cachet": {
         // Setup reporting error count as a metric to Cachet
         "apiKey": "",
@@ -57,6 +58,6 @@ module.exports = {
             "enabled": false,
             "clientID": "",
             "clientSecret": ""
-        },
+        }
     }
 };
