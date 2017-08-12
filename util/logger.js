@@ -11,9 +11,23 @@ const methodColours = {
     error: "\x1b[31m" // red
 }
 
+var lastLogTime = null;
+var messagesSinceLastDatestamp = 0;
+
 for (const method of Object.keys(console)) {
     exports[method] = function log(topic, ...args) {
-        console[method](new Date().toISOString(), `${methodColours[method] || ""}${method.toUpperCase()}:`, `${topicColour}[${topic}]${resetColour}`, ...args);
+        // Datestamp calculation
+        var now = new Date();
+        // show datestamp for every unique date or every 50 messages for legibility
+        if (lastLogTime != null ? now.toDateString() !== lastLogTime.toDateString() : true || messagesSinceLastDatestamp > 50) {
+            console.log(`--------- [ MESSAGES ON ${now.toLocaleDateString()} ] ---------`);
+            messagesSinceLastDatestamp = 0;
+        } else {
+            messagesSinceLastDatestamp++
+        }
+        lastLogTime = now;
+        // Actual logging
+        console[method](new Date().toLocaleTimeString(), `${topicColour}[${topic}]`, `${methodColours[method] || ""}${method.toUpperCase()}:${resetColour}`, ...args);
     };
 }
 
