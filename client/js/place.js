@@ -281,7 +281,7 @@ var place = {
     selectedColour: null, handElement: null, unlockTime: null, fullUnlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null}, loadedImage: false,
     notificationHandler: notificationHandler, hashHandler: hashHandler,
     messages: null,
-    isOutdated: false,
+    isOutdated: false, lastPixelUpdate: null,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
         this.canvas = canvas; // moved around; hidden
@@ -378,7 +378,7 @@ var place = {
     getCanvasImage: function() {
         if(this.loadedImage) return;
         var app = this;
-        if(!this.isOutdated) this.adjustLoadingScreen("Loading…");;
+        this.adjustLoadingScreen("Loading…");;
         this.loadImage().then((image) => {
             app.adjustLoadingScreen();
             app.canvasController.clearCanvas();
@@ -386,6 +386,7 @@ var place = {
             app.updateDisplayCanvas();
             app.displayCtx.imageSmoothingEnabled = false;
             app.loadedImage = true;
+            app.lastPixelUpdate = Date.now() / 1000;
         }).catch((err) => {
             console.error("Error loading board image", err);
             if(typeof err.status !== "undefined" && err.status === 503) {
@@ -532,10 +533,16 @@ var place = {
         });
         socket.on("connect", () => {
             console.log("Socket successfully connected");
-            if(this.isOutdated) {
+            if(!this.isOutdated) return;
+            if(Date.now() / 1000 - this.lastPixelUpdate > 60) {
+                // 1 minute has passed
+                console.log("We'll need to get the entire board image because the last update was over a minute ago.");
                 this.loadedImage = false;
                 this.getCanvasImage();
                 this.isOutdated = false;
+            } else {
+                console.log("The last request was a minute or less ago, we can just get the changed pixels over websocket.")
+                this.requestPixelsAfterDate(this.lastPixelUpdate)
             }
         });
 
@@ -561,6 +568,7 @@ var place = {
     },
 
     liveUpdateTile: function (data) {
+        this.lastPixelUpdate = Date.now() / 1000;
         this.popoutController.loadActiveUsers();
         this.setPixel(`#${data.colour}`, data.x, data.y);
     },
