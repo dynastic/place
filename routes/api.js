@@ -11,6 +11,7 @@ const AdminActionsController = require("../controllers/AdminActionsController");
 const ModeratorUserController = require("../controllers/ModeratorUserController");
 const SignInController = require("../controllers/SignInController");
 const SignUpController = require("../controllers/SignUpController");
+const AccountPageController = require("../controllers/AccountPageController");
 
 function APIRouter(app) {
     let router = express.Router();
@@ -149,7 +150,9 @@ function APIRouter(app) {
         proxyDepth: app.config.trustProxyDepth
     });
 
-    router.route("/chat").get(ChatController.getAPIChat).post([requireUser, chatRatelimit.prevent], ChatController.postAPIChatMessage)
+    router.route("/chat").get(ChatController.getAPIChat).post([requireUser, chatRatelimit.prevent], ChatController.postAPIChatMessage);
+
+    router.get("/user/:username", AccountPageController.getAPIAccount);
 
     // Admin APIs
 
