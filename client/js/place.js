@@ -364,6 +364,11 @@ var place = {
             }, 1);
         }
 
+        // Check canvas size after chat sidebar animation
+        $(".canvas-container").on('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', () => {
+            this.handleResize();
+        });
+
         setInterval(function() { app.doKeys() }, 15);
 
         this.dismissBtn = $("<button>").attr("type", "button").addClass("close").attr("data-dismiss", "alert").attr("aria-label", "Close");
