@@ -45,13 +45,14 @@ app.loadConfig = (path = "./config/config") => {
     if(oldConfig && (oldConfig.port != app.config.port || oldConfig.onlyListenLocal != app.config.onlyListenLocal)) app.restartServer();
 }
 app.loadConfig();
+
+app.moduleManager = new ModuleManager(app);
+app.moduleManager.loadAll();
+
 app.temporaryUserInfo = TemporaryUserInfo;
 app.responseFactory = (req, res) => new ResponseFactory(app, req, res);
 
 app.pixelNotificationManager = new PixelNotificationManager(app);
-
-app.moduleManager = new ModuleManager(app);
-app.moduleManager.loadAll();
 
 app.reportError = app.logger.capture;
 

@@ -1,9 +1,5 @@
 const express = require("express");
 const passport = require("passport");
-const APIRouter = require("../routes/api");
-const PublicRouter = require("../routes/public");
-const OAuthRouter = require("../routes/oauth");
-const AdminRouter = require("../routes/admin");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const User = require("../models/user");
@@ -99,10 +95,10 @@ function HTTPServer(app) {
         });
 
         // Handle routes
-        server.use("/api", APIRouter(app));
-        server.use("/admin", AdminRouter(app));
-        server.use("/auth", OAuthRouter(app));
-        server.use("/", PublicRouter(app));
+        server.use("/api", require("../routes/api")(app));
+        server.use("/admin", require("../routes/admin")(app));
+        server.use("/auth", require("../routes/oauth")(app));
+        server.use("/", require("../routes/public")(app));
 
         if (app.logger.bugsnag) server.use(app.logger.bugsnag.errorHandler);
         if (app.logger.raven) server.use(app.logger.raven.errorHandler());

@@ -57,7 +57,9 @@ class ModuleManager {
             s.modules.set(meta.identifier, newModule);
             s.logger.log('MODULE MANAGER', `Loaded module "${meta.name}" (${meta.identifier}).`);
         }
-        this.processViewExtensionsForModule(meta, () => finalizeLoad());
+        this.processViewExtensionsForModule(meta, () => {
+            this.processModelExtensionsForModule(meta, () => finalizeLoad());            
+        });
     }
 
     loadAll() {
