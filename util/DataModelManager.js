@@ -45,7 +45,7 @@ class DataModelManager {
     }
 
     registerModuleOverrides(name, override) {
-        var name = override.schemaName || name;
+        if(override.schemaName) name = override.schemaName;
         // Make sure we have objects in our object for this model override
         if(!this.modelFields[name]) this.modelFields[name] = {};
         if(!this.modelInstanceMethods[name]) this.modelInstanceMethods[name] = {};
