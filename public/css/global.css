@@ -624,6 +624,10 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
 
 .btn.btn-oauth {
     color: #fff;
+    margin-right: 4px;
+}
+.btn.btn-oauth:last-child {
+    margin-right: 0;
 }
 .btn.btn-oauth:hover {
     opacity: 0.7;
