@@ -24,17 +24,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <title><%- pageTitle != null ? `${pageTitle} &middot; ` : "" %>Place 2.0</title>
-
     <link rel="apple-touch-icon" href="/img/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="/img/favicon-96x96.png">
     <link rel="shortcut icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
-    <% if(pinnable) { %>
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <% } %>
-
+    <% if(pinnable) { %><meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" /><% } %>
     <meta property="og:title" content="<%= pageTitle || "Place 2.0" %>" />
     <% if(pageTitle) { %><meta property="og:site_name" content="Place 2.0" /><% } %>
     <meta property="og:url" content="https://place.dynastic.co" />
@@ -44,17 +40,11 @@
     <meta property="twitter:image" content="/img/apple-touch-icon.png" />
     <% if(pageDesc) { %><meta property="og:description" content="<%= pageDesc %>" />
     <meta property="twitter:description" content="<%= pageDesc %>" /><% } %>
-
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-
     <link href="/css/global.css" rel="stylesheet">
-
-    <% css.forEach(function(cssFilename) { %>
-      <link href="<%= cssFilename %>" rel="stylesheet">
-    <% }) %>
-
+<%- [...new Set(css)].map((cssFilename) => `    <link href="${cssFilename}" rel="stylesheet">`).join("\n") %>
     <%- moduleManager.gatherViewExtensions("head", include); %>
 
     <!--[if lt IE 9]>
@@ -63,8 +53,7 @@
     <![endif]-->
   </head>
   <body class="fixed-navbar<% if(user) { %> signed-in<% } %><% if(isPoppedOut) { %> is-popped-out<% } %>" data-user-is-mod="<%= userMod %>" data-user-is-admin="<%= userAdmin %>" data-user-id="<%= user ? user._id : ""; %>">
-    <%- moduleManager.gatherViewExtensions("body", include); %>
-    <nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %><%= navbarSupportsTopMode ? " supports-top" : "" %>" id="page-nav">
+    <%- moduleManager.gatherViewExtensions("body", include); %><nav class="navbar navbar-default navbar-fixed-top<% if(isAdmin) { %> navbar-inverse<% } %><%= navbarSupportsTopMode ? " supports-top" : "" %>" id="page-nav">
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -76,13 +65,10 @@
           </button>
           <a href="https://www.dynastic.co" class="navbar-brand" style="margin-right: -5px;"><img src="https://dynastic.co/img/nbicon.png" height="20" /></a><a class="navbar-brand" href="/">Place 2.0 <% if(config.debug) { %> <span class="label label-danger beta-label">debug</span><% } %></a>
         </div>
-
         <div class="collapse navbar-collapse" id="navbar-collapse">
-          <ul class="nav navbar-nav">
-            <%- moduleManager.gatherViewExtensions("nav_left", include); %>
+          <ul class="nav navbar-nav"><%- moduleManager.gatherViewExtensions("nav_left", include); %>
             <%- renderNavItem("Home", "/", "home"); %>
-            <%- moduleManager.gatherViewExtensions("nav_inside", include); %>
-            <li class="dropdown">
+            <%- moduleManager.gatherViewExtensions("nav_inside", include); %><li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-users fa-fw"></i>Community <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <%- renderNavItem("Official Subreddit", "https://www.reddit.com/r/place20", "reddit-alien"); %>
@@ -98,8 +84,7 @@
             <%- moduleManager.gatherViewExtensions("nav_right", include); %>
           </ul>
           <ul class="nav navbar-nav navbar-right">
-            <%- moduleManager.gatherViewExtensions("nav_user_left", include); %>
-            <% if(user) { %>
+            <%- moduleManager.gatherViewExtensions("nav_user_left", include); %><% if(user) { %>
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user fa-fw"></i><span name="user-dropdown"><%= user.usernameSet ? user.name : "" %></span> <span class="caret"></span></a>
                 <ul class="dropdown-menu">
@@ -107,13 +92,9 @@
                   <li role="separator" class="divider"></li>
                   <%- renderNavItem("Sign out", `/signout?redirectURL=${redirectURLPart}`, "sign-out"); %>
                 </ul>
-              </li>
-            <% } else { %>
-              <li id="nav-auth-link">
+              </li><% } else { %><li id="nav-auth-link">
                 <a class="btn btn-sm btn-nav-auth-link" href="<%= (path == "/" ? "javascript:void(0)" : `/#signup&redirectURL=${redirectURLPart}`) %>" data-place-trigger="openAuthDialog">Get started</a>
-              </li>
-            <% } %>
-            <%- moduleManager.gatherViewExtensions("nav_user_right", include); %>
+              </li><% } %><%- moduleManager.gatherViewExtensions("nav_user_right", include); %>
           </ul>
         </div>
       </div>
