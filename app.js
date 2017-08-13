@@ -33,7 +33,7 @@ app.loadConfig = (path = "./config/config") => {
     app.config = require(path);
     if(!app.config.boardSize) app.config.boardSize = 1400; // default to 1400 if not specified in config
     if(oldConfig && (oldConfig.secret != app.config.secret || oldConfig.database != app.config.database || oldConfig.boardSize != app.config.boardSize)) {
-        app.logger.log("We are stopping the Place server because the database URL, secret, and/or board image size has been changed, which will require restarting the entire server.");
+        app.logger.log("Configuration", "We are stopping the Place server because the database URL, secret, and/or board image size has been changed, which will require restarting the entire server.");
         process.exit(0);
     }
     if(oldConfig && (oldConfig.oauth != app.config.oauth)) {
@@ -62,10 +62,10 @@ process.on("uncaughtException", (err) => {
 
 // Get image handler
 app.paintingManager = PaintingManager(app);
-app.logger.info('STARTUP', "Loading image from the database…");
+app.logger.info('Startup', "Loading image from the database…");
 app.paintingManager.loadImageFromDatabase().then((image) => {
     app.paintingManager.startTimer();
-    app.logger.info('STARTUP', "Successfully loaded image from database.");
+    app.logger.info('Startup', "Successfully loaded image from database.");
 }).catch((err) => {
     app.logger.capture("Error while loading the image from database: " + err);
 });
@@ -114,7 +114,7 @@ function swallowError(error) {
 
 // Process JavaScript
 gulp.task("scripts", ["clean"], (cb) => {
-    app.logger.info('BABEL', "Processing JavaScript…");
+    app.logger.info('Babel', "Processing JavaScript…");
     var t = gulp.src(paths.scripts.src);
     t = t.pipe(sourcemaps.init());
     t = t.pipe(babel({ presets: ["es2015"] }));
@@ -123,7 +123,7 @@ gulp.task("scripts", ["clean"], (cb) => {
     t = t.on("error", swallowError);
     t = t.pipe(sourcemaps.write('.'));
     t = t.pipe(gulp.dest(paths.scripts.built));
-    t = t.on("end", () => app.logger.info('BABEL', "Finished processing JavaScript."));
+    t = t.on("end", () => app.logger.info('Babel', "Finished processing JavaScript."));
     return t;
 });
 
@@ -135,7 +135,7 @@ gulp.start(["watch", "scripts"]);
 
 app.stopServer = () => {
     if(app.server.listening) {
-        app.logger.log('SHUTDOWN', "Closing server...")
+        app.logger.log('Shutdown', "Closing server...")
         app.server.close();
         setImmediate(function() { app.server.emit("close"); });
     }
@@ -144,7 +144,7 @@ app.stopServer = () => {
 app.restartServer = () => {
     app.stopServer();
     app.server.listen(app.config.port, app.config.onlyListenLocal ? "127.0.0.1" : null, null, () => {
-        app.logger.log('STARTUP', `Started Place server on port ${app.config.port}${app.config.onlyListenLocal ? " (only listening locally)" : ""}.`);
+        app.logger.log('Startup', `Started Place server on port ${app.config.port}${app.config.onlyListenLocal ? " (only listening locally)" : ""}.`);
     });
 }
 app.restartServer();

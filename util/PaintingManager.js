@@ -133,10 +133,10 @@ function PaintingManager(app) {
         startTimer: function() {
             setInterval(() => {
                 if(this.imageHasChanged) {
-                    app.logger.log('PAINTING MANAGER', "Starting board image update...");
+                    app.logger.log('Painting Manager', "Starting board image update...");
                     this.generateOutputImage();
                 } else {
-                    app.logger.log('PAINTING MANAGER', "Not updating board image, no changes since last update.");
+                    app.logger.log('Painting Manager', "Not updating board image, no changes since last update.");
                 }
             }, 30 * 1000);
         }

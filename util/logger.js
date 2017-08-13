@@ -27,7 +27,7 @@ for (const method of Object.keys(console)) {
         }
         lastLogTime = now;
         // Actual logging
-        console[method](new Date().toLocaleTimeString(), `${topicColour}[${topic}]`, `${methodColours[method] || ""}${method.toUpperCase()}:${resetColour}`, ...args);
+        console[method](new Date().toLocaleTimeString(), `${topicColour}[${topic.toUpperCase()}]`, `${methodColours[method] || ""}${method.toUpperCase()}:${resetColour}`, ...args);
     };
 }
 

@@ -3,7 +3,7 @@ const Pixel = require("../models/pixel");
 
 function WebsocketServer(app, httpServer) {
     var server = socketIO(httpServer);
-    app.logger.log('WEBSOCKET SERVER', "Attached to HTTP server.");
+    app.logger.log('Websocket Server', "Attached to HTTP server.");
 
     let obj = {
         server: server,
