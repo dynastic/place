@@ -366,7 +366,7 @@ var hashHandler = {
         var decoded = {};
         hashArguments.forEach(function(hashArg) {
             let parts = hashArg.split("=");
-            let key = parts[0], value = parts[1];
+            let key = parts[0], value = decodeURIComponent(parts[1]);
             if(key) decoded[key] = value;
         });
         return decoded;
