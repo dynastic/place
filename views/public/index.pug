@@ -24,7 +24,8 @@ unless user
                         label.sr-only(for="inputPassword2") Password (again)
                         input.form-control.form-merge-bottom#inputPassword2(type="password", placeholder="Password (again)", name="passwordverify", required)
                         if captcha
-                            - renderCaptcha()
+                            .
+                                !{renderCaptcha()}
                         if fs.existsSync("./config/community_guidelines.md")
                             .checkbox
                                 label.

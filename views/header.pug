@@ -22,9 +22,8 @@ mixin renderNavItem(name, itemPath, icon)
       if isCurrentPage
         span.sr-only (current)
 mixin getViewExtensions(name)
-  - var output = moduleManager.gatherViewExtensions(name, req, res);
   .
-    !{output}
+    !{moduleManager.gatherViewExtensions(name, req, res)}
 doctype html
 html(lang=en)
   head
