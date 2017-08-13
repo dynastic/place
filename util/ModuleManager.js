@@ -81,7 +81,7 @@ class ModuleManager {
                 moduleInfo = moduleInfo.filter((o) => !!o).sort((a, b) => b.priority - a.priority); 
                 this.moduleIdentifiers = moduleInfo.map((info) => info.identifier);
                 moduleInfo.forEach((info) => this.load(info.meta, info.main));
-                this.doneLoading()
+                this.doneLoading();
             }).catch(err => this.logger.capture("Error loading modules: " + err));
         });
     }
@@ -105,7 +105,7 @@ class ModuleManager {
                     this.logger.capture("Error loading single module directory: " + err);
                     return resolve(null);
                 }
-                if(!stat.isDirectory()) return;
+                if(!stat.isDirectory()) return resolve(null);
                 var folder = path.parse(folderPath);
                 var nicePath = path.join(folder.dir, folder.base);
                 // Attempt to stat module.json
