@@ -23,7 +23,7 @@ function WebsocketServer(app, httpServer) {
                     if(!ts || ts < currentTS - 60 || ts > currentTS) return;
                     // Only allow one fetch per socket (no spam pls!)
                     if(hasRequestedFetch) {
-                        app.logger.info('WEBSOCKET SERVER', "Disconnected client for requesting fetch more than once.")
+                        app.logger.info('Websocket Server', "Disconnected client for requesting fetch more than once.")
                         return socket.disconnect();
                     }
                     hasRequestedFetch = true;

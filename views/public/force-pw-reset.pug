@@ -1,0 +1,18 @@
+- var pageTitle = "Reset your Password";
+- var css = ["/css/signin.css"];
+include ../header
+- if (typeof error === "undefined") error = null;
+.container
+    form.form-signin(method="POST", action="/force-pw-reset")
+        h2.form-signin-heading Reset your Password
+        p You are required to change your password to continue using Place 2.0.
+        br
+        label.sr-only(for="inputPassword") Password
+        input.form-control#inputPassword(type="password", placeholder="Password", name="password", required, autofocus)
+        label.sr-only(for="inputPasswordC") Password (again)
+        input.form-control#inputPasswordC(type="password", placeholder="Password (again)", name="confirmPassword", required)
+        button.btn.btn-lg.btn-primary.btn-block(type="submit") Reset Password
+        if error
+            br
+            .alert.alert-danger: #[strong Uh oh!] #{error.message}
+include ../footer
