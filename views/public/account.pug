@@ -1,0 +1,106 @@
+- var isSelf = user ? user.id == profileUser.id : false;
+- var pixel = profileUserInfo.latestPixel;
+- var boardImageCorrection = (1000 / config.boardSize) * 4;
+- var pageTitle = isSelf ? "Account Details" : `${profileUser.name}'s Profile`;
+- var pageDesc = isSelf ? "View information about your Place 2.0 account." : `View ${profileUser.name}'s profile on Place 2.0.`;
+- var css = ["/css/dashboard.css", "/css/profile.css"];
+- var navbarSupportsTopMode = !!profileUserInfo.latestPixel;
+- js = ["/js/tooltip.js", "/js/build/account.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"];
+- jsModSnippets = [`  $(document).ready(function() {
+-    $("#profile-mod-tools-ctn").html(renderUserActions(${JSON.stringify(profileUser)}));
+-  });`];
+include ../header
+if pixel
+    a(href=`/#x=${pixel.point.x}&y=${pixel.point.y}`)
+        .profile-header(style=`background-position: calc(50% - ${(pixel.point.x - (config.boardSize / 2)) * boardImageCorrection}px) ${-(pixel.point.y * boardImageCorrection) + 175}px;`)
+            .overlay
+.container
+    .profile-info(class=(pixel ? " has-pixel" : ""))
+        .user-header-info
+            .avatar: span= profileUser.getUsernameInitials()
+            .user-info
+                span.username #{profileUser.name} !{profileUser.admin || profileUser.moderator ? `<span class="label label-warning badge-label">${profileUser.admin ? "Admin" : "Moderator"}</span>` : ""}
+                .subdetails
+                    - var rank = profileUserInfo.statistics.leaderboardRank;
+                    if rank !== null
+                        div
+                            span.value ##{profileUserInfo.statistics.leaderboardRank.toLocaleString()}
+                            span.name Global rank
+                    div
+                        span.value= profileUser.placeCount.toLocaleString()
+                        span.name pixel#{profileUser.placeCount == 1 ? "" : "s"} placed
+                    if profileUserInfo.statistics.placesThisWeek !== null
+                        div
+                            span.value= profileUserInfo.statistics.placesThisWeek.toLocaleString()
+                            span.name pixel#{profileUserInfo.statistics.placesThisWeek == 1 ? "" : "s"} this week
+        if hasNewPassword
+            .alert.alert-success #[strong Success!] Your password has been changed successfully!
+            hr
+        h1 About #{isSelf ? "me" : "them"}
+        .user-details
+            p #[strong Joined] #[time.timeago(datetime=profileUser.creationDate.toISOString(), title=profileUser.creationDate.toLocaleString()) on loading date].
+            if profileUser.lastPlace
+                p #[strong Last placed] #[time.timeago(datetime=profileUser.lastPlace.toISOString(), title=profileUser.lastPlace.toLocaleString())]
+                    if pixel && pixel.isLatest
+                        .
+                            #{" at "}
+                        a(href=`/#x=${pixel.point.x}&y=${pixel.point.y}`) (#{pixel.point.x.toLocaleString()}, #{pixel.point.y.toLocaleString()})
+                    . 
+                        .
+        //- Disable this section for OAuth users because they cannot deactivate or change passwords at this time.
+        if isSelf && !profileUser.oAuth
+            hr
+            h1 My account
+            .
+                #[a.btn.btn-info(data-toggle="modal", data-target="#changePassword") Change Password] #[a.btn.btn-danger(data-toggle="modal", data-target="#deactivateAccount") Deactivate Account]
+        if user && user.canPerformActionsOnUser(profileUser)
+            hr
+            h1 Moderator tools
+            #profile-mod-tools-ctn
+
+if isSelf && !profileUser.oAuth
+    .modal.fade#changePassword(tabindex="-1", role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                form.form-horizontal#changePasswordForm
+                    .modal-header
+                        button.close(type="button", data-dimiss="modal", aria-label="Close"): span(aria-hidden="true") &times;
+                        h4.modal-title Change Password
+                    .modal-body
+                        p Change your password using your current password. #[Make sure you remember the new password, as this cannot be undone without it.]
+                        .alert.hidden(role="alert", name="changePasswordProgressAlert")
+                        .form-group
+                            label.col-sm-3.control-label(for="inputChangePasswordCurrent") Password
+                            .col-sm-9: input.form-control#inputChangePasswordCurrent(type="password", placeholder="Current Password", name="password")
+                        .form-group
+                            label.col-sm-3.control-label(for="inputChangePasswordNew") New Password
+                            .col-sm-9: input.form-control#inputChangePasswordNew(type="password", placeholder="New Password", name="newPassword")
+                        .form-group
+                            .col-sm-9.col-sm-offset-3: input.form-control#inputChangePasswordNew2(type="password", placeholder="New Password (again)", name="newConfPassword")
+                    .modal-footer
+                        button.btn.btn-default(type="button", data-dismiss="modal") Cancel
+                        button.btn.btn-primary(type="submit") Change Password
+
+    .modal.fade#deactivateAccount(tabindex="-1", role="dialog")
+        .modal-dialog(role="document")
+            .modal-content
+                form.form-horizontal#deactivateAccountForm
+                    .modal-header
+                        button.close(type="button", data-dimiss="modal", aria-label="Close"): span(aria-hidden="true") &times;
+                        h4.modal-title Deactivate Account
+                    .modal-body
+                        p Are you sure you want to deactivate your account?
+                        p Before you do so:
+                        ul
+                            li Deactivated accounts #[strong cannot be manually recovered].
+                            li Your pixels will remain, but the creator will be shown as "Deactivated account".
+                        p If you are still sure, re-enter your account's current password to deactivate it.
+                        .alert.hidden(role="alert", name="deactivateAccountProgressAlert")
+                        .form-group
+                            label.col-sm-3.control-label(for="inputDeactivatePassword") Password
+                            .col-sm-9: input.form-control#inputDeactivatePassword(type="password", placeholder="Password", name="password")
+                    .modal-footer
+                        button.btn.btn-default(type="button", data-dismiss="modal") Cancel
+                        button.btn.btn-danger(type="submit") Deactivate
+
+include ../footer

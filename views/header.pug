@@ -63,7 +63,7 @@ html(lang=en)
     <![endif]-->
   body(class=bodyClasses, data-user-is-mod=(userMod ? "true" : "false"), data-user-is-admin=(userAdmin ? "true" : "false"), data-user-id=(user ? user.id : ""))
     +getViewExtensions("body")
-    nav#page-nav(class=`navbar navbar-default navbar-fixed-top${isAdmin ? " navbar-inverse" : ""}${navbarSupportsTopMode ? "supports-top" : ""}`)
+    nav#page-nav(class=`navbar navbar-default navbar-fixed-top${isAdmin ? " navbar-inverse" : ""}${navbarSupportsTopMode ? " supports-top" : ""}`)
       .container
         // Brand and toggle get grouped for better mobile display
         .navbar-header
