@@ -198,8 +198,11 @@ class ModuleManager {
             var routerPath = path.join(path.join(this.modulePaths[meta.identifier], "routes"), routerInfo.file);
             fs.stat(routerPath, (err, stat) => {
                 if(err || stat.isDirectory()) return resolve(null);
-                var Router = require(routerPath);
-                resolve({root: routerInfo.path, middleware: Router(this.app)});
+                var router = require(routerPath)(this.app, (req, res, next) => {
+                    req.moduleResponseFactory = new ResponseFactory(this.app, req, res, path.join(this.modulePaths[meta.identifier], "views") + path.sep);
+                    next();
+                });
+                resolve({root: routerInfo.path, middleware: router});
             });
         });
     }

@@ -1,16 +1,17 @@
 const fs = require("fs");
 
 class ResponseFactory {
-    constructor(app, req, res) {
+    constructor(app, req, res, root = "") {
         this.app = app;
         this.req = req;
         this.res = res;
+        this.root = root;
     }
 
     sendRenderedResponse(template, data = null, mimeType = "text/html") {
         var sendData = this.getAutomaticTemplateData();
         if (data) sendData = Object.assign({}, sendData, data);
-        return this.res.header("Content-Type", mimeType).render(template, sendData);
+        return this.res.header("Content-Type", mimeType).render(this.root + template, sendData);
     }
 
     getAutomaticTemplateData() {
