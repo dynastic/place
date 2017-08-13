@@ -53,7 +53,7 @@ class ModuleManager {
             var Module = require(mainPath);
             var newModule = new Module(s.app);
             s.modules.set(meta.identifier, newModule);
-            this.logger.log('MODULE MANAGER', `Loaded module "${meta.name}" (${meta.identifier}).`);
+            s.logger.log('MODULE MANAGER', `Loaded module "${meta.name}" (${meta.identifier}).`);
         }
         this.processViewExtensionsForModule(meta, () => finalizeLoad());
     }
@@ -238,7 +238,7 @@ class ModuleManager {
         return this.viewExtensions[name] || [];
     }
 
-    gatherViewExtensions(name, include) {
+    gatherViewExtensions(name) {
         return this.getViewExtensions(name).map((file) => include(file)).join("");
     }
 
