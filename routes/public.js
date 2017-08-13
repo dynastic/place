@@ -53,7 +53,7 @@ function PublicRouter(app) {
 
     router.get("/sitemap.xml", function(req, res, next) {
         if (typeof app.config.host === undefined) return next();
-        req.responseFactory.sendRenderedResponse("public/sitemap.xml.html", null, "text/xml");
+        req.responseFactory.sendRenderedResponse("public/sitemap.xml.pug", null, "text/xml");
     });
 
     router.get("/signin", function(req, res, next) {

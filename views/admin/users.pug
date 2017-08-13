@@ -1,0 +1,20 @@
+extends ../admin_layout
+block dependencies
+    - var css = ["https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css"];
+    - var js = ["https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js", "https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js", "/js/build/admin_users.js"];
+block content
+    h1.page-header Users
+    table.table#users
+        thead
+            tr
+                th Username
+                th Account Created
+                th Last Place
+                th Total Places
+                th Actions
+        tbody
+            th ------
+            th ---- -- --, -- -- -- --
+            th ---- -- --, -- -- -- --
+            th --
+            th ...

@@ -31,6 +31,7 @@ body.fixed-navbar {
     text-transform: uppercase;
     position: relative;
     top: -2px;
+    margin-left: 4px;
 }
 
 .badge-label {

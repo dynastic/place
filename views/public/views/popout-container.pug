@@ -1,0 +1,28 @@
+#popout-container
+    .navigation-bar
+        span.title
+        .buttons
+            span.popout-btn(aria-label="Popout") &#x2197;
+            span.close-btn(aria-label="Close") &times;
+    .content-ctn
+        .tab-content.active.chat(data-tab-name="chat")
+            .messages#chat-messages
+            .text-field
+                input#chat-input-field(type="text", maxlength="249", autocomplete="off", placeholder="Send a message")
+                a.send-btn#chat-send-btn(href="javascript:void(0)")
+        .tab-content#leaderboardTab(data-tab-name="leaderboard")
+            .coming-soon
+                p Loading…
+        if user
+            .tab-content#achievementsTab(data-tab-name="achievements")
+                .coming-soon
+                    p Coming Soon
+        .tab-content#activeUsersTab(data-tab-name="active-users")
+            .coming-soon
+                p Loading…
+    .tabbar
+        .tab.active(data-tab-name="chat", title="Chat"): i.fa.fa-comments
+        .tab(data-tab-name="leaderboard", title="Leaderboard"): i.fa.fa-trophy
+        if user
+            .tab(data-tab-name="achievements", title="Achievements"): i.fa.fa-star
+        .tab(data-tab-name="active-users", title="Active Users"): i.fa.fa-users

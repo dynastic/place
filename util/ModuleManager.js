@@ -1,8 +1,10 @@
 const fs = require("fs-extra-promise");
 const path = require('path');
+const pug = require('pug');
 const modulesDirectory = path.resolve(`${__dirname.replace(/\/\w+$/, ``)}/modules/`);
 const express = require("express");
 const DataModelManager = require("./DataModelManager");
+const ResponseFactory = require("./ResponseFactory");
 
 // Heavily inspired by EricRabil's work on DDBot.
 
@@ -53,7 +55,7 @@ class ModuleManager {
             var Module = require(mainPath);
             var newModule = new Module(s.app);
             s.modules.set(meta.identifier, newModule);
-            this.logger.log('MODULE MANAGER', `Loaded module "${meta.name}" (${meta.identifier}).`);
+            s.logger.log('MODULE MANAGER', `Loaded module "${meta.name}" (${meta.identifier}).`);
         }
         this.processViewExtensionsForModule(meta, () => finalizeLoad());
     }
@@ -220,12 +222,12 @@ class ModuleManager {
     // --- View Extensions ---
 
     processViewExtensionsForModule(meta, callback) {
-        var vPath = path.join(this.modulePaths[meta.identifier], "views");
+        var vPath = path.join(this.modulePaths[meta.identifier], "view_extensions");
         fs.stat(vPath, (err, stat) => {
             if(err || !stat.isDirectory()) return callback();
             fs.readdir(vPath, (err, files) => {
-                files.filter((fn) => path.extname(fn) == ".html").forEach((file) => {
-                    var templateName = file.toLowerCase().slice(0, -5);
+                files.filter((fn) => path.extname(fn) == ".pug").forEach((file) => {
+                    var templateName = file.toLowerCase().slice(0, -4);
                     if(!this.viewExtensions[templateName]) this.viewExtensions[templateName] = [];
                     this.viewExtensions[templateName].push(path.join(vPath, file));
                 });
@@ -238,8 +240,10 @@ class ModuleManager {
         return this.viewExtensions[name] || [];
     }
 
-    gatherViewExtensions(name, include) {
-        return this.getViewExtensions(name).map((file) => include(file)).join("");
+    gatherViewExtensions(name, req, res) {
+        var responseFactory = new ResponseFactory(this.app, req, res);
+        var info = responseFactory.getAutomaticTemplateData();
+        return this.getViewExtensions(name).map((file) => pug.renderFile(file, info)).join("\n");
     }
 
     // --- Model Extensions ---

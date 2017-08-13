@@ -6,7 +6,6 @@ const OAuthRouter = require("../routes/oauth");
 const AdminRouter = require("../routes/admin");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
-const ejs = require("ejs");
 const User = require("../models/user");
 const session = require("cookie-session");
 const fs = require("fs");
@@ -21,8 +20,7 @@ function HTTPServer(app) {
     server.use(bodyParser.json());
 
     // Set rendering engine
-    server.set("view engine", "html");
-    server.engine("html", ejs.renderFile);
+    server.set("view engine", "pug");
 
     var setupRoutes = function(directories, modulesWithRoutes) {
         // Use public folder for resources

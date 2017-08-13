@@ -1,0 +1,66 @@
+extends ../admin_layout
+mixin renderDashboardStat(id, name, underName, moreInfo)
+    .col-xs-6.col-sm-3.placeholder
+        .admin-stat(id=id)
+            span: i.fa.fa-circle-o-notch.fa-spin
+        h4 #{name}
+        span.text-muted
+            .
+                #{underName}
+            if moreInfo
+                br
+                small #{moreInfo}
+block dependencies
+    - var js = ["/js/build/admin_dashboard.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"];
+    - var jsSnippets = [`loadRecentActionsIntoContainer($("#actions-ctn"), 10, false, false)`];
+block content
+    h1.page-header Dashboard
+    // Status Updates
+    .row.placeholders
+        +renderDashboardStat("users-online", "Users online", "right now", null)
+        +renderDashboardStat("new-accounts", "New accounts", "in the last 24 hours", null)
+        +renderDashboardStat("pixels-placed", "Pixels placed", "in the last 24 hours", null)
+        +renderDashboardStat("pixels-placed-2", "Pixels placed", "per minute", "(averaged from last 20 minutes)")
+    if user.admin
+        // Administrator Actions
+        .section-heading
+            h2.sub-header Adminsitrator Actions
+        .content#admin-actions Loading…
+        - jsSnippets.push(`$("#admin-actions").html(renderServerActions())`);
+    // Recent Actions
+    .section-heading
+        h2.sub-header Recent Actions
+        a(href="/admin/actions") See all &raquo;
+    .dashboard-actions-ctn.compact#actions-ctn
+    if user.admin
+        .modal.fade#broadcastModal(tabindex="-1", role="dialog", aria-labelledby="broadcastModalLabel")
+            .modal-dialog(role="document")
+                .modal-content
+                    form.form-horizontal#broadcastForm
+                        .modal-header
+                            button.close(type="button", data-dismiss="modal", aria-label="Close"): span(aria-hidden="true") &times
+                            h4.modal-title#broadcastModalLabel Admin Broadcast
+                        .modal-body
+                            p Send a message to all users currently viewing connected to the websockets.
+                            .form-group
+                                label.col-sm-2.control-label(for="inputBroadcastTitle") Title
+                                .col-sm-10: input.form-control#inputBroadcastTitle(type="text", placeholder="Title (optional)")
+                            .form-group
+                                label.col-sm-2.control-label(for="inputBroadcastMessage") Message
+                                .col-sm-10: input.form-control#inputBroadcastTitle(type="text", placeholder="Message")
+                            .form-group
+                                label.col-sm-2.control-label(for="inputBroadcastStyle") Style
+                                .col-sm-10
+                                    select.selectpicker.form-control#inputBroadcastStyle
+                                        option(value="info") Informative
+                                        option(value="success") Success
+                                        option(value="warning") Warning
+                                        option(value="danger") Danger
+                            .form-group
+                                label.col-sm-2.control-label(for="inputBroadcastTimeout") Timeout
+                                .col-sm-10
+                                    input.form-control#inputBroadcastTimeout(type="number", placeholder="Timeout", value="0", aria-describedby="inputBroadcastTimeoutHelpBlock")
+                                    span.help-block#inputBroadcastTimeoutHelpBlock How long to wait before automatically dismissing the alert in seconds. Enter #[strong 0] to never automatically dismiss.
+                        .modal-footer
+                            button.btn.btn-default(type="button", data-dismiss="modal") Cancel
+                            button.btn.btn-primary(type="submit") Broadcast

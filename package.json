@@ -23,7 +23,6 @@
     "cachet-api": "github:applebetas/cachet-api",
     "cookie-session": "^2.0.0-beta.1",
     "del": "^2.2.2",
-    "ejs": "^2.5.6",
     "express": "^4.15.2",
     "express-brute-mongoose": "0.0.8",
     "express-recaptcha": "^2.1.0",
@@ -48,6 +47,7 @@
     "passport-microsoft": "^0.0.5",
     "passport-reddit": "^0.2.4",
     "passport-twitter": "^1.0.4",
+    "pug": "^2.0.0-rc.3",
     "pump": "^1.0.2",
     "raven": "^2.1.0",
     "socket.io": "^1.7.3"

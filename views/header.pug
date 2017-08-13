@@ -1,0 +1,119 @@
+- if(typeof user === "undefined") user = null;
+- if(typeof css === "undefined") css = [];
+- if(typeof pageTitle === "undefined") pageTitle = null;
+- if(typeof pageDesc === "undefined") pageDesc = null;
+- if(typeof isAdmin === "undefined") isAdmin = false;
+- if(typeof pinnable === "undefined") pinnable = false;
+- if(typeof navbarSupportsTopMode === "undefined") navbarSupportsTopMode = false;
+- if(typeof isPoppedOut === "undefined") isPoppedOut = false;
+- var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
+- css = resources.css.concat(css);
+- var bodyClasses = ["fixed-navbar"];
+- if (user) bodyClasses.push("signed-in");
+- if (isPoppedOut) bodyClasses.push("is-popped-out");
+mixin renderNavItem(name, itemPath, icon)
+  - var isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
+  li(id=`nav-${name.toLowerCase().replace(/ /g, "-")}`, class=(isCurrentPage ? "active" : ""))
+    a(href=itemPath)
+      if icon
+        i.fa.fa-fw(class=`fa-${icon}`)
+      .
+        #{name}
+      if isCurrentPage
+        span.sr-only (current)
+mixin getViewExtensions(name)
+  - var output = moduleManager.gatherViewExtensions(name, req, res);
+  .
+    !{output}
+doctype html
+html(lang=en)
+  head
+    meta(charset="utf-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    title !{pageTitle != null ? `${pageTitle} &middot; ` : ""}Place 2.0
+    link(rel="apple-touch-icon", href="/img/apple-touch-icon.png")
+    link(rel="icon", type="image/png", sizes="16x16", href="/img/favicon-16x16.png")
+    link(rel="icon", type="image/png", sizes="32x32", href="/img/favicon-32x32.png")
+    link(rel="icon", type="image/png", sizes="96x96", href="/img/favicon-96x96.png")
+    link(rel="shortcut icon", type="image/png", sizes="32x32", href="/img/favicon-32x32.png")
+    if pinnable
+      meta(name="apple-mobile-web-app-capable", content="yes")
+      meta(name="apple-mobile-web-app-status-bar-style", content="default")
+    meta(property="og:title" content=(pageTitle || "Place 2.0"))
+    if pageTitle
+      meta(property="og:site_name", content="Place 2.0")
+    meta(property="og:url", content="https://place.dynastic.co")
+    meta(property="og:image", content="/img/apple-touch-icon.png")
+    meta(property="twitter:card", content="summary")
+    meta(property="twitter:title", content=`Place 2.0${pageTitle != null ? `: ${pageTitle}` : ""}`)
+    meta(property="twitter:image", content="/img/apple-touch-icon.png")
+    if pageDesc
+      meta(property="og:description", content=pageDesc)
+      meta(property="twitter:description", content=pageDesc)
+    link(href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700", rel="stylesheet")
+    link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", rel="stylesheet")
+    link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", rel="stylesheet")
+    link(href="/css/global.css", rel="stylesheet")
+    each item in [...new Set(css)]
+      link(href=item, rel="stylesheet")
+    +getViewExtensions("head")
+    <!--[if lt IE 9]>
+      script(src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js")
+      script(src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js")
+    <![endif]-->
+  body(class=bodyClasses, data-user-is-mod=(userMod ? "true" : "false"), data-user-is-admin=(userAdmin ? "true" : "false"), data-user-id=(user ? user.id : ""))
+    +getViewExtensions("body")
+    nav#page-nav(class=`navbar navbar-default navbar-fixed-top${isAdmin ? " navbar-inverse" : ""}${navbarSupportsTopMode ? " supports-top" : ""}`)
+      .container
+        // Brand and toggle get grouped for better mobile display
+        .navbar-header
+          button.navbar-toggle.collapsed(type="button", data-toggle="collapse", data-target="#navbar-collapse", aria-expanded="false")
+            span.sr-only Toggle navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.navbar-brand(href="https://www.dynastic.co", style="margin-right: -5px")
+            img(src="https://dynastic.co/img/nbicon.png", height="20")
+          a(class="navbar-brand", href="/")
+            .
+              Place 2.0
+            if config.debug
+              span.label.label-danger.beta-label debug
+        .collapse.navbar-collapse#navbar-collapse
+          ul.nav.navbar-nav
+            +getViewExtensions("nav_left")
+            +renderNavItem("Home", "/", "home")
+            +getViewExtensions("nav_inside")
+            li.dropdown
+              a.dropdown-toggle(data-toggle="dropdown", href="#", role="button", aria-haspopup="true", aria-expanded="false")
+                i.fa.fa-users.fa-fw
+                .
+                  Community #[span.caret]
+              ul.dropdown-menu
+                +renderNavItem("Official Subreddit", "https://www.reddit.com/r/place20", "reddit-alien")
+                +renderNavItem("Chat on Discord", "https://discord.gg/CgC8FTg", "comments")
+                +renderNavItem("Internet World Congress", "https://discord.gg/nQ4m2Gv", "globe")
+                +renderNavItem("Timelapses", "https://disk.ph1l3r.fr/place20/", "clock-o")
+                +renderNavItem("Source Code", "https://www.github.com/dynasticdevelop/place", "github")
+            +renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money")
+            if fs.existsSync("./config/community_guidelines.md")
+              +renderNavItem("Rules", "/guidelines", "handshake-o")
+            if user && userMod
+              +renderNavItem(userAdmin ? "Admin" : "Moderator", "/admin", "gavel")
+            +getViewExtensions("nav_right")
+          ul.nav.navbar-nav.navbar-right
+            +getViewExtensions("nav_user_left")
+            if user
+              li.dropdown
+                a.dropdown-toggle(href="#", data-toggle="dropdown", role="button", aria-haspopup="true", aria-expanded="false")
+                  i.fa.fa-user.fa-fw
+                  .
+                    #[span(name="user-dropdown") #{user.usernameSet ? user.name : ""}] #[span.caret]
+                ul.dropdown-menu
+                  +renderNavItem("Account Details", "/account", "pencil-square-o")
+                  li.divider(role="separator")
+                  +renderNavItem("Sign Out", `/signout?redirectURL=${redirectURLPart}`, "sign-out")
+            else
+              li#nav-auth-link
+                a.btn.btn-sm.btn-nav-auth-link(href=(path == "/" ? "javascript:void(0)" : `/#signup&redirectURL=${redirectURLPart}`), data-place-trigger="openAuthDialog") Get Started
+            +getViewExtensions("nav_user_right")

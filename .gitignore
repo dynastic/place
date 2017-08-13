@@ -6,7 +6,7 @@ public/js/build
 public/css/build
 util/legit.js
 util/legit.*.js
-views/legit.html
+views/legit.*
 config/community_guidelines.md
 modules/*
 

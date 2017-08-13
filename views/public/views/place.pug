@@ -1,0 +1,44 @@
+#floating-alert-ctn
+#place
+    +getViewExtensions("place")
+    #loading
+        .content
+            img.icon(src="https://www.dynastic.co/img/dd-big.png", height="75")
+            span.text Loading…
+    .canvas-container
+        include pixel-data
+        .button-ctn
+            .popout-btns
+                .popout-control.control.btn.btn-default(data-tab-name="chat"): i.fa.fa-comments.fa-fw
+                .popout-control.control.btn.btn-default(data-tab-name="leaderboard"): i.fa.fa-trophy.fa-fw
+                if user
+                    .popout-control.control.btn.btn-default(data-tab-name="achievements"): i.fa.fa-star.fa-fw
+                .popout-control.control.btn.btn-default(data-tab-name="active-users"): i.fa.fa-users.fa-fw
+            .control-btns
+                .control.btn.btn-warning.show-in-full-mode#full-map-button
+                .control.btn.btn-success#grid-button
+                .control.btn.btn-primary#zoom-button
+        #grid
+        #grid-hint
+        #palette-ctn
+            .ctn-row
+                .content.compact
+                    #user-count.section.clickable(style="display: none;")
+                        i.fa.fa-user.fa-fw
+                        span.count
+                        i.fa.fa-circle-o-notch.fa-spin.fa-fw.loading
+                    button#coordinates.section(style="display: none;")
+                        i.fa.fa-map-marker.fa-fw
+                        .
+                            (#[span], #[span])
+            .ctn-row
+                .content#palette
+                    .overlay#sign-in-reminder
+                        span #[a#overlay-sign-in(data-place-trigger="openSignInDialog", href="javascript:href(0)") Sign in] or #[a#overlay-sign-up(data-place-trigger="openSigUpDialog", href="javascript:href(0)") sign up] to start placing!
+                    .overlay#placing-modal Placing…
+                    .overlay#place-timer: span
+        canvas#place-canvas(height="100%", width="100%")
+        #zoom-controller
+            #camera-controller
+                canvas#place-canvas-draw(height=config.boardSize, width=config.boardSize)
+    include popout-container

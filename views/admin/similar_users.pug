@@ -1,0 +1,16 @@
+extends ../admin_layout
+block dependencies
+    - var js = ["https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js", "/js/build/admin_similar_users.js"];
+    - var jsSnippets = [`var defaultBanReason = "Alternate account of ${target.name}";`, `var userID = "${target.id}";`];
+block content
+    .page-header
+        h1 Similar Accounts
+        p.lead.text-muted Accounts identified to be similar to "#{target.name}".
+        a(href="/admin/users") &laquo; Back to users
+    #data
+        #loading #[i.fa.fa-circle-o-notch.fa-spin] Loading similar accounts…
+        #target-ctn
+        br
+        #similar-ctn
+            .heading
+            .user-list#similar
