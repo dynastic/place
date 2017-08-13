@@ -41,7 +41,7 @@ if (config.raven) {
     Raven.config(config.raven, {
         sendTimeout: 5,
         release: childProcess.execSync('git rev-parse HEAD').toString().trim(),
-        environment: process.env.NODE_ENV || 'production',
+        environment: config.debug ? 'development' : 'production' || 'production',
         parseUser: function(req) {
             return {
                 username: req.user.username,

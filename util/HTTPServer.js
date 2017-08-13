@@ -27,9 +27,17 @@ function HTTPServer(app) {
         server.use(express.static("public"));
         // Register module public directories
         directories.forEach((dir) => server.use(dir.root, dir.middleware));
-
+        
         // Log to console
-        server.use(morgan("dev"));
+        if (app.config.debug) server.use(morgan("dev"));
+        else {
+            const logStream = require("stream-file-archive")({
+                path: "/var/log/place/access-%Y-%m-%d.log",  // Write logs rotated by the day
+                symlink: "/var/log/place/current.log",    // Maintain a symlink called current.log
+                compress: true                // Gzip old log files
+            });
+            server.use(morgan("common", { stream: logStream }));
+        }
 
         server.set("trust proxy", typeof app.config.trustProxyDepth === "number" ? app.config.trustProxyDepth : 0);
 

@@ -694,7 +694,6 @@ var place = {
 
     liveUpdateTile: function (data) {
         this.lastPixelUpdate = Date.now() / 1000;
-        this.popoutController.loadActiveUsers();
         this.setPixel(`#${data.colour}`, data.x, data.y);
     },
 

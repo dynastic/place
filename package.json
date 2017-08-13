@@ -50,6 +50,7 @@
     "pug": "^2.0.0-rc.3",
     "pump": "^1.0.2",
     "raven": "^2.1.0",
-    "socket.io": "^1.7.3"
+    "socket.io": "^1.7.3",
+    "stream-file-archive": "^1.1.3"
   }
 }

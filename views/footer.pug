@@ -17,9 +17,7 @@ script(src="https://cdn.polyfill.io/v2/polyfill.min.js")
 script(src="https://cdn.ravenjs.com/3.17.0/raven.min.js", crossorigin="anonymous")
 script.
     Raven.config('https://d067712e632c4c36a3ab1ffe4b540833@sentry.io/183264').install();
-    window.onerror = () => {
-        if (Raven.isSetup()) Raven.showReportDialog();
-    }
+    window.onerror = function() { if (Raven.isSetup()) Raven.showReportDialog(); }
 script(src="/js/build/site.js")
 each item in [...new Set(js)]
     script(src=item)

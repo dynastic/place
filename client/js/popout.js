@@ -348,7 +348,7 @@ var popoutController = {
             var date = item.statistics.lastSeenActively;
             $("<time>").attr("datetime", date).attr("title", new Date(date).toLocaleString()).text($.timeago(date)).appendTo($("<strong>").appendTo(lastSeen));
         });
-        $("<p>").addClass("text-muted").text("Users that are both logged in and have either placed a pixel or sent a chat message in the last five minutes will appear here.").appendTo(tab);
+        $("<p>").addClass("text-muted").text("Users that are both logged in and have either placed a pixel or sent a chat message in the last five minutes will appear here. This tab is updated once a minute, so data may appear delayed.").appendTo(tab);
     },
 
     isInPopOutWindow: function() {

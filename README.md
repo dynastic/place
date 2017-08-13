@@ -25,6 +25,8 @@ These instructions will help you get a copy of the project up and running on you
 
 ## Deployment
 
+**Ensure `/var/log/place` exists, and the app can write to it.**
+
 Please only host your own copy if you are willing to abide by the clearly defined [license](https://github.com/dynasticdevelop/place/blob/master/LICENSE). **Failure to comply with the listed terms will result in legal action.**
 
 When deploying, it is recommended you use a daemon to keep the server alive. We use `pm2`, but any daemon utility, such as `forever`, should work.
