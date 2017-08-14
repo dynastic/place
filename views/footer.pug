@@ -12,13 +12,13 @@ footer.footer
         .col-xs-6
             p.text-muted &copy; Dynastic Development
         .col-xs-6.right
-            p
+            p: ul.footer-links
                 if hasTOS
-                    a(href="/tos") Terms of Service
-                if hasTOS && hasCommunityGuidelines
-                    |  &middot 
+                    li: a(href="/tos") Terms of Service
                 if hasCommunityGuidelines
-                    a(href="/guidelines") Rules
+                    li: a(href="/guidelines") Rules
+                if hasPP
+                    li: a(href="/privacy") Privacy Policy
     +getViewExtensions("footer")
 script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
 script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", crossorigin="anonymous")

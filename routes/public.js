@@ -63,7 +63,8 @@ function PublicRouter(app) {
     });
 
     router.get("/guidelines", GuidelineController.getGuidelines);
-    router.get("/tos", TOSController.getTOS);
+    router.get(["/tos", "/terms-of-service"], TOSController.getTOS);
+    router.get(["/privacy", "/privacy-policy"], TOSController.getPrivacyPolicy);
 
     router.get("/deactivated", function(req, res) {
         if (req.user) return res.redirect("/");

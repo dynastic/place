@@ -24,3 +24,20 @@ exports.getTOS = (req, res, next, forcePage = false) => {
         }).catch(err => goNext());
     }).catch(err => goNext());
 }
+
+exports.getPrivacyPolicy = (req, res, next) => {
+    TOSManager.hasPrivacyPolicy().then((hasTOS) => {
+        if(!hasTOS) return next();
+        TOSManager.getPrivacyPolicyContent().then((data) => {
+            if(!data) return next();
+            marked(data, (err, markdown) => {
+                if(err || !markdown) return next();
+                return req.responseFactory.sendRenderedResponse("public/markdown-document", {
+                    pageTitle: "Privacy Policy",
+                    pageDesc: "How Dynastic Development uses the data you submit to Place 2.0.",
+                    md: markdown
+                });
+            });
+        }).catch(err => next());
+    }).catch(err => next());
+}

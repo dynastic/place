@@ -13,6 +13,7 @@
 - if (isPoppedOut) bodyClasses.push("is-popped-out");
 - var hasCommunityGuidelines = fs.existsSync("./config/community_guidelines.md");
 - var hasTOS = TOSManager.hasTOSSync();
+- var hasPP = TOSManager.hasPrivacyPolicySync();
 mixin renderNavItem(name, itemPath, icon)
   - var isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
   li(id=`nav-${name.toLowerCase().replace(/ /g, "-")}`, class=(isCurrentPage ? "active" : ""))
