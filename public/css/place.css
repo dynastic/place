@@ -121,6 +121,10 @@ body {
     pointer-events: none;
 }
 
+.picker-showing #palette-ctn {
+    z-index: 1049;
+}
+
 #palette-ctn > .ctn-row {
     display: block;
     width: 100%;
@@ -359,25 +363,28 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     left: 0;
     bottom: 0;
     right: 0;
-    z-index: 1050;
+    z-index: 1049;
     pointer-events: none;
     opacity: 0;
-    transition: 250ms opacity ease-in-out;
+    transition: 0.15s opacity ease-in-out;
     background: rgba(0, 0, 0, 0.2);
-}
-
-#colour-picker-popover-ctn.show {
-    pointer-events: initial;
-    opacity: 1;
 }
 
 #colour-picker-popover {
     padding: 10px;
     position: absolute;
-    z-index: 5;
     padding-bottom: 5px;
     text-align: center;
     bottom: 50px;
+    z-index: 1050;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.15s opacity ease-in-out;
+}
+
+.picker-showing #colour-picker-popover-ctn, .picker-showing #colour-picker-popover {
+    pointer-events: initial;
+    opacity: 1;
 }
 
 #colour-picker-popover .field {
@@ -679,8 +686,6 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     margin-top: 30px;
 }
 
-
-
 @supports (backdrop-filter:none) or (-webkit-backdrop-filter:none) {
     #loading {
         background: rgba(255,255,255,0.7);
@@ -689,9 +694,10 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     }
 
     #colour-picker-popover-ctn {
-        background: rgba(0, 0, 0, 0.1);
-        -webkit-backdrop-filter: blur(3px);
-        backdrop-filter: blur(3px);
+        background: rgba(0,0,0,0.05)
+        transition: 0.15s opacity ease-in-out, 0.15s backdrop-filter ease-in-out, 0.15s -webkit-backdrop-filter ease-in-out;
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
     }
 }
 

@@ -499,7 +499,7 @@ var place = {
 
         this.updateColourSelectorPosition();
         $("#colour-picker-popover-ctn").click(function() {
-            $(this).removeClass("show");
+            $("body").removeClass("picker-showing");
         })
 
         setInterval(function() { app.doKeys() }, 15);
@@ -737,7 +737,7 @@ var place = {
         if(this.colours) {
             overlay.hide();
             if(this.canPlaceCustomColours) $("<div>").addClass("colour-option rainbow").attr("id", "customColourChooserOption").click(function() {
-                $("#colour-picker-popover-ctn").toggleClass("show");
+                $("body").toggleClass("picker-showing");
             }).appendTo(this.colourPaletteElement);
             var elem = $("<div>").addClass("colour-option custom").attr("id", "customChosenColourOption").attr("data-colour", 1).hide().appendTo(this.colourPaletteElement);
             this.colourPaletteOptionElements.push(elem[0]);
