@@ -31,7 +31,7 @@ function PublicRouter(app) {
             if (req.path == "/force-pw-reset" && req.method == "POST") return next(); // Allow the user to POST their new password
             return req.responseFactory.sendRenderedResponse("public/force-pw-reset");
         }
-        if(req.user == null) return next();
+        if(!req.user) return next();
         req.user.getMustAcceptTOS().then((mustAcceptTOS) => {
             if(!mustAcceptTOS) return next();
             if (req.method == "POST" && req.body.tosAccepted == "true") {
