@@ -11,6 +11,8 @@
 - var bodyClasses = ["fixed-navbar"];
 - if (user) bodyClasses.push("signed-in");
 - if (isPoppedOut) bodyClasses.push("is-popped-out");
+- var hasCommunityGuidelines = fs.existsSync("./config/community_guidelines.md");
+- var hasTOS = TOSManager.hasTOSSync();
 mixin renderNavItem(name, itemPath, icon)
   - var isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
   li(id=`nav-${name.toLowerCase().replace(/ /g, "-")}`, class=(isCurrentPage ? "active" : ""))
@@ -30,7 +32,7 @@ html(lang=en)
     meta(charset="utf-8")
     meta(http-equiv="X-UA-Compatible", content="IE=edge")
     meta(name="viewport", content="width=device-width, initial-scale=1, user-scalable=no")
-    title !{pageTitle != null ? `${pageTitle} &middot; ` : ""}Place 2.0
+    title !{pageTitle != null ? `${pageTitle} &middot; ` : ""}Place 2.0#{config.debug ? " (debug)" : ""}
     link(rel="apple-touch-icon", href="/img/apple-touch-icon.png")
     link(rel="icon", type="image/png", sizes="16x16", href="/img/favicon-16x16.png")
     link(rel="icon", type="image/png", sizes="32x32", href="/img/favicon-32x32.png")
@@ -74,9 +76,8 @@ html(lang=en)
             span.icon-bar
           a.navbar-brand(href="https://www.dynastic.co", style="margin-right: -5px")
             img(src="https://dynastic.co/img/nbicon.png", height="20")
-          a(class="navbar-brand", href="/")
-            .
-              Place 2.0
+          a.navbar-brand(href="/")
+            | Place 2.0
             if config.debug
               span.label.label-danger.beta-label debug
         .collapse.navbar-collapse#navbar-collapse
@@ -96,8 +97,6 @@ html(lang=en)
                 +renderNavItem("Timelapses", "https://disk.ph1l3r.fr/place20/", "clock-o")
                 +renderNavItem("Source Code", "https://www.github.com/dynasticdevelop/place", "github")
             +renderNavItem("Donate", "https://www.paypal.me/AppleBetasPay", "money")
-            if fs.existsSync("./config/community_guidelines.md")
-              +renderNavItem("Rules", "/guidelines", "handshake-o")
             if user && userMod
               +renderNavItem(userAdmin ? "Admin" : "Moderator", "/admin", "gavel")
             +getViewExtensions("nav_right")

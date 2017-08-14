@@ -18,8 +18,12 @@ body {
   border-top: 1px solid #efefef;
 }
 
-.footer .container .text-muted {
+.footer .container p {
   margin: 19.5px 0;
+}
+
+.footer .container .right {
+    text-align: right;
 }
 
 body.fixed-navbar {
@@ -747,4 +751,15 @@ table.table.table-contained, td {
 
 .btn:not(.btn-popping), .label {
     background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%);
+}
+
+.term {
+    font-size: 18px;
+    letter-spacing: -0.1px;
+}
+
+@media(max-width: 750px) {
+    .term {
+        font-size: 16px;
+    }
 }

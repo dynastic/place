@@ -11,10 +11,19 @@ include ../header
         if captcha
             .
                 !{renderCaptcha()}
-        if fs.existsSync("./config/community_guidelines.md")
+        if hasCommunityGuidelines || hasTOS
             .checkbox
-                label.
-                    #[input(type="checkbox", name="agreeToGuidelines")] #[span I agree to abide by the #[a(href="/guidelines") Community Guidelines].]
+                label
+                    input(type="checkbox", name="agreeToGuidelines")
+                    span
+                        | I agree to abide by the 
+                        if hasTOS
+                            a(href="/tos") Terms of Service
+                        if hasTOS && hasCommunityGuidelines
+                            |  and 
+                        if hasCommunityGuidelines
+                            a(href="/guidelines") Community Guidelines
+                        | .
         button.btn.btn-lg.btn-primary.btn-block(type="Submit") Save
         if error
             br

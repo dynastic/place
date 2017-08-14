@@ -3,6 +3,7 @@ const express = require("express");
 const UsernamePickerController = require("../controllers/UsernamePickerController");
 const PasswordChangeController = require("../controllers/PasswordChangeController");
 const GuidelineController = require("../controllers/GuidelineController");
+const TOSController = require("../controllers/TOSController");
 const AccountPageController = require("../controllers/AccountPageController");
 const SignOutController = require("../controllers/SignOutController");
 
@@ -30,7 +31,24 @@ function PublicRouter(app) {
             if (req.path == "/force-pw-reset" && req.method == "POST") return next(); // Allow the user to POST their new password
             return req.responseFactory.sendRenderedResponse("public/force-pw-reset");
         }
-        next(); // Otherwise, carry on...
+        if(req.user == null) return next();
+        req.user.getMustAcceptTOS().then((mustAcceptTOS) => {
+            if(!mustAcceptTOS) return next();
+            if (req.method == "POST" && req.body.tosAccepted == "true") {
+                function handleError(err) {
+                    req.place.reportError("Error trying to accept TOS: " + err);
+                    res.status(500);
+                    req.responseManager.sendRenderedResponse("errors/500");
+                }
+                return req.user.updateTOSAcceptance().then(() => {
+                    req.user.save().then(() => res.redirect(req.url)).catch(handleError);
+                }).catch(handleError);
+            }
+            TOSController.getTOS(req, res, next, true);
+        }).catch(err => {
+            req.place.reportError("Error trying to get user TOS status: " + err);
+            next();
+        });
     });
 
     router.post("/pick-username", [requireUser, UsernamePickerController.postUsername]);
@@ -45,6 +63,7 @@ function PublicRouter(app) {
     });
 
     router.get("/guidelines", GuidelineController.getGuidelines);
+    router.get("/tos", TOSController.getTOS);
 
     router.get("/deactivated", function(req, res) {
         if (req.user) return res.redirect("/");

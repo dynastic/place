@@ -30,15 +30,25 @@ function APIRouter(app) {
                 message: "Please create a username for your account before continuing.",
                 code: "oauth_no_username"
             }
-        })
+        });
         if (req.user && req.user.passwordResetKey) return res.status(401).json({
             success: false,
             error: {
                 message: "Please go to the Place 2.0 website to reset your password.",
                 code: "forced_password_reset"
             }
-        })
-        next(); // Otherwise, carry on...
+        });
+        if(req.user === null) return next();
+        req.user.getMustAcceptTOS().then((mustAcceptTOS) => {
+            if(!mustAcceptTOS) return next();
+            res.status(401).json({
+                success: false,
+                error: {
+                    message: "Please go to the Place 2.0 website to accept the Terms of Service.",
+                    code: "tos_not_accepted"
+                }
+            })
+        }).catch(err => next());
     });
 
     const requireUser = (req, res, next) => {

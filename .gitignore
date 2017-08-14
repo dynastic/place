@@ -8,6 +8,7 @@ util/legit.js
 util/legit.*.js
 views/legit.*
 config/community_guidelines.md
+config/tos.md
 modules/*
 
 ### Linux ###

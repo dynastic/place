@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const Pixel = require("./pixel");
 const Access = require("./access");
 const dataTables = require("mongoose-datatables");
+const TOSManager = require("../util/TOSManager");
 
 var UserSchema = new Schema({
     name: {
@@ -78,6 +79,10 @@ var UserSchema = new Schema({
         type: String,
         required: false,
         default: ""
+    },
+    lastAcceptedTOSRevision: {
+        type: String,
+        required: false
     }
 });
 
@@ -341,7 +346,38 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
             app.logger.capture("Error getting user info: " + err, { user: { _id: userID } });
             returnInfo("delete");
         });
-    })
+    });
+}
+
+UserSchema.methods.getMustAcceptTOS = function() {
+    return new Promise((resolve, reject) => {
+        TOSManager.hasTOS().then((hasTOS) => {
+            if(!hasTOS) return resolve(false);
+            if(!this.lastAcceptedTOSRevision) return resolve(true);
+            TOSManager.getCurrentTOSVersion().then((version) => {
+                resolve(this.lastAcceptedTOSRevision != version);
+            }).catch((err) => reject(err));
+        }).catch((err) => reject(err));
+    });
+}
+
+UserSchema.methods.updateTOSAcceptance = function() {
+    return new Promise((resolve, reject) => {
+        TOSManager.hasTOS().then((hasTOS) => {
+            if(!hasTOS) {
+                this.lastAcceptedTOSRevision = null;
+                resolve();
+            }
+            TOSManager.getCurrentTOSVersion().then((version) => {
+                this.lastAcceptedTOSRevision = version;
+                resolve();
+            }).catch((err) => reject(err));
+        }).catch((err) => reject(err));
+    });
+}
+
+UserSchema.statics.isTOSAgreementCurrentlyRequired = function() {
+    return TOSManager.hasTOS();
 }
 
 UserSchema.plugin(dataTables, {

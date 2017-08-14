@@ -8,9 +8,18 @@
 - if(typeof jsModSnippets === "undefined" || !jsModSnippets || !userMod) jsModSnippets = [];
 - js = resources.js.concat(js);
 footer.footer
-    div.container
-        p.text-muted &copy; Dynastic Development 2017
-        +getViewExtensions("footer")
+    .container.row-fluid
+        .col-xs-6
+            p.text-muted &copy; Dynastic Development
+        .col-xs-6.right
+            p
+                if hasTOS
+                    a(href="/tos") Terms of Service
+                if hasTOS && hasCommunityGuidelines
+                    |  &middot 
+                if hasCommunityGuidelines
+                    a(href="/guidelines") Rules
+    +getViewExtensions("footer")
 script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
 script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", crossorigin="anonymous")
 script(src="https://cdn.polyfill.io/v2/polyfill.min.js")
