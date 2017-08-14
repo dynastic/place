@@ -363,7 +363,7 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     pointer-events: none;
     opacity: 0;
     transition: 250ms opacity ease-in-out;
-    background: rgba(0,0,0,0.1)
+    background: rgba(0, 0, 0, 0.2);
 }
 
 #colour-picker-popover-ctn.show {
@@ -686,6 +686,12 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
         background: rgba(255,255,255,0.7);
         -webkit-backdrop-filter: blur(12px);
         backdrop-filter: blur(12px);
+    }
+
+    #colour-picker-popover-ctn {
+        background: rgba(0, 0, 0, 0.1);
+        -webkit-backdrop-filter: blur(3px);
+        backdrop-filter: blur(3px);
     }
 }
 
