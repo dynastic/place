@@ -1017,6 +1017,7 @@ var place = {
 
     checkSecondsTimer: function() {
         function padLeft(str, pad, length) {
+            if (str.length > length) return str;
             return (new Array(length + 1).join(pad) + str).slice(-length);
         }
         if(this.unlockTime && this.secondTimer && this.fullUnlockTime) {
