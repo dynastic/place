@@ -405,7 +405,7 @@ var place = {
     notificationHandler: notificationHandler, hashHandler: hashHandler,
     messages: null,
     isOutdated: false, lastPixelUpdate: null,
-    colours: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false,
+    colours: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
         size = canvas.height;
@@ -491,10 +491,16 @@ var place = {
             }, 1);
         }
 
+        $("#colour-picker").minicolors({inline: true, format: "hex", letterCase: "uppercase", defaultValue: "#D66668", change: (change) => this.handleColourPaletteChange(change) });
         // Check canvas size after chat animation
         $(".canvas-container").on('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', () => {
             this.handleResize();
         });
+
+        this.updateColourSelectorPosition();
+        $("#colour-picker-popover-ctn").click(function() {
+            $(this).removeClass("show");
+        })
 
         setInterval(function() { app.doKeys() }, 15);
 
@@ -730,13 +736,31 @@ var place = {
         this.colourPaletteOptionElements = [];
         if(this.colours) {
             overlay.hide();
+            if(this.canPlaceCustomColours) $("<div>").addClass("colour-option rainbow").attr("id", "customColourChooserOption").click(function() {
+                $("#colour-picker-popover-ctn").toggleClass("show");
+            }).appendTo(this.colourPaletteElement);
+            var elem = $("<div>").addClass("colour-option custom").attr("id", "customChosenColourOption").attr("data-colour", 1).hide().appendTo(this.colourPaletteElement);
+            this.colourPaletteOptionElements.push(elem[0]);
+            if(this.canPlaceCustomColours) $("<div>").addClass("palette-separator").appendTo(this.colourPaletteElement);
             this.colours.forEach((colour, index) => {
-                let elem = $("<div class=\"colour-option" + (colour.toLowerCase() == "#ffffff" ? " is-white" : "") + "\" style=\"background-color: " + colour + ";\" data-colour=\"" + (index + 1) + "\"></div>").appendTo(this.colourPaletteElement)[0];
-                this.colourPaletteOptionElements.push(elem);
+                var elem = $("<div>").addClass("colour-option" + (colour.toLowerCase() == "#ffffff" ? " is-white" : "")).css("background-color", colour).attr("data-colour", index + 2);
+                elem.appendTo(this.colourPaletteElement);
+                this.colourPaletteOptionElements.push(elem[0]);
             });
+            this.updateColourSelectorPosition();
         } else {
             overlay.text(this.hasTriedToFetchAvailability ? "An error occurred while loading colours. Retrying…" : "Loading..").show();
         }
+    },
+
+    handleColourPaletteChange: function(newColour) {
+        if(!this.canPlaceCustomColours) return;
+        this.customColour = newColour;
+        var elem = $("#customChosenColourOption").show().css("background-color", newColour);
+        $("#colour-picker-hex-value").text(newColour.toUpperCase());
+        if(newColour.toLowerCase() == "#ffffff") elem.addClass("is-white");
+        else elem.removeClass("is-white");
+        this.selectColour(1);
     },
 
     handleResize: function() {
@@ -751,6 +775,25 @@ var place = {
         this.updateGrid();
         this.updateGridHint(this.lastX, this.lastY);
         this.setFullMapViewScale();
+        this.updateColourSelectorPosition();
+    },
+
+    updateColourSelectorPosition: function() {
+        var elem = $("#colour-picker-popover"), button = $("#customColourChooserOption");
+        var position = 20;
+        if(button.length > 0) position = Math.max(20, button.offset().left - (elem.outerWidth() / 2) + (button.outerWidth() / 2));
+        if(position <= 20) {
+            elem.addClass("arrow-left");
+            if(button.length > 0) {
+                var arrowOffset = button.offset().left - (button.outerWidth() / 2) - 10;
+                $("#popover-styling").html(`#colour-picker-popover:after, #colour-picker-popover:before { left: ${arrowOffset}px!important; }`);
+            }
+            else $("#popover-styling").html("");
+        } else {
+            elem.removeClass("arrow-left");
+            $("#popover-styling").html("");
+        }
+        elem.css({left: position});
     },
 
     setFullMapViewScale: function() {
@@ -1222,13 +1265,14 @@ var place = {
         var a = this;
         if(this.selectedColour !== null && !this.placing) {
             this.changePlacingModalVisibility(true);
+            var hex = this.getCurrentColourHex();
             this.placing = true;
             $.post("/api/place", {
-                x: x, y: y, hex: this.colours[this.selectedColour]
+                x: x, y: y, hex: hex
             }).done((data) => {
                 if(data.success) {
                     this.popoutController.loadActiveUsers();
-                    a.setPixel(a.colours[a.selectedColour], x, y);
+                    a.setPixel(hex, x, y);
                     a.changeSelectorVisibility(false);
                     if(data.timer) a.doTimer(data.timer);
                     else a.updatePlaceTimer();
@@ -1240,6 +1284,11 @@ var place = {
                 this.placing = false;
             });
         }
+    },
+
+    getCurrentColourHex: function() {
+        if(this.selectedColour <= 0 && this.customColour) return this.customColour;
+        return this.colours[this.selectedColour - 1];
     },
 
     setPixel: function(colour, x, y) {
