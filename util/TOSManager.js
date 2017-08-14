@@ -4,55 +4,75 @@ const md5 = require("md5");
 
 const tosPath = path.join(__dirname, ".." + path.sep + "config" + path.sep + "tos.md");
 const ppPath = path.join(__dirname, ".." + path.sep + "config" + path.sep + "privacy_policy.md");
-var manager = {
+
+class TOSManager {
+    constructor() {
+        this.cachedTOSVersion = null;
+        this.refreshTOSVersion();
+    }
+
     // Terms of Service
 
-    hasTOSSync: function() {
+    hasTOSSync() {
         return fs.existsSync(tosPath);
-    },
+    }
     
-    hasTOS: function() {
+    hasTOS() {
         return new Promise((resolve, reject) => {
             fs.access(tosPath, (err) =>  resolve(err == null));
         });
-    },
+    }
     
-    getTOSContent: function() {
+    getTOSContent() {
         return new Promise((resolve, reject) => {
             fs.readFile(tosPath, "utf8", (err, data) => {
                 if(err || !data) return reject(err);
                 resolve(data);
             });
         });
-    },
+    }
 
-    getCurrentTOSVersion: function() {
+    getCurrentTOSVersion(overrideCache = false) {
         return new Promise((resolve, reject) => {
+            if(this.cachedTOSVersion != null || !overrideCache) return resolve(this.cachedTOSVersion);
             this.getTOSContent().then((content) => resolve(md5(content))).catch((err) => reject(err));
         })
-    },
+    }
+    
+    refreshTOSVersion() {
+        this.getCurrentTOSVersion(true).then((version) => {
+            this.cachedTOSVersion = version;
+            console.log("Cached TOS version: " + version);
+            setTimeout(() => this.refreshTOSVersion(), 30000); // check TOS version every 30 seconds
+        }).catch((err) => {
+            console.log("Couldn't cache TOS version: " + err)
+            setTimeout(() => this.refreshTOSVersion(), 30000); // check TOS version every 30 seconds
+        })
+    }
 
     // Privacy Policy
 
-    hasPrivacyPolicySync: function() {
+    hasPrivacyPolicySync() {
         return fs.existsSync(ppPath);
-    },
-    
-    hasPrivacyPolicy: function() {
+    }
+
+    hasPrivacyPolicy() {
         return new Promise((resolve, reject) => {
             fs.access(ppPath, (err) =>  resolve(err == null));
         });
-    },
+    }
     
-    getPrivacyPolicyContent: function() {
+    getPrivacyPolicyContent() {
         return new Promise((resolve, reject) => {
             fs.readFile(ppPath, "utf8", (err, data) => {
                 if(err || !data) return reject(err);
                 resolve(data);
             });
         });
-    },
+    }
 
 }
 
-module.exports = manager;
+const instance = new TOSManager();
+
+module.exports = instance;
