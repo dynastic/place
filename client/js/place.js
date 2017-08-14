@@ -732,7 +732,7 @@ var place = {
 
     setupColours: function() {
         var overlay = $("#availability-loading-modal");
-        $(this.colourPaletteElement).remove(".colour-option");
+        $(this.colourPaletteElement).find(".colour-option, .palette-separator").remove();
         this.colourPaletteOptionElements = [];
         if(this.colours) {
             overlay.hide();
