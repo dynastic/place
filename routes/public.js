@@ -33,13 +33,13 @@ function PublicRouter(app) {
         }
         if(!req.user) return next();
         req.user.getMustAcceptTOS().then((mustAcceptTOS) => {
+            function handleError(err) {
+                req.place.reportError("Error trying to accept TOS: " + err);
+                res.status(500);
+                req.responseManager.sendRenderedResponse("errors/500");
+            }
             if(!mustAcceptTOS) return next();
             if (req.method == "POST" && req.body.tosAccepted == "true") {
-                function handleError(err) {
-                    req.place.reportError("Error trying to accept TOS: " + err);
-                    res.status(500);
-                    req.responseManager.sendRenderedResponse("errors/500");
-                }
                 return req.user.updateTOSAcceptance().then(() => {
                     req.user.save().then(() => res.redirect(req.url)).catch(handleError);
                 }).catch(handleError);
