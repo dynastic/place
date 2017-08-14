@@ -33,7 +33,7 @@ var actions = {
         inlineDisplayName: "Placed a pixel",
         category: "gameplay",
         hideInfo: true,
-        sentenceEndTextFormatting: " at <a href=\"/#x=${x}&y=${y}\">(${x}, ${y})</a>"
+        sentenceEndTextFormatting: " at <a href=\"/#x=${x}&y=${y}\">(${x.toLocaleString()}, ${y.toLocaleString()})</a>"
     },
     sendChatMessage: {
         displayName: "Send chat message",
