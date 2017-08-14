@@ -31,6 +31,7 @@ app.loadConfig = (path = "./config/config") => {
     delete require.cache[require.resolve(path)];
     var oldConfig = app.config;
     app.config = require(path);
+    app.colours = [... new Set((app.config.colours || ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"]).map((c) => c.toUpperCase()))];
     if(!app.config.boardSize) app.config.boardSize = 1400; // default to 1400 if not specified in config
     if(oldConfig && (oldConfig.secret != app.config.secret || oldConfig.database != app.config.database || oldConfig.boardSize != app.config.boardSize)) {
         app.logger.log("Configuration", "We are stopping the Place server because the database URL, secret, and/or board image size has been changed, which will require restarting the entire server.");
@@ -45,6 +46,7 @@ app.loadConfig = (path = "./config/config") => {
     if(oldConfig && (oldConfig.port != app.config.port || oldConfig.onlyListenLocal != app.config.onlyListenLocal)) app.restartServer();
 }
 app.loadConfig();
+
 app.temporaryUserInfo = TemporaryUserInfo;
 app.responseFactory = (req, res) => new ResponseFactory(app, req, res);
 

@@ -401,11 +401,11 @@ var place = {
     dragStart: null,
     placing: false, shouldShowPopover: false,
     panX: 0, panY: 0,
-    DEFAULT_COLOURS: ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"],
     selectedColour: null, handElement: null, unlockTime: null, fullUnlockTime: null, secondTimer: null, lastUpdatedCoordinates: {x: null, y: null}, loadedImage: false,
     notificationHandler: notificationHandler, hashHandler: hashHandler,
     messages: null,
     isOutdated: false, lastPixelUpdate: null,
+    colours: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
         size = canvas.height;
@@ -471,6 +471,8 @@ var place = {
         $(this.userCountElement).show();
 
         this.getCanvasImage();
+        
+        this.determineFeatureAvailability();
 
         this.changeUserCount(null);
         this.loadUserCount().then((online) => {
@@ -498,6 +500,23 @@ var place = {
 
         this.dismissBtn = $("<button>").attr("type", "button").addClass("close").attr("data-dismiss", "alert").attr("aria-label", "Close");
         $("<span>").attr("aria-hidden", "true").html("&times;").appendTo(this.dismissBtn);
+    },
+
+    determineFeatureAvailability: function() {
+        $.get("/api/feature-availability").done((data) => {
+            this.hasTriedToFetchAvailability = true;
+            if(data.success) {
+                this.colours = data.availability.colours;
+                this.canPlaceCustomColours = data.availability.user && data.availability.user.canPlaceCustomColours;
+            } else {
+                setTimeout(() => this.determineFeatureAvailability(), 2500);
+            }
+            this.setupColours();
+        }).fail(() => {
+            this.hasTriedToFetchAvailability = true;
+            setTimeout(() => this.determineFeatureAvailability(), 2500);
+            this.setupColours();
+        })
     },
 
     getCanvasImage: function() {
@@ -706,12 +725,18 @@ var place = {
     },
 
     setupColours: function() {
+        var overlay = $("#availability-loading-modal");
         $(this.colourPaletteElement).remove(".colour-option");
         this.colourPaletteOptionElements = [];
-        this.DEFAULT_COLOURS.forEach((colour, index) => {
-            let elem = $("<div class=\"colour-option" + (colour.toLowerCase() == "#ffffff" ? " is-white" : "") + "\" style=\"background-color: " + colour + ";\" data-colour=\"" + (index + 1) + "\"></div>").appendTo(this.colourPaletteElement)[0];
-            this.colourPaletteOptionElements.push(elem);
-        });
+        if(this.colours) {
+            overlay.hide();
+            this.colours.forEach((colour, index) => {
+                let elem = $("<div class=\"colour-option" + (colour.toLowerCase() == "#ffffff" ? " is-white" : "") + "\" style=\"background-color: " + colour + ";\" data-colour=\"" + (index + 1) + "\"></div>").appendTo(this.colourPaletteElement)[0];
+                this.colourPaletteOptionElements.push(elem);
+            });
+        } else {
+            overlay.text(this.hasTriedToFetchAvailability ? "An error occurred while loading colours. Retrying…" : "Loading..").show();
+        }
     },
 
     handleResize: function() {
@@ -752,13 +777,13 @@ var place = {
     },
 
     _lerp: function(from, to, time) {
-        if (time > 100) time = 100
-        return from + (time / 100) * (to - from)
+        if (time > 100) time = 100;
+        return from + (time / 100) * (to - from);
     },
 
     _getCurrentZoom: function() {
-        if (!this.zooming.zooming) return this._getZoomMultiplier()
-        return this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime)
+        if (!this.zooming.zooming) return this._getZoomMultiplier();
+        return this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime);
     },
 
     _getZoomMultiplier: function() {
@@ -1199,11 +1224,11 @@ var place = {
             this.changePlacingModalVisibility(true);
             this.placing = true;
             $.post("/api/place", {
-                x: x, y: y, colour: this.selectedColour
+                x: x, y: y, hex: this.colours[this.selectedColour]
             }).done((data) => {
                 if(data.success) {
                     this.popoutController.loadActiveUsers();
-                    a.setPixel(a.DEFAULT_COLOURS[a.selectedColour], x, y);
+                    a.setPixel(a.colours[a.selectedColour], x, y);
                     a.changeSelectorVisibility(false);
                     if(data.timer) a.doTimer(data.timer);
                     else a.updatePlaceTimer();

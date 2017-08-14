@@ -380,6 +380,19 @@ UserSchema.statics.isTOSAgreementCurrentlyRequired = function() {
     return TOSManager.hasTOS();
 }
 
+UserSchema.methods.canPlaceCustomColours = function() {
+    return this.admin;
+}
+
+UserSchema.methods.canPlaceColour = function(hex, app) {
+    if(this.canPlaceCustomColours()) return true;
+    return app.colours.includes(hex.toUpperCase());
+}
+
+UserSchema.methods.getFeatureAvailability = function() {
+    return {canPlaceCustomColours: this.canPlaceCustomColours()};
+}
+
 UserSchema.plugin(dataTables, {
     totalKey: "recordsFiltered",
 });

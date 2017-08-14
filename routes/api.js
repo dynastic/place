@@ -6,6 +6,7 @@ const DeactivateAccountController = require("../controllers/DeactivateAccountCon
 const BoardImageController = require("../controllers/BoardImageController");
 const PlaceController = require("../controllers/PlaceController");
 const PixelInfoController = require("../controllers/PixelInfoController");
+const FeatureAvailabilityController = require("../controllers/FeatureAvailabilityController");
 const ChatController = require("../controllers/ChatController");
 const AdminActionsController = require("../controllers/AdminActionsController");
 const ModeratorUserController = require("../controllers/ModeratorUserController");
@@ -94,7 +95,9 @@ function APIRouter(app) {
     });
 
     router.get("/board-image", BoardImageController.getAPIBoardImage);
-
+    
+    router.get("/feature-availability", FeatureAvailabilityController.getAvailability);
+    
     router.post("/place", requireUser, PlaceController.postAPIPixel);
 
     router.get("/timer", requireUser, PlaceController.getAPITimer);
