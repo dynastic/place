@@ -15,6 +15,7 @@ function PublicRouter(app) {
         next();
     }
 
+    const whitelistedTOSPaths = ["/privacy", "/guidelines", "/privacy-policy", "/rules", "/community-guidelines"];
     router.use(function(req, res, next) {
         if (req.path == "/signout") return next(); // Allow the user to sign out
         if (req.user && !req.user.usernameSet && req.user.OAuthName) { // If the user has no username...
@@ -39,6 +40,7 @@ function PublicRouter(app) {
                 req.responseManager.sendRenderedResponse("errors/500");
             }
             if(!mustAcceptTOS) return next();
+            if(whitelistedTOSPaths.includes(req.path)) return next();
             if (req.method == "POST" && req.body.tosAccepted == "true") {
                 return req.user.updateTOSAcceptance().then(() => {
                     req.user.save().then(() => res.redirect(req.url)).catch(handleError);
@@ -62,7 +64,7 @@ function PublicRouter(app) {
         req.responseFactory.sendRenderedResponse("public/popout");
     });
 
-    router.get("/guidelines", GuidelineController.getGuidelines);
+    router.get(["/guidelines", "/rules", "/community-guidelines"], GuidelineController.getGuidelines);
     router.get(["/tos", "/terms-of-service"], TOSController.getTOS);
     router.get(["/privacy", "/privacy-policy"], TOSController.getPrivacyPolicy);
 
