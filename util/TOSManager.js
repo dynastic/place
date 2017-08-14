@@ -34,7 +34,7 @@ class TOSManager {
 
     getCurrentTOSVersion(overrideCache = false) {
         return new Promise((resolve, reject) => {
-            if(this.cachedTOSVersion != null || !overrideCache) return resolve(this.cachedTOSVersion);
+            if(this.cachedTOSVersion != null && !overrideCache) return resolve(this.cachedTOSVersion);
             this.getTOSContent().then((content) => resolve(md5(content))).catch((err) => reject(err));
         })
     }
