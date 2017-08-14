@@ -38,7 +38,7 @@ function APIRouter(app) {
                 code: "forced_password_reset"
             }
         });
-        if(req.user === null) return next();
+        if(req.user == null) return next();
         req.user.getMustAcceptTOS().then((mustAcceptTOS) => {
             if(!mustAcceptTOS) return next();
             res.status(401).json({
