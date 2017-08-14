@@ -18,7 +18,7 @@ exports.postSignUp = (req, res, next) => {
     fs.exists(__dirname + "/../config/community_guidelines.md", (exists) => {
         if (!req.body.username || !req.body.password || !req.body.passwordverify) return sendError("Please fill out all the fields.")
         if (req.body.password != req.body.passwordverify) return sendError("The passwords you entered did not match.");
-        if (!req.body.agreeToGuidelines && exists) return sendError("You must agree to the community guidelines to use this service.");
+        if (!req.body.agreeToGuidelines && exists) return sendError("You must agree to the Terms of Service and community guidelines to use this service.");
         if(req.place.enableCaptcha) {
             req.place.recaptcha.verify(req, (error) => {
                 if(error) return sendError("Please fill in the captcha properly.");
