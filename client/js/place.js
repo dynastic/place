@@ -1149,6 +1149,7 @@ var place = {
 
     deselectColour: function() {
         this.selectedColour = null;
+        $("body").removeClass("picker-showing");
         $(this.handElement).remove();
         $(this.colourPaletteOptionElements).removeClass("selected");
         $(this.zoomController).removeClass("selected");
