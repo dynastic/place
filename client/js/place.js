@@ -760,7 +760,7 @@ var place = {
         $("#colour-picker-hex-value").text(newColour.toUpperCase());
         if(newColour.toLowerCase() == "#ffffff") elem.addClass("is-white");
         else elem.removeClass("is-white");
-        this.selectColour(1);
+        this.selectColour(1, false);
     },
 
     handleResize: function() {
@@ -1136,9 +1136,9 @@ var place = {
         else $(this.placingOverlay).removeClass("shown");
     },
 
-    selectColour: function(colourID) {
+    selectColour: function(colourID, hideColourPicker = true) {
         if(this.isViewingFullMap()) return;
-        this.deselectColour();
+        this.deselectColour(hideColourPicker);
         this.selectedColour = colourID - 1;
         let elem = this.colourPaletteOptionElements[this.selectedColour];
         this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
@@ -1147,9 +1147,9 @@ var place = {
         $(this.gridHint).show();
     },
 
-    deselectColour: function() {
+    deselectColour: function(hideColourPicker = true) {
         this.selectedColour = null;
-        $("body").removeClass("picker-showing");
+        if(hideColourPicker) $("body").removeClass("picker-showing");
         $(this.handElement).remove();
         $(this.colourPaletteOptionElements).removeClass("selected");
         $(this.zoomController).removeClass("selected");
