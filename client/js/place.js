@@ -40,8 +40,10 @@ var SignInDialogController = {
             $.post("/api" + call, data).done(function(data) {
                 if(data.success) {
                     var hash = hashHandler.getHash();
-                    if(hash["redirectURL"] != null) {
-                        window.location = hash["redirectURL"];
+                    var redirectURL = hash["redirectURL"];
+                    const absoluteURLRegex = new RegExp('^(?:[a-z]+:)?(//)?', 'i');
+                    if(redirectURL && redirectURL != "/" && !absoluteURLRegex.test(redirectURL)) {
+                        window.location = redirectURL;
                     } else {
                         window.location.reload();
                     }
