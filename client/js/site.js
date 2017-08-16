@@ -1,3 +1,7 @@
+$.ajaxSetup({
+	headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+});
+
 // Mobile Safari in standalone mode - from https://gist.github.com/kylebarrow/1042026
 if(("standalone" in window.navigator) && window.navigator.standalone){
 
@@ -19,5 +23,5 @@ if(("standalone" in window.navigator) && window.navigator.standalone){
 			document.location.href = noddy.href;
 		}
 	
-	},false);
+	}, false);
 }
