@@ -186,10 +186,19 @@ UserSchema.statics.findByUsername = function(username, callback = null) {
     }, callback)
 }
 
+UserSchema.statics.getPasswordError = function(password) {
+    return password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/) ? null : "That password cannot be used. Passwords are required to contain at least one digit, one uppercase letter, one lowercase letter, and be at least 8 characters in length.";
+}
+
 UserSchema.statics.register = function(username, password, app, callback, OAuthID, OAuthName) {
     if (!OAuthID && !this.isValidUsername(username)) return callback(null, {
         message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.",
         code: "username_taken"
+    });
+    var passwordError = this.getPasswordError(password);
+    if(passwordError) return callback(null, {
+        message: passwordError,
+        code: "password_validation"
     });
 
     var Schema = this;
