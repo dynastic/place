@@ -10,10 +10,10 @@ mixin renderDashboardStat(id, name, underName, moreInfo)
             if moreInfo
                 br
                 small #{moreInfo}
-block dependencies
+block adminDependencies
     - var js = ["/js/build/admin_dashboard.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"];
     - var jsSnippets = [`loadRecentActionsIntoContainer($("#actions-ctn"), 10, false, false)`];
-block content
+block adminContent
     h1.page-header Dashboard
     // Status Updates
     .row.placeholders

@@ -1,31 +1,32 @@
-- var pageTitle = "Pick a Username";
-- var css = ["/css/signin.css"];
-include ../header
-- if (typeof username === "undefined") username = "";
-- if (typeof error === "undefined") error = null;
-.container
-    form.form-signin(method="POST", action="/pick-username")
-        h2.form-signin-heading Pick a Username
-        label.sr-only(for="inputUsername") Username
-        input.form-control#inputUsername(type="text", placeholder="Username", name="username", value=username, required, autofocus, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false")
-        if captcha
-            .
-                !{renderCaptcha()}
-        if hasCommunityGuidelines || hasTOS
-            .checkbox
-                label
-                    input(type="checkbox", name="agreeToGuidelines")
-                    span
-                        | I agree to abide by the 
-                        if hasTOS
-                            a(href="/tos") Terms of Service
-                        if hasTOS && hasCommunityGuidelines
-                            |  and 
-                        if hasCommunityGuidelines
-                            a(href="/guidelines") Community Guidelines
-                        | .
-        button.btn.btn-lg.btn-primary.btn-block(type="Submit") Save
-        if error
-            br
-            .alert.alert-danger #[strong Uh oh!] #{error.message}
-include ../footer
+extends ../layout
+block dependencies
+    - var pageTitle = "Pick a Username";
+    - var css = ["/css/signin.css"];
+block content
+    - if (typeof username === "undefined") username = "";
+    - if (typeof error === "undefined") error = null;
+    .container
+        form.form-signin(method="POST", action="/pick-username")
+            h2.form-signin-heading Pick a Username
+            label.sr-only(for="inputUsername") Username
+            input.form-control#inputUsername(type="text", placeholder="Username", name="username", value=username, required, autofocus, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false")
+            if captcha
+                .
+                    !{renderCaptcha()}
+            if hasCommunityGuidelines || hasTOS
+                .checkbox
+                    label
+                        input(type="checkbox", name="agreeToGuidelines")
+                        span
+                            | I agree to abide by the 
+                            if hasTOS
+                                a(href="/tos") Terms of Service
+                            if hasTOS && hasCommunityGuidelines
+                                |  and 
+                            if hasCommunityGuidelines
+                                a(href="/guidelines") Community Guidelines
+                            | .
+            button.btn.btn-lg.btn-primary.btn-block(type="Submit") Save
+            if error
+                br
+                .alert.alert-danger #[strong Uh oh!] #{error.message}

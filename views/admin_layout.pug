@@ -1,6 +1,4 @@
-- if (typeof pageTitle === "undefined") pageTitle = null;
-- if (typeof user === "undefined") user = null;
-- var userAdmin = user ? user.admin : false;
+extends layout
 mixin renderNavItem(name, itemPath)
     var isCurrentPage = itemPath == path;
     li(class=(isCurrentPage ? "active": ""))
@@ -10,23 +8,25 @@ mixin renderNavItem(name, itemPath)
             if isCurrentPage
                 span.sr-only (current)
 block dependencies
-- var pageTitle = !!pageTitle ? pageTitle + " &middot; Admin" : "Admin";
-- var css = ["/css/dashboard.css", "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css"].concat(typeof css === "undefined" ? [] : css);
-- var isAdmin = true;
-include header
-.container-fluid
-    .row
-        .col-sm-3.col-md-2.sidebar
-            ul.nav.nav-sidebar
-                +renderNavItem("Dashboard", "/admin/")
-                +renderNavItem("Recent Actions", "/admin/actions")
-                +renderNavItem("Moderator Log", "/admin/log")
-            ul.nav.nav-sidebar
-                +renderNavItem("Users", "/admin/users")
-                +renderNavItem("Reports", "/admin/reports")
-                +renderNavItem("Pixels", "/admin/pixels")
-        .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
-            block content
-- var isAdmin = true;
-- var js = ["https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"].concat(typeof js === "undefined" ? [] : js);
-include footer
+    block adminDependencies
+    - if (typeof pageTitle === "undefined") pageTitle = null;
+    - if (typeof user === "undefined") user = null;
+    - var userAdmin = user ? user.admin : false;
+    - var pageTitle = !!pageTitle ? pageTitle + " &middot; Admin" : "Admin";
+    - var css = ["/css/dashboard.css", "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css"].concat(typeof css === "undefined" ? [] : css);
+    - var js = ["https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"].concat(typeof js === "undefined" ? [] : js);
+    - var isAdmin = true;
+block content
+    .container-fluid
+        .row
+            .col-sm-3.col-md-2.sidebar
+                ul.nav.nav-sidebar
+                    +renderNavItem("Dashboard", "/admin/")
+                    +renderNavItem("Recent Actions", "/admin/actions")
+                    +renderNavItem("Moderator Log", "/admin/log")
+                ul.nav.nav-sidebar
+                    +renderNavItem("Users", "/admin/users")
+                    +renderNavItem("Reports", "/admin/reports")
+                    +renderNavItem("Pixels", "/admin/pixels")
+            .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
+                block adminContent

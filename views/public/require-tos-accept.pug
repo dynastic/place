@@ -1,14 +1,14 @@
-include ../header
-.container.norctn
-    h1 Hey, #{user.name}!
-    p.lead.text-muted We need something from you before you can continue to Place 2.0.
-    p Our #[a(href="/tos") Terms of Service] have changed since the last time you used Place 2.0, so before we can let you use Place 2.0 again, you'll need to accept the new Terms of Service. Please read the provided Terms of Service and indicate that you either agree or disagree at the bottom of the page.
-    hr
-    div !{md}
-    hr
-    p.text-muted If you agree with the new Terms of Service, click #[strong Agree] to continue to Place 2.0. If you do not agree to the new Terms of Service, you may not use Place 2.0, click #[strong Disagree] to be signed out.
-    form(method="POST")
-        input(type="hidden", name="tosAccepted", value="true")
-        .
-            #[input.btn.btn-success(type="submit", value="Agree")] #[a.btn.btn-danger(href="/signout?redirectURL=" + redirectURLPart) Disagree]
-include ../footer
+extends ../layout
+block content
+    .container.norctn
+        h1 Hey, #{user.name}!
+        p.lead.text-muted We need something from you before you can continue to Place 2.0.
+        p Our #[a(href="/tos") Terms of Service] have changed since the last time you used Place 2.0, so before we can let you use Place 2.0 again, you'll need to accept the new Terms of Service. Please read the provided Terms of Service and indicate that you either agree or disagree at the bottom of the page.
+        hr
+        div !{md}
+        hr
+        p.text-muted If you agree with the new Terms of Service, click #[strong Agree] to continue to Place 2.0. If you do not agree to the new Terms of Service, you may not use Place 2.0, click #[strong Disagree] to be signed out.
+        form(method="POST")
+            input(type="hidden", name="tosAccepted", value="true")
+            .
+                #[input.btn.btn-success(type="submit", value="Agree")] #[a.btn.btn-danger(href="/signout?redirectURL=" + redirectURLPart) Disagree]

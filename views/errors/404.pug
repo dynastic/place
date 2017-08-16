@@ -1,7 +1,8 @@
-- var pageTitle = "Page not found"
-include ../header
-.container.norctn
-    h1 Page not found!
-    p.text-muted.lead We're sorry, but we could not find that page on our server. It may have been moved, deleted, or never existed in the first place. If you believe this is in error, please #[a(href="mailto:hello@dynastic.co") contact us].
-    a(href="/") &laquo; Go to home page
-include ../footer
+extends ../layout
+block dependencies
+    - var pageTitle = "Page not found"
+block content
+    .container.norctn
+        h1 Page not found!
+        p.text-muted.lead We're sorry, but we could not find that page on our server. It may have been moved, deleted, or never existed in the first place. If you believe this is in error, please #[a(href="mailto:hello@dynastic.co") contact us].
+        a(href="/") &laquo; Go to home page
