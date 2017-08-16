@@ -13,6 +13,7 @@ const ModeratorUserController = require("../controllers/ModeratorUserController"
 const SignInController = require("../controllers/SignInController");
 const SignUpController = require("../controllers/SignUpController");
 const AccountPageController = require("../controllers/AccountPageController");
+const TOTPSetupController = require("../controllers/TOTPSetupController");
 
 function APIRouter(app) {
     let router = express.Router();
@@ -82,6 +83,8 @@ function APIRouter(app) {
     router.post("/signup", signupRatelimit.prevent, SignUpController.postSignUp);
 
     router.post("/identify", JWTController.identifyAPIUser);
+
+    router.route("/user/totp-setup", requireUser).get(TOTPSetupController.getTOTPSetup).post(TOTPSetupController.postTOTPSetup);
 
     router.post("/user/change-password", requireUser, PasswordChangeController.postSelfServePassword);
 

@@ -12,6 +12,7 @@ block dependencies
     -    $("#profile-mod-tools-ctn").html(renderUserActions(${JSON.stringify(profileUser)}));
     -  });`];
 block content
+    - var has2FA = profileUser.twoFactorAuthEnabled();
     if pixel
         a(href=`/#x=${pixel.point.x}&y=${pixel.point.y}`)
             .profile-header(style=`background-position: calc(50% - ${(pixel.point.x - (config.boardSize / 2)) * boardImageCorrection}px) ${-(pixel.point.y * boardImageCorrection) + 175}px;`)
@@ -50,17 +51,17 @@ block content
                         . 
                             .
             //- Disable this section for OAuth users because they cannot deactivate or change passwords at this time.
-            if isSelf && !profileUser.oAuth
+            if isSelf && !profileUser.isOauth
                 hr
                 h1 My account
-                .
-                    #[a.btn.btn-info(data-toggle="modal", data-target="#changePassword") Change Password] #[a.btn.btn-danger(data-toggle="modal", data-target="#deactivateAccount") Deactivate Account]
+                | #[a.btn.btn-success(data-toggle="modal", id=has2FA ? "disableTwoFactorAuth" : "", data-target=has2FA ? "" : "#twoFactorAuth") #{has2FA ? "Disable" : "Enable"} Two-Factor Authentication]
+                | #[a.btn.btn-info(data-toggle="modal", data-target="#changePassword") Change Password]
+                | #[a.btn.btn-danger(data-toggle="modal", data-target="#deactivateAccount") Deactivate Account]
             if user && user.canPerformActionsOnUser(profileUser)
                 hr
                 h1 Moderator tools
                 #profile-mod-tools-ctn
-
-    if isSelf && !profileUser.oAuth
+    if isSelf && !profileUser.isOauth
         .modal.fade#changePassword(tabindex="-1", role="dialog")
             .modal-dialog(role="document")
                 .modal-content

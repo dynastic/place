@@ -83,6 +83,10 @@ var UserSchema = new Schema({
     lastAcceptedTOSRevision: {
         type: String,
         required: false
+    },
+    totpSecret: {
+        type: String,
+        required: false
     }
 });
 
@@ -376,6 +380,10 @@ UserSchema.methods.getMustAcceptTOS = function() {
             }).catch((err) => reject(err));
         }).catch((err) => reject(err));
     });
+}
+
+UserSchema.methods.twoFactorAuthEnabled = function() {
+    return this.totpSecret != null;
 }
 
 UserSchema.methods.updateTOSAcceptance = function() {

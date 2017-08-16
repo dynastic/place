@@ -30,11 +30,14 @@ module.exports = function(passport, app) {
     }));
 
     passport.use(new LocalStrategy(function(username, password, done) {
+        function rejectCredentials() {
+            done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
+        }
         User.findByUsername(username, function(err, user) {
             if (err) return done(err, false);
             if (user) {
                 // Don't allow Oauth logins from normal login area.
-                if(user.isOauth === true) return done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
+                if(user.isOauth === true) return rejectCredentials();
                 if (user.loginError()) return done(null, false, { error: user.loginError() });
               
                 if(user.passwordResetKey) {
@@ -45,11 +48,11 @@ module.exports = function(passport, app) {
                             ActionLogger.log(app, "signIn", user, null, {method: "normal"});
                             return done(null, user);
                         }
-                        done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
+                        rejectCredentials();
                     });
                 }
             }
-            done(null, false, { error: { message: "Incorrect username or password provided.", code: "invalid_credentials" } });
+            rejectCredentials();
         });
     }));
 

@@ -50,8 +50,10 @@
     "passport-twitter": "^1.0.4",
     "pug": "^2.0.0-rc.3",
     "pump": "^1.0.2",
+    "qrcode": "^0.9.0",
     "raven": "^2.1.0",
     "socket.io": "^1.7.3",
+    "speakeasy": "^2.0.0",
     "stream-file-archive": "^1.1.3"
   }
 }
