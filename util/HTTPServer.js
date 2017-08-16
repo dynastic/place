@@ -2,6 +2,8 @@ const express = require("express");
 const passport = require("passport");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const helmet = require("helmet");
+const csurf = require("csurf");
 const User = require("../models/user");
 const session = require("cookie-session");
 const fs = require("fs");
@@ -14,6 +16,8 @@ function HTTPServer(app) {
     // Setup for parameters and bodies
     server.use(bodyParser.urlencoded({extended: false}));
     server.use(bodyParser.json());
+    
+    server.use(helmet());
 
     // Set rendering engine
     server.set("view engine", "pug");
@@ -45,6 +49,12 @@ function HTTPServer(app) {
             secret: app.config.secret,
             name: "session"
         }));
+
+        server.use(csurf());
+        server.use((req, res, next) => {
+            res.locals._csrf = req.csrfToken();
+            next();
+        })
 
         if (fs.existsSync(path.join(__dirname, "../util/", "legit.js"))) {
             const legit = require("../util/legit");
@@ -106,6 +116,9 @@ function HTTPServer(app) {
         if (server.get("env") !== "development") {
             // Production error handler, no stack traces shown to user
             server.use((err, req, res, next) => {
+                if (err.code === 'EBADCSRFTOKEN') {
+                    res.status(403).json({ success: false, error: { message: 'you tried, have a star.', code: 'invalid CSRF token' }});
+                }
                 res.status(err.status || 500);
                 app.reportError(err);
                 if (req.accepts("json") && !req.accepts("html")) return res.send({ success: false, error: { message: "An unknown error occured.", code: "internal_server_error" } });

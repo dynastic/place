@@ -51,6 +51,7 @@ html(lang=en)
     meta(property="twitter:card", content="summary")
     meta(property="twitter:title", content=`Place 2.0${pageTitle != null ? `: ${pageTitle}` : ""}`)
     meta(property="twitter:image", content="/img/apple-touch-icon.png")
+    meta(name="csrf-token" content=_csrf)
     if pageDesc
       meta(property="og:description", content=pageDesc)
       meta(property="twitter:description", content=pageDesc)

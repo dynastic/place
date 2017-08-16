@@ -65,6 +65,7 @@ block content
             .modal-dialog(role="document")
                 .modal-content
                     form.form-horizontal#changePasswordForm
+                        input(type='hidden', name='_csrf', value=_csrf)
                         .modal-header
                             button.close(type="button", data-dimiss="modal", aria-label="Close"): span(aria-hidden="true") &times;
                             h4.modal-title Change Password
@@ -87,6 +88,7 @@ block content
             .modal-dialog(role="document")
                 .modal-content
                     form.form-horizontal#deactivateAccountForm
+                        input(type='hidden', name='_csrf', value=_csrf)
                         .modal-header
                             button.close(type="button", data-dimiss="modal", aria-label="Close"): span(aria-hidden="true") &times;
                             h4.modal-title Deactivate Account

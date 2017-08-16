@@ -7,6 +7,7 @@ block content
     - if (typeof error === "undefined") error = null;
     .container
         form.form-signin(method="POST", action="/pick-username")
+            input(type='hidden', name='_csrf', value=_csrf)
             h2.form-signin-heading Pick a Username
             label.sr-only(for="inputUsername") Username
             input.form-control#inputUsername(type="text", placeholder="Username", name="username", value=username, required, autofocus, autocomplete="off", autocorrect="off", autocapitalize="off", spellcheck="false")

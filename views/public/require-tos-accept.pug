@@ -9,6 +9,7 @@ block content
         hr
         p.text-muted If you agree with the new Terms of Service, click #[strong Agree] to continue to Place 2.0. If you do not agree to the new Terms of Service, you may not use Place 2.0, click #[strong Disagree] to be signed out.
         form(method="POST")
+            input(type='hidden', name='_csrf', value=_csrf)
             input(type="hidden", name="tosAccepted", value="true")
             .
                 #[input.btn.btn-success(type="submit", value="Agree")] #[a.btn.btn-danger(href="/signout?redirectURL=" + redirectURLPart) Disagree]

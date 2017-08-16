@@ -6,6 +6,7 @@ block dependencies
 block content
     .container
         form.form-signin(method="POST", action="/force-pw-reset")
+            input(type='hidden', name='_csrf', value=_csrf)
             h2.form-signin-heading Reset your Password
             p You are required to change your password to continue using Place 2.0.
             br
