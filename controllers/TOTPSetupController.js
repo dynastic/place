@@ -1,5 +1,5 @@
 const speakeasy = require("speakeasy");
-const QRCode = require("QRCode");
+const QRCode = require("qrcode");
 
 exports.getTOTPSetup = function(req, res, next) {
     if(req.user.twoFactorAuthEnabled()) return res.status(403).json({success: false, error: {message: "You already have two-factor authentication set up on your account.", code: "totp_already_setup"}});
