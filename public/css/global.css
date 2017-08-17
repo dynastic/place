@@ -810,3 +810,8 @@ table.table.table-contained, td {
 .align-center {
     text-align: center;
 }
+
+.sentry-error-embed-wrapper {
+    top: 50px!important;
+    -webkit-overflow-scrolling: touch!important;
+}
