@@ -146,13 +146,10 @@ var popoutController = {
     
     loadChatMessages: function() {
         var app = this;
-        $.get("/api/chat").done(function(response) {
-            if(!response.success || !response.messages) console.log("Failed to load chat messages.");
+        placeAjax.get("/api/chat", null, null).then((response) => {
             app.messages = response.messages;
             app.layoutMessages();
-        }).fail(function() {
-            console.log("Failed to load chat messages.");
-        });
+        }).catch((err) => console.log("Failed to load chat messages."));
     },
 
     layoutMessages: function(alwaysScrollToBottom = true) {
@@ -237,10 +234,6 @@ var popoutController = {
     },
 
     sendChatMessage: function() {
-        var parseError = function(response) {
-            var data = typeof response.error === "object" ? response : (typeof response.error().responseJSON === "undefined" ? null : response.error().responseJSON);
-            return data.error.message ? data.error.message : "An error occurred while trying to send your chat message.";
-        }
         var app = this;
         var input = $("#chat-input-field");
         var btn = $("#chat-send-btn");
@@ -249,35 +242,24 @@ var popoutController = {
         console.log()
         var coords = this.place.getCoordinates();
         var text = input.val();
-        $.post("/api/chat", {
-            text: text,
-            x: coords.x,
-            y: coords.y
-        }).done(function(response) {
-            if(!response.success) return alert(parseError(response));
+        placeAjax.post("/api/chat", {text: text, x: coords.x, y: coords.y}, "An unknown error occurred while trying to send your chat message.", () => {
+            btn.text("Send").removeAttr("disabled");
+        }).then((response) => {
             app.ignoreChatFocus = true;
             app.loadActiveUsers();
             input.val("");
             input.focus();
             if(response.message) app.addChatMessage(response.message);
-        }).fail(function(response) {
-            alert(parseError(response));
-        }).always(function() {
-            btn.text("Send").removeAttr("disabled");
-        })
+        }).catch(() => {});
     },
 
     loadLeaderboard: function() {
         var app = this;
-        $.get("/api/leaderboard").done(function(response) {
-            if(!response.success || !response.leaderboard) {
-                console.log("Failed to load leaderboard data.");
-                return app.showTextOnTab("leaderboard", "Failed to load");
-            }
+        placeAjax.get("/api/leaderboard", null, null).then((response) => {
             app.leaderboard = response.leaderboard;
             if(response.lastUpdated) app.leaderboardUpdated = new Date(response.lastUpdated);
             app.layoutLeaderboard();
-        }).fail(function() {
+        }).catch((err) => {
             console.log("Failed to load leaderboard data.");
             app.showTextOnTab("leaderboard", "Failed to load");
         });
@@ -323,14 +305,10 @@ var popoutController = {
 
     loadActiveUsers: function() {
         var app = this;
-        $.get("/api/active-now").done(function(response) {
-            if(!response.success || !response.active) {
-                console.error("Failed to load active user data.");
-                return app.showTextOnTab("active-users", "Failed to load");
-            }
+        placeAjax.get("/api/active-now", null, null).then((response) => {
             app.activeUsers = response.active;
             app.layoutActiveUsers();
-        }).fail(function() {
+        }).catch((err) => {
             console.error("Failed to load active user data.");
             app.showTextOnTab("active-users", "Failed to load");
         });

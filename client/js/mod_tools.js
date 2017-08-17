@@ -60,9 +60,8 @@ var actions = {
             getRequestData: function(elem) {
                 return new Promise((resolve, reject) => {
                     var id = elem.parent().attr("data-user-id");
-                    if(!id) id = elem.parent().parent().attr("data-user-id")
-                    $.get("/api/mod/user_notes", {id: id}).done(function(res) {
-                        if(!res.success || res.userNotes == null) return reject("Couldn't fetch user notes");
+                    if(!id) id = elem.parent().parent().attr("data-user-id");
+                    placeAjax.get("/api/mod/user_notes", {id: id}, null).then((res) => {
                         bootbox.prompt({
                             title: "Edit user notes",
                             inputType: "textarea",
@@ -82,7 +81,7 @@ var actions = {
                                 }
                             },
                         });
-                    }).fail(() => reject("Couldn't fetch user notes"));
+                    }).catch((err) => reject("Couldn't fetch user notes: " + err));
                 })
             },
             buttonText: (data) => "Edit User Notes",
@@ -185,11 +184,6 @@ var updateUserDropdowns = function(user) {
 }
 
 $("body").on("click", ".user-action-btn", function() {
-    function handleError(data) {
-        var error = "An unknown error occurred."
-        if(data && typeof data.error !== "undefined" && data.error.message) error = data.error.message;
-        alert("Couldn't perform action on user: " + error);
-    }
     var userID = $(this).parent().data("user-id");
     if(!userID) userID = $(this).parent().parent().data("user-id");
     var action = actions.user[$(this).data("user-action")];
@@ -199,31 +193,25 @@ $("body").on("click", ".user-action-btn", function() {
     function continueWithRequestData(data) {
         var originalText = elem.html();
         elem.addClass("disabled").html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
-        $.ajax({
+        placeAjax.ajax({
             url:`/api/${action.url}/?id=${userID}`,
             method: method,
             data: data
-        }).done(function(data) {
-            if(!data.success || !data.user) return handleError(data);
+        }, "An unknown error occurred while trying to perform actions on user.", () => {
+            elem.removeClass("disabled");
+            if(action.callbackModifiesText === false) elem.html(originalText);
+        }).then((data) => {
             if(typeof action.callback === "function") action.callback(data.user, elem);
             setActionDataOnElement(data.user, elem, action);
             updateUserDropdowns(data.user);
             if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
-        }).fail((res) => handleError(typeof res.responseJSON === "undefined" ? null : res.responseJSON)).always(function() {
-            elem.removeClass("disabled");
-            if(action.callbackModifiesText === false) elem.html(originalText);
-        });
+        }).catch(() => {});
     }
     if(typeof action.getRequestData === "function") action.getRequestData($(this)).then((d) => continueWithRequestData(d)).catch((err) => { if(err) window.alert(err) });
     else continueWithRequestData({});
 });
 
 $("body").on("click", ".server-action-btn", function() {
-    function handleError(data) {
-        var error = "An unknown error occurred."
-        if(data && typeof data.error !== "undefined" && data.error.message) error = data.error.message;
-        alert("Couldn't perform action: " + error);
-    }
     var action = actions.server[$(this).data("server-action")];
     var data = {};
     if(typeof action.getRequestData === "function") data = action.getRequestData($(this));
@@ -232,34 +220,27 @@ $("body").on("click", ".server-action-btn", function() {
     $(this).addClass("disabled");
     $(this).html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
     var elem = $(this);
-    $.get(`/api/${action.url}/`, data).done(function(data) {
-        if(!data.success) return handleError(data);
-        action.callback(data, elem);
-        if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
-    }).fail(function(res) {
-        handleError(typeof res.responseJSON === "undefined" ? null : res.responseJSON);
-        if(action.callbackModifiesText !== false) elem.html(originalText);
-    }).always(function() {
+    placeAjax.get(`/api/${action.url}/`, data, "Couldn't perform action.", () => {
         elem.removeClass("disabled");
         if(action.callbackModifiesText === false) elem.html(originalText);
-    });
+    }).then((data) => {
+        action.callback(data, elem);
+        if(typeof action.getAttributes === "function") elem.attr(action.getAttributes(data));
+    }).catch(() => {});
 });
 
 
 $("#broadcastForm").submit(function(e) {
     e.preventDefault();
-    $.post("/api/admin/broadcast", {
+    placeAjax.post("/api/admin/broadcast", {
         title: $(this).find("#inputBroadcastTitle").val(),
         message: $(this).find("#inputBroadcastMessage").val(),
         style: $(this).find("#inputBroadcastStyle").val(),
         timeout: $(this).find("#inputBroadcastTimeout").val()
-    }).done(function(data) {
-        if(!data.success) return alert("Couldn't send broadcast");
+    }, "An unknown error occurred while trying to send your broadcast.").then((data) => {
         $("#broadcastModal").modal("hide");
-        alert("Successfully sent out broadcast to all connected clients.");
-    }).fail(function() {
-        alert("Couldn't send broadcast");
-    })
+        window.alert("Successfully sent out broadcast to all connected clients.");
+    }).catch(() => {});
 })
 
 function getRowForAction(action) {
@@ -318,14 +299,11 @@ function getRowForAction(action) {
 }
 
 function fetchActions(lastID, modOnly, limit, firstID, callback) {
-    $.get("/api/mod/actions", {lastID: lastID, firstID: firstID, limit: limit, modOnly: modOnly}).done(function(data) {
-        if(!data.success || !data.actions || !data.actionTemplates) return callback(null);
+    placeAjax.get("/api/mod/actions", {lastID: lastID, firstID: firstID, limit: limit, modOnly: modOnly}, null).then((data) => {
         actionTemplates = data.actionTemplates;
         callback(data.actions, data.lastID);
         $(".timeago").timeago();
-    }).fail(function() {
-        callback(null, null);
-    });
+    }).catch(() => callback(null));
 }
 
 function addToContainerForResponse(container, data, lastID, modOnly, limit, allowsShowMore) {

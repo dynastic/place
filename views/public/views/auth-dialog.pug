@@ -9,7 +9,6 @@
                     h1 Become a member
                     p.subhead Join the Place 2.0 community today to start placing.
                 form.form-signin(action="/signup")
-                    input(type='hidden', name='_csrf', value=_csrf)
                     label.sr-only(for="inputUsername") Username
                     input.form-control#inputUsername(type="text", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalizae="off", spellcheck="false")
                     label.sr-only(for="inputPassword") Password
@@ -41,7 +40,6 @@
                     h1 Welcome back
                     p.subhead Sign in to your account to continue placing and save your stats.
                 form.form-signin(action="/signin")
-                    input(type='hidden', name='_csrf', value=_csrf)
                     label.sr-only(for="inputUsername") Username
                     input.form-control#inputUsername(type="text", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalizae="off", spellcheck="false")
                     label.sr-only(for="inputPassword") Password
@@ -49,6 +47,18 @@
                     .send-section
                         button.btn.btn-popping(type="submit") Sign in
                         include social-buttons
+            div.hides-switchers(tab-name="2fa-auth")
+                .heading
+                    span.site Place 2.0
+                    h1 Two-factor Authentication
+                    p.subhead This account is secured with two-factor authentication. To continue, enter the token from your two-factor authentication app.
+                form.form-signin(action="/signin")
+                    input.form-control#inputUsername2FA(type="hidden", name="username")
+                    input.form-control#inputPassword2FA(type="hidden", name="password")
+                    label.sr-only(for="inputTotpToken") Authentication Token
+                    input.form-control#inputTotpToken(maxlength="6", inputmode="numeric", pattern="[0-9]{6}", name="totpToken", placeholder="Authentication Token", required)
+                    .send-section
+                        button.btn.btn-popping(type="submit") Continue
         .switchers
             .active(tab-name="sign-up")
                 div

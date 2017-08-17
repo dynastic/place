@@ -324,8 +324,10 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
 
 .dialog > .pages > div {
     padding: 40px;
-    padding-bottom: 25px;
     display: none;
+}
+.dialog > .pages > div:not(.hides-switchers) {
+    padding-bottom: 25px;
 }
 .dialog > .switchers > div > div {
     display: flex;
@@ -352,7 +354,7 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
 .dialog > .pages > div.active {
     display: block;
 }
-.dialog > .switchers > div.active {
+.dialog > .switchers > div.active, .dialog > .switchers.hidden {
     display: none;
 }
 
@@ -799,4 +801,12 @@ table.table.table-contained, td {
     content: "";
     display: block;
     clear: both;
+}
+
+.breaks {
+    word-wrap: break-word;
+}
+
+.align-center {
+    text-align: center;
 }

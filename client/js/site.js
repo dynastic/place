@@ -2,6 +2,42 @@ $.ajaxSetup({
 	headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
 });
 
+const defaultErrorMessage = "An unknown error occurred while trying to make that request.";
+var placeAjax = {
+	ajax: function(data, defaultErrorMessage = defaultErrorMessage, alwaysCallback = null) {
+		return new Promise((resolve, reject) => {
+			function handleError(response) {
+				if(defaultErrorMessage) window.alert(response && response.error ? (response.error.message || defaultErrorMessage) : defaultErrorMessage);
+				reject(response ? response.error : null);
+			}
+			$.ajax(data).done(function(response) {
+				if(!response.success) return handleError(response);
+				resolve(response);
+			}).fail((res) => handleError(typeof res.responseJSON === "undefined" ? null : res.responseJSON)).always(function() {
+				if(typeof alwaysCallback == "function") alwaysCallback();
+			})
+		});
+	},
+	get: function(url, data = null, defaultErrorMessage = defaultErrorMessage, alwaysCallback = null) {
+		return this.ajax({url: url, data: data, method: "GET"}, defaultErrorMessage, alwaysCallback);
+	},
+	post: function(url, data = null, defaultErrorMessage = defaultErrorMessage, alwaysCallback = null) {
+		return this.ajax({url: url, data: data, method: "POST"}, defaultErrorMessage, alwaysCallback);
+	},
+	put: function(url, data = null, defaultErrorMessage = defaultErrorMessage, alwaysCallback = null) {
+		return this.ajax({url: url, data: data, method: "PUT"}, defaultErrorMessage, alwaysCallback);
+	},
+	patch: function(url, data = null, defaultErrorMessage = defaultErrorMessage, alwaysCallback = null) {
+		return this.ajax({url: url, data: data, method: "PATCH"}, defaultErrorMessage, alwaysCallback);
+	},
+	delete: function(url, data = null, defaultErrorMessage = defaultErrorMessage, alwaysCallback = null) {
+		return this.ajax({url: url, data: data, method: "DELETE"}, defaultErrorMessage, alwaysCallback);
+	},
+	options: function(url, data = null, defaultErrorMessage = defaultErrorMessage, alwaysCallback = null) {
+		return this.ajax({url: url, data: data, method: "OPTIONS"}, defaultErrorMessage, alwaysCallback);
+	}
+}
+
 // Mobile Safari in standalone mode - from https://gist.github.com/kylebarrow/1042026
 if(("standalone" in window.navigator) && window.navigator.standalone){
 

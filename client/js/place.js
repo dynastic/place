@@ -27,41 +27,40 @@ var SignInDialogController = {
             }
         })
         me.dialog.find("form.form-signin").submit(function(e) {
+            e.preventDefault();
             var form = $(this);
             var call = form.attr("action");
             var tab = form.parent().attr("tab-name");
             var data = form.serialize();
-            e.preventDefault();
             if(form.data("submitting")) return;
             var submitButton = form.find("input[type=submit], button[type=submit]");
             var origSubmitButtonText = submitButton.text();
             submitButton.text("Loading").attr("disabled", "disabled");
             form.data("submitting", true);
-            $.post("/api" + call, data).done(function(data) {
-                if(data.success) {
-                    var hash = hashHandler.getHash();
-                    var redirectURL = hash["redirectURL"];
-                    const absoluteURLRegex = new RegExp('^(?:[a-z]+:)?(//)?', 'i');
-                    if(redirectURL && redirectURL != "/" && !absoluteURLRegex.test(redirectURL)) {
-                        window.location = redirectURL;
-                    } else {
-                        window.location.reload();
-                    }
-                } else {
-                    me.shake();
-                    var error = "An unknown error occurred while attempting to authenticate you.";
-                    if(data.error && data.error.message) {
-                        error = data.error.message;
-                    }
-                    me.showErrorOnTab(tab, error);
-                }
-            }).fail(function() {
-                me.shake();
-                me.showErrorOnTab(tab, "An error occurred while trying to communicate with Place to authenticate you.");
-            }).always(function() {
+            placeAjax.post("/api" + call, data, null, () => {
                 submitButton.removeAttr("disabled");
                 if(origSubmitButtonText) submitButton.text(origSubmitButtonText);
                 form.data("submitting", false);
+            }).then((data) => {
+                var hash = hashHandler.getHash();
+                var redirectURL = hash["redirectURL"];
+                const absoluteURLRegex = new RegExp('^(?:[a-z]+:)?(//)?', 'i');
+                if(redirectURL && redirectURL != "/" && !absoluteURLRegex.test(redirectURL)) {
+                    window.location = redirectURL;
+                } else {
+                    window.location.reload();
+                }
+            }).catch((err) => {
+                if(tab == "sign-in" && err && err.code == "totp_needed") {
+                    $("#inputUsername2FA").val(form.find("#inputUsername").val());
+                    $("#inputPassword2FA").val(form.find("#inputPassword").val());
+                    me.switchTab("2fa-auth");
+                    return;
+                }
+                me.shake();
+                var error = "An unknown error occurred while attempting to authenticate you.";
+                if(err && err.message) error = err.message;
+                me.showErrorOnTab(tab, error);
             });
         });
         return me;
@@ -98,23 +97,25 @@ var SignInDialogController = {
         this.dialog.find(`.pages > div:not([tab-name=${tab}]) .tab-error`).remove();
         this.currentTab = tab;
         this.isAnimating = true;
+        var hidesSwitchers = this.dialog.find(`.pages > div[tab-name=${tab}]`).hasClass("hides-switchers");
         var applyClasses = () => {
             this.isAnimating = false;
             this.dialog.find(".pages > div.active, .switchers > div.active").removeClass("active");
+            this.dialog.find(".switchers").removeClass("hidden");
             this.dialog.find(`.pages > div[tab-name=${tab}], .switchers > div[tab-name=${tab}]`).addClass("active");
+            if(hidesSwitchers) $(`.switchers`).addClass("hidden");
         }
         if(animated) {
             const animDuration = 250;
-            var toHide = $(`.pages > div.active, .switchers > div[tab-name=${tab}]`).animate({opacity: 0}, {duration: animDuration, queue: false}).slideUp({duration: animDuration, queue: false, complete: function() {
+            var toHide = $(`.pages > div.active, .switchers${hidesSwitchers ? "" : ` > div[tab-name=${tab}]`}`).animate({opacity: 0}, {duration: animDuration, queue: false}).slideUp({duration: animDuration, queue: false, complete: function() {
                 $(this).attr("style", "");
                 applyClasses();
             }});
+            this.dialog.find(".switchers").removeClass("hidden");
             $(`.pages > div[tab-name=${tab}], .switchers > div.active`).css({opacity: 1}).slideDown(animDuration, function() {
                 $(this).attr("style", "");
             });
-        } else {
-            applyClasses();
-        }
+        } else applyClasses();
     },
 
     show: function(tab = null) {
@@ -126,130 +127,11 @@ var SignInDialogController = {
 
     hide: function(){ 
         this.dialog.find(".tab-error").remove();
-        this.dialog.find("form").trigger("reset");
-        this.dialog.parent().removeClass("show");
-        hashHandler.deleteHashKey("d");
-    }
-}.setup();
-
-var SignInDialogController = {
-    dialog: $("#sign-in-dialog"),
-    currentTab: null,
-    isAnimating: false,
-
-    setup: function() {
-        var me = this;
-        me.dialog.parent().find(".dialog .close, .dialog-overlay").click(function() {
-            me.hide();
-        });
-        me.dialog.find(".switchers > div").click(function() {
-            var id = $(this).attr("tab-name");
-            me.switchTab(id);
-        });
-        $(document).keydown(function(e) {
-            if(me.isShowing() && e.keyCode == 27) { // escape
-                e.preventDefault();
-                me.hide();
-            }
-        })
-        me.dialog.find("form.form-signin").submit(function(e) {
-            var form = $(this);
-            var call = form.attr("action");
-            var tab = form.parent().attr("tab-name");
-            var data = form.serialize();
-            e.preventDefault();
-            if(form.data("submitting")) return;
-            var submitButton = form.find("input[type=submit], button[type=submit]");
-            var origSubmitButtonText = submitButton.text();
-            submitButton.text("Loading").attr("disabled", "disabled");
-            form.data("submitting", true);
-            $.post("/api" + call, data).done(function(data) {
-                if(data.success) {
-                    var hash = hashHandler.getHash();
-                    if(hash["redirectURL"] != null) {
-                        window.location = hash["redirectURL"];
-                    } else {
-                        window.location.reload();
-                    }
-                } else {
-                    me.shake();
-                    var error = "An unknown error occurred while attempting to authenticate you.";
-                    if(data.error && data.error.message) {
-                        error = data.error.message;
-                    }
-                    me.showErrorOnTab(tab, error);
-                }
-            }).fail(function() {
-                me.shake();
-                me.showErrorOnTab(tab, "An error occurred while trying to communicate with Place to authenticate you.");
-            }).always(function() {
-                submitButton.removeAttr("disabled");
-                if(origSubmitButtonText) submitButton.text(origSubmitButtonText);
-                form.data("submitting", false);
-            });
-        });
-        return me;
-    },
-
-    isShowing: function() {
-        return this.dialog.parent().hasClass("show");
-    },
-
-    shake: function() {                
-        this.dialog.addClass("shake");
-        setTimeout(() => { this.dialog.removeClass("shake"); }, 500);
-    },
-
-    showErrorOnTab: function(tab, text = null) {
-        var tabContent = this.dialog.find(`.pages > div[tab-name=${tab}]`);
-        if(text) {
-            // show error
-            var existing = tabContent.find(".tab-error");
-            if(existing.length > 0) {
-                existing.find("span").text(text);
-                return;
-            }
-            var alert = $("<div>").addClass("tab-error alert alert-danger").hide().appendTo(tabContent).fadeIn();
-            $("<strong>").text("Uh oh! ").appendTo(alert);
-            $("<span>").text(text).appendTo(alert);
-        } else {
-            tabContent.find(".tab-error").remove();
+        if(this.currentTab == "2fa-auth") {
+            this.dialog.find(".pages > .active form").trigger("reset");
+            this.switchTab("sign-in");
+            return;
         }
-    },
-
-    switchTab: function(tab, animated = true) {
-        if(tab == this.currentTab || this.isAnimating) return;
-        this.dialog.find(`.pages > div:not([tab-name=${tab}]) .tab-error`).remove();
-        this.currentTab = tab;
-        this.isAnimating = true;
-        var applyClasses = () => {
-            this.isAnimating = false;
-            this.dialog.find(".pages > div.active, .switchers > div.active").removeClass("active");
-            this.dialog.find(`.pages > div[tab-name=${tab}], .switchers > div[tab-name=${tab}]`).addClass("active");
-        }
-        if(animated) {
-            const animDuration = 250;
-            var toHide = $(`.pages > div.active, .switchers > div[tab-name=${tab}]`).animate({opacity: 0}, {duration: animDuration, queue: false}).slideUp({duration: animDuration, queue: false, complete: function() {
-                $(this).attr("style", "");
-                applyClasses();
-            }});
-            $(`.pages > div[tab-name=${tab}], .switchers > div.active`).css({opacity: 1}).slideDown(animDuration, function() {
-                $(this).attr("style", "");
-            });
-        } else {
-            applyClasses();
-        }
-    },
-
-    show: function(tab = null) {
-        if(this.isShowing()) return;
-        if(tab) this.switchTab(tab, false);
-        this.dialog.parent().addClass("show");
-        hashHandler.modifyHash({"d": 1});
-    },
-
-    hide: function(){ 
-        this.dialog.find(".tab-error").remove();
         this.dialog.find("form").trigger("reset");
         this.dialog.parent().removeClass("show");
         hashHandler.deleteHashKey("d");
@@ -511,16 +393,12 @@ var place = {
     },
 
     determineFeatureAvailability: function() {
-        $.get("/api/feature-availability").done((data) => {
+        placeAjax.get("/api/feature-availability", null, null).then((data) => {
             this.hasTriedToFetchAvailability = true;
-            if(data.success) {
-                this.colours = data.availability.colours;
-                this.canPlaceCustomColours = data.availability.user && data.availability.user.canPlaceCustomColours;
-            } else {
-                setTimeout(() => this.determineFeatureAvailability(), 2500);
-            }
+            this.colours = data.availability.colours;
+            this.canPlaceCustomColours = data.availability.user && data.availability.user.canPlaceCustomColours;
             this.setupColours();
-        }).fail(() => {
+        }).catch((err) => {
             this.hasTriedToFetchAvailability = true;
             setTimeout(() => this.determineFeatureAvailability(), 2500);
             this.setupColours();
@@ -640,10 +518,10 @@ var place = {
 
     loadUserCount: function() {
         return new Promise((resolve, reject) => {
-            $.get("/api/online").done((data) => {
-                if(data.success && !!data.online) return resolve(data.online.count);
-                reject();
-            }).fail((err) => reject(err));
+            placeAjax.get("/api/online").then((data) => {
+                if(!data.online) return reject();
+                resolve(data.online.count);
+            }).catch((err) => reject(err));
         });
     },
 
@@ -1047,15 +925,9 @@ var place = {
     },
 
     getPixel: function(x, y, callback) {
-        function failToPost(error) {
-            let defaultError = "An error occurred while trying to retrieve data about that pixel.";
-            window.alert(!!error ? error.message || defaultError : defaultError);
-            callback(error);
-        }
-        return $.get(`/api/pos-info?x=${x}&y=${y}`).done((data) => {
-            if(!data.success) return failToPost(data.error);
+        return placeAjax.get(`/api/pos-info`, {x: x, y: y}, "An error occurred while trying to retrieve data about that pixel.").then((data) => {
             callback(null, data);
-        }).fail((err) => failToPost(err));
+        }).catch((err) => callback(err));
     },
 
     isSignedIn: function() {
@@ -1067,10 +939,7 @@ var place = {
             this.changePlaceTimerVisibility(true);
             $(this.placeTimer).children("span").text("Loading…");
             var a = this;
-            return $.get("/api/timer").done((data) => {
-                if(data.success) return a.doTimer(data.timer);
-                failToPost(data.error);
-            }).fail(() => this.changePlaceTimerVisibility(false));
+            return placeAjax.get("/api/timer").then((data) => a.doTimer(data.timer)).catch((err) => this.changePlaceTimerVisibility(false));
         }
         this.changePlaceTimerVisibility(false);
     },
@@ -1197,10 +1066,6 @@ var place = {
         }
 
         $(this.pixelDataPopover).hide();
-        function failToPost(error) {
-            let defaultError = "An error occurred while trying to place your pixel.";
-            window.alert(!!error ? error.message || defaultError : defaultError);
-        }
 
         // Don't even try if it's out of bounds
         if (x < 0 || y < 0 || x > this.canvas.width - 1 || y > this.canvas.height - 1) return;
@@ -1265,27 +1130,20 @@ var place = {
         }
         if(wasZoomedOut) return;
 
-        var a = this;
         if(this.selectedColour !== null && !this.placing) {
             this.changePlacingModalVisibility(true);
             var hex = this.getCurrentColourHex();
             this.placing = true;
-            $.post("/api/place", {
-                x: x, y: y, hex: hex
-            }).done((data) => {
-                if(data.success) {
-                    this.popoutController.loadActiveUsers();
-                    a.setPixel(hex, x, y);
-                    a.changeSelectorVisibility(false);
-                    if(data.timer) a.doTimer(data.timer);
-                    else a.updatePlaceTimer();
-                } else failToPost(data.error);
-            }).fail((data) => {
-                failToPost(data.responseJSON != null ? data.responseJSON.error : null);
-            }).always(() => {
+            placeAjax.post("/api/place", { x: x, y: y, hex: hex }, "An error occurred while trying to place your pixel.", () => {
                 this.changePlacingModalVisibility(false);
                 this.placing = false;
-            });
+            }).then((data) => {
+                this.popoutController.loadActiveUsers();
+                this.setPixel(hex, x, y);
+                this.changeSelectorVisibility(false);
+                if(data.timer) this.doTimer(data.timer);
+                else this.updatePlaceTimer();
+            }).catch(() => {});
         }
     },
 

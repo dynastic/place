@@ -84,10 +84,8 @@ function APIRouter(app) {
 
     router.post("/identify", JWTController.identifyAPIUser);
 
-    router.route("/user/totp-setup", requireUser).get(TOTPSetupController.getTOTPSetup).post(TOTPSetupController.postTOTPSetup);
-
+    router.route("/user/totp-setup", requireUser).get([requireUser, TOTPSetupController.getTOTPSetup]).post([requireUser, TOTPSetupController.postTOTPSetup]).delete([requireUser, TOTPSetupController.deleteTOTPSetup]);
     router.post("/user/change-password", requireUser, PasswordChangeController.postSelfServePassword);
-
     router.post("/user/deactivate", requireUser, DeactivateAccountController.postAPIDeactivate);
 
     router.get("/session", requireUser, function(req, res, next) {

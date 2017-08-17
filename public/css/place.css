@@ -721,6 +721,10 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     background: #fcfdff;
 }
 
+nav.navbar {
+    transition: 0.25s box-shadow ease-in-out;
+}
+
 .popout-open:not(.popped-out) nav.navbar {
   box-shadow: -330px 0 20px rgba(0, 0, 0, 0.1);
 }
@@ -1050,10 +1054,6 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 
     #popout-container > * {
         background: #fff;
-    }
-
-    nav.navbar {
-        transition: 0.25s box-shadow ease-in-out;
     }
 
     .popout-open:not(.popped-out) nav.navbar {

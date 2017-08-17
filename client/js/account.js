@@ -1,10 +1,6 @@
 var passwordProgressAlert = $("div[name=\"changePasswordProgressAlert\"]");
 var deactivateProgressAlert = $("div[name=\"deactivateAccountProgressAlert\"]");
-
-var parseError = function(response) {
-  var data = typeof response.error === "object" ? response : (typeof response.error().responseJSON === "undefined" ? null : response.error().responseJSON);
-  return data.error.message ? data.error.message : "An unknown error occured.";
-}
+var enableTOTPAlert = $("div[name=\"enableTOTPAlert\"]");
 
 function setAlert(alert, success = true, text) {
   alert.attr("class", "").addClass(`alert alert-${success ? "success" : "danger"}`).html(`<strong>${success ? "Success!" : "Uh oh!"}</strong> ${text}`);
@@ -18,25 +14,49 @@ $("form#changePasswordForm").submit(function(e) {
   if(oPassword == "" || nPassword == "" || nCPassword == "") return setAlert(passwordProgressAlert, false, "Please fill out all the fields.");
   if(nPassword !== nCPassword) return setAlert(passwordProgressAlert, false, "The passwords you entered did not match.");
 
-  $.post("/api/user/change-password", {old: oPassword, new: nPassword}).done(function(response) {
-    if(!response.success) return setAlert(passwordProgressAlert, false, parseError(response));
+  placeAjax.post("/api/user/change-password", {old: oPassword, new: nPassword}, null).then((response) => {
     window.location = "/account?hasNewPassword=true";
-  }).fail(function(response){
-    setAlert(passwordProgressAlert, false, parseError(response));
-  });
+  }).catch((err) => setAlert(passwordProgressAlert, false, err));
 });
 
 $("form#deactivateAccountForm").submit(function(e) {
   e.preventDefault();
   var password = $(this).find("input[name=\"password\"]").val();
-  if(password == "") return setAlert(passwordProgressAlert, false, "Please enter your password.");
-
-  $.post("/api/user/deactivate", {password: password}).done(function(response) {
-    if(!response.success) return setAlert(passwordProgressAlert, false, parseError(response));
+  if(password == "") return setAlert(deactivateProgressAlert, false, "Please enter your password.");
+  placeAjax.post("/api/user/deactivate", {password: password}, null).then((response) => {
     window.location = "/deactivated";
-  }).fail(function(response) {
-    setAlert(deactivateProgressAlert, false, parseError(response));
-  });
+  }).catch((err) => setAlert(deactivateProgressAlert, false, err));
+});
+
+$("#disableTwoFactorAuth").click(function() {
+  var elem = $(this).addClass("disabled");
+  placeAjax.delete("/api/user/totp-setup", null, "An unknown error occurred while trying to disable two-factor authentication.", () => {
+    elem.removeClass("disabled");
+  }).then((response) => {
+    window.location.reload();
+  }).catch(() => {});
+});
+
+$("form#enableTOTPForm").submit(function(e) {
+  e.preventDefault();
+  var submitBtn = $(this).find("button[type=submit]").text("Verifying").addClass("disabled");
+  placeAjax.post("/api/user/totp-setup", $(this).serialize(), null, () => {
+    submitBtn.text("Verify").removeClass("disabled");
+  }).then((response) => {
+    window.location.reload();
+  }).catch((err) => setAlert(enableTOTPAlert, false, err));
+});
+
+$("#enableTwoFactorAuth").click(function() {
+  var elem = $(this).addClass("disabled");
+  placeAjax.get("/api/user/totp-setup", null, "An unknown error occurred while trying to load two-factor authentication setup.", () => {
+    elem.removeClass("disabled");
+  }).then((response) => {
+    $("#totpQRCode").attr("src", response.totp.qrData);
+    $("#totpSecretCode").text(response.totp.secret);
+    $("#totpSecretCodeInput").val(response.totp.secret);
+    $("#enableTOTP").modal("show");
+  }).catch(() => {});
 });
 
 $("#changePassword, #deactivateAccount").on("hidden.bs.modal", function() {

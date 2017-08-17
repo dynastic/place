@@ -12,8 +12,7 @@ $(document).ready(function() {
             <div class="user-actions">${renderUserActions(user)}</div>
         </div>`;
     }
-    $.get("/api/mod/similar_users/" + userID).done(function(response) {
-        if(!response.success) return $("#loading").text("An error occurred while loading data");
+    placeAjax.get("/api/mod/similar_users/" + userID, null, null).then((response) => {
         $("#loading").remove();
         $(getUserRow(response.target, "Original User")).appendTo("#target-ctn");
         $(`<h4>${response.identifiedAccounts.length} Matching User${response.identifiedAccounts.length == 1 ? "" : "s"}</h4>`).appendTo("#similar-ctn > .heading");
@@ -21,7 +20,7 @@ $(document).ready(function() {
             $(getUserRow(identification.user, `Same ${identification.reasons.map((item, i, arr) => item + (i == arr.length - 1 ? "" : i == arr.length - 2 ? " and " : ", ")).join("")}`)).appendTo("#similar");
         });
         $(".timeago").timeago();
-    }).fail(function() {
+    }).catch((err) => {
         $("#loading").text("An error occurred while loading data");
-    })
+    });
 });
