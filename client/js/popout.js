@@ -149,7 +149,7 @@ var popoutController = {
         placeAjax.get("/api/chat", null, null).then((response) => {
             app.messages = response.messages;
             app.layoutMessages();
-        }).catch((err) => console.log("Failed to load chat messages."));
+        }).catch((err) => console.log("Failed to load chat messages.", err));
     },
 
     layoutMessages: function(alwaysScrollToBottom = true) {
@@ -260,7 +260,7 @@ var popoutController = {
             if(response.lastUpdated) app.leaderboardUpdated = new Date(response.lastUpdated);
             app.layoutLeaderboard();
         }).catch((err) => {
-            console.log("Failed to load leaderboard data.");
+            console.log("Failed to load leaderboard data.", err);
             app.showTextOnTab("leaderboard", "Failed to load");
         });
     },
@@ -309,7 +309,7 @@ var popoutController = {
             app.activeUsers = response.active;
             app.layoutActiveUsers();
         }).catch((err) => {
-            console.error("Failed to load active user data.");
+            console.error("Failed to load active user data.", err);
             app.showTextOnTab("active-users", "Failed to load");
         });
     },
