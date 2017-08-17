@@ -389,15 +389,16 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 
 #colour-picker-popover .field {
     font-weight: 700;
-    display: inline-block;
-    width: auto;
-    margin: 0 auto;
-    text-align: center;
     margin-top: 3px;
+    width: 100%;
+    max-width: 173px;
+    display: flex;
+    overflow-x: hidden;
 }
 #colour-picker-popover .field .title {
     color: #999;
-    top: 2px;
+    top: 3px;
+    float: none;
 }
 #colour-picker-popover .field .value {
     color: #444;
@@ -406,6 +407,8 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
     -webkit-user-select: initial;
     -moz-user-select: initial;
     -ms-user-select: initial;
+    float: none;
+    max-width: 140px;
 }
 
 #colour-picker-popover .minicolors {
@@ -1191,4 +1194,13 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
     color: #666;
     text-transform: uppercase;
     font-weight: 700;
+}
+
+#colour-picker-hex-value {
+    text-align: left;
+    background: none;
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    text-transform: uppercase;
 }

@@ -376,6 +376,16 @@ var place = {
         }
 
         $("#colour-picker").minicolors({inline: true, format: "hex", letterCase: "uppercase", defaultValue: "#D66668", change: (change) => this.handleColourPaletteChange(change) });
+        $("#colour-picker-hex-value").on("input", function() {
+            app.handleColourTextChange(true);
+        });
+        $("#colour-picker-hex-value").on("change", function(e) {
+            app.handleColourTextChange(false);
+        });
+        $("#colour-picker-hex-value").on("keydown", function(e) {
+            if(e.keyCode != 13) return;
+            app.handleColourTextChange(false);
+        });
         // Check canvas size after chat animation
         $(".canvas-container").on('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', () => {
             this.handleResize();
@@ -390,6 +400,13 @@ var place = {
 
         this.dismissBtn = $("<button>").attr("type", "button").addClass("close").attr("data-dismiss", "alert").attr("aria-label", "Close");
         $("<span>").attr("aria-hidden", "true").html("&times;").appendTo(this.dismissBtn);
+    },
+
+    handleColourTextChange: function(premature = false) {
+        var colour = $("#colour-picker-hex-value").val();
+        if(colour.substring(0, 1) != "#") colour = "#" + colour;
+        if(colour.length != 7 && (colour.length != 4 || premature)) return;
+        $("#colour-picker").minicolors("value", colour);
     },
 
     determineFeatureAvailability: function() {
@@ -618,6 +635,7 @@ var place = {
             overlay.hide();
             if(this.canPlaceCustomColours) $("<div>").addClass("colour-option rainbow").attr("id", "customColourChooserOption").click(function() {
                 $("body").toggleClass("picker-showing");
+                if($("body").hasClass("picker-showing")) $("#colour-picker-hex-value").focus();
             }).appendTo(this.colourPaletteElement);
             var elem = $("<div>").addClass("colour-option custom").attr("id", "customChosenColourOption").attr("data-colour", 1).hide().appendTo(this.colourPaletteElement);
             this.colourPaletteOptionElements.push(elem[0]);
@@ -637,7 +655,7 @@ var place = {
         if(!this.canPlaceCustomColours) return;
         this.customColour = newColour;
         var elem = $("#customChosenColourOption").show().css("background-color", newColour);
-        $("#colour-picker-hex-value").text(newColour.toUpperCase());
+        $("#colour-picker-hex-value").val(newColour.toUpperCase());
         if(newColour.toLowerCase() == "#ffffff") elem.addClass("is-white");
         else elem.removeClass("is-white");
         this.selectColour(1, false);
@@ -1191,7 +1209,7 @@ var place = {
         return "Deleted account";
     },
 
-    showAdminBroadcast(title, message, style, timeout = 0) {
+    showAdminBroadcast: function(title, message, style, timeout = 0) {
         var alert = $("<div>").addClass("floating-alert admin-alert alert alert-block alert-dismissable").addClass("alert-" + style).hide().prependTo($("#floating-alert-ctn"));
         this.dismissBtn.clone().appendTo(alert);
         var text = $("<p>").text(message).appendTo(alert);
