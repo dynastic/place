@@ -724,6 +724,7 @@ li#nav-auth-link {
 
 .alert-success, .alert-danger, .alert-warning, .alert-info {
   color: #fff;
+  border: none;
 }
 
 .alert-success {
