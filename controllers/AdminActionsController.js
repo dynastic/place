@@ -43,7 +43,7 @@ exports.apiReloadConfig = (req, res, next) => {
 };
 
 exports.apiBroadcastAlert = (req, res, next) => {
-    if(!req.body.title || !req.body.message || !req.body.timeout) return res.status(400).json({success: false});
+    if(!req.body.message || !req.body.timeout) return res.status(400).json({success: false});
     var timeout = Number.parseInt(req.body.timeout);
     if(Number.isNaN(timeout)) return res.status(400).json({success: false});
     var info = {
