@@ -146,10 +146,10 @@ html(lang=en)
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
     script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", crossorigin="anonymous")
     script(src="https://cdn.polyfill.io/v2/polyfill.min.js")
-    script(src="https://cdn.ravenjs.com/3.17.0/raven.min.js", crossorigin="anonymous")
-    script.
-        Raven.config('https://d067712e632c4c36a3ab1ffe4b540833@sentry.io/183264').install();
-        window.onerror = function() { if (Raven.isSetup()) Raven.showReportDialog(); }
+    if typeof config.publicRaven !== "undefined" && config.publicRaven
+      script(src="https://cdn.ravenjs.com/3.17.0/raven.min.js", crossorigin="anonymous")
+      script.
+          Raven.config('#{config.publicRaven}').install();
     script(src="/js/build/site.js")
     each item in [...new Set(js)]
         script(src=item)

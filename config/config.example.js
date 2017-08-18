@@ -10,6 +10,7 @@ module.exports = {
     "host": "http://place.dynastic.co", // the publicly accessible URL of the site
     "placeTimeout": 60,
     //"raven": "", 
+    //"publicRaven": "", 
     // "bugsnag": "",
     "cachet": {
         // Setup reporting error count as a metric to Cachet
