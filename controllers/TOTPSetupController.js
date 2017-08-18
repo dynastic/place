@@ -8,7 +8,7 @@ exports.getTOTPSetup = function(req, res, next) {
     QRCode.toDataURL(url, function(err, data_url) {
         if(err) return res.status(500).json({success: false, error: {message: "An error occurred while trying to set up two-factor authentication on your account."}})
         res.json({success: true, totp: {secret: secret.base32, qrData: data_url, authURL: url}});
-      });
+    });
 }
 
 exports.postTOTPSetup = function(req, res, next) {

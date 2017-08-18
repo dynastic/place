@@ -116,9 +116,7 @@ function HTTPServer(app) {
         if (server.get("env") !== "development") {
             // Production error handler, no stack traces shown to user
             server.use((err, req, res, next) => {
-                if (err.code === 'EBADCSRFTOKEN') {
-                    return res.status(403).json({ success: false, error: { message: 'you tried, have a star.', code: 'invalid CSRF token' }});
-                }
+                if (err.code === 'EBADCSRFTOKEN') return res.status(403).json({success: false, error: {message: 'you tried, have a star.', code: 'invalid CSRF token'}});
                 res.status(err.status || 500);
                 app.reportError(err);
                 if (req.accepts("json") && !req.accepts("html")) return res.send({ success: false, error: { message: "An unknown error occured.", code: "internal_server_error" } });
