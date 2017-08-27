@@ -57,6 +57,7 @@ var SignInDialogController = {
                     me.switchTab("2fa-auth");
                     return;
                 }
+                if(tab == "sign-up") grecaptcha.reset();
                 me.shake();
                 var error = "An unknown error occurred while attempting to authenticate you.";
                 if(err && err.message) error = err.message;
