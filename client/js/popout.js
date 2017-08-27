@@ -11,6 +11,7 @@ function PopoutVisibilityController(popoutContainer) {
 
         _setup: function() {
             var p = this;
+            $(this.popoutContainer).find("input").attr("disabled", "disabled");
             $(this.popoutContainer).find(".tabbar > .tab").click(function() {
                 p.changeTab($(this).data("tab-name"));
             });
@@ -62,9 +63,11 @@ function PopoutVisibilityController(popoutContainer) {
 
         open: function() {
             $("body").addClass("popout-open");
+            $(this.popoutContainer).find("input").removeAttr("disabled");
             if(this.visibilityChangeCallback) this.visibilityChangeCallback();
         },
         close: function() {
+            $(this.popoutContainer).find("input").attr("disabled", "disabled");
             if($("body").hasClass("is-popped-out")) {
                 window.close();
                 if(window.opener.place) window.opener.place.popoutController.popoutVisibilityController.close();
