@@ -1257,14 +1257,14 @@ $("#user-count").click(function() {
 
 var hash = hashHandler.getHash();
 var hashKeys = Object.keys(hash);
-if(hashKeys.includes("signin") || hashKeys.includes("logintext")) {
-    if(hashKeys.includes("logintext")) {
+if(hashKeys.indexOf("signin") > 0 || hashKeys.indexOf("logintext") > 0) {
+    if(hashKeys.indexOf("logintext") > 0) {
         SignInDialogController.showErrorOnTab("sign-in", hash["logintext"])
         hashHandler.deleteHashKey("logintext");
     }
     SignInDialogController.show("sign-in");
     hashHandler.deleteHashKey("signin");
-} else if(hashKeys.includes("signup")) {
+} else if(hashKeys.indexOf("signup") > 0) {
     SignInDialogController.show("sign-up");
     hashHandler.deleteHashKey("signup");
 }
