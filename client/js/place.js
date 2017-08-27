@@ -377,15 +377,9 @@ var place = {
         }
 
         $("#colour-picker").minicolors({inline: true, format: "hex", letterCase: "uppercase", defaultValue: "#D66668", change: (change) => this.handleColourPaletteChange(change) });
-        $("#colour-picker-hex-value").on("input", function() {
-            app.handleColourTextChange(true);
-        });
-        $("#colour-picker-hex-value").on("change", function(e) {
-            app.handleColourTextChange(false);
-        });
-        $("#colour-picker-hex-value").on("keydown", function(e) {
-            if(e.keyCode != 13) return;
-            app.handleColourTextChange(false);
+        $("#colour-picker-hex-value").on("input change keydown", function(e) {
+            if (e.keyCode && e.keyCode !== 33) return;
+            app.handleColourTextChange(e.type === "input");
         });
         // Check canvas size after chat animation
         $(".canvas-container").on('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', () => {
