@@ -8,7 +8,7 @@
         .tab-content.active.chat(data-tab-name="chat")
             .messages#chat-messages
             .text-field
-                input#chat-input-field(type="text", maxlength="249", autocomplete="off", placeholder="Send a message")
+                input#chat-input-field(type="text", maxlength="249", autocomplete="off", placeholder="Send a message", tabindex="-1")
                 a.send-btn#chat-send-btn(href="javascript:void(0)") Send
         .tab-content#leaderboardTab(data-tab-name="leaderboard")
             .coming-soon
