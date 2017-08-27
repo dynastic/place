@@ -46,7 +46,7 @@ var SignInDialogController = {
                 var redirectURL = hash["redirectURL"];
                 const absoluteURLRegex = new RegExp('^(?:[a-z]+:)?(//)?', 'i');
                 if(redirectURL && redirectURL != "/" && !absoluteURLRegex.test(redirectURL)) {
-                    window.location = redirectURL;
+                    window.location.href = redirectURL;
                 } else {
                     window.location.reload();
                 }

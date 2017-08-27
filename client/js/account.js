@@ -15,7 +15,7 @@ $("form#changePasswordForm").submit(function(e) {
   if(nPassword !== nCPassword) return setAlert(passwordProgressAlert, false, "The passwords you entered did not match.");
 
   placeAjax.post("/api/user/change-password", {old: oPassword, new: nPassword}, null).then((response) => {
-    window.location = "/account?hasNewPassword=true";
+    window.location.href = "/account?hasNewPassword=true";
   }).catch((err) => setAlert(passwordProgressAlert, false, err ? err.message : null));
 });
 
@@ -24,7 +24,7 @@ $("form#deactivateAccountForm").submit(function(e) {
   var password = $(this).find("input[name=\"password\"]").val();
   if(password == "") return setAlert(deactivateProgressAlert, false, "Please enter your password.");
   placeAjax.post("/api/user/deactivate", {password: password}, null).then((response) => {
-    window.location = "/deactivated";
+    window.location.href = "/deactivated";
   }).catch((err) => setAlert(deactivateProgressAlert, false, err ? err.message : null));
 });
 
