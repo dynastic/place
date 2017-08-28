@@ -4,6 +4,7 @@ class DataModelManager {
     constructor(app) {
         this.app = app;
         this.registeredModels = new Map();
+        this.registeredModules = new Set();
         this.modelStaticMethods = {};
         this.modelInstanceMethods = {};
         this.modelStaticMethodOverrides = {};
@@ -45,6 +46,8 @@ class DataModelManager {
     }
 
     registerModuleOverrides(name, override) {
+        if(this.registeredModules.has(name)) return;
+        this.registeredModules.add(name);
         if(override.schemaName) name = override.schemaName;
         // Make sure we have objects in our object for this model override
         if(!this.modelFields[name]) this.modelFields[name] = {};
@@ -54,16 +57,26 @@ class DataModelManager {
         if(!this.modelStaticMethodOverrides[name]) this.modelStaticMethodOverrides[name] = {};
         // Loop through the added instance methods, and set them up to work
         Object.keys(override.methods).forEach((key) => {
-            this.modelInstanceMethods[name][key] = override.methods[key];
+            if(!this.modelInstanceMethods[name][key]) this.modelInstanceMethods[name][key] = [];
+            this.modelInstanceMethods[name][key].push(override.methods[key]);
             this._setupMethodHandler(name, key, false);
         });
 
         // TODO: Loop statics, find where mongoose stores its static shit, set it there (set it to go through _getMethodHandler)
         
         // Store fields, static methods, and instance methods internally for use later
-        Object.keys(override.fields).forEach((key) => this.modelFields[name][key] = override.fields[key]);
-        Object.keys(override.hookMethods).forEach((key) => this.modelInstanceMethodOverrides[name][key] = override.hookMethods[key]);
-        Object.keys(override.hookStatics).forEach((key) => this.modelStaticMethodOverrides[name][key] = override.hookStatics[key]);
+        Object.keys(override.fields).forEach((key) => {
+            if(!this.modelFields[name][key]) this.modelFields[name][key] = [];
+            this.modelFields[name][key].push(override.fields[key]);
+        });
+        Object.keys(override.hookMethods).forEach((key) => {
+            if(!this.modelInstanceMethodOverrides[name][key]) this.modelInstanceMethodOverrides[name][key] = [];
+            this.modelInstanceMethodOverrides[name][key].push(override.hookMethods[key]);
+        });
+        Object.keys(override.hookStatics).forEach((key) => {
+            if(!this.modelStaticMethodOverrides[name][key]) this.modelStaticMethodOverrides[name][key] = [];
+            this.modelStaticMethodOverrides[name][key].push(override.hookStatics[key]);
+        });
     }
 
     _setupMethodHandler(name, key, isStatic) {
@@ -80,13 +93,23 @@ class DataModelManager {
     }
 
     _getMethodHandler(model, name, isStatic) {
-        // console.log(`Getting method handler ${model}/${name} (${isStatic ? "static" : "instance"})`)
-        return this._getList(isStatic)[model][name];
+        var res = this._getList(isStatic)[model][name].slice().reverse();
+        return function() {
+            var args = Array.from(arguments);
+            var index = 1;
+            args.push(() => {
+                if(!res[index]) return;
+                index++;
+                return res[index - 1].apply(this, args);
+            });
+            return res[0].apply(this, args);
+        }
     }
 
     _registerMethodHandler(model, name, isStatic, handler) {
         if(!this._getList(isStatic)[model]) this._getList(isStatic)[model] = [];
-        this._getList(isStatic)[model][name] = handler;
+        if(!this._getList(isStatic)[model][name]) this._getList(isStatic)[model][name] = [];
+        this._getList(isStatic)[model][name].push(handler);
     }
 }
 
