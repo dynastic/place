@@ -83,6 +83,13 @@ var actions = {
         requiresModerator: true,
         isPrivileged: true
     },
+    forcePWReset: {
+        displayName: "Force a password reset",
+        inlineDisplayName: "Forced a password reset for",
+        category: "moderation",
+        requiresModerator: true,
+        isPrivileged: true
+    },
     // Administrative actions
     giveModerator: {
         displayName: "Give moderator",

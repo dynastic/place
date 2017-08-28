@@ -47,6 +47,36 @@ var actions = {
             btnStyle: "warning",
             buttonText: (data) => data.deactivated ? "Activate" : "Deactivate",
         },
+        forcePWReset: {
+            url: "admin/force_pw_reset",
+            btnStyle: "info",
+            adminOnly: true,
+            getRequestData: function(elem) {
+                return new Promise((resolve, reject) => {
+                    var id = elem.parent().attr("data-user-id");
+                    if(!id) id = elem.parent().parent().attr("data-user-id");
+                    bootbox.prompt({
+                        title: "Password Reset Key (for login)",
+                        size: "small",
+                        callback: function (result) {
+                            if(result == null) return reject();
+                            resolve({key: result});
+                        },
+                        buttons: {
+                            confirm: {
+                                label: "Submit",
+                                className: "btn-primary"
+                            },
+                            cancel: {
+                                label: "Cancel",
+                                className: "btn-default"
+                            }
+                        },
+                    });
+                })
+            },
+            buttonText: () => "Password Reset"
+        },
         disableTOTP: {
             url: "admin/disable_totp",
             btnStyle: "info",
@@ -85,10 +115,7 @@ var actions = {
                     }).catch((err) => reject("Couldn't fetch user notes: " + err));
                 })
             },
-            buttonText: (data) => "Edit User Notes",
-            getAttributes: function(data) {
-                return {"data-user-banned": data.banned};
-            },
+            buttonText: (data) => "Edit User Notes"
         },
         mod: {
             url: "admin/toggle_mod",

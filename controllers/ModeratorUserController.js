@@ -180,13 +180,31 @@ exports.postAPIDisableTOTP = (req, res, next) => {
         user.totpSecret = null;
         user.save().then((user) => {
             ActionLogger.log(req.place, "disableTOTP", user, req.user);
-            res.json({success: true, user: {hasTOTP: false}})
+            res.json({success: true, user: {hasTOTP: false}});
         }).catch((err) => {
             req.place.reportError("Error trying to disable two-factor authentication for user: " + err);
             res.status(500).json({success: false});
         });
     }).catch((err) => {
         req.place.reportError("Error trying to get user to disable two-factor authentication on: " + err);
+        res.status(500).json({success: false})
+    });
+}
+
+exports.postAPIForcePasswordReset = (req, res, next) => {
+    if(!req.query.id || !req.query.key) return res.status(400).json({success: false, error: {message: "No user ID or password reset key specified.", code: "bad_request"}});
+    User.findById(req.query.id).then((user) => {
+        if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
+        user.passwordResetKey = req.query.key;
+        user.save().then((user) => {
+            ActionLogger.log(req.place, "forcePWReset", user, req.user);
+            res.json({success: true, user: user.toInfo()});
+        }).catch((err) => {
+            req.place.reportError("Error trying to force a password reset for user: " + err);
+            res.status(500).json({success: false});
+        });
+    }).catch((err) => {
+        req.place.reportError("Error trying to get user to force a password reset on: " + err);
         res.status(500).json({success: false})
     });
 }
