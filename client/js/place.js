@@ -532,7 +532,7 @@ var place = {
         }).on("tap", (event) => {
             if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
             if(!this.zooming.zooming) {
-                var cursor = app.getCanvasCursorPosition(event.pageX, event.pageY);
+                var cursor = app.getCanvasCursorPosition();
                 app.canvasClicked(cursor.x, cursor.y);
             }
             event.preventDefault();
@@ -547,9 +547,9 @@ var place = {
         });
     },
 
-    getCanvasCursorPosition: function(x = null, y = null) {
+    getCanvasCursorPosition: function() {
         var zoom = this._getZoomMultiplier();
-        return {x: Math.round((x || this.cursorX - $(this.cameraController).offset().left) / zoom), y: Math.round((y || this.cursorY - $(this.cameraController).offset().top) / zoom)};
+        return {x: Math.round((this.cursorX - $(this.cameraController).offset().left) / zoom), y: Math.round((this.cursorY - $(this.cameraController).offset().top) / zoom)};
     },
 
     loadUserCount: function() {
