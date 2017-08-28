@@ -27,21 +27,33 @@ function PaintingManager(app) {
             return new Promise((resolve, reject) => {
                 this.getBlankImage().then((image) => {
                     let batch = image.batch();
-                    Pixel.find({}).stream().on("data", (pixel) => {
-                        var x = pixel.xPos, y = pixel.yPos;
-                        var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB };
-                        if(x >= 0 && y >= 0 && x < imageSize && y < imageSize) batch.setPixel(x, y, colour);
-                    }).on("end", () => {
-                        batch.exec((err, image) => {
-                            if (err) return reject(err);
-                            this.hasImage = true;
-                            this.image = image;
-                            this.imageBatch = this.image.batch();
-                            this.firstGenerateAfterLoad = true;
-                            this.generateOutputImage();
-                            resolve(image);
+                    Pixel.count({}).then((count) => {
+                        console.log(count);
+                        var loaded = 0;
+                        var progressUpdater = setInterval(() => {
+                            app.logger.info("Startup", `Loaded ${loaded} of ${count} pixel${count == 1 ? "" : "s"} (${Math.round(loaded / count * 100)}% complete)`)
+                        }, 2500);
+                        Pixel.find({}).stream().on("data", (pixel) => {
+                            var x = pixel.xPos, y = pixel.yPos;
+                            var colour = { r: pixel.colourR,  g: pixel.colourG, b: pixel.colourB };
+                            if(x >= 0 && y >= 0 && x < imageSize && y < imageSize) batch.setPixel(x, y, colour);
+                            loaded++;
+                        }).on("end", () => {
+                            batch.exec((err, image) => {
+                                clearInterval(progressUpdater);
+                                if (err) return reject(err);
+                                this.hasImage = true;
+                                this.image = image;
+                                this.imageBatch = this.image.batch();
+                                this.firstGenerateAfterLoad = true;
+                                this.generateOutputImage();
+                                resolve(image);
+                            });
+                        }).on("error", (err) => {
+                            clearInterval(progressUpdater);
+                            reject(err)
                         });
-                    }).on("error", (err) => reject(err));
+                    }).catch((err) => reject(err));
                 }).catch((err) => reject(err));
             });
         },
