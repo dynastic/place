@@ -326,6 +326,11 @@ var popoutController = {
         this.activeUsers.forEach((item, index) => {
             var row = $("<div>").addClass("user-info").appendTo($("<div>").addClass("user").appendTo(usersCtn));
             $("<a>").text(item.username).addClass("username").attr("href", `/@${item.username}`).appendTo(row);
+            if(item.badges && item.badges.length > 0) {
+                var badgeCtn = $("<div>").addClass("rank-container").appendTo(row);
+                item.badges.forEach((badge) => renderBadge(badge, false).appendTo(badgeCtn));
+
+            }
             var lastSeen = $("<span>").text("Last seen ").addClass("last-seen").appendTo(row);
             var date = item.statistics.lastSeenActively;
             $("<time>").attr("datetime", date).attr("title", new Date(date).toLocaleString()).text($.timeago(date)).appendTo($("<strong>").appendTo(lastSeen));

@@ -171,7 +171,7 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     font-size: 19px;
     margin-bottom: 2px;
 }
-.user span {
+.user .user-info > span {
     display: block;
 }
 .user::after {
