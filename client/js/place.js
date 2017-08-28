@@ -171,6 +171,15 @@ var canvasController = {
         this.ctx.fillStyle = colour;
         this.ctx.fillRect(x, y, 1, 1);
         this.isDisplayDirty = true;
+    },
+
+    getPixelColour: function(x, y) {
+        var data = this.ctx.getImageData(x, y, 1, 1).data;
+        function componentToHex(c) {
+            var hex = c.toString(16);
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+        return componentToHex(data[0]) + componentToHex(data[1]) + componentToHex(data[2]);
     }
 };
 
@@ -203,7 +212,7 @@ var notificationHandler = {
 
     sendNotification: function(title, message, requesting = false) {
         if(!this.notificationsSupported) return;
-        let canSend = this.canNotify;
+        var canSend = this.canNotify;
         if(!canSend && !requesting) return;
         if(!canSend) {
             return this.requestPermission((granted) => {
@@ -247,11 +256,11 @@ var hashHandler = {
     decodeHash: function(hashString) {
         if(hashString.indexOf("#") === 0) hashString = hashString.substring(1);
         if (hashString.length <= 0) return {};
-        let hashArguments = hashString.split("&");
+        var hashArguments = hashString.split("&");
         var decoded = {};
         hashArguments.forEach(function(hashArg) {
-            let parts = hashArg.split("=");
-            let key = parts[0], value = decodeURIComponent(parts[1]);
+            var parts = hashArg.split("=");
+            var key = parts[0], value = decodeURIComponent(parts[1]);
             if(key) decoded[key] = value;
         });
         return decoded;
@@ -291,6 +300,7 @@ var place = {
     messages: null,
     isOutdated: false, lastPixelUpdate: null,
     colours: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
+    cursorX: 0, cursorY: 0,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
         size = canvas.height;
@@ -312,9 +322,9 @@ var place = {
         this.placingOverlay = $(this.colourPaletteElement).children("#placing-modal");
         this.placeTimer = $(this.colourPaletteElement).children("#place-timer");
         $(this.placeTimer).on("click", "#notify-me", () => this.handleNotifyMeClick());
-        let app = this;
+        var app = this;
         $(this.colourPaletteElement).on("click", ".colour-option", function() {
-            let colourID = parseInt($(this).data("colour"));
+            var colourID = parseInt($(this).data("colour"));
             if(colourID) app.selectColour(colourID);
         });
         $(this.colourPaletteElement).click(function(e) {
@@ -323,7 +333,7 @@ var place = {
         })
         this.updatePlaceTimer();
 
-        let controller = $(zoomController).parent()[0];
+        var controller = $(zoomController).parent()[0];
         canvas.onmousemove = (event) => this.handleMouseMove(event || window.event);
         canvas.addEventListener("contextmenu", (event) => this.contextMenu(event));
 
@@ -341,6 +351,10 @@ var place = {
                 app.handleKeyDown(e.keyCode || e.which);
             }
         };
+        document.body.onmousemove = function(e) {
+            app.cursorX = e.pageX;
+            app.cursorY = e.pageY;
+        };
 
         window.onresize = () => this.handleResize();
         window.onhashchange = () => this.handleHashChange();
@@ -350,7 +364,7 @@ var place = {
         this.setupDisplayCanvas(this.displayCanvas);
         this.setupInteraction();
 
-        let spawnPoint = this.getSpawnPoint();
+        var spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
         $(this.coordinateElement).show();
         $(this.userCountElement).show();
@@ -518,8 +532,8 @@ var place = {
         }).on("tap", (event) => {
             if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
             if(!this.zooming.zooming) {
-                let zoom = app._getZoomMultiplier();
-                app.canvasClicked(Math.round((event.pageX - $(app.cameraController).offset().left) / zoom), Math.round((event.pageY - $(app.cameraController).offset().top) / zoom));
+                var cursor = app.getCanvasCursorPosition(event.pageX, event.pageY);
+                app.canvasClicked(cursor.x, cursor.y);
             }
             event.preventDefault();
         }).on("doubletap", (event) => {
@@ -533,6 +547,11 @@ var place = {
         });
     },
 
+    getCanvasCursorPosition: function(x = null, y = null) {
+        var zoom = this._getZoomMultiplier();
+        return {x: Math.round((x || this.cursorX - $(this.cameraController).offset().left) / zoom), y: Math.round((y || this.cursorY - $(this.cameraController).offset().top) / zoom)};
+    },
+
     loadUserCount: function() {
         return new Promise((resolve, reject) => {
             placeAjax.get("/api/online").then((data) => {
@@ -543,13 +562,13 @@ var place = {
     },
 
     getSpawnPoint: function() {
-        let point = this.getHashPoint();
+        var point = this.getHashPoint();
         if (point) return point;
         return this.getRandomSpawnPoint();
     },
 
     getHashPoint: function() {
-        let hash = this.hashHandler.getHash();
+        var hash = this.hashHandler.getHash();
         if(typeof hash.x !== "undefined" && typeof hash.y !== "undefined") {
             var x = parseInt(hash.x), y = parseInt(hash.y);
             var fixed = this.closestInsideCoordinates(x, y);
@@ -710,10 +729,10 @@ var place = {
     },
 
     updateDisplayCanvas: function() {
-        let dcanvas = this.displayCanvas;
+        var dcanvas = this.displayCanvas;
         this.displayCtx.clearRect(0, 0, dcanvas.width, dcanvas.height);
-        let zoom = this._getCurrentZoom();
-        let mod = size / 2;
+        var zoom = this._getCurrentZoom();
+        var mod = size / 2;
         this.displayCtx.drawImage(this.canvas, dcanvas.width / 2 + (this.panX - mod - 0.5) * zoom, dcanvas.height / 2 + (this.panY - mod - 0.5) * zoom, this.canvas.width * zoom, this.canvas.height * zoom);
     },
 
@@ -734,8 +753,8 @@ var place = {
     animateZoom: function(callback = null) {
         this.zooming.zoomTime += this.zooming.fastZoom ? 5 : 1
 
-        let x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
-        let y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
+        var x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
+        var y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
         this.setCanvasPosition(x, y)
 
         if (this.zooming.zoomTime >= 100) {
@@ -754,7 +773,7 @@ var place = {
         this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
         this.zooming.panToX = null, this.zooming.panToY = null;
         clearInterval(this.zooming.zoomHandle);
-        let coord = this.getCoordinates();
+        var coord = this.getCoordinates();
         this.hashHandler.modifyHash(coord);
         this.zooming.zoomHandle = null;
         this.zooming.fastZoom = false;
@@ -849,7 +868,7 @@ var place = {
         if(coord != this.lastUpdatedCoordinates) {
             var coordElem = $(this.coordinateElement);
             setTimeout(function() {
-                let spans = coordElem.find("span");
+                var spans = coordElem.find("span");
                 spans.first().text(coord.x.toLocaleString());
                 spans.last().text(coord.y.toLocaleString());
                 coordElem.attr("data-clipboard-text", `(${coord.x}, ${coord.y})`);
@@ -865,7 +884,7 @@ var place = {
     },
 
     getCoordinates: function() {
-        let dcanvas = this.canvasController.canvas;
+        var dcanvas = this.canvasController.canvas;
         return {x: Math.floor(-this.panX) + dcanvas.width / 2, y: Math.floor(-this.panY) + dcanvas.height / 2};
     },
 
@@ -887,7 +906,7 @@ var place = {
     },
 
     updateGrid: function() {
-        let zoom = this._getCurrentZoom();
+        var zoom = this._getCurrentZoom();
         $(this.grid).css({
             transform: `translate(${(($(this.cameraController).offset().left / zoom) - 0.5) * zoom % zoom}px, ${(($(this.cameraController).offset().top / zoom) - 0.5) * zoom % zoom}px)`,
             backgroundSize: `${zoom}px ${zoom}px`
@@ -903,12 +922,12 @@ var place = {
         this.lastX = x;
         this.lastY = y;
         if(this.gridHint) {
-            let zoom = this._getCurrentZoom();
+            var zoom = this._getCurrentZoom();
             // Hover position in grid multiplied by zoom
-            let x = Math.round((this.lastX - $(this.cameraController).offset().left) / zoom), y = Math.round((this.lastY - $(this.cameraController).offset().top) / zoom);
-            let elem = $(this.gridHint);
-            let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
-            let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
+            var x = Math.round((this.lastX - $(this.cameraController).offset().left) / zoom), y = Math.round((this.lastY - $(this.cameraController).offset().top) / zoom);
+            var elem = $(this.gridHint);
+            var posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
+            var posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
             elem.css({
                 left: posX * zoom,
                 top: posY * zoom,
@@ -920,7 +939,7 @@ var place = {
         if(!this.placing) {
             this.updateGridHint(event.pageX, event.pageY);
             if(this.handElement) {
-                let elem = $(this.handElement);
+                var elem = $(this.handElement);
                 elem.css({
                     left: event.pageX - (elem.width() / 2),
                     top: event.pageY - (elem.height() / 2),
@@ -978,11 +997,11 @@ var place = {
             return (new Array(length + 1).join(pad) + str).slice(-length);
         }
         if(this.unlockTime && this.secondTimer && this.fullUnlockTime) {
-            let time = Math.round(this.unlockTime - new Date().getTime() / 1000);
+            var time = Math.round(this.unlockTime - new Date().getTime() / 1000);
             if(time > 0) {
-                let minutes = ~~(time / 60), seconds = time - minutes * 60;
-                let formattedTime = `${minutes}:${padLeft(seconds.toString(), "0", 2)}`;
-                let shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
+                var minutes = ~~(time / 60), seconds = time - minutes * 60;
+                var formattedTime = `${minutes}:${padLeft(seconds.toString(), "0", 2)}`;
+                var shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
             } else if(this.fullUnlockTime > 5) { // only notify if full countdown exceeds 5 seconds
@@ -1000,11 +1019,11 @@ var place = {
     },
 
     changeUserCount: function(newContent) {
-        let elem = $(this.userCountElement);
+        var elem = $(this.userCountElement);
         elem.show();
-        let notch = elem.find(".loading");
-        let text = elem.find(".count");
-        let num = parseInt(newContent);
+        var notch = elem.find(".loading");
+        var text = elem.find(".count");
+        var num = parseInt(newContent);
         if(num === null || isNaN(num)) {
             notch.show();
             text.text("");
@@ -1029,7 +1048,7 @@ var place = {
         if(this.isViewingFullMap()) return;
         this.deselectColour(hideColourPicker);
         this.selectedColour = colourID - 1;
-        let elem = this.colourPaletteOptionElements[this.selectedColour];
+        var elem = this.colourPaletteOptionElements[this.selectedColour];
         this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
         $(elem).addClass("selected");
         $(this.zoomController).addClass("selected");
@@ -1048,7 +1067,7 @@ var place = {
     changeSelectorVisibility: function(visible) {
         if(this.selectedColour == null) return;
         if(visible) {
-          let elem = this.colourPaletteOptionElements[this.selectedColour];
+          var elem = this.colourPaletteOptionElements[this.selectedColour];
           $(this.handElement).show();
           $(this.zoomController).addClass("selected");
           $(this.gridHint).show();
@@ -1089,14 +1108,14 @@ var place = {
         if (x < 0 || y < 0 || x > this.canvas.width - 1 || y > this.canvas.height - 1) return;
 
         // Make the user zoom in before placing pixel
-        let wasZoomedOut = !this.zooming.zoomedIn;
+        var wasZoomedOut = !this.zooming.zoomedIn;
         if(wasZoomedOut) this.zoomIntoPoint(x, y);
 
         if(this.selectedColour === null) {
             this.zoomIntoPoint(x, y);
             return this.getPixel(x, y, (err, data) => {
                 if(err || !data.pixel) return;
-                let popover = $(this.pixelDataPopover);
+                var popover = $(this.pixelDataPopover);
                 if(this.zooming.zooming) this.shouldShowPopover = true;
                 else popover.fadeIn(250);
                 var hasUser = !!data.pixel.user;
@@ -1199,7 +1218,15 @@ var place = {
             this.deselectColour();
         } else if(keycode == 70) { // F - toggle full map view
             this.toggleViewingFullMap();
+        } else if(keycode == 80) { // P - pick colour under mouse cursor
+            this.pickColourUnderCursor();
         }
+    },
+
+    pickColourUnderCursor: function() {
+        var cursor = this.getCanvasCursorPosition();
+        var colour = this.canvasController.getPixelColour(cursor.x, cursor.y);
+        $("#colour-picker").minicolors("value", "#" + colour);
     },
 
     adjustLoadingScreen: function(text = null) {
