@@ -42,7 +42,6 @@ class TOSManager {
     refreshTOSVersion() {
         this.getCurrentTOSVersion(true).then((version) => {
             this.cachedTOSVersion = version;
-            console.info('TOS Manager', "Cached TOS version: " + version);
             setTimeout(() => this.refreshTOSVersion(), 30000); // check TOS version every 30 seconds
         }).catch((err) => {
             console.error('TOS Manager', "Couldn't cache TOS version: " + err);
