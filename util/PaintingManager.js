@@ -30,7 +30,7 @@ function PaintingManager(app) {
                     Pixel.count({}).then((count) => {
                         var loaded = 0;
                         var progressUpdater = setInterval(() => {
-                            app.logger.info("Startup", `Loaded ${loaded} of ${count} pixel${count == 1 ? "" : "s"} (${Math.round(loaded / count * 100)}% complete)`);
+                            app.logger.info("Startup", `Loaded ${loaded.toLocaleString()} of ${count.toLocaleString()} pixel${count == 1 ? "" : "s"} (${Math.round(loaded / count * 100)}% complete)`);
                         }, 2500);
                         Pixel.find({}).stream().on("data", (pixel) => {
                             var x = pixel.xPos, y = pixel.yPos;
@@ -39,7 +39,7 @@ function PaintingManager(app) {
                             loaded++;
                         }).on("end", () => {
                             clearInterval(progressUpdater);
-                            app.logger.info("Startup", `Loaded total ${count} pixel${count == 1 ? "" : "s"} pixels from database. Generating image...`);
+                            app.logger.info("Startup", `Loaded total ${count.toLocaleString()} pixel${count == 1 ? "" : "s"} pixels from database. Generating image...`);
                             batch.exec((err, image) => {
                                 if (err) return reject(err);
                                 this.hasImage = true;
