@@ -93,7 +93,9 @@ class DataModelManager {
     }
 
     _getMethodHandler(model, name, isStatic) {
-        var res = this._getList(isStatic)[model][name].slice().reverse();
+        var res = this._getList(isStatic)[model][name].slice();
+        if (res.length <= 1) return res[0];
+        res.reverse();
         return function() {
             var args = Array.from(arguments);
             var index = 1;
