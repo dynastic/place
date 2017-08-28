@@ -87,6 +87,7 @@ function PopoutVisibilityController(popoutContainer) {
 
 var popoutController = {
     isOutdated: false, place: null,
+    messages: [], activeUsers: [], leaderboard: [],
 
     setup: function(place, popoutContainer) {
         this.popoutVisibilityController = PopoutVisibilityController(popoutContainer);
