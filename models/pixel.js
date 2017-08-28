@@ -65,11 +65,7 @@ PixelSchema.methods.toInfo = function() {
         },
         editorID: this.editorID,
         modified: this.lastModified,
-        colour: {
-            r: this.colourR,
-            g: this.colourG,
-            b: this.colourB
-        }
+        colour: this.getHexColour()
     };
 }
 
