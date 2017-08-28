@@ -28,7 +28,6 @@ function PaintingManager(app) {
                 this.getBlankImage().then((image) => {
                     let batch = image.batch();
                     Pixel.count({}).then((count) => {
-                        console.log(count);
                         var loaded = 0;
                         var progressUpdater = setInterval(() => {
                             app.logger.info("Startup", `Loaded ${loaded} of ${count} pixel${count == 1 ? "" : "s"} (${Math.round(loaded / count * 100)}% complete)`)
