@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 mongoose.promise = global.Promise;
 const recaptcha = require("express-recaptcha");
-const gulp = require("gulp");
-const uglify = require("gulp-uglify");
-const babel = require("gulp-babel");
-const sourcemaps = require('gulp-sourcemaps');
-const del = require("del");
 const PaintingManager = require("./util/PaintingManager");
 const HTTPServer = require("./util/HTTPServer");
 const WebsocketServer = require("./util/WebsocketServer");
@@ -15,13 +10,7 @@ const LeaderboardManager = require("./util/LeaderboardManager");
 const UserActivityManager = require("./util/UserActivityManager");
 const ModuleManager = require("./util/ModuleManager");
 const PixelNotificationManager = require("./util/PixelNotificationManager");
-
-const paths = {
-    scripts: {
-        built: "public/js/build",
-        src: "client/js/*.js"
-    }
-};
+const JavaScriptProcessor = require("./util/JavaScriptProcessor");
 
 var app = {};
 
@@ -106,34 +95,9 @@ app.recreateServer();
 
 mongoose.connect(app.config.database);
 
-// Clean existing built JS
-gulp.task("clean", () => del(["public/js/build"]));
-
-function swallowError(error) {
-    app.reportError("Error while processing JavaScript: " + error);
-    this.emit("end");
-}
-
-// Process JavaScript
-gulp.task("scripts", ["clean"], (cb) => {
-    app.logger.info('Babel', "Processing JavaScript…");
-    var t = gulp.src(paths.scripts.src);
-    t = t.pipe(sourcemaps.init());
-    t = t.pipe(babel({ presets: ["es2015"] }));
-    t = t.on("error", swallowError);
-    if(!app.config.debug) t = t.pipe(uglify());
-    t = t.on("error", swallowError);
-    t = t.pipe(sourcemaps.write('.'));
-    t = t.pipe(gulp.dest(paths.scripts.built));
-    t = t.on("end", () => app.logger.info('Babel', "Finished processing JavaScript."));
-    return t;
-});
-
-// Rerun the task when a file changes 
-gulp.task("watch", () => gulp.watch(paths.scripts.src, ["scripts"]));
-
-gulp.task("default", ["watch", "scripts"]);
-gulp.start(["watch", "scripts"]);
+// Process JS
+app.javascriptProcessor = new JavaScriptProcessor(app);
+app.javascriptProcessor.processJavaScript();
 
 app.stopServer = () => {
     if(app.server.listening) {
