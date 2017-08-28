@@ -83,7 +83,7 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, app, callback) {
         var pixel = pixels[0];
         var wasIdentical = colour.r == 255 && colour.g == 255 && colour.b == 255; // set to identical if pixel was white
         if(pixel) { // we have data from the old pixel
-            wasIdentical = pixel.editorID == userID && pixel.colourR == colour.r && pixel.colourG == colour.g && pixel.colourB == pixel.colourB; // set to identical if colour matched old pixel
+            wasIdentical = pixel.editorID == userID && pixel.colourR == colour.r && pixel.colourG == colour.g && pixel.colourB == colour.b; // set to identical if colour matched old pixel
         }
         if(!wasIdentical) { // if the pixel was changed
             if(!pixel) { // if the spot was blank, create a new one
