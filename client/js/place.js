@@ -532,7 +532,7 @@ var place = {
         }).on("tap", (event) => {
             if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
             if(!this.zooming.zooming) {
-                var cursor = app.getCanvasCursorPosition();
+                var cursor = app.getCanvasCursorPosition(event.pageX, event.pageY);
                 app.canvasClicked(cursor.x, cursor.y);
             }
             event.preventDefault();
@@ -547,9 +547,9 @@ var place = {
         });
     },
 
-    getCanvasCursorPosition: function() {
+    getCanvasCursorPosition: function(x = null, y = null) {
         var zoom = this._getZoomMultiplier();
-        return {x: Math.round((this.cursorX - $(this.cameraController).offset().left) / zoom), y: Math.round((this.cursorY - $(this.cameraController).offset().top) / zoom)};
+        return {x: Math.round(((x ? x : this.cursorX) - $(this.cameraController).offset().left) / zoom), y: Math.round(((y ? y : this.cursorY) - $(this.cameraController).offset().top) / zoom)};
     },
 
     loadUserCount: function() {
@@ -1155,7 +1155,6 @@ var place = {
                     if(rank !== null) {
                         popover.find(".rank-container").show();
                         popover.find(".rank-label").removeClass("label-info label-success").addClass(`label-${rank <= 25 ? (rank <= 5 ? "danger" : "success") : "info"}`).text(`Ranked #${rank.toLocaleString()}`);
-                        
                     } else popover.find(".rank-container").hide();
                     if (data.pixel.user.admin) popover.find("#pixel-badge").show().text("Admin");
                     else if (data.pixel.user.moderator) popover.find("#pixel-badge").show().text("Moderator");
