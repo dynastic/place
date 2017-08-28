@@ -4,7 +4,7 @@ var actionTemplates = null;
 var actions = {
     user: {
         similar: {
-            btnStyle: "info",
+            btnStyle: "default",
             type: "link",
             getLinkURL: (data) => `/admin/users/similar/${data.id}`,
             buttonText: (data) => "View Similar"
@@ -47,11 +47,12 @@ var actions = {
             btnStyle: "warning",
             buttonText: (data) => data.deactivated ? "Activate" : "Deactivate",
         },
-        mod: {
-            url: "admin/toggle_mod",
-            btnStyle: "success",
+        disableTOTP: {
+            url: "admin/disable_totp",
+            btnStyle: "info",
             adminOnly: true,
-            buttonText: (data) => `${data.moderator ? "Remove" : "Give"} Moderator`
+            shouldShow: (data) => data.hasTOTP,
+            buttonText: () => "Disable 2FA"
         },
         editUserNotes: {
             url: "mod/user_notes",
@@ -88,6 +89,12 @@ var actions = {
             getAttributes: function(data) {
                 return {"data-user-banned": data.banned};
             },
+        },
+        mod: {
+            url: "admin/toggle_mod",
+            btnStyle: "success",
+            adminOnly: true,
+            buttonText: (data) => `${data.moderator ? "Remove" : "Give"} Moderator`
         }
     },
     server: {
@@ -116,6 +123,8 @@ var actions = {
 
 var setActionDataOnElement = function(data, elem, action) {
     var title = action.buttonText(data);
+    var shouldShow = true;
+    if(typeof action["shouldShow"] === "function") shouldShow = action.shouldShow(data);
     var isPressed = false;
     var text = title;
     if(typeof action.icon === "function") text = `<i class="fa fa-${action.icon(data)}"></i>`
@@ -123,6 +132,8 @@ var setActionDataOnElement = function(data, elem, action) {
     if(typeof action.isActive === "function") isPressed = action.isActive(data);
     if(isPressed) elem.addClass("active")
     else elem.removeClass("active");
+    if(shouldShow) elem.removeClass("hidden");
+    else elem.addClass("hidden");
     elem.html(text);
 }
 
@@ -143,7 +154,7 @@ var renderAction = function(actionName, data = {}, type = "user", dropdown = fal
     return dropdown ? dropdownItem : btn;
 }
 
-var actionIDs = ["similar", "ban", "activation", "editUserNotes", "mod"]
+var actionIDs = Object.keys(actions.user);
 
 var canTouchUser = function(user) {
     var currentUserID = $("body").data("user-id");

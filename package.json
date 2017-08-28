@@ -37,7 +37,7 @@
     "marked": "^0.3.6",
     "md5": "^2.2.1",
     "mongoose": "^4.9.2",
-    "mongoose-datatables": "^3.0.0",
+    "mongoose-datatables": "github:applebetas/mongoose-datatables",
     "morgan": "^1.8.1",
     "pajk-lwip": "0.2.0",
     "passport": "^0.3.2",

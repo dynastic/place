@@ -177,6 +177,7 @@ function APIRouter(app) {
 
     router.post("/admin/users", app.modMiddleware, ModeratorUserController.getAPIUsersTable);
     router.get("/admin/toggle_mod", app.adminMiddleware, ModeratorUserController.postAPIToggleModerator);
+    router.get("/admin/disable_totp", app.adminMiddleware, ModeratorUserController.postAPIDisableTOTP);
 
     // Mod APIs
 
