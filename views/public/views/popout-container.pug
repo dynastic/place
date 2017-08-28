@@ -13,7 +13,7 @@
         .tab-content#leaderboardTab(data-tab-name="leaderboard")
             .coming-soon
                 p Loading…
-        if user
+        //if user
             .tab-content#achievementsTab(data-tab-name="achievements")
                 .coming-soon
                     p Coming Soon
@@ -23,6 +23,6 @@
     .tabbar
         .tab.active(data-tab-name="chat", title="Chat"): i.fa.fa-comments
         .tab(data-tab-name="leaderboard", title="Leaderboard"): i.fa.fa-trophy
-        if user
+        //if user
             .tab(data-tab-name="achievements", title="Achievements"): i.fa.fa-star
         .tab(data-tab-name="active-users", title="Active Users"): i.fa.fa-users
