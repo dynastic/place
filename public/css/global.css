@@ -573,6 +573,9 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     box-shadow: none;
     padding-right: 0;
 }
+.btn.btn-popping.btn-arrow {
+    background: none;
+}
 .btn.btn-popping.btn-arrow::after {
     content: "";
     display: inline-block;

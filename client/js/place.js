@@ -391,6 +391,11 @@ var place = {
             $("body").removeClass("picker-showing");
         })
 
+        $("#pixel-use-colour-btn").click(function() {
+            var colour = $(this).attr("data-represented-colour");
+            $("#colour-picker").minicolors("value", "#" + colour);
+        })
+
         setInterval(function() { app.doKeys() }, 15);
 
         this.dismissBtn = $("<button>").attr("type", "button").addClass("close").attr("data-dismiss", "alert").attr("aria-label", "Close");
@@ -1104,6 +1109,13 @@ var place = {
                 popover.find("#pixel-data-time").attr("title", new Date(data.pixel.modified).toLocaleString());
                 popover.find("#pixel-data-x").text(x.toLocaleString());
                 popover.find("#pixel-data-y").text(y.toLocaleString());
+                popover.find("#pixel-colour-code").text(`#${data.pixel.colour.toUpperCase()}`);
+                popover.find("#pixel-colour-preview").css("background-color", `#${data.pixel.colour}`);
+                if(data.pixel.colour.toLowerCase() == "ffffff") popover.find("#pixel-colour-preview").addClass("is-white");
+                else popover.find("#pixel-colour-preview").removeClass("is-white");
+                popover.find("#pixel-use-colour-btn").attr("data-represented-colour", data.pixel.colour);
+                if(this.canPlaceCustomColours) popover.find(".pixel-colour").addClass("allow-use");
+                else popover.find(".pixel-colour").removeClass("allow-use")
                 if(hasUser) {
                     var userInfoCtn = popover.find(".user-info");
                     userInfoCtn.show();
