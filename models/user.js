@@ -422,7 +422,6 @@ UserSchema.methods.getFeatureAvailability = function() {
 
 UserSchema.methods.getBadges = function(app) {
     var badges = [];
-    console.log("Has app (2):", app != null);
     if(app) {
         var rank = app.leaderboardManager.getUserRank(this.id);
         if(rank) badges.push({ text: `Ranked #${rank.toLocaleString()}`, style: rank <= 25 ? (rank <= 5 ? "danger" : "success") : "info", isRanking: true, lowPriority: true });
