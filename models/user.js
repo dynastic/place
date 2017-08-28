@@ -125,7 +125,8 @@ UserSchema.methods.toInfo = function(app = null) {
             lastPlace: this.lastPlace
         },
         banned: this.banned,
-        deactivated: this.deactivated
+        deactivated: this.deactivated,
+        badges: this.getBadges(app)
     };
     if (app) {
         info.statistics.placesThisWeek = app.leaderboardManager.pixelCounts[this.id];
@@ -417,6 +418,20 @@ UserSchema.methods.canPlaceColour = function(hex, app) {
 
 UserSchema.methods.getFeatureAvailability = function() {
     return {canPlaceCustomColours: this.canPlaceCustomColours()};
+}
+
+UserSchema.methods.getBadges = function(app) {
+    var badges = [];
+    console.log("Has app (2):", app != null);
+    if(app) {
+        var rank = app.leaderboardManager.getUserRank(this.id);
+        if(rank) badges.push({ text: `Ranked #${rank.toLocaleString()}`, style: rank <= 25 ? (rank <= 5 ? "danger" : "success") : "info", isRanking: true, lowPriority: true });
+    }
+    if(this.banned) badges.push({ text: "Banned", style: "danger", title: "This user has been banned from using Place 2.0 for breaking the rules." });
+    else if(this.deactivated) badges.push({ text: "Deactivated", style: "danger", title: "This user chose to deactivate their account." });
+    if(this.admin) badges.push({ text: "Admin", style: "warning", inlineBefore: true, title: "This user is a Place 2.0 administrator." });
+    else if(this.moderator) badges.push({ text: "Moderator", shortText: "Mod", style: "warning", inlineBefore: true, title: "This user is a Place 2.0 moderator." });
+    return badges;
 }
 
 UserSchema.plugin(dataTables, {

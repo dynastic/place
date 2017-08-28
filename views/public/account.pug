@@ -22,7 +22,10 @@ block content
             .user-header-info
                 .avatar: span= profileUser.getUsernameInitials()
                 .user-info
-                    span.username #{profileUser.name} !{profileUser.admin || profileUser.moderator ? `<span class="label label-warning badge-label">${profileUser.admin ? "Admin" : "Moderator"}</span>` : ""}
+                    span.username
+                        .
+                            #{profileUser.name}
+                        +renderBadges(profileUser.getBadges(null))
                     .subdetails
                         - var rank = profileUserInfo.statistics.leaderboardRank;
                         if rank !== null

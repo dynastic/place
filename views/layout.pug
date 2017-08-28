@@ -15,6 +15,11 @@ block dependencies
 - var hasCommunityGuidelines = fs.existsSync("./config/community_guidelines.md");
 - var hasTOS = TOSManager.hasTOSSync();
 - var hasPP = TOSManager.hasPrivacyPolicySync();
+mixin renderBadge(badge, prefersShortText = false)
+  span.label.badge-label(class=`label-${badge.style || "default"}`, title=badge.title) #{prefersShortText && badge.shortText ? badge.shortText : badge.text}
+mixin renderBadges(badges, prefersShortText = false)
+  each badge in badges
+    +renderBadge(badge, prefersShortText)
 mixin renderNavItem(name, itemPath, icon)
   - var isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
   li(id=`nav-${name.toLowerCase().replace(/ /g, "-")}`, class=(isCurrentPage ? "active" : ""))

@@ -113,6 +113,11 @@ body {
 
 .profile-info .user-info > .username .badge-label {
   font-size: 13px;
+  margin-left: 4px;
+  top: -7px;
+}
+.profile-info .user-info > .username .badge-label:first-child {
+  margin-left: 8px;
 }
 
 .profile-info .user-info {

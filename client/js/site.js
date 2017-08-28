@@ -2,6 +2,12 @@ $.ajaxSetup({
 	headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
 });
 
+var renderBadge = function(badge, prefersShortText = false) {
+	var badge = $("<span>").addClass(`label badge-label label-${badge.style || "default"}`).text(prefersShortText && badge.shortText ? badge.shortText : badge.text);
+	if(badge.title) badge.attr("title", badge.title);
+	return badge;
+}
+
 const defaultErrorMessage = "An unknown error occurred while trying to make that request.";
 var placeAjax = {
 	ajax: function(data, defaultErrorMessage = defaultErrorMessage, alwaysCallback = null) {

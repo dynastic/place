@@ -581,7 +581,6 @@ body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place
 
 .pixel-data > .summary > .contents > .user-summary > .rank-container {
     margin-top: 5px;
-    display: none;
 }
 
 .pixel-data > .summary > .contents > .user-summary > .username-container .username {

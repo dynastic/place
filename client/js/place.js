@@ -1134,7 +1134,8 @@ var place = {
                 else popover.find("#pixel-colour-preview").removeClass("is-white");
                 popover.find("#pixel-use-colour-btn").attr("data-represented-colour", data.pixel.colour);
                 if(this.canPlaceCustomColours) popover.find(".pixel-colour").addClass("allow-use");
-                else popover.find(".pixel-colour").removeClass("allow-use")
+                else popover.find(".pixel-colour").removeClass("allow-use");
+                popover.find(".rank-container > *").remove();
                 if(hasUser) {
                     var userInfoCtn = popover.find(".user-info");
                     userInfoCtn.show();
@@ -1151,28 +1152,17 @@ var place = {
                         element.appendTo(latestCtn.find(".value"));
                     }
                     popover.find("#pixel-data-username").attr("href", `/@${data.pixel.user.username}`);
-                    var rank = data.pixel.user.statistics.leaderboardRank;
-                    if(rank !== null) {
-                        popover.find(".rank-container").show();
-                        popover.find(".rank-label").removeClass("label-info label-success").addClass(`label-${rank <= 25 ? (rank <= 5 ? "danger" : "success") : "info"}`).text(`Ranked #${rank.toLocaleString()}`);
-                    } else popover.find(".rank-container").hide();
-                    if (data.pixel.user.admin) popover.find("#pixel-badge").show().text("Admin");
-                    else if (data.pixel.user.moderator) popover.find("#pixel-badge").show().text("Moderator");
-                    else popover.find("#pixel-badge").hide();
-                    if (data.pixel.user.banned) popover.find("#pixel-user-state-badge").show().text("Banned");
-                    else if (data.pixel.user.deactivated) popover.find("#pixel-user-state-badge").show().text("Deactivated");
-                    else popover.find("#pixel-user-state-badge").hide();
+                    var rankContainer = popover.find(".rank-container");
+                    data.pixel.user.badges.forEach((badge) => renderBadge(badge).appendTo(rankContainer));
                     popover.find("#user-actions-dropdown-ctn").html(renderUserActionsDropdown(data.pixel.user));
                 } else {
                     popover.find(".user-info, #pixel-badge, #pixel-user-state-badge").hide();
                     popover.find("#user-actions-dropdown-ctn").html("");
                     popover.find("#pixel-data-username").removeAttr("href");
-                    popover.find(".rank-container").hide();
                 }
             });
         }
         if(wasZoomedOut) return;
-
         if(this.selectedColour !== null && !this.placing) {
             this.changePlacingModalVisibility(true);
             var hex = this.getCurrentColourHex();

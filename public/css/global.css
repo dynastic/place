@@ -43,6 +43,10 @@ body.fixed-navbar {
     text-transform: uppercase;
     position: relative;
     top: -2px;
+    margin-left: 3px;
+}
+.badge-label:first-child {
+    margin-left: 0;
 }
 
 body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=true]) .actions-ctn *[data-admin-only=true] {

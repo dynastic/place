@@ -198,8 +198,8 @@ var popoutController = {
             }
             if(hasUser) {
                 usernameHTML.find("a.username").attr("href", `/@${item.user.username}`);
-                if(item.user.banned || item.user.deactivated) $(`<span class="label label-danger badge-label"></span>`).text(item.user.banned ? "Banned" : "Deactivated").appendTo(usernameHTML.find("a.username"));
-                if(item.user.moderator || item.user.admin) $(`<span class="label label-warning badge-label"></span>`).text(item.user.admin ? "Admin" : "Moderator").prependTo(usernameHTML.find("a.username"));
+                item.user.badges.filter((badge) => !badge.lowPriority && badge.inlineBefore).forEach((badge) => renderBadge(badge, true).prependTo(usernameHTML.find("a.username")));
+                item.user.badges.filter((badge) => !badge.lowPriority && !badge.inlineBefore).forEach((badge) => renderBadge(badge, true).appendTo(usernameHTML.find("a.username")));
             } else usernameHTML.find("a.username").addClass("deleted-account");
             if(needsUsername) usernameHTML.prependTo(ctn);
             ctn.find(".message").text(item.text).attr("title", messageDate.toLocaleString());
