@@ -58,6 +58,7 @@ function LeaderboardManager(app) {
         },
 
         getUserRank: function(userID) {
+            if(!this.topUsers) return null;
             var index = this.topUsers.indexOf(userID);
             return index >= 0 ? index + 1 : null;
         }
