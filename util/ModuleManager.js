@@ -63,11 +63,11 @@ class ModuleManager {
     }
 
     loadAll() {
-        this.logger.log('MODULE MANAGER', "Starting load of modules...");
+        this.logger.log('MODULE MANAGER', "Starting load of modules…");
         fs.readdir(modulesDirectory, (err, files) => {
             if(err) {
                 if(err.code == "ENOENT") {
-                    this.logger.log('MODULE MANAGER', "Creating modules directory because it doesn't exist...")
+                    this.logger.log('MODULE MANAGER', "Creating modules directory because it doesn't exist…")
                     fs.mkdirAsync(modulesDirectory);
                     return this.doneLoading();
                 }
