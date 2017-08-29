@@ -103,47 +103,6 @@ var notificationHandler = {
     }
 }
 
-var hashHandler = {
-    getHash: function() {
-        return this.decodeHash(window.location.hash);
-    },
-
-    setHash: function(hash) {
-        var encodedHash = this.encodeHash(hash);
-        if("history" in window) window.history.replaceState(undefined, undefined, "#" + encodedHash);
-        else location.replace("#" + encodedHash);
-    },
-
-    modifyHash: function(newHash) {
-        this.setHash(Object.assign(this.getHash(), newHash));
-    },
-
-    deleteHashKey: function(keys) {
-        var keysToUse = keys;
-        if(typeof keys == "string") keysToUse = [keys];
-        var hash = this.getHash();
-        keysToUse.forEach((key) => delete hash[key]);
-        this.setHash(hash);
-    },
-
-    decodeHash: function(hashString) {
-        if(hashString.indexOf("#") === 0) hashString = hashString.substring(1);
-        if (hashString.length <= 0) return {};
-        var hashArguments = hashString.split("&");
-        var decoded = {};
-        hashArguments.forEach(function(hashArg) {
-            var parts = hashArg.split("=");
-            var key = parts[0], value = decodeURIComponent(parts[1]);
-            if(key) decoded[key] = value;
-        });
-        return decoded;
-    },
-
-    encodeHash: function(hash) {
-        return $.param(hash);
-    }
-}
-
 var place = {
     zooming: {
         zoomedIn: false,
