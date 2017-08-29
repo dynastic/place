@@ -15,6 +15,11 @@ class JavaScriptProcessor {
             }
         };
 
+        var swallowError = function() {
+            app.reportError("Error while processing JavaScript: " + error);
+            this.emit("end");
+        }
+
         // Clean existing built JavaScript
         gulp.task("clean", () => del([this.paths.scripts.built]));
         // Process JavaScript
@@ -42,11 +47,6 @@ class JavaScriptProcessor {
     watchJavaScript() {
         // Rerun the task when a file changes 
         gulp.task("watch", () => gulp.watch(this.paths.scripts.src, ["scripts"]));
-    }
-    
-    swallowError(error) {
-        this.app.reportError("Error while processing JavaScript: " + error);
-        this.emit("end");
     }
 }
 
