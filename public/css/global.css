@@ -235,12 +235,6 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     -webkit-backdrop-filter: blur(0);
 }
 
-@media(max-height: 600px) {
-  .dialog-ctn {
-      display: block!important;
-  }
-}
-
 .dialog-ctn {
     opacity: 0;
     transition: 0.25s opacity ease-in-out, 0.25s backdrop-filter ease-in-out, 0.25s -webkit-backdrop-filter ease-in-out;
@@ -311,7 +305,7 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
 .dialog {
     background: #fff;
     position: relative;
-    margin: 0 auto;
+    margin: auto;
     display: block;
     width: 100%;
     max-width: 465px;
