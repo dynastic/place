@@ -2,8 +2,9 @@ const path = require("path");
 const fs = require("fs");
 const md5 = require("md5");
 
-const tosPath = path.join(__dirname, ".." + path.sep + "config" + path.sep + "tos.md");
-const ppPath = path.join(__dirname, ".." + path.sep + "config" + path.sep + "privacy_policy.md");
+const configPath = path.join(__dirname, "..", "config");
+const tosPath = path.join(configPath, "tos.md");
+const ppPath = path.join(configPath, "privacy_policy.md");
 
 class TOSManager {
     constructor() {
