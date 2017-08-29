@@ -33,34 +33,30 @@ block adminContent
         a(href="/admin/actions") See all &raquo;
     .dashboard-actions-ctn.compact#actions-ctn
     if user.admin
-        .modal.fade#broadcastModal(tabindex="-1", role="dialog", aria-labelledby="broadcastModalLabel")
-            .modal-dialog(role="document")
-                .modal-content
-                    form.form-horizontal#broadcastForm
-                        .modal-header
-                            button.close(type="button", data-dismiss="modal", aria-label="Close"): span(aria-hidden="true") &times
-                            h4.modal-title#broadcastModalLabel Admin Broadcast
-                        .modal-body
-                            p Send a message to all users currently viewing connected to the websockets.
-                            .form-group
-                                label.col-sm-2.control-label(for="inputBroadcastTitle") Title
-                                .col-sm-10: input.form-control#inputBroadcastTitle(type="text", placeholder="Title (optional)")
-                            .form-group
-                                label.col-sm-2.control-label(for="inputBroadcastMessage") Message
-                                .col-sm-10: input.form-control#inputBroadcastMessage(type="text", placeholder="Message")
-                            .form-group
-                                label.col-sm-2.control-label(for="inputBroadcastStyle") Style
-                                .col-sm-10
-                                    select.selectpicker.form-control#inputBroadcastStyle
-                                        option(value="info") Informative
-                                        option(value="success") Success
-                                        option(value="warning") Warning
-                                        option(value="danger") Danger
-                            .form-group
-                                label.col-sm-2.control-label(for="inputBroadcastTimeout") Timeout
-                                .col-sm-10
-                                    input.form-control#inputBroadcastTimeout(type="number", placeholder="Timeout", value="0", aria-describedby="inputBroadcastTimeoutHelpBlock")
-                                    span.help-block#inputBroadcastTimeoutHelpBlock How long to wait before automatically dismissing the alert in seconds. Enter #[strong 0] to never automatically dismiss.
-                        .modal-footer
-                            button.btn.btn-default(type="button", data-dismiss="modal") Cancel
-                            button.btn.btn-primary(type="submit") Broadcast
+        form#broadcastForm: .dialog-ctn
+            .dialog-overlay
+            .dialog#broadcast-dialog
+                .close &times;
+                .pages
+                    .active(tab-name="sign-up")
+                        .heading
+                            span.site Place 2.0
+                            h1 Send Admin Broadcast
+                            p.subhead Send a message to all users currently viewing connected to the websockets.
+                        .content
+                            label.sr-only(for="inputBroadcastTitle") Title (optional)
+                            input.form-control#inputBroadcastTitle(type="text", placeholder="Title (optional)")
+                            label.sr-only(for="inputBroadcastMessage") Message
+                            input.form-control#inputBroadcastMessage(type="text", placeholder="Message")
+                            label.sr-only(for="inputBroadcastTitle") Style
+                            select.selectpicker.form-control#inputBroadcastStyle
+                                option(value="info") Informative
+                                option(value="success") Success
+                                option(value="warning") Warning
+                                option(value="danger") Danger
+                            label.sr-only(for="inputBroadcastTimeout") Timeout
+                            input.form-control#inputBroadcastTimeout(type="number", placeholder="Timeout", value="0", aria-describedby="inputBroadcastTimeoutHelpBlock")
+                            small.text-muted.help-block#inputBroadcastTimeoutHelpBlock How long to wait before automatically dismissing the alert in seconds. Enter #[strong 0] to never automatically dismiss.
+                .dialog-footer.align-end
+                    button.btn.btn-popping.btn-default(type="button", data-dialog-dismiss=true) Cancel
+                    button.btn.btn-popping.btn-primary(type="submit") Broadcast

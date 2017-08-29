@@ -1,6 +1,8 @@
 var defaultBanReason = "";
 var actionTemplates = null;
 
+var BroadcastDialogController = DialogController($("#broadcast-dialog"));
+
 var actions = {
     user: {
         similar: {
@@ -144,6 +146,13 @@ var actions = {
                 alert("Successfully refreshed all clients currently connected to websockets.")
             },
             buttonText: (data) => "Refresh All Clients"
+        },
+        broadcastMessage: {
+            type: "event",
+            btnStyle: "info",
+            buttonText: (data) => "Broadcast Message",
+            adminOnly: true,
+            onClick: () => BroadcastDialogController.show()
         }
     }
 };
@@ -201,11 +210,9 @@ var renderUserActions = function(user) {
 }
 
 var renderServerActions = function() {
-    return `<div class="actions-ctn">
-        ${renderAction("reloadConfig", {}, "server")[0].outerHTML}
-        ${renderAction("refreshClients", {}, "server")[0].outerHTML}
-        <a href="javascript:void(0);" class="server-action-btn btn btn-info action-btn" data-toggle="modal" data-target="#broadcastModal">Broadcast message</button>
-    </div>`
+    var actionContainer = $("<div>").addClass("action-ctn");
+    Object.keys(actions.server).forEach((key) => renderAction(key, {}, "server").appendTo(actionContainer));
+    return actionContainer[0].outerHTML;
 }
 
 var renderUserActionsDropdown = function(user) {
@@ -252,6 +259,7 @@ $("body").on("click", ".user-action-btn", function() {
 $("body").on("click", ".server-action-btn", function() {
     var action = actions.server[$(this).data("server-action")];
     var data = {};
+    if(action.type == "event" && typeof action.onClick === "function") return action.onClick($(this));
     if(typeof action.getRequestData === "function") data = action.getRequestData($(this));
     if(!data) return;
     var originalText = $(this).html();
@@ -270,13 +278,14 @@ $("body").on("click", ".server-action-btn", function() {
 
 $("#broadcastForm").submit(function(e) {
     e.preventDefault();
+    var submitBtn = $(this).find("#broadcastFormSubmit").text("Broadcasting...").attr("disabled", "disabled");
     placeAjax.post("/api/admin/broadcast", {
         title: $(this).find("#inputBroadcastTitle").val(),
         message: $(this).find("#inputBroadcastMessage").val(),
         style: $(this).find("#inputBroadcastStyle").val(),
         timeout: $(this).find("#inputBroadcastTimeout").val()
-    }, "An unknown error occurred while trying to send your broadcast.").then((data) => {
-        $("#broadcastModal").modal("hide");
+    }, "An unknown error occurred while trying to send your broadcast.", () => submitBtn.text("Broadcast").removeAttr("disabled")).then((data) => {
+        BroadcastDialogController.hide();
         window.alert("Successfully sent out broadcast to all connected clients.");
     }).catch(() => {});
 })
