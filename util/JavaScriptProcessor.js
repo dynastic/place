@@ -28,9 +28,9 @@ class JavaScriptProcessor {
             var t = gulp.src(this.paths.scripts.src);
             t = t.pipe(sourcemaps.init());
             t = t.pipe(babel({ presets: ["es2015"] }));
-            t = t.on("error", this.swallowError);
+            t = t.on("error", swallowError);
             if(!this.app.config.debug) t = t.pipe(uglify());
-            t = t.on("error", this.swallowError);
+            t = t.on("error", swallowError);
             t = t.pipe(sourcemaps.write('.'));
             t = t.pipe(gulp.dest(this.paths.scripts.built));
             t = t.on("end", () => this.app.logger.info('Babel', "Finished processing JavaScript."));
