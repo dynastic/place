@@ -73,10 +73,12 @@ class ChangelogManager {
         return this.getChangelogs().filter((c) => c.version < version);
     }
 
-    getPaginationInfo(version) {
+    getPaginationInfo(version, forceDisableNext = false) {
         if(!version) return {};
         var versions = this.getChangelogVersions();
-        return {next: versions.filter((c) => c > version).slice(-1).pop(), previous: versions.filter((c) => c < version)[0]}
+        var previous = versions.filter((c) => c < version)[0];
+        var next = forceDisableNext ? null : versions.filter((c) => c > version).slice(-1).pop();
+        return {next: next, previous: previous}
     }
 }
 

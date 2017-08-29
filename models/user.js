@@ -227,7 +227,8 @@ UserSchema.statics.register = function(username, password, app, callback, OAuthI
             admin: false,
             isOauth: !!OAuthID,
             OAuthID: OAuthID,
-            OAuthName: OAuthName
+            OAuthName: OAuthName,
+            latestChangelogFetch: app.changelogManager.getLatestChangelogVersion()
         });
 
         TOSManager.hasTOS().then((hasTOS) => {
@@ -235,7 +236,7 @@ UserSchema.statics.register = function(username, password, app, callback, OAuthI
             else TOSManager.getCurrentTOSVersion().then((version) => {
                 newUser.lastAcceptedTOSRevision = version;
             })
-        })
+        });
 
         // Save the user
         newUser.save(function(err) {

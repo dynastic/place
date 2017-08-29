@@ -357,7 +357,7 @@ var place = {
             if(document.activeElement.tagName != "INPUT") handleKeyEvents(e);
         }
         document.body.onkeydown = function(e) {
-            if(document.activeElement.tagName != "INPUT") {
+            if(document.activeElement.tagName != "INPUT" && $(".dialog-ctn.show").length <= 0) {
                 handleKeyEvents(e);
                 app.handleKeyDown(e.keyCode || e.which);
             }
@@ -1320,10 +1320,24 @@ if(place.isSignedIn()) {
         changelogs: null, pagination: null,
         isLoadingChangelogs: false,
 
+        setup: function() {
+            $(document).on("keydown", (e) => {
+                var isLeft = e.keyCode == 37, isRight = e.keyCode == 39;
+                if(ChangelogDialogController.isShowing() && (isLeft || isRight) && this.pagination) {
+                    e.preventDefault();
+                    if(this.pagination.next && isRight) this.requestChangelogPage(this.pagination.next);
+                    if(this.pagination.previous && isLeft) this.requestChangelogPage(this.pagination.previous);
+                }
+            });
+
+            return this;
+        },
+
         getMissedChangelogs: function() {
             if(this.isLoadingChangelogs) return;
             this.isLoadingChangelogs = true;
             placeAjax.get("/api/changelog/missed", null, null, () => { this.isLoadingChangelogs = false; }).then((data) => {
+                placeAjax.post("/api/changelog/missed");
                 this.changelogs = data.changelogs;
                 this.pagination = data.pagination;
                 this.layoutChangelogs();
@@ -1374,6 +1388,6 @@ if(place.isSignedIn()) {
             else if(date.toDateString() == y.toDateString()) return "Yesterday";
             else return date.toLocaleDateString();
         }
-    };
+    }.setup();
     changelogController.getMissedChangelogs();
 }

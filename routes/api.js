@@ -170,7 +170,7 @@ function APIRouter(app) {
     router.get("/user/:username", AccountPageController.getAPIAccount);
 
     router.get("/changelog/latest", ChangelogController.getLatestChangelog);
-    router.route("/changelog/missed").get([requireUser, ChangelogController.getMissedChangelogs]).delete([requireUser, ChangelogController.deleteMissedChangelogs]);
+    router.route("/changelog/missed").get([requireUser, ChangelogController.getMissedChangelogs]).post([requireUser, ChangelogController.postMissedChangelogs]).delete([requireUser, ChangelogController.deleteMissedChangelogs]);
     router.get("/changelog/:version", ChangelogController.getChangelog);
 
     // Admin APIs

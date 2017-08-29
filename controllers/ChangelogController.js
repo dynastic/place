@@ -4,11 +4,15 @@ exports.getMissedChangelogs = (req, res, next) => {
     if(req.user.latestChangelogFetch) changelogs = req.place.changelogManager.getChangelogsSince(req.user.latestChangelogFetch);
     else changelogs = req.place.changelogManager.getChangelogs();
     changelogs = changelogs.slice(0, 2);
-    if(changelogs[0]) {
-        req.user.latestChangelogFetch = changelogs[0].version;
-        req.user.save();
-    }
-    res.json({success: true, changelogs: changelogs, pagination: req.place.changelogManager.getPaginationInfo(changelogs[changelogs.length - 1])});
+    res.json({success: true, changelogs: changelogs, pagination: req.place.changelogManager.getPaginationInfo(changelogs.length > 0 ? changelogs[changelogs.length - 1].version : null, true)});
+}
+
+exports.postMissedChangelogs = (req, res, next) => {
+    req.user.latestChangelogFetch = req.place.changelogManager.getLatestChangelogVersion();
+    req.user.save().then(() => res.json({success: true})).catch((err) => {
+        req.place.logger.error("Changelogs", "Couldn't save user missed changelogs version: " + err);
+        res.status(500).json({success: false, error: {message: "An unknown error occurred while update the changelog read status.", code: "server_error"}});
+    });
 }
 
 exports.deleteMissedChangelogs = (req, res, next) => {

@@ -846,3 +846,7 @@ table.table.table-contained, td {
 #changelog-content .pager {
     margin-bottom: 0;
 }
+
+#changelog-content .lead {
+    margin-bottom: 5px;
+}
