@@ -87,6 +87,15 @@ var UserSchema = new Schema({
     totpSecret: {
         type: String,
         required: false
+    },
+    latestChangelogFetch: {
+        type: String,
+        required: false
+    },
+    changelogOptedOut: {
+        type: Boolean,
+        required: false,
+        default: false
     }
 });
 

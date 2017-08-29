@@ -9,6 +9,7 @@ module.exports = {
     "googleAnalyticsTrackingID": "", // UA-XXXXXXXX-XX
     "host": "http://place.dynastic.co", // the publicly accessible URL of the site
     "placeTimeout": 60,
+    'enableChangelogs': true,
     //"raven": "", 
     //"publicRaven": "", 
     // "bugsnag": "",

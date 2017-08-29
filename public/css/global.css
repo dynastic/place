@@ -229,7 +229,6 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     display: flex!important;
     align-items: center;
     justify-content: center;
-    justify-content: center;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     backdrop-filter: blur(0);
@@ -417,7 +416,11 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
 }
 
 .dialog .heading {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+}
+
+.dialog .heading.no-margin {
+    margin-bottom: 0;
 }
 
 .dialog .heading h1 {
@@ -437,11 +440,15 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     display: block;
 }
 
-.dialog .heading .subhead {
+.dialog .subhead {
     font-size: 15px;
     color: #8b8b8b;
     letter-spacing: 0.47px;
     margin-top: 9px;
+}
+
+.dialog .subhead.extra-margin {
+    margin-bottom: 10px;
 }
 
 .dialog input {
@@ -532,6 +539,10 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
 
 .dialog input[type=checkbox]:checked:after {
     background-size: 14px;
+}
+
+.dialog .form-signin {
+    padding-top: 10px;
 }
 
 .dialog a {
@@ -822,4 +833,16 @@ table.table.table-contained, td {
 .sentry-error-embed-wrapper {
     top: 50px!important;
     -webkit-overflow-scrolling: touch!important;
+}
+
+.changelog > ul {
+    padding: 0 20px;
+}
+
+#changelog-content.needs-margin {
+    margin-top: 10px;
+}
+
+#changelog-content .pager {
+    margin-bottom: 0;
 }

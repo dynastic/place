@@ -6,138 +6,149 @@
 
 var size;
 
-var SignInDialogController = {
-    dialog: $("#sign-in-dialog"),
-    currentTab: null,
-    isAnimating: false,
+function DialogController(dialog) {
+    return {
+        dialog: dialog,
+        currentTab: null,
+        isAnimating: false,
 
-    setup: function() {
-        var me = this;
-        me.dialog.parent().find(".dialog .close, .dialog-overlay").click(function() {
-            me.hide();
-        });
-        me.dialog.find(".switchers > div").click(function() {
-            var id = $(this).attr("tab-name");
-            me.switchTab(id);
-        });
-        $(document).keydown(function(e) {
-            if(me.isShowing() && e.keyCode == 27) { // escape
-                e.preventDefault();
+        setup: function() {
+            var me = this;
+            me.dialog.parent().find(".dialog .close, .dialog-overlay").click(function() {
                 me.hide();
-            }
-        })
-        me.dialog.find("form.form-signin").submit(function(e) {
-            e.preventDefault();
-            var form = $(this);
-            var call = form.attr("action");
-            var tab = form.parent().attr("tab-name");
-            var data = form.serialize();
-            if(form.data("submitting")) return;
-            var submitButton = form.find("input[type=submit], button[type=submit]");
-            var origSubmitButtonText = submitButton.text();
-            submitButton.text("Loading").attr("disabled", "disabled");
-            form.data("submitting", true);
-            placeAjax.post("/api" + call, data, null, () => {
-                submitButton.removeAttr("disabled");
-                if(origSubmitButtonText) submitButton.text(origSubmitButtonText);
-                form.data("submitting", false);
-            }).then((data) => {
-                var hash = hashHandler.getHash();
-                var redirectURL = hash["redirectURL"];
-                const absoluteURLRegex = new RegExp('^(?:[a-z]+:)?(//)?', 'i');
-                if(redirectURL && redirectURL != "/" && !absoluteURLRegex.test(redirectURL)) {
-                    window.location.href = redirectURL;
-                } else {
-                    window.location.reload();
+            });
+            me.dialog.find(".switchers > div").click(function() {
+                var id = $(this).attr("tab-name");
+                me.switchTab(id);
+            });
+            $(document).keydown(function(e) {
+                if(me.isShowing() && e.keyCode == 27) { // escape
+                    e.preventDefault();
+                    me.hide();
                 }
-            }).catch((err) => {
-                if(tab == "sign-in" && err && err.code == "totp_needed") {
-                    $("#inputUsername2FA").val(form.find("#inputUsername").val());
-                    $("#inputPassword2FA").val(form.find("#inputPassword").val());
-                    me.switchTab("2fa-auth");
+            })
+            me.dialog.on("click", "[data-dialog-dismiss]", function() {
+                me.hide();
+            })
+            me.dialog.find("form.form-signin").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var call = form.attr("action");
+                var tab = form.parent().attr("tab-name");
+                var data = form.serialize();
+                if(form.data("submitting")) return;
+                var submitButton = form.find("input[type=submit], button[type=submit]");
+                var origSubmitButtonText = submitButton.text();
+                submitButton.text("Loading").attr("disabled", "disabled");
+                form.data("submitting", true);
+                placeAjax.post("/api" + call, data, null, () => {
+                    submitButton.removeAttr("disabled");
+                    if(origSubmitButtonText) submitButton.text(origSubmitButtonText);
+                    form.data("submitting", false);
+                }).then((data) => {
+                    var hash = hashHandler.getHash();
+                    var redirectURL = hash["redirectURL"];
+                    const absoluteURLRegex = new RegExp('^(?:[a-z]+:)?(//)?', 'i');
+                    if(redirectURL && redirectURL != "/" && !absoluteURLRegex.test(redirectURL)) {
+                        window.location.href = redirectURL;
+                    } else {
+                        window.location.reload();
+                    }
+                }).catch((err) => {
+                    if(tab == "sign-in" && err && err.code == "totp_needed") {
+                        $("#inputUsername2FA").val(form.find("#inputUsername").val());
+                        $("#inputPassword2FA").val(form.find("#inputPassword").val());
+                        me.switchTab("2fa-auth");
+                        return;
+                    }
+                    if(tab == "sign-up") grecaptcha.reset();
+                    me.shake();
+                    var error = "An unknown error occurred while attempting to authenticate you.";
+                    if(err && err.message) error = err.message;
+                    me.showErrorOnTab(tab, error);
+                });
+            });
+            return me;
+        },
+
+        isShowing: function() {
+            return this.dialog.parent().hasClass("show");
+        },
+
+        shake: function() {                
+            this.dialog.addClass("shake");
+            setTimeout(() => { this.dialog.removeClass("shake"); }, 500);
+        },
+
+        showErrorOnTab: function(tab, text = null) {
+            var tabContent = this.dialog.find(`.pages > div[tab-name=${tab}]`);
+            if(text) {
+                // show error
+                var existing = tabContent.find(".tab-error");
+                if(existing.length > 0) {
+                    existing.find("span").text(text);
                     return;
                 }
-                if(tab == "sign-up") grecaptcha.reset();
-                me.shake();
-                var error = "An unknown error occurred while attempting to authenticate you.";
-                if(err && err.message) error = err.message;
-                me.showErrorOnTab(tab, error);
-            });
-        });
-        return me;
-    },
+                var alert = $("<div>").addClass("tab-error alert alert-danger").hide().appendTo(tabContent).fadeIn();
+                $("<strong>").text("Uh oh! ").appendTo(alert);
+                $("<span>").text(text).appendTo(alert);
+            } else {
+                tabContent.find(".tab-error").remove();
+            }
+        },
 
-    isShowing: function() {
-        return this.dialog.parent().hasClass("show");
-    },
+        switchTab: function(tab, animated = true) {
+            if(tab == this.currentTab || this.isAnimating) return;
+            this.dialog.find(`.pages > div:not([tab-name=${tab}]) .tab-error`).remove();
+            this.currentTab = tab;
+            this.isAnimating = true;
+            var hidesSwitchers = this.dialog.find(`.pages > div[tab-name=${tab}]`).hasClass("hides-switchers");
+            var applyClasses = () => {
+                this.isAnimating = false;
+                this.dialog.find(".pages > div.active, .switchers > div.active").removeClass("active");
+                this.dialog.find(".switchers").removeClass("hidden");
+                this.dialog.find(`.pages > div[tab-name=${tab}], .switchers > div[tab-name=${tab}]`).addClass("active");
+                if(hidesSwitchers) $(`.switchers`).addClass("hidden");
+            }
+            if(animated) {
+                const animDuration = 250;
+                var toHide = $(`.pages > div.active, .switchers${hidesSwitchers ? "" : ` > div[tab-name=${tab}]`}`).animate({opacity: 0}, {duration: animDuration, queue: false}).slideUp({duration: animDuration, queue: false, complete: function() {
+                    $(this).attr("style", "");
+                    applyClasses();
+                }});
+                this.dialog.find(".switchers").removeClass("hidden");
+                $(`.pages > div[tab-name=${tab}], .switchers > div.active`).css({opacity: 1}).slideDown(animDuration, function() {
+                    $(this).attr("style", "");
+                });
+            } else applyClasses();
+        },
 
-    shake: function() {                
-        this.dialog.addClass("shake");
-        setTimeout(() => { this.dialog.removeClass("shake"); }, 500);
-    },
+        show: function(tab = null) {
+            if(this.isShowing()) return;
+            if(tab) this.switchTab(tab, false);
+            this.dialog.parent().addClass("show");
+            hashHandler.modifyHash({"d": 1});
+        },
 
-    showErrorOnTab: function(tab, text = null) {
-        var tabContent = this.dialog.find(`.pages > div[tab-name=${tab}]`);
-        if(text) {
-            // show error
-            var existing = tabContent.find(".tab-error");
-            if(existing.length > 0) {
-                existing.find("span").text(text);
+        hide: function(){ 
+            this.dialog.find(".tab-error").remove();
+            if(this.currentTab == "2fa-auth") {
+                this.dialog.find(".pages > .active form").trigger("reset");
+                this.switchTab("sign-in");
                 return;
             }
-            var alert = $("<div>").addClass("tab-error alert alert-danger").hide().appendTo(tabContent).fadeIn();
-            $("<strong>").text("Uh oh! ").appendTo(alert);
-            $("<span>").text(text).appendTo(alert);
-        } else {
-            tabContent.find(".tab-error").remove();
+            this.dialog.find("form").trigger("reset");
+            this.dialog.parent().removeClass("show");
+            hashHandler.deleteHashKey("d");
         }
-    },
-
-    switchTab: function(tab, animated = true) {
-        if(tab == this.currentTab || this.isAnimating) return;
-        this.dialog.find(`.pages > div:not([tab-name=${tab}]) .tab-error`).remove();
-        this.currentTab = tab;
-        this.isAnimating = true;
-        var hidesSwitchers = this.dialog.find(`.pages > div[tab-name=${tab}]`).hasClass("hides-switchers");
-        var applyClasses = () => {
-            this.isAnimating = false;
-            this.dialog.find(".pages > div.active, .switchers > div.active").removeClass("active");
-            this.dialog.find(".switchers").removeClass("hidden");
-            this.dialog.find(`.pages > div[tab-name=${tab}], .switchers > div[tab-name=${tab}]`).addClass("active");
-            if(hidesSwitchers) $(`.switchers`).addClass("hidden");
-        }
-        if(animated) {
-            const animDuration = 250;
-            var toHide = $(`.pages > div.active, .switchers${hidesSwitchers ? "" : ` > div[tab-name=${tab}]`}`).animate({opacity: 0}, {duration: animDuration, queue: false}).slideUp({duration: animDuration, queue: false, complete: function() {
-                $(this).attr("style", "");
-                applyClasses();
-            }});
-            this.dialog.find(".switchers").removeClass("hidden");
-            $(`.pages > div[tab-name=${tab}], .switchers > div.active`).css({opacity: 1}).slideDown(animDuration, function() {
-                $(this).attr("style", "");
-            });
-        } else applyClasses();
-    },
-
-    show: function(tab = null) {
-        if(this.isShowing()) return;
-        if(tab) this.switchTab(tab, false);
-        this.dialog.parent().addClass("show");
-        hashHandler.modifyHash({"d": 1});
-    },
-
-    hide: function(){ 
-        this.dialog.find(".tab-error").remove();
-        if(this.currentTab == "2fa-auth") {
-            this.dialog.find(".pages > .active form").trigger("reset");
-            this.switchTab("sign-in");
-            return;
-        }
-        this.dialog.find("form").trigger("reset");
-        this.dialog.parent().removeClass("show");
-        hashHandler.deleteHashKey("d");
     }
-}.setup();
+}
+
+var SignInDialogController = DialogController($("#sign-in-dialog")).setup();
+var ChangelogDialogController = DialogController($("#changelog-dialog")).setup();
+ChangelogDialogController.dialog.find("#changelog-opt-out").click(function() {
+    placeAjax.delete("/api/changelog/missed");
+})
 
 var canvasController = {
     isDisplayDirty: false,
@@ -1302,3 +1313,67 @@ $("*[data-place-trigger]").click(function() {
         SignInDialogController.show();
     }
 });
+
+if(place.isSignedIn()) {
+    var changelogController = {
+        contentElement: $("#changelog-content"),
+        changelogs: null, pagination: null,
+        isLoadingChangelogs: false,
+
+        getMissedChangelogs: function() {
+            if(this.isLoadingChangelogs) return;
+            this.isLoadingChangelogs = true;
+            placeAjax.get("/api/changelog/missed", null, null, () => { this.isLoadingChangelogs = false; }).then((data) => {
+                this.changelogs = data.changelogs;
+                this.pagination = data.pagination;
+                this.layoutChangelogs();
+                if(this.changelogs && this.changelogs.length > 0) this.showDialog();
+            }).catch((err) => console.warn("Couldn't load changelogs: " + err));
+        },
+
+        requestChangelogPage: function(id) {
+            if(this.isLoadingChangelogs) return;
+            this.isLoadingChangelogs = true;
+            placeAjax.get("/api/changelog/" + id, null, null, () => { this.isLoadingChangelogs = false; }).then((data) => {
+                if(data.changelog) this.changelogs = [data.changelog];
+                else this.changelogs = [];
+                this.pagination = data.pagination;
+                this.layoutChangelogs();
+            }).catch((err) => console.warn("Couldn't load changelog with ID:" + id + ", error: " + err));
+        },
+
+        showDialog: function()  {
+            ChangelogDialogController.show();
+        },
+
+        layoutChangelogs: function() {
+            if(!this.changelogs) return this.contentElement.addClass("needs-margin").text("Loading…");
+            if(this.changelogs.length <= 0) return this.contentElement.addClass("needs-margin").text("There's no changelog to show.");
+            this.contentElement.html("").removeClass("needs-margin");
+            this.changelogs.forEach((changelog) => {
+                var element = $("<div>").addClass("changelog-info").attr("data-changelog-version", changelog.version).appendTo(this.contentElement);
+                $("<p>").addClass("subhead extra-margin").text(this.getFormattedDate(changelog.date)).appendTo(element);
+                $("<p>").html(changelog.html).appendTo(element);
+            });
+            if(this.pagination) {
+                var paginationContainer = $("<ul>").addClass("pager").appendTo($("<nav>").attr("aria-label", "Changelog page navigation").appendTo(this.contentElement));
+                var previous = $("<a>").html("<span aria-hidden=\"true\">&larr;</span> Older").appendTo($("<li>").addClass("previous").appendTo(paginationContainer));
+                var next = $("<a>").html("Newer <span aria-hidden=\"true\">&rarr;</span>").appendTo($("<li>").addClass("next").appendTo(paginationContainer));
+                if(this.pagination.previous) previous.attr("href", "javascript:void(0)").click(() => this.requestChangelogPage(this.pagination.previous));
+                else previous.parent().addClass("disabled");
+                if(this.pagination.next) next.attr("href", "javascript:void(0)").click(() => this.requestChangelogPage(this.pagination.next));
+                else next.parent().addClass("disabled");
+            }
+        },
+
+        getFormattedDate: function(dateStr) {
+            var date = new Date(dateStr);
+            var t = new Date(), y = new Date();
+            y.setDate(y.getDate() - 1);
+            if(date.toDateString() == (new Date()).toDateString()) return "Today";
+            else if(date.toDateString() == y.toDateString()) return "Yesterday";
+            else return date.toLocaleDateString();
+        }
+    };
+    changelogController.getMissedChangelogs();
+}
