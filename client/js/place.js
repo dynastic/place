@@ -6,8 +6,8 @@
 
 var size;
 
-var SignInDialogController = DialogController($("#sign-in-dialog")).setup();
-var ChangelogDialogController = DialogController($("#changelog-dialog")).setup();
+var SignInDialogController = DialogController($("#sign-in-dialog"));
+var ChangelogDialogController = DialogController($("#changelog-dialog"));
 ChangelogDialogController.dialog.find("#changelog-opt-out").click(function() {
     placeAjax.delete("/api/changelog/missed");
 })

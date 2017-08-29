@@ -143,7 +143,7 @@ function DialogController(dialog) {
             this.dialog.parent().removeClass("show");
             hashHandler.deleteHashKey("d");
         }
-    }
+    }.setup();
 }
 
 const defaultErrorMessage = "An unknown error occurred while trying to make that request.";

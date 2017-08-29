@@ -308,7 +308,6 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     margin: auto;
     display: block;
     width: 100%;
-    max-width: 465px;
     box-shadow: 0 20px 50px 20px rgba(0,0,0,0.45);
     border-radius: 4px;
     z-index: 1051;
@@ -317,6 +316,18 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     -ms-user-select: none;
     -webkit-user-select: none;
     cursor: default;
+}
+
+.dialog, .dialog.dialog-sm {
+    max-width: 465px;
+}
+
+.dialog.dialog-md {
+    max-width: 600px;
+}
+
+.dialog.dialog-lg {
+    max-width: 768px;
 }
 
 .dialog > .pages > div {
@@ -367,7 +378,7 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     bottom: 0;
     right: 0;
     border-radius: 0;
-    max-width: initial;
+    max-width: initial!important;
     display: flex!important;
     flex-direction: column;
   }
@@ -537,10 +548,6 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
 
 .dialog .form-signin {
     padding-top: 10px;
-}
-
-.dialog a {
-    color: #4ACDFF;
 }
 
 .btn.btn-popping {
@@ -756,7 +763,7 @@ li#nav-auth-link {
 }
 
 a {
-  color: #009ef7;
+    color: #4ACDFF;
 }
 
 table.table.table-contained, td {
