@@ -278,7 +278,7 @@ $("body").on("click", ".server-action-btn", function() {
 
 $("#broadcastForm").submit(function(e) {
     e.preventDefault();
-    var submitBtn = $(this).find("#broadcastFormSubmit").text("Broadcasting...").attr("disabled", "disabled");
+    var submitBtn = $(this).find("button[type=submit]").text("Broadcasting...").attr("disabled", "disabled");
     placeAjax.post("/api/admin/broadcast", {
         title: $(this).find("#inputBroadcastTitle").val(),
         message: $(this).find("#inputBroadcastMessage").val(),
