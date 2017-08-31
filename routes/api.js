@@ -15,6 +15,7 @@ const SignUpController = require("../controllers/SignUpController");
 const AccountPageController = require("../controllers/AccountPageController");
 const TOTPSetupController = require("../controllers/TOTPSetupController");
 const ChangelogController = require("../controllers/ChangelogController");
+const WarpController = require("../controllers/WarpController");
 
 function APIRouter(app) {
     let router = express.Router();
@@ -172,6 +173,9 @@ function APIRouter(app) {
     router.get("/changelog/latest", ChangelogController.getLatestChangelog);
     router.route("/changelog/missed").get([requireUser, ChangelogController.getMissedChangelogs]).post([requireUser, ChangelogController.postMissedChangelogs]).delete([requireUser, ChangelogController.deleteMissedChangelogs]);
     router.get("/changelog/:version", ChangelogController.getChangelog);
+
+    router.route("/warps").get([requireUser, WarpController.getWarps]).post([requireUser, WarpController.postWarp]);
+    router.route("/warps/:id").get([requireUser, WarpController.getWarp]).delete([requireUser, WarpController.deleteWarp]);
 
     // Admin APIs
 
