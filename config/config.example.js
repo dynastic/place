@@ -7,7 +7,7 @@ module.exports = {
     "trustProxyDepth": 1, // How many levels of proxy to trust for IP
     "debug": false,
     "googleAnalyticsTrackingID": "", // UA-XXXXXXXX-XX
-    "host": "http://place.dynastic.co", // the publicly accessible URL of the site
+    "host": "http://canvas.place", // the publicly accessible URL of the site
     "placeTimeout": 60,
     'enableChangelogs': true,
     //"raven": "", 
