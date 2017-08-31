@@ -30,6 +30,9 @@
         #palette-ctn
             .ctn-row
                 .content.compact
+                    if user
+                        button#palette-expando.section.clickable
+                            i.fa.fa-chevron-up
                     #user-count.section.clickable(style="display: none;")
                         i.fa.fa-user.fa-fw
                         span.count
@@ -40,11 +43,16 @@
                             (#[span], #[span])
             .ctn-row
                 .content#palette
-                    .overlay#sign-in-reminder
-                        span #[a#overlay-sign-in(data-place-trigger="openSignInDialog", href="javascript:void(0)") Sign in] or #[a#overlay-sign-up(data-place-trigger="openSigUpDialog", href="javascript:void(0)") sign up] to start placing!
-                    .overlay#placing-modal Placing…
-                    .overlay#place-timer: span
-                    .overlay#availability-loading-modal
+                    #menu-content-ctn
+                        .menu-section
+                            span.menu-heading Warps
+                            #warps-ctn Loading warps…
+                    #palette-content-ctn
+                        .overlay#sign-in-reminder
+                            span #[a#overlay-sign-in(data-place-trigger="openSignInDialog", href="javascript:void(0)") Sign in] or #[a#overlay-sign-up(data-place-trigger="openSigUpDialog", href="javascript:void(0)") sign up] to start placing!
+                        .overlay#placing-modal Placing…
+                        .overlay#place-timer: span
+                        .overlay#availability-loading-modal
         canvas#place-canvas(height="100%", width="100%")
         #zoom-controller
             #camera-controller

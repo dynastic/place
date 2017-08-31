@@ -151,8 +151,8 @@ var place = {
 
         this.colourPaletteElement = colourPaletteElement;
         this.setupColours();
-        this.placingOverlay = $(this.colourPaletteElement).children("#placing-modal");
-        this.placeTimer = $(this.colourPaletteElement).children("#place-timer");
+        this.placingOverlay = $(this.colourPaletteElement).find("#placing-modal");
+        this.placeTimer = $(this.colourPaletteElement).find("#place-timer");
         $(this.placeTimer).on("click", "#notify-me", () => this.handleNotifyMeClick());
         var app = this;
         $(this.colourPaletteElement).on("click", ".colour-option", function() {
@@ -164,6 +164,8 @@ var place = {
             app.deselectColour();
         })
         this.updatePlaceTimer();
+
+        $("#palette-expando").click(this.handlePaletteExpandoClick);
 
         var controller = $(zoomController).parent()[0];
         canvas.onmousemove = (event) => this.handleMouseMove(event || window.event);
@@ -246,6 +248,8 @@ var place = {
 
         this.dismissBtn = $("<button>").attr("type", "button").addClass("close").attr("data-dismiss", "alert").attr("aria-label", "Close");
         $("<span>").attr("aria-hidden", "true").html("&times;").appendTo(this.dismissBtn);
+
+        this.loadWarps();
     },
 
     handleColourTextChange: function(premature = false) {
@@ -481,24 +485,25 @@ var place = {
     setupColours: function() {
         var overlay = $("#availability-loading-modal");
         $(this.colourPaletteElement).find(".colour-option, .palette-separator").remove();
+        var contentContainer = $(this.colourPaletteElement).find("#palette-content-ctn");
         this.colourPaletteOptionElements = [];
         if(this.colours) {
             overlay.hide();
             if(this.canPlaceCustomColours) $("<div>").addClass("colour-option rainbow").attr("id", "customColourChooserOption").click(function() {
                 $("body").toggleClass("picker-showing");
                 if($("body").hasClass("picker-showing")) $("#colour-picker-hex-value").focus();
-            }).appendTo(this.colourPaletteElement);
-            var elem = $("<div>").addClass("colour-option custom").attr("id", "customChosenColourOption").attr("data-colour", 1).hide().appendTo(this.colourPaletteElement);
+            }).appendTo(contentContainer);
+            var elem = $("<div>").addClass("colour-option custom").attr("id", "customChosenColourOption").attr("data-colour", 1).hide().appendTo(contentContainer);
             this.colourPaletteOptionElements.push(elem[0]);
-            if(this.canPlaceCustomColours) $("<div>").addClass("palette-separator").appendTo(this.colourPaletteElement);
+            if(this.canPlaceCustomColours) $("<div>").addClass("palette-separator").appendTo(contentContainer);
             this.colours.forEach((colour, index) => {
                 var elem = $("<div>").addClass("colour-option" + (colour.toLowerCase() == "#ffffff" ? " is-white" : "")).css("background-color", colour).attr("data-colour", index + 2);
-                elem.appendTo(this.colourPaletteElement);
+                elem.appendTo(contentContainer);
                 this.colourPaletteOptionElements.push(elem[0]);
             });
             this.updateColourSelectorPosition();
         } else {
-            overlay.text(this.hasTriedToFetchAvailability ? "An error occurred while loading colours. Retrying…" : "Loading..").show();
+            overlay.text(this.hasTriedToFetchAvailability ? "An error occurred while loading colours. Retrying…" : "Loading…").show();
         }
     },
 
@@ -1091,6 +1096,79 @@ var place = {
 
     isViewingFullMap: function() {
         return $("body").hasClass("viewing-full-map");
+    },
+
+    handlePaletteExpandoClick: function() {
+        var options = {duration: 1000, queue: false};
+        var expand = $(this).toggleClass("expanded").hasClass("expanded");
+        if(expand) $("#menu-content-ctn").slideDown(options);
+        else $("#menu-content-ctn").slideUp(options).fadeOut(options);
+    },
+
+    loadWarps: function() {
+        if(!this.isSignedIn()) return;
+        placeAjax.get("/api/warps", null, null).then((response) => {
+            this.warps = response.warps;
+            this.layoutWarps();
+        }).catch((err) => {
+            console.error("Couldn't load warps: " + err);
+            this.warps = null;
+            this.layoutWarps();
+        });
+    },
+
+    layoutWarps: function() {
+        var app = this;
+        function getWarpInfo(title = null, detail = null, clickHandler = null, deleteClickHandler = null, add = false) {
+            var warpInfo = $("<div>").addClass("warp-info");
+            if(title) $("<span>").addClass("warp-title").text(title).appendTo(warpInfo);
+            if(detail) $("<span>").addClass("warp-coordinates").text(detail).appendTo(warpInfo);
+            if(add) warpInfo.addClass("add").attr("title", "Create a warp at the current position").append("<span class=\"warp-title\"><i class=\"fa fa-plus\"></i></span>");
+            else {
+                if(typeof deleteClickHandler === "function") $("<div>").addClass("warp-delete").attr("title", `Delete warp '${title}'`).html("<i class=\"fa fa-trash\"></i>").click(deleteClickHandler.bind(app, warpInfo)).appendTo(warpInfo);
+                warpInfo.attr("title", `Warp to '${title}'`)
+            }
+            if(clickHandler) warpInfo.click(clickHandler.bind(app, warpInfo));
+            return warpInfo;
+        }
+        var warpsContainer = $("#warps-ctn");
+        if(!this.warps) return warpsContainer.text("Couldn't load warps.");
+        warpsContainer.html("");
+        var warpInfoContainer = $("<div>").addClass("menu-section-content").appendTo($("<div>").addClass("menu-section-content-ctn").appendTo(warpsContainer));
+        getWarpInfo(null, null, this.addNewWarpClicked, null, true).appendTo(warpInfoContainer);
+        this.warps.forEach((warp) => getWarpInfo(warp.name, `(${warp.location.x.toLocaleString()}, ${warp.location.y.toLocaleString()})`, () => this.zoomIntoPoint(warp.location.x, warp.location.y, false), this.deleteWarpClicked).attr("data-warp-id", warp.id).appendTo(warpInfoContainer));
+    },
+
+    addNewWarpClicked: function(elem, event, input = null) {
+        var warpTitle = window.prompt(`Enter a title for this warp (at current position):`, input || "");
+        if(!warpTitle || warpTitle.length <= 0) return;
+        var pos = this.getCoordinates();
+        placeAjax.post("/api/warps", {x: pos.x, y: pos.y, name: warpTitle}, "An unknown error occurred while attempting to create your warp.").then((response) => {
+            if(response.warp) this.warps.unshift(response.warp);
+            this.layoutWarps();
+        }).catch((err) => {
+            if(err.code == "validation") this.addNewWarpClicked(elem, event, warpTitle);
+        });
+    },
+
+    deleteWarpClicked: function(elem, event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if(elem.data("deleting") === true) return;
+        function setDeletingState(deleting) {
+            elem.data("deleting", deleting);
+            var icon = elem.find("i");
+            if(deleting) icon.addClass("fa-trash").removeClass("fa-spin fa-circle-o-notch");
+            else icon.removeClass("fa-trash").addClass("fa-spin fa-circle-o-notch");
+        }
+        setDeletingState(true);
+        var warpID = elem.attr("data-warp-id");
+        if(!warpID) return;
+        placeAjax.delete("/api/warps/" + warpID, null, "An unknown error occurred while attempting to delete the specified warp.", () => setDeletingState(false)).then((response) => {
+            var index = this.warps.map((w) => w.id).indexOf(warpID);
+            if(index >= 0) this.warps.splice(index, 1);
+            this.layoutWarps();
+        }).catch(() => {});
     }
 };
 

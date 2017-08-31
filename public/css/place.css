@@ -20,7 +20,7 @@ body.fixed-navbar {
 }
 
 body {
-    overflow-y: hidden;
+    overflow: hidden;
     touch-action: none;
 }
 
@@ -175,12 +175,22 @@ body {
 }
 
 #palette {
-    height: 34px;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
     position: relative;
+}
+
+#palette-content-ctn {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+}
+
+#palette-content-ctn {
+    height: 34px;
 }
 
 .content .section.clickable {
@@ -260,7 +270,7 @@ body {
     border: 1px solid rgba(0,0,0,0.05);
 }
 
-#palette > .overlay {
+.content .overlay {
     border-radius: 10px;
     background-image: linear-gradient(-180deg, rgb(241,241,241) 0%, rgb(227,227,227) 100%);
     font-size: 15px;
@@ -274,22 +284,22 @@ body {
     z-index: 3;
 }
 
-body.signed-in #palette > #sign-in-reminder, #palette > #placing-modal, #palette > #place-timer {
+body.signed-in #sign-in-reminder, #placing-modal, #place-timer {
     display: none;
 }
 
-body.signed-in #palette > #placing-modal.shown, body.signed-in #palette > #place-timer.shown {
+body.signed-in #placing-modal.shown, body.signed-in #place-timer.shown {
     display: flex;
 }
 
 @supports (backdrop-filter:none) or (-webkit-backdrop-filter:none) {
-    #palette-ctn > .ctn-row > .content, #palette > .overlay {
+    #palette-ctn > .ctn-row > .content, .content .overlay {
         background-image: linear-gradient(-180deg, rgba(241,241,241,0.8) 0%, rgba(227,227,227,0.8) 100%);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
     }
 
-    #palette > .overlay {
+    .content .overlay {
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
     }
@@ -1259,4 +1269,136 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
 }
 .colour-preview.is-white {
     border: 1px solid #eee;
+}
+
+#palette-expando > i {
+    color: #666;
+    margin: 0 10px;
+    transition: transform 150ms ease-in-out;
+}
+
+#palette-expando.expanded > i {
+    transform: rotate(180deg) translateY(-2px);
+}
+
+#menu-content-ctn {
+    display: none;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.menu-section {
+    margin-bottom: 10px;
+    padding: 10px 5px;
+    position: relative;
+}
+
+.menu-section, #menu-content-ctn {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.menu-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.menu-section:first-child {
+    padding-top: 3px;
+}
+
+.menu-section .menu-heading {
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #777;
+    display: block;
+    margin-bottom: 5px;
+} 
+
+.menu-section .menu-section-content-ctn {
+    position: relative;
+    padding-top: 58px;
+}
+
+.menu-section .menu-section-content {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.warp-info {
+    background: rgba(255, 255, 255, 0.4);
+    display: inline-block;
+    padding: 10px;
+    border-radius: 4px;
+    margin-right: 3px;
+    height: 58px;
+    min-width: 58px;
+    max-width: 150px;
+    position: relative;
+    transition: transform 100ms ease-in-out;
+    cursor: pointer;
+}
+
+.warp-info > .warp-delete {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    border-top-left-radius: 5px;
+    border-bottom-right-radius: 4px;
+    background: #ff5555;
+    text-align: center;
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 10px;
+    display: none;
+}
+
+.warp-info > .warp-delete:hover {
+    background: #ee4444;
+}
+
+.warp-info:hover .warp-delete {
+    display: block;
+}
+
+.warp-info:active {
+    transform: scale(0.95);
+}
+
+.warp-info.add {
+    text-align: center;
+    padding: 21px 10px;
+}
+
+.warp-info:last-child {
+    margin-right: 0;
+}
+
+.warp-info span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.warp-info .warp-title {
+    font-weight: 700;
+    font-size: 12px;
+    display: block;
+}
+
+.warp-info.add .warp-title {
+    font-size: 20px;
+    position: relative;
+    top: -5px;
+    color: #666;
+}
+
+.warp-info .warp-coordinates {
+    font-size: 11px;
+    color: #777;
 }

@@ -20,12 +20,15 @@ exports.postWarp = (req, res, next) => {
 exports.getWarp = (req, res, next) => {
     if(!req.params.id) return res.status(400).json({success: false, error: {message: "You didn't specify the warp to retrieve.", code: "bad_request"}});
     Warp.findOne({userID: req.user.id, id: req.params.id}).then((warp) => {
-        if(!warp) return res.status(400).json({success: false, error: {message: "An accessible warp with that ID doesn't exist.", code: "not_found"}})
+        if(!warp) return res.status(404).json({success: false, error: {message: "An accessible warp with that ID doesn't exist.", code: "not_found"}});
         res.json({success: true, warp: warp.toInfo()});
     }).catch((err) => res.status(500).json({success: false}));
 };
 
 exports.deleteWarp = (req, res, next) => {
     if(!req.params.id) return res.status(400).json({success: false, error: {message: "You didn't specify the warp to delete.", code: "bad_request"}});
-    Warp.findOneAndRemove({userID: req.user.id, id: req.params.id}).then(() => res.json({success: true})).catch((err) => res.status(500).json({success: false}));
+    Warp.findOneAndRemove({userID: req.user.id, _id: req.params.id}).then((warp) => {
+        if(!warp) return res.status(404).json({success: false, error: {message: "An accessible warp with that ID doesn't exist.", code: "not_found"}});
+        res.json({success: true});
+    }).catch((err) => res.status(500).json({success: false}));
 };

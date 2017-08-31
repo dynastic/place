@@ -35,6 +35,7 @@ var WarpSchema = new Schema({
 
 WarpSchema.methods.toInfo = function() {
     return {
+        id: this.id,
         location: {
             x: this.xPos,
             y: this.yPos
@@ -57,7 +58,6 @@ WarpSchema.statics.createWarp = function(x, y, name, userID, callback) {
         });
     
         warp.save(function(err) {
-            console.log(err);
             if (err) return callback(null, { message: "An error occurred while trying to create that warp.", code: "server_error" });
             return callback(warp, null);
         });
