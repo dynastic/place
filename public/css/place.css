@@ -218,6 +218,7 @@ body {
     border-radius: 5px;
     cursor: pointer;
     transition: 0.1s transform ease-in-out, 0.1s box-shadow ease-in-out;
+    position: relative;
 }
 
 .colour-option.rainbow {
@@ -226,6 +227,18 @@ body {
     -webkit-animation: colour-transition 5s ease infinite alternate;
     -moz-animation: colour-transition 5s ease infinite alternate;
     animation: colour-transition 5s ease infinite alternate;
+}
+
+.colour-option.transparent {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
 }
 
 @-webkit-keyframes colour-transition {
@@ -1288,7 +1301,6 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
 }
 
 .menu-section {
-    margin-bottom: 10px;
     padding: 10px 5px;
     position: relative;
 }
@@ -1299,7 +1311,6 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
 
 .menu-section:last-child {
     border-bottom: none;
-    margin-bottom: 0;
 }
 
 .menu-section:first-child {

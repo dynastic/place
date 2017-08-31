@@ -492,7 +492,7 @@ var place = {
             if(this.canPlaceCustomColours) $("<div>").addClass("colour-option rainbow").attr("id", "customColourChooserOption").click(function() {
                 $("body").toggleClass("picker-showing");
                 if($("body").hasClass("picker-showing")) $("#colour-picker-hex-value").focus();
-            }).appendTo(contentContainer);
+            }).append("<div class=\"colour-option transparent\"></div>").appendTo(contentContainer);
             var elem = $("<div>").addClass("colour-option custom").attr("id", "customChosenColourOption").attr("data-colour", 1).hide().appendTo(contentContainer);
             this.colourPaletteOptionElements.push(elem[0]);
             if(this.canPlaceCustomColours) $("<div>").addClass("palette-separator").appendTo(contentContainer);
