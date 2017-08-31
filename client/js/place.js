@@ -1099,7 +1099,7 @@ var place = {
     },
 
     handlePaletteExpandoClick: function() {
-        var options = {duration: 1000, queue: false};
+        var options = {duration: 150, queue: false};
         var expand = $(this).toggleClass("expanded").hasClass("expanded");
         if(expand) $("#menu-content-ctn").slideDown(options);
         else $("#menu-content-ctn").slideUp(options).fadeOut(options);
