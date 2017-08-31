@@ -1136,7 +1136,13 @@ var place = {
         warpsContainer.html("");
         var warpInfoContainer = $("<div>").addClass("menu-section-content").appendTo($("<div>").addClass("menu-section-content-ctn").appendTo(warpsContainer));
         getWarpInfo(null, null, this.addNewWarpClicked, null, true).appendTo(warpInfoContainer);
-        this.warps.forEach((warp) => getWarpInfo(warp.name, `(${warp.location.x.toLocaleString()}, ${warp.location.y.toLocaleString()})`, () => this.zoomIntoPoint(warp.location.x, warp.location.y, false), this.deleteWarpClicked).attr("data-warp-id", warp.id).appendTo(warpInfoContainer));
+        if(this.warps.length > 0) {
+            this.warps.forEach((warp) => getWarpInfo(warp.name, `(${warp.location.x.toLocaleString()}, ${warp.location.y.toLocaleString()})`, () => this.zoomIntoPoint(warp.location.x, warp.location.y, false), this.deleteWarpClicked).attr("data-warp-id", warp.id).appendTo(warpInfoContainer));
+        } else {
+            var explanation = $("<div>").addClass("warp-info explanation").appendTo(warpInfoContainer);
+            $("<span>").addClass("warp-title").text("Warps").appendTo(explanation);
+            $("<span>").addClass("warp-coordinates").text("Use warps to get around the canvas quickly. Save a position and warp to it later on.").appendTo(explanation);
+        }
     },
 
     addNewWarpClicked: function(elem, event, input = null) {

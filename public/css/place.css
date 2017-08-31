@@ -1344,6 +1344,13 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
     cursor: pointer;
 }
 
+.warp-info.explanation {
+    background: none;
+    pointer-events: none;
+    max-width: none;
+    min-width: none;
+}
+
 .warp-info > .warp-delete {
     position: absolute;
     right: 0;
