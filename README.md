@@ -1,4 +1,4 @@
-![Dynastic Development](https://github.com/dynasticdevelop/assets/raw/master/images/brand.png)
+![Dynastic Development](https://github.com/dynastic/assets/raw/master/images/brand.png)
 
 # Place 2.0
 
@@ -27,7 +27,7 @@ These instructions will help you get a copy of the project up and running on you
 
 **Ensure `/var/log/place` exists, and the app can write to it.**
 
-Please only host your own copy if you are willing to abide by the clearly defined [license](https://github.com/dynasticdevelop/place/blob/master/LICENSE). **Failure to comply with the listed terms will result in legal action.**
+Please only host your own copy if you are willing to abide by the clearly defined [license](https://github.com/dynastic/place/blob/master/LICENSE). **Failure to comply with the listed terms will result in legal action.**
 
 When deploying, it is recommended you use a daemon to keep the server alive. We use `pm2`, but any daemon utility, such as `forever`, should work.
 
@@ -73,7 +73,7 @@ server {
 
 ## Contributing 
 
-Please make a [pull request](/https://github.com/dynasticdevelop/place/pulls). Before making a pull request, come and chat with us on [Discord](https://discord.gg/CgC8FTg) in #contributors.
+Please make a [pull request](/https://github.com/dynastic/place/pulls). Before making a pull request, come and chat with us on [Discord](https://discord.gg/CgC8FTg) in #contributors.
 
 Ensure that all code lints successfully - we have CI that requires this.
 
@@ -86,11 +86,11 @@ Check our currently open issues for an idea on what to work on!
 * [AppleBetas](https://applebetas.co) - Core Developer
 * [nullpixel](https://nullpixel.uk) - Core Developer
 
-Also see the list of [contributors](https://www.github.com/dynasticdevelop/place/contributors) who participated in this project and helped to make it as great as it is!
+Also see the list of [contributors](https://www.github.com/dynstic/place/contributors) who participated in this project and helped to make it as great as it is!
 
 ## License
 
-Place 2.0 is licensed under the [APGL-3.0 license](https://github.com/dynasticdevelop/place/blob/master/LICENSE). Please see it for details.
+Place 2.0 is licensed under the [APGL-3.0 license](https://github.com/dynastic/place/blob/master/LICENSE). Please see it for details.
 
 ## Acknowledgments
 
