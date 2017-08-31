@@ -1313,7 +1313,9 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
     color: #777;
     display: block;
     margin-bottom: 5px;
-} 
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
 
 .menu-section .menu-section-content-ctn {
     position: relative;
