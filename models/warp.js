@@ -39,26 +39,29 @@ WarpSchema.methods.toInfo = function() {
             x: this.xPos,
             y: this.yPos
         },
-        name: this.name,
-        created: this.creationDate
+        name: this.name
     };
 }
 
 WarpSchema.statics.createWarp = function(x, y, name, userID, callback) {
     if(name.length <= 0 || name.length > 15) return callback(null, { message: "Your warp name must be between 1-15 characters in length.", code: "validation" });
-    var warp = this({
-        xPos: x,
-        yPos: y,
-        name: name,
-        userID: userID,
-        creationDate: Date()
-    });
+    this.count({userID: userID, name: name}).then((count) => {
+        if(count > 0) return callback(null, { message: "You already have a warp with that name.", code: "validation" });
 
-    warp.save(function(err) {
-        console.log(err);
-        if (err) return callback(null, { message: "An error occurred while trying to create that warp.", code: "server_error" });
-        return callback(warp, null);
-    });
+        var warp = this({
+            xPos: x,
+            yPos: y,
+            name: name,
+            userID: userID,
+            creationDate: Date()
+        });
+    
+        warp.save(function(err) {
+            console.log(err);
+            if (err) return callback(null, { message: "An error occurred while trying to create that warp.", code: "server_error" });
+            return callback(warp, null);
+        });
+    }).catch((err) => callback(null, { message: "An error occurred while trying to create that warp.", code: "server_error" }));
 }
 
 module.exports = DataModelManager.registerModel("Warp", WarpSchema);

@@ -2,7 +2,7 @@ const Warp = require("../models/warp");
 
 exports.getWarps = (req, res, next) => {
     Warp.find({userID: req.user.id}).then((warps) => {
-        res.json({success: true, warps: warps.map((w) => w.toInfo())});
+        res.json({success: true, warps: warps.sort((a, b) => b.creationDate - a.creationDate).map((w) => w.toInfo())});
     }).catch((err) => {
         req.place.logger.error("Couldn't get warps for user: " + err);
         res.json({success: false, error: {message: "An unknown error occurred while trying to retrieve your warps.", code: "server_error"}});
