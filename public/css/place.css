@@ -187,10 +187,9 @@ body {
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     position: relative;
-}
-
-#palette-content-ctn {
-    height: 34px;
+    line-height: 0;
+    margin: -10px;
+    padding: 10px;
 }
 
 .content .section.clickable {
