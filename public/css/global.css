@@ -587,7 +587,7 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     margin-right: 0;
 }
 
-.btn.btn-popping:not(.btn-primary):not(.btn-info):not(.btn-success):not(.btn-danger):not(.btn-warning) {
+.btn.btn-popping:not(.btn-primary):not(.btn-info):not(.btn-success):not(.btn-danger):not(.btn-warning):not(.btn-oauth) {
     background: #fff;
     color: #4ACDFF;
 }
@@ -603,7 +603,7 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     border-radius: 2px;
 }
 
-.btn.btn-popping:hover:not(.btn-primary):not(.btn-info):not(.btn-success):not(.btn-danger):not(.btn-warning) {
+.btn.btn-popping:hover:not(.btn-primary):not(.btn-info):not(.btn-success):not(.btn-danger):not(.btn-warning):not(.btn-oauth) {
     box-shadow: 0 2px 14px 2px rgba(57,56,56,0.25);
 }
 
@@ -616,11 +616,9 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
 }
 
 .btn.btn-popping.btn-arrow, .btn.btn-popping.btn-arrow:hover {
-    box-shadow: none;
-    padding-right: 0;
-}
-.btn.btn-popping.btn-arrow {
-    background: none;
+    box-shadow: none!important;
+    padding-right: 0!important;
+    background: none!important;
 }
 .btn.btn-popping.btn-arrow::after {
     content: "";
