@@ -48,7 +48,7 @@ server {
         listen 80;
         listen [::]:80;
 
-        server_name place.dynastic.co;
+        server_name canvas.place;
 
         include /etc/nginx/global/*;
 

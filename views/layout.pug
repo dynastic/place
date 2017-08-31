@@ -51,7 +51,7 @@ html(lang=en)
     meta(property="og:title" content=(pageTitle || "Place 2.0"))
     if pageTitle
       meta(property="og:site_name", content="Place 2.0")
-    meta(property="og:url", content="https://place.dynastic.co")
+    meta(property="og:url", content=config.host)
     meta(property="og:image", content="/img/apple-touch-icon.png")
     meta(property="twitter:card", content="summary")
     meta(property="twitter:title", content=`Place 2.0${pageTitle != null ? `: ${pageTitle}` : ""}`)
