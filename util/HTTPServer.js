@@ -113,7 +113,7 @@ function HTTPServer(app) {
         if (app.logger.bugsnag) server.use(app.logger.bugsnag.errorHandler);
         if (app.logger.raven) server.use(app.logger.raven.errorHandler());
 
-        if (server.get("env") !== "development") {
+        if (!app.config.debug) {
             // Production error handler, no stack traces shown to user
             server.use((err, req, res, next) => {
                 if (err.code === 'EBADCSRFTOKEN') return res.status(403).json({success: false, error: {message: 'you tried, have a star.', code: 'invalid CSRF token'}});
