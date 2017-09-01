@@ -699,7 +699,7 @@ body.signed-in #placing-modal.shown, body.signed-in #place-timer.shown {
 #loading {
     background-color: #fff;
     position: absolute;
-    top: 0;
+    top: 50px;
     left: 0;
     bottom: 0;
     right: 0;
