@@ -373,6 +373,10 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
             else if (!overrideDataAccess && user.deactivated) return returnInfo("deactivated");
             user.getInfo(app, getPixelInfo).then((userInfo) => {
                 info.user = userInfo;
+                if(overrideDataAccess) {
+                    info.user.isOauth = user.isOauth;
+                    info.user.hasTOTP = user.twoFactorAuthEnabled();
+                }
                 resolve(info);
             }).catch((err) => returnInfo("delete"));
         }).catch((err) => {
