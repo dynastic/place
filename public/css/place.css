@@ -73,9 +73,7 @@ body {
     cursor: grab;
     cursor: -moz-grab;
     cursor: -webkit-grab;
-    -webkit-transition: transform 250ms ease-out;
-    -moz-transition: transform 250ms ease-out;
-    transition: transform 250ms ease-out;
+    transition: transform 1s ease-out;
 }
 
 .zoomed > #zoom-controller {
@@ -1200,57 +1198,16 @@ nav.navbar {
     margin-right: 0;
 }
 
-.viewing-full-map #place-canvas, .viewing-full-map #palette, .viewing-full-map #coordinates, .viewing-full-map .control-btns > div:not(.show-in-full-mode), .viewing-full-map #grid {
-    display: none!important;
-}
-
-.viewing-full-map #palette-ctn {
-    left: 0;
-    right: 0;
-}
-
-.viewing-full-map #palette-ctn > .ctn-row {
-    align-items: left;
-    justify-content: left;
-}
-
-.viewing-full-map #palette-ctn > .ctn-row > .content {
-    border-radius: 0 10px 0 0;
-}
-
-.viewing-full-map #palette-ctn > .ctn-row > .content.compact {
-    border-radius: 0 5px 0 0;
-}
-
-.viewing-full-map #zoom-controller {
-    transform: scale(1, 1);
-    cursor: default;
-}
-
-.viewing-full-map #camera-controller {
-    top: initial!important;
-    left: initial!important;
-}
-
-.viewing-full-map #place-canvas-draw {
-    transition: 0.2s opacity ease-in-out 0.05s;
-    opacity: 1;
-}
-
-body:not(.viewing-full-map) #place-canvas-draw {
+body #place-canvas-draw {
     transform: scale(1, 1);
 }
 
-.viewing-full-map .canvas-container {
-    top: 50px;
-}
-
-body:not(.viewing-full-map) .button-ctn, body #popout-container {
+body .button-ctn, body #popout-container {
     padding-top: 50px;
 }
 
 @media(max-width: 600px) {
-    body:not(.viewing-full-map) #popout-container {
+    body #popout-container {
         margin-top: 0;
         padding-top: 50px;
     }

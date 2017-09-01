@@ -352,29 +352,27 @@ var place = {
             },
             autoScroll: true,
             onstart: (event) => {
-                if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
+                if(event.interaction.downEvent.button == 2) return event.preventDefault();
                 $(app.zoomController).addClass("grabbing");
                 $(":focus").blur();
             },
             onmove: (event) => {
-                if(app.isViewingFullMap()) return event.preventDefault();
                 app.moveCamera(event.dx, event.dy)
             },
             onend: (event) => {
-                if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
+                if(event.interaction.downEvent.button == 2) return event.preventDefault();
                 $(app.zoomController).removeClass("grabbing");
                 var coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
             }
         }).on("tap", (event) => {
-            if(event.interaction.downEvent.button == 2 || app.isViewingFullMap()) return event.preventDefault();
+            if(event.interaction.downEvent.button == 2) return event.preventDefault();
             if(!this.zooming.zooming) {
                 var cursor = app.getCanvasCursorPosition(event.pageX, event.pageY);
                 app.canvasClicked(cursor.x, cursor.y);
             }
             event.preventDefault();
         }).on("doubletap", (event) => {
-            if(app.isViewingFullMap()) return event.preventDefault();
             if(app.zooming.zoomedIn && this.selectedColour === null) {
                 app.zoomFinished();
                 app.shouldShowPopover = false;
@@ -529,7 +527,6 @@ var place = {
         this.updateDisplayCanvas();
         this.updateGrid();
         this.updateGridHint(this.lastX, this.lastY);
-        this.setFullMapViewScale();
         this.updateColourSelectorPosition();
     },
 
@@ -551,14 +548,14 @@ var place = {
         elem.css({left: position});
     },
 
-    setFullMapViewScale: function() {
+    /*setFullMapViewScale: function() {
         var scale = 1;
         if(this.isViewingFullMap()) {
             var canvasContainer = $(this.zoomController).parent();
             var scale = Math.min(1, Math.min(canvasContainer.height() / size, canvasContainer.width() / size));
         }
         $(this.canvas).css({ "transform": `scale(${scale}, ${scale})` });
-    },
+    },*/
 
     setupDisplayCanvas: function(canvas) {
         this.displayCtx = canvas.getContext("2d");
@@ -653,11 +650,6 @@ var place = {
         if (this.gridButton) $(this.gridButton).html(`<i class="fa fa-fw fa-${gridShown ? "square" : "th"}"></i>`).attr("title", (gridShown ? "Hide Grid" : "Show Grid") + " (G)");
     },
 
-    _adjustFullButtonText: function() {
-        var isInFullMode = this.isViewingFullMap();
-        if (this.fullMapButton) $(this.fullMapButton).html(`<i class="fa fa-fw fa-${isInFullMode ? "hand-paper" : "picture"}-o"></i>`).attr("title", (isInFullMode ? "Exit Full Map Mode" : "View Full Map") + " (F)");
-    },
-
     setZoomButton: function(btn) {
         this.zoomButton = btn;
         this._adjustZoomButtonText();
@@ -668,12 +660,6 @@ var place = {
         this.gridButton = btn;
         this._adjustGridButtonText();
         $(btn).click(this.toggleGrid.bind(this));
-    },
-
-    setFullMapButton: function(btn) {
-        this.fullMapButton = btn;
-        this._adjustFullButtonText();
-        $(btn).click(this.toggleViewingFullMap.bind(this));
     },
 
     setCoordinatesButton: function(btn) {
@@ -887,7 +873,6 @@ var place = {
     },
 
     selectColour: function(colourID, hideColourPicker = true) {
-        if(this.isViewingFullMap()) return;
         this.deselectColour(hideColourPicker);
         this.selectedColour = colourID - 1;
         var elem = this.colourPaletteOptionElements[this.selectedColour];
@@ -1047,8 +1032,6 @@ var place = {
             this.toggleZoom();
         } else if(keycode == 27 && this.selectedColour !== null) { // Esc - Deselect colour
             this.deselectColour();
-        } else if(keycode == 70) { // F - toggle full map view
-            this.toggleViewingFullMap();
         } else if(keycode == 80) { // P - pick colour under mouse cursor
             this.pickColourUnderCursor();
         }
@@ -1089,18 +1072,6 @@ var place = {
                 }, timeout * 1000);
             }
         });
-    },
-
-    toggleViewingFullMap: function() {
-        this.deselectColour();
-        $(this.pixelDataPopover).hide();
-        $("body").toggleClass("viewing-full-map");
-        this.setFullMapViewScale();
-        this._adjustFullButtonText();
-    },
-
-    isViewingFullMap: function() {
-        return $("body").hasClass("viewing-full-map");
     },
 
     handlePaletteExpandoClick: function() {
@@ -1210,9 +1181,9 @@ var place = {
                 $("<div>").addClass("warp-visibility").attr("title", "Change the opacity of this template").html("<i class=\"fa fa-eye fa-fw\"></i>").click(this.changeOpacityOfTemplateClicked.bind(this, templateCtn)).appendTo(templateCtn);
                 $("<div>").addClass("warp-scale").attr("title", "Change the scale of this template").html("<i class=\"fa fa-expand fa-fw\"></i>").click(this.changeScaleOfTemplateClicked.bind(this, templateCtn)).appendTo(templateCtn);
                 $("<div>").addClass("template-img").css("background-image", `url(${template.url})`).appendTo(templateCtn);
-                $("<img>").attr("src", template.url).css({top: template.pos.y, left: template.pos.x, transform: `scale(${template.scale}) translateZ(0) translate(-${50 / template.scale}%, -${50 / template.scale}%)`, opacity: template.opacity}).appendTo(templateImgs);
+                var scale = (template.scale || 1) / 4;
+                $("<img>").attr("src", template.url).css({top: template.pos.y, left: template.pos.x, transform: `scale(${scale}) translateZ(0) translate(-${50 / scale}%, -${50 / scale}%)`, opacity: template.opacity}).appendTo(templateImgs);
             });
-
         } else {
             infoContainer.addClass("empty");
             var explanation = $("<div>").addClass("warp-info template explanation").appendTo(infoContainer);
@@ -1299,7 +1270,6 @@ var place = {
 place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
 place.setZoomButton($("#zoom-button")[0]);
 place.setGridButton($("#grid-button")[0]);
-place.setFullMapButton($("#full-map-button")[0]);
 place.setCoordinatesButton($("#coordinates")[0]);
 
 $(".popout-control").click(function() {
