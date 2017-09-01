@@ -34,7 +34,7 @@ mixin getViewExtensions(name)
   .
     !{moduleManager.gatherViewExtensions(name, req, res)}
 doctype html
-html(lang=en)
+html(lang="en")
   head
     meta(charset="utf-8")
     meta(http-equiv="X-UA-Compatible", content="IE=edge")
@@ -57,6 +57,7 @@ html(lang=en)
     meta(property="twitter:title", content=`${config.siteName}${pageTitle != null ? `: ${pageTitle}` : ""}`)
     meta(property="twitter:image", content="/img/apple-touch-icon.png")
     meta(name="csrf-token" content=_csrf)
+    meta(name="place-site-name", content=config.siteName)
     if pageDesc
       meta(property="og:description", content=pageDesc)
       meta(property="twitter:description", content=pageDesc)

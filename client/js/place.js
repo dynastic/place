@@ -829,6 +829,10 @@ var place = {
         this.checkSecondsTimer();
     },
 
+    getSiteName: function() {
+        return $("meta[name=place-site-name]").attr("content");
+    },
+
     checkSecondsTimer: function() {
         function padLeft(str, pad, length) {
             if (str.length > length) return str;
@@ -843,7 +847,7 @@ var place = {
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
             } else if(this.fullUnlockTime > 5) { // only notify if full countdown exceeds 5 seconds
-                this.notificationHandler.sendNotification("canvas.place", "You may now place!");
+                this.notificationHandler.sendNotification(this.getSiteName(), "You may now place!");
             }
         }
         if(this.secondTimer) clearInterval(this.secondTimer);
