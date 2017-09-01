@@ -1218,6 +1218,7 @@ var place = {
     deleteTemplateClicked: function(elem, event) {
         event.preventDefault();
         event.stopPropagation();
+        if(!window.confirm("Are you sure you want to delete this template?")) return;
         var index = $(elem).attr("data-template-id");
         if(!index || index < 0) return;
         this.templates.splice(index, 1);
