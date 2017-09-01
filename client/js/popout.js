@@ -119,7 +119,7 @@ var popoutController = {
             this.isOutdated = true;
         });
         socket.on("connect", () => {
-            console.log("Socket successfully connected");
+            console.log("Socket successfully connected (using main window socket)");
             if(this.isOutdated) {
                 this.loadChatMessages();
                 this.isOutdated = false;
