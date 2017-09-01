@@ -843,7 +843,7 @@ var place = {
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
             } else if(this.fullUnlockTime > 5) { // only notify if full countdown exceeds 5 seconds
-                this.notificationHandler.sendNotification("Place 2.0", "You may now place!");
+                this.notificationHandler.sendNotification("canvas.place", "You may now place!");
             }
         }
         if(this.secondTimer) clearInterval(this.secondTimer);

@@ -1,6 +1,6 @@
 ![Dynastic Development](https://github.com/dynastic/assets/raw/master/images/brand.png)
 
-# Place 2.0
+# Dynastic Place
 
 An open-source place alternative, made by [Dynastic Development](https://dynastic.co). Want to chat? Join our [Discord](https://discord.gg/CgC8FTg).
 
@@ -86,11 +86,11 @@ Check our currently open issues for an idea on what to work on!
 * [AppleBetas](https://applebetas.co) - Core Developer
 * [nullpixel](https://nullpixel.uk) - Core Developer
 
-Also see the list of [contributors](https://www.github.com/dynstic/place/contributors) who participated in this project and helped to make it as great as it is!
+Also see the list of [contributors](https://www.github.com/dynastic/place/contributors) who participated in this project and helped to make it as great as it is!
 
 ## License
 
-Place 2.0 is licensed under the [APGL-3.0 license](https://github.com/dynastic/place/blob/master/LICENSE). Please see it for details.
+Dynastic Place is licensed under the [APGL-3.0 license](https://github.com/dynastic/place/blob/master/LICENSE). Please see it for details.
 
 ## Acknowledgments
 

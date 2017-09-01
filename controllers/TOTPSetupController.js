@@ -3,8 +3,8 @@ const QRCode = require("qrcode");
 
 exports.getTOTPSetup = function(req, res, next) {
     if(req.user.twoFactorAuthEnabled()) return res.status(403).json({success: false, error: {message: "You already have two-factor authentication set up on your account.", code: "totp_already_setup"}});
-    var secret = speakeasy.generateSecret({length: 20, issuer: "Place 2.0", name: req.user.name});
-    var url = speakeasy.otpauthURL({secret: secret.ascii, label: req.user.name, issuer: "Place 2.0"});
+    var secret = speakeasy.generateSecret({length: 20, issuer: req.place.config.siteName, name: req.user.name});
+    var url = speakeasy.otpauthURL({secret: secret.ascii, label: req.user.name, issuer: req.place.config.siteName});
     QRCode.toDataURL(url, function(err, data_url) {
         if(err) return res.status(500).json({success: false, error: {message: "An error occurred while trying to set up two-factor authentication on your account."}})
         res.json({success: true, totp: {secret: secret.base32, qrData: data_url, authURL: url}});

@@ -17,7 +17,7 @@ exports.getTOS = (req, res, next, forcePage = false) => {
                 if(err || !markdown) return goNext();
                 return req.responseFactory.sendRenderedResponse(forcePage ? "public/require-tos-accept" : "public/markdown-document", {
                     pageTitle: "Terms of Service",
-                    pageDesc: "The terms of service that agreement to is required in order to participate in Place 2.0.",
+                    pageDesc: `The terms of service that agreement to is required in order to participate in ${req.place.config.siteName}.`,
                     md: markdown
                 });
             });
@@ -34,7 +34,7 @@ exports.getPrivacyPolicy = (req, res, next) => {
                 if(err || !markdown) return next();
                 return req.responseFactory.sendRenderedResponse("public/markdown-document", {
                     pageTitle: "Privacy Policy",
-                    pageDesc: "How Dynastic Development uses the data you submit to Place 2.0.",
+                    pageDesc: `How Dynastic Development uses the data you submit to ${req.place.config.siteName}.`,
                     md: markdown
                 });
             });

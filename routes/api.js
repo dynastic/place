@@ -38,7 +38,7 @@ function APIRouter(app) {
         if (req.user && req.user.passwordResetKey) return res.status(401).json({
             success: false,
             error: {
-                message: "Please go to the Place 2.0 website to reset your password.",
+                message: `Please go to the ${req.place.config.siteName} website to reset your password.`,
                 code: "forced_password_reset"
             }
         });
@@ -48,7 +48,7 @@ function APIRouter(app) {
             res.status(401).json({
                 success: false,
                 error: {
-                    message: "Please go to the Place 2.0 website to accept the Terms of Service.",
+                    message: `Please go to the ${req.place.config.siteName} website to accept the Terms of Service.`,
                     code: "tos_not_accepted"
                 }
             })

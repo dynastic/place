@@ -5,9 +5,9 @@
         .pages
             .active(tab-name="sign-up")
                 .heading
-                    span.site Place 2.0
+                    span.site #{config.siteName}
                     h1 Become a member
-                    p.subhead Join the Place 2.0 community today to start placing.
+                    p.subhead Join the #{config.siteName} community today to start placing.
                 form.form-signin(action="/signup")
                     label.sr-only(for="inputUsername") Username
                     input.form-control#inputUsername(type="text", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalize="off", spellcheck="false")
@@ -36,7 +36,7 @@
                         include social-buttons
             div(tab-name="sign-in")
                 .heading
-                    span.site Place 2.0
+                    span.site #{config.siteName}
                     h1 Welcome back
                     p.subhead Sign in to your account to continue placing and save your stats.
                 form.form-signin(action="/signin")
@@ -49,7 +49,7 @@
                         include social-buttons
             div.hides-switchers(tab-name="2fa-auth")
                 .heading
-                    span.site Place 2.0
+                    span.site #{config.siteName}
                     h1 Two-factor Authentication
                     p.subhead This account is secured with two-factor authentication. To continue, enter the token from your two-factor authentication app.
                 form.form-signin(action="/signin")

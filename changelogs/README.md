@@ -1,8 +1,8 @@
-# Place 2.0 Changelogs
+# Changelogs
 
-These are shown to Place 2.0 users upon visiting the site if they haven't opted out and if there has been a new changelog published since.
+These are shown to users upon visiting the site if they haven't opted out and if there has been a new changelog published since.
 
-As notable changes occur to the Place 2.0 codebase, we'll add changelogs to this folder on the repository. If you're running your own site, you can provide your own changelogs by using the folder for yourself, but that requires some Git customization to set up and keep pulling changes, so we recommend against it. You can set `enableChangelogs` to *false* in the configuration file to disable this functionality altogether.
+As notable changes occur to the codebase, we'll add changelogs to this folder on the repository. If you're running your own site, you can provide your own changelogs by using the folder for yourself, but that requires some Git customization to set up and keep pulling changes, so we recommend against it. You can set `enableChangelogs` to *false* in the configuration file to disable this functionality altogether.
 
 ## Changelog file reference
 

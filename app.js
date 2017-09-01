@@ -22,6 +22,7 @@ app.loadConfig = (path = "./config/config") => {
     var oldConfig = app.config;
     app.config = require(path);
     app.colours = [... new Set((app.config.colours || ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"]).map((c) => c.toUpperCase()))];
+    if(!app.config.siteName) app.config.siteName = "Place";
     if(!app.config.enableChangelogs) app.config.enableChangelogs = true;
     if(!app.config.boardSize) app.config.boardSize = 1400; // default to 1400 if not specified in config
     if(oldConfig && (oldConfig.secret != app.config.secret || oldConfig.database != app.config.database || oldConfig.boardSize != app.config.boardSize)) {

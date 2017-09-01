@@ -10,6 +10,7 @@ module.exports = {
     "host": "http://canvas.place", // the publicly accessible URL of the site
     "placeTimeout": 60,
     'enableChangelogs': true,
+    'siteName': 'Place',
     //"raven": "", 
     //"publicRaven": "", 
     // "bugsnag": "",

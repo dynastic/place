@@ -8,7 +8,7 @@ block content
         form.form-signin(method="POST", action="/force-pw-reset")
             input(type='hidden', name='_csrf', value=_csrf)
             h2.form-signin-heading Reset your Password
-            p You are required to change your password to continue using Place 2.0.
+            p You are required to change your password to continue using #{config.siteName}.
             br
             label.sr-only(for="inputPassword") Password
             input.form-control#inputPassword(type="password", placeholder="Password", name="password", required, autofocus)

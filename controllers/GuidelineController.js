@@ -8,7 +8,7 @@ exports.getGuidelines = (req, res, next) => {
             if(err || !markdown) return next();
             return req.responseFactory.sendRenderedResponse("public/markdown-document", {
                 pageTitle: "Community Guidelines",
-                pageDesc: "The set of rules you must abide by to participate in Place 2.0.",
+                pageDesc: `The set of rules you must abide by to participate in ${req.place.config.siteName}.`,
                 md: markdown
             });
         });

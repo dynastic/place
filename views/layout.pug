@@ -39,7 +39,7 @@ html(lang=en)
     meta(charset="utf-8")
     meta(http-equiv="X-UA-Compatible", content="IE=edge")
     meta(name="viewport", content="width=device-width, initial-scale=1, user-scalable=no")
-    title !{pageTitle != null ? `${pageTitle} &middot; ` : ""}Place 2.0#{config.debug ? " (debug)" : ""}
+    title !{pageTitle != null ? `${pageTitle} &middot; ` : ""}#{config.siteName}#{config.debug ? " (debug)" : ""}
     link(rel="apple-touch-icon", href="/img/apple-touch-icon.png")
     link(rel="icon", type="image/png", sizes="16x16", href="/img/favicon-16x16.png")
     link(rel="icon", type="image/png", sizes="32x32", href="/img/favicon-32x32.png")
@@ -48,13 +48,13 @@ html(lang=en)
     if pinnable
       meta(name="apple-mobile-web-app-capable", content="yes")
       meta(name="apple-mobile-web-app-status-bar-style", content="default")
-    meta(property="og:title" content=(pageTitle || "Place 2.0"))
+    meta(property="og:title" content=(pageTitle || config.siteName))
     if pageTitle
-      meta(property="og:site_name", content="Place 2.0")
+      meta(property="og:site_name", content=config.siteName)
     meta(property="og:url", content=config.host)
     meta(property="og:image", content="/img/apple-touch-icon.png")
     meta(property="twitter:card", content="summary")
-    meta(property="twitter:title", content=`Place 2.0${pageTitle != null ? `: ${pageTitle}` : ""}`)
+    meta(property="twitter:title", content=`${config.siteName}${pageTitle != null ? `: ${pageTitle}` : ""}`)
     meta(property="twitter:image", content="/img/apple-touch-icon.png")
     meta(name="csrf-token" content=_csrf)
     if pageDesc
@@ -85,7 +85,7 @@ html(lang=en)
           a.navbar-brand(href="https://www.dynastic.co", style="margin-right: -5px")
             img(src="https://dynastic.co/img/nbicon.png", height="20")
           a.navbar-brand(href="/")
-            | Place 2.0
+            | #{config.siteName}
             if config.debug
               span.label.label-danger.beta-label debug
         .collapse.navbar-collapse#navbar-collapse
