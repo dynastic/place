@@ -45,6 +45,9 @@
                 .content#palette
                     #menu-content-ctn
                         .menu-section
+                            span.menu-heading Templates
+                            #templates-ctn Loading templates…
+                        .menu-section
                             span.menu-heading Warps
                             #warps-ctn Loading warps…
                     #palette-content-ctn
@@ -56,5 +59,6 @@
         canvas#place-canvas(height="100%", width="100%")
         #zoom-controller
             #camera-controller
+                #template-images
                 canvas#place-canvas-draw(height=config.boardSize, width=config.boardSize)
     include popout-container

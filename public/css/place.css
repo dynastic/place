@@ -73,9 +73,9 @@ body {
     cursor: grab;
     cursor: -moz-grab;
     cursor: -webkit-grab;
-    -webkit-transition: translate 250ms ease-out;
-    -moz-transition: translate 250ms ease-out;
-    transition: translate 250ms ease-out;
+    -webkit-transition: transform 250ms ease-out;
+    -moz-transition: transform 250ms ease-out;
+    transition: transform 250ms ease-out;
 }
 
 .zoomed > #zoom-controller {
@@ -1284,7 +1284,7 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
 }
 
 #palette-expando > i {
-    color: #666;
+    color: #4ACDFF;    
     margin: 0 10px;
     transition: transform 150ms ease-in-out;
 }
@@ -1327,9 +1327,13 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
     letter-spacing: 0.5px;
 }
 
-.menu-section .menu-section-content-ctn {
+#warps-ctn .menu-section-content-ctn, #templates-ctn .menu-section-content-ctn {
     position: relative;
     padding-top: 58px;
+}
+
+#templates-ctn .menu-section-content-ctn {
+    padding-top: 74px;
 }
 
 .menu-section .menu-section-content {
@@ -1356,33 +1360,94 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
     cursor: pointer;
 }
 
+.warp-info.template {
+    height: 74px;
+    width: 74px;
+}
+
 .warp-info.explanation {
     background: none;
     pointer-events: none;
     max-width: none;
     min-width: none;
+    width: auto;
 }
 
-.warp-info > .warp-delete {
+.warp-info > .warp-delete, .warp-info > .warp-jump-to, .warp-info > .warp-visibility, .warp-info > .warp-scale {
     position: absolute;
     right: 0;
     bottom: 0;
     border-top-left-radius: 5px;
     border-bottom-right-radius: 4px;
-    background: #ff5555;
+    background: #F44336;
     text-align: center;
     color: #fff;
     font-size: 12px;
-    padding: 6px 10px;
-    display: none;
+    padding: 6px;
+    opacity: 0;
+    transition: opacity 50ms ease-in-out;
+    z-index: 2;
 }
 
 .warp-info > .warp-delete:hover {
-    background: #ee4444;
+    background: #D32F2F;
 }
 
-.warp-info:hover .warp-delete {
-    display: block;
+.warp-info > .warp-jump-to {
+    bottom: initial;
+    top: 0;
+    border-radius: 0;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 4px;
+    background: #2196F3;
+}
+
+.warp-info > .warp-jump-to:hover {
+    background: #1976D2;
+}
+
+.warp-info > .warp-visibility {
+    right: initial;
+    left: 0;
+    border-radius: 0;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 4px;
+    background: #8BC34A;
+}
+
+.warp-info > .warp-visibility:hover {
+    background: #689F38;
+}
+
+.warp-info > .warp-scale {
+    right: initial;
+    left: 0;
+    bottom: initial;
+    top: 0;
+    border-radius: 0;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 4px;
+    background: #009688;
+}
+
+.warp-info > .warp-scale:hover {
+    background: #00796B;
+}
+
+.warp-info:hover .warp-delete, .warp-info:hover > .warp-jump-to, .warp-info:hover > .warp-visibility, .warp-info:hover > .warp-scale {
+    opacity: 1;
+}
+
+.warp-info > .template-img {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    background-position: center center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 1;
 }
 
 .warp-info:active {
@@ -1392,6 +1457,10 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
 .warp-info.add {
     text-align: center;
     padding: 21px 10px;
+}
+
+.warp-info.template.add {
+    padding: 30px 10px;
 }
 
 .warp-info:last-child {
@@ -1411,13 +1480,36 @@ body:not(.viewing-full-map) .button-ctn, body #popout-container {
 }
 
 .warp-info.add .warp-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
     font-size: 20px;
-    position: relative;
-    top: -5px;
+    transform: translate(-50%, -50%);
+    padding-top: 2px;
     color: #666;
 }
 
 .warp-info .warp-coordinates {
     font-size: 11px;
     color: #777;
+}
+
+.menu-section-content.empty {
+    display: flex;
+    align-items: center;
+}
+
+.menu-section-content.empty .warp-info.explanation {
+    flex-grow: 1;
+    height: auto;
+}
+
+.warp-info:not(.template):not(.add) {
+    top: -16px;
+}
+
+#template-images > img {
+    -webkit-backface-visibility: hidden; 
+    transform: translateZ(0);
+    position: absolute;
 }
