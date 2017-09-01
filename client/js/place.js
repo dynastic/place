@@ -1102,7 +1102,7 @@ var place = {
             if(detail) $("<span>").addClass("warp-coordinates").text(detail).appendTo(warpInfo);
             if(add) warpInfo.addClass("add").attr("title", "Create a warp at the current position").append("<span class=\"warp-title\"><i class=\"fa fa-plus\"></i></span>");
             else {
-                if(typeof deleteClickHandler === "function") $("<div>").addClass("warp-delete").attr("title", `Delete warp '${title}'`).html("<i class=\"fa fa-trash fa-fw\"></i>").click(deleteClickHandler.bind(app, warpInfo)).appendTo(warpInfo);
+                if(typeof deleteClickHandler === "function") $("<div>").addClass("warp-delete").attr("title", `Delete warp '${title}'`).html("<i class=\"fa fa-minus fa-fw\"></i>").click(deleteClickHandler.bind(app, warpInfo)).appendTo(warpInfo);
                 warpInfo.attr("title", `Warp to '${title}'`)
             }
             if(clickHandler) warpInfo.click(clickHandler.bind(app, warpInfo));
@@ -1139,11 +1139,12 @@ var place = {
         event.preventDefault();
         event.stopPropagation();
         if(elem.data("deleting") === true) return;
+        if(!window.confirm("Are you sure you want to delete this warp?")) return;
         function setDeletingState(deleting) {
             elem.data("deleting", deleting);
             var icon = elem.find("i");
-            if(deleting) icon.addClass("fa-trash").removeClass("fa-spin fa-circle-o-notch");
-            else icon.removeClass("fa-trash").addClass("fa-spin fa-circle-o-notch");
+            if(deleting) icon.addClass("fa-minus").removeClass("fa-spin fa-circle-o-notch");
+            else icon.removeClass("fa-minus").addClass("fa-spin fa-circle-o-notch");
         }
         setDeletingState(true);
         var warpID = elem.attr("data-warp-id");
