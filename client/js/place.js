@@ -133,6 +133,7 @@ var place = {
     isOutdated: false, lastPixelUpdate: null,
     colours: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
     cursorX: 0, cursorY: 0,
+    templatesEnabled: false,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
         size = canvas.height;
@@ -1165,6 +1166,7 @@ var place = {
     },
     
     layoutTemplates: function() {
+        if(!this.templatesEnabled) return $("#templates-ctn").text("Coming Soon");
         if(!this.templates) this.loadTemplates();
         var templatesContainer = $("#templates-ctn");
         var templateImgs = $("#template-images");
