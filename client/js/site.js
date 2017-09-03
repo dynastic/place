@@ -101,6 +101,7 @@ function DialogController(dialog) {
                     if(tab == "sign-in" && err && err.code == "totp_needed") {
                         $("#inputUsername2FA").val(form.find("#inputUsername").val());
                         $("#inputPassword2FA").val(form.find("#inputPassword").val());
+                        $("#inputKeepSignIn2FA").prop("checked", form.find("#inputKeepSignIn").is(":checked"));
                         me.switchTab("2fa-auth");
                         return;
                     }

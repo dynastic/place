@@ -107,7 +107,6 @@ var notificationHandler = {
             let notif = new Notification(title, {
                 body: message
             });
-
             notif.addEventListener('click', () => {
                 // focus on window
                 parent.focus();
@@ -198,10 +197,10 @@ var place = {
         }
 
         document.body.onkeyup = function(e) {
-            if(document.activeElement.tagName != "INPUT") handleKeyEvents(e);
+            if(document.activeElement.tagName.toLowerCase() != "input") handleKeyEvents(e);
         }
         document.body.onkeydown = function(e) {
-            if(document.activeElement.tagName != "INPUT" && $(".dialog-ctn.show").length <= 0) {
+            if(document.activeElement.tagName.toLowerCase() != "input" && $(".dialog-ctn.show").length <= 0) {
                 handleKeyEvents(e);
                 app.handleKeyDown(e.keyCode || e.which);
             }
