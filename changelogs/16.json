@@ -1,4 +1,4 @@
 {
-    "text": "We've been working hard on canvas.place for the past few days. Here's what we managed to add:\n* **Rebrand:** We're no longer **Place 2.0**, we're **canvas.place**, and that domain is our new home.\n* **Warps:** You can now save positions on the canvas in your bottom bar, and easily travel back to them later.\n* **Better Countdown:** The time until you can place your next pixel appears in the window title, allowing you to see how long it is until you can place again at a glance.",
+    "text": "We've been working hard on canvas.place for the past few days. Here's what we managed to add:\n* **Rebrand:** We're no longer **Place 2.0**, we're **canvas.place**, and that domain is our new home.\n* **Warps:** You can now save positions on the canvas in your bottom bar, and easily travel back to them later.\n* **Better Countdown:** The time until you can place your next pixel appears in the window title, allowing you to see how long it is until you can place again at a glance.\n* **Keep me signed in:** You can now ask to be kept signed in, rather than automatically signing you out when you close your browser.",
     "date": "2017-09-03"
 }

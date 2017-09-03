@@ -52,7 +52,7 @@ function HTTPServer(app) {
 
         server.use(function (req, res, next) {
             req.sessionOptions.maxAge = req.session.maxAge || req.sessionOptions.maxAge;
-            req.session.random = Math.random() * 1000; // Force new cookie
+            if(req.session.maxAge) req.session.random = Math.random() * 1000; // Force new cookie
             next();
         });
 
