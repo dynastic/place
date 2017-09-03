@@ -8,3 +8,12 @@ exports.getAvailability = (req, res, next) => {
         availability: features
     });
 }
+
+exports.betaSignup = (req, res, next) => {
+    if (req.user.tester) return res.json({ success: true });
+
+    req.user.update({ tester: true }, (err, user) => {
+        if (err) return res.status(500).json({ success: false });
+        return res.json({ success: true });
+    });
+}

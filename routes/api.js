@@ -99,6 +99,7 @@ function APIRouter(app) {
     router.get("/board-image", BoardImageController.getAPIBoardImage);
     
     router.get("/feature-availability", FeatureAvailabilityController.getAvailability);
+    router.post("/beta-signup", requireUser, FeatureAvailabilityController.betaSignup);
     
     router.post("/place", requireUser, PlaceController.postAPIPixel);
 
