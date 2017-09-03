@@ -22,7 +22,7 @@ mixin renderBadges(badges, prefersShortText = false)
     +renderBadge(badge, prefersShortText)
 mixin renderNavItem(name, itemPath, icon)
   - var isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
-  li(id=`nav-${name.toLowerCase().replace(/ /g, "-")}`, class=(isCurrentPage ? "active" : ""))
+  li(id=`nav-${name.toLowerCase().replace(/[^0-9a-z ]/gi, '').replace(/ /g, "-")}`, class=(isCurrentPage ? "active" : ""))
     a(href=itemPath)
       if icon
         i.fa.fa-fw(class=`fa-${icon}`)
@@ -117,7 +117,8 @@ html(lang="en")
                   .
                     #[span(name="user-dropdown") #{user.usernameSet ? user.name : ""}] #[span.caret]
                 ul.dropdown-menu
-                  +renderNavItem("Account Details", "/account", "pencil-square-o")
+                  +renderNavItem("Your Profile", "/account", "user-circle-o")
+                  +renderNavItem("What's New", "javascript:void(0)", "list")
                   li.divider(role="separator")
                   +renderNavItem("Sign Out", `/signout?redirectURL=${redirectURLPart}`, "sign-out")
             else

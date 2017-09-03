@@ -1349,16 +1349,20 @@ if(place.isSignedIn()) {
                     if(this.pagination.previous && isLeft) this.requestChangelogPage(this.pagination.previous);
                 }
             });
+            $("#nav-whats-new > a").click(() => {
+                this.getChangelogsForShow("latest");
+            });
 
             return this;
         },
 
-        getMissedChangelogs: function() {
+        getChangelogsForShow: function(path = "missed") {
             if(this.isLoadingChangelogs) return;
             this.isLoadingChangelogs = true;
-            placeAjax.get("/api/changelog/missed", null, null, () => { this.isLoadingChangelogs = false; }).then((data) => {
+            placeAjax.get("/api/changelog/" + path, null, null, () => { this.isLoadingChangelogs = false; }).then((data) => {
                 placeAjax.post("/api/changelog/missed");
-                this.changelogs = data.changelogs;
+                if(!data.changelogs && data.changelog) data.changelogs = [data.changelog];
+                this.changelogs = data.changelogs
                 this.pagination = data.pagination;
                 this.layoutChangelogs();
                 if(this.changelogs && this.changelogs.length > 0) this.showDialog();
@@ -1410,6 +1414,6 @@ if(place.isSignedIn()) {
         }
     }.setup();
     $(document).ready(function() {
-        changelogController.getMissedChangelogs();
+        changelogController.getChangelogsForShow();
     });
 }

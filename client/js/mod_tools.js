@@ -276,7 +276,6 @@ $("body").on("click", ".server-action-btn", function() {
     }).catch(() => {});
 });
 
-
 $("#broadcastForm").submit(function(e) {
     e.preventDefault();
     var submitBtn = $(this).find("button[type=submit]").text("Broadcasting...").attr("disabled", "disabled");
