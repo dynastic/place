@@ -838,11 +838,13 @@ var place = {
             if(time > 0) {
                 var minutes = ~~(time / 60), seconds = time - minutes * 60;
                 var formattedTime = `${minutes}:${padLeft(seconds.toString(), "0", 2)}`;
+                document.title = `[${formattedTime}] | ${this.getSiteName()}`;
                 var shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
             } else if(this.fullUnlockTime > 5) { // only notify if full countdown exceeds 5 seconds
                 this.notificationHandler.sendNotification(this.getSiteName(), "You may now place!");
+                document.title = `${this.getSiteName()}`;
             }
         }
         if(this.secondTimer) clearInterval(this.secondTimer);
