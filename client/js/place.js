@@ -850,7 +850,7 @@ var place = {
         }
         if(this.secondTimer) clearInterval(this.secondTimer);
         this.secondTimer = null, this.unlockTime = null, this.fullUnlockTime = null;
-        document.title = `${this.originalTitle}`;
+        document.title = this.originalTitle;
         this.changePlaceTimerVisibility(false);
     },
 
@@ -1398,5 +1398,7 @@ if(place.isSignedIn()) {
             else return date.toLocaleDateString();
         }
     }.setup();
-    changelogController.getMissedChangelogs();
+    $(document).ready(function() {
+        changelogController.getMissedChangelogs();
+    });
 }
