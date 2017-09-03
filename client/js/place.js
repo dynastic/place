@@ -8,6 +8,16 @@ var size;
 
 var SignInDialogController = DialogController($("#sign-in-dialog"));
 var ChangelogDialogController = DialogController($("#changelog-dialog"));
+var BetaDialogController = DialogController($("#beta-dialog"));
+BetaDialogController.dialog.find("#signup").click(function() {
+    placeAjax.post("/api/beta-signup", null, null).then(data => {
+        if (data.success) return BetaDialogController.hide();
+        BetaDialogController.showErrorOnTab("enroll", "An error occured whilst signing you up for the beta program.");
+    }).catch(e => {
+        BetaDialogController.showErrorOnTab("enroll", "An error occured whilst signing you up for the beta program.");
+    })
+})
+
 ChangelogDialogController.dialog.find("#changelog-opt-out").click(function() {
     placeAjax.delete("/api/changelog/missed");
 })
@@ -274,6 +284,8 @@ var place = {
             this.hasTriedToFetchAvailability = true;
             this.colours = data.availability.colours;
             this.canPlaceCustomColours = data.availability.user && data.availability.user.canPlaceCustomColours;
+            this.templatesEnabled = data.availability.user && data.availability.user.hasTemplatesExperiment
+            this.layoutTemplates();
             this.setupColours();
         }).catch((err) => {
             this.hasTriedToFetchAvailability = true;

@@ -246,3 +246,10 @@ if(("standalone" in window.navigator) && window.navigator.standalone){
 	
 	}, false);
 }
+
+$(document).ready(function() {
+    if(hashHandler.getHash()["beta"] != null) {
+        hashHandler.deleteHashKey("beta");
+        BetaDialogController.show();
+    }
+});

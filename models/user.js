@@ -56,6 +56,11 @@ var UserSchema = new Schema({
         required: true,
         default: false
     },
+    tester: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
     placeCount: {
         type: Number,
         required: true,
@@ -432,7 +437,10 @@ UserSchema.methods.canPlaceColour = function(hex, app) {
 }
 
 UserSchema.methods.getFeatureAvailability = function() {
-    return {canPlaceCustomColours: this.canPlaceCustomColours()};
+    return {
+        canPlaceCustomColours: this.canPlaceCustomColours(),
+        hasTemplatesExperiment: this.admin || this.tester || false
+    };
 }
 
 UserSchema.methods.getBadges = function(app) {
