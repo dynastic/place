@@ -844,11 +844,11 @@ var place = {
                 return;
             } else if(this.fullUnlockTime > 5) { // only notify if full countdown exceeds 5 seconds
                 this.notificationHandler.sendNotification(this.getSiteName(), "You may now place!");
-                document.title = `${this.getSiteName()}`;
             }
         }
         if(this.secondTimer) clearInterval(this.secondTimer);
         this.secondTimer = null, this.unlockTime = null, this.fullUnlockTime = null;
+        document.title = `${this.getSiteName()}`;
         this.changePlaceTimerVisibility(false);
     },
 
