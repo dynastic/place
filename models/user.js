@@ -126,6 +126,7 @@ UserSchema.methods.toInfo = function(app = null) {
     var info = {
         id: this.id,
         username: this.name,
+        isOauth: this.isOauth || false,
         creationDate: this.creationDate,
         admin: this.admin,
         moderator: this.moderator,

@@ -77,6 +77,7 @@ var actions = {
                     });
                 })
             },
+            shouldShow: (data) => !data.isOauth,
             buttonText: () => "Password Reset"
         },
         disableTOTP: {

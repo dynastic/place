@@ -94,9 +94,17 @@ var notificationHandler = {
         }
         try {
             // Failsafe so it doesn't get stuck on 1 second
-            new Notification(title, {
+            let notif = new Notification(title, {
                 body: message
             });
+
+            notif.addEventListener('click', () => {
+                // focus on window
+                parent.focus();
+                window.focus(); // fallback
+                e.target.close();
+            });
+
         } catch(e) {
             console.error("Tried to send notification via old API, but failed: " + e);
         }
@@ -830,6 +838,7 @@ var place = {
             if(time > 0) {
                 var minutes = ~~(time / 60), seconds = time - minutes * 60;
                 var formattedTime = `${minutes}:${padLeft(seconds.toString(), "0", 2)}`;
+                document.title = `[${formattedTime}] | ${this.getSiteName()}`;
                 var shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
@@ -839,6 +848,7 @@ var place = {
         }
         if(this.secondTimer) clearInterval(this.secondTimer);
         this.secondTimer = null, this.unlockTime = null, this.fullUnlockTime = null;
+        document.title = `${this.getSiteName()}`;
         this.changePlaceTimerVisibility(false);
     },
 
