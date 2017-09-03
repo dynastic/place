@@ -8,6 +8,7 @@ block dependencies
 - if(typeof navbarSupportsTopMode === "undefined") navbarSupportsTopMode = false;
 - if(typeof isPoppedOut === "undefined") isPoppedOut = false;
 - var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
+- var resourceVersion = "1"; // Increment this when you make a change to the HTML that absolutely requires CSS or JS refreshing
 - css = resources.css.concat(css);
 - var bodyClasses = ["fixed-navbar"];
 - if (user) bodyClasses.push("signed-in");
@@ -64,9 +65,9 @@ html(lang="en")
     link(href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700", rel="stylesheet")
     link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", rel="stylesheet")
     link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", rel="stylesheet")
-    link(href="/css/global.css", rel="stylesheet")
+    - css.unshift("/css/global.css")
     each item in [...new Set(css)]
-      link(href=item, rel="stylesheet")
+      link(href=item + "?v=" + resourceVersion, rel="stylesheet")
     +getViewExtensions("head")
     <!--[if lt IE 9]>
       script(src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js")
@@ -156,9 +157,9 @@ html(lang="en")
       script(src="https://cdn.ravenjs.com/3.17.0/raven.min.js", crossorigin="anonymous")
       script.
           Raven.config('#{config.publicRaven}').install();
-    script(src="/js/build/site.js")
+    - js.unshift("/js/build/site.js");
     each item in [...new Set(js)]
-        script(src=item)
+        script(src=item + "?v=" + resourceVersion)
     each item in [...new Set(jsSnippets.concat(jsModSnippets))]
         script !{item}
     if typeof config.googleAnalyticsTrackingID !== "undefined" && config.googleAnalyticsTrackingID !== null && config.googleAnalyticsTrackingID != ""
