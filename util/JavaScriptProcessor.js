@@ -1,7 +1,10 @@
+const fs = require("fs");
+const path = require("path");
 const gulp = require("gulp");
 const uglify = require("gulp-uglify");
 const babel = require("gulp-babel");
 const sourcemaps = require('gulp-sourcemaps');
+const changed = require('gulp-changed');
 const del = require("del");
 
 class JavaScriptProcessor {
@@ -23,9 +26,10 @@ class JavaScriptProcessor {
         // Clean existing built JavaScript
         gulp.task("clean", () => del([this.paths.scripts.built]));
         // Process JavaScript
-        gulp.task("scripts", ["clean"], (cb) => {
+        gulp.task("scripts", (cb) => {
             this.app.logger.info('Babel', "Processing JavaScript…");
             var t = gulp.src(this.paths.scripts.src);
+            t = t.pipe(changed(this.paths.scripts.built))
             t = t.pipe(sourcemaps.init());
             t = t.pipe(babel({ presets: ["es2015"] }));
             t = t.on("error", swallowError);
@@ -41,7 +45,11 @@ class JavaScriptProcessor {
     }
 
     processJavaScript() {
-        gulp.start(["watch", "scripts"]);
+        gulp.start(["scripts"]);
+    }
+
+    cleanJavaScript() {
+        gulp.start(["clean"]);
     }
 
     watchJavaScript() {
