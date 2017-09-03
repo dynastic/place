@@ -73,7 +73,6 @@ body {
     cursor: grab;
     cursor: -moz-grab;
     cursor: -webkit-grab;
-    transition: transform 1s ease-out;
 }
 
 .zoomed > #zoom-controller {
@@ -1243,7 +1242,7 @@ body .button-ctn, body #popout-container {
 #palette-expando > i {
     color: #4ACDFF;    
     margin: 0 10px;
-    transition: transform 150ms ease-in-out;
+    transition: 150ms transform ease-in-out;
 }
 
 #palette-expando.expanded > i {
@@ -1313,7 +1312,7 @@ body .button-ctn, body #popout-container {
     min-width: 58px;
     max-width: 150px;
     position: relative;
-    transition: transform 100ms ease-in-out;
+    transition: 100ms transform ease-in-out;
     cursor: pointer;
 }
 
