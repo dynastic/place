@@ -94,9 +94,17 @@ var notificationHandler = {
         }
         try {
             // Failsafe so it doesn't get stuck on 1 second
-            new Notification(title, {
+            let notif = new Notification(title, {
                 body: message
             });
+
+            notif.addEventListener('click', () => {
+                // focus on window
+                parent.focus();
+                window.focus(); // fallback
+                e.target.close();
+            });
+
         } catch(e) {
             console.error("Tried to send notification via old API, but failed: " + e);
         }
