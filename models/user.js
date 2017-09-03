@@ -362,7 +362,6 @@ UserSchema.methods.getUsernameInitials = function() {
 UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false, app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
         var info = {};
-
         function returnInfo(error) {
             info.userError = error;
             resolve(info);
@@ -373,6 +372,10 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
             else if (!overrideDataAccess && user.deactivated) return returnInfo("deactivated");
             user.getInfo(app, getPixelInfo).then((userInfo) => {
                 info.user = userInfo;
+                if(overrideDataAccess) {
+                    info.user.isOauth = user.isOauth;
+                    info.user.hasTOTP = user.twoFactorAuthEnabled();
+                }
                 resolve(info);
             }).catch((err) => returnInfo("delete"));
         }).catch((err) => {
