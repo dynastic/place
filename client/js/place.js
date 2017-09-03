@@ -151,6 +151,8 @@ var place = {
         this.grid = grid;
         this.displayCanvas = displayCanvas; // used for display
 
+        this.originalTitle = document.title;
+
         this.coordinateElement = coordinateElement;
         this.userCountElement = userCountElement;
         this.gridHint = gridHint;
@@ -838,7 +840,7 @@ var place = {
             if(time > 0) {
                 var minutes = ~~(time / 60), seconds = time - minutes * 60;
                 var formattedTime = `${minutes}:${padLeft(seconds.toString(), "0", 2)}`;
-                document.title = `[${formattedTime}] | ${this.getSiteName()}`;
+                document.title = `[${formattedTime}] | ${this.originalTitle}`;
                 var shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
@@ -848,7 +850,7 @@ var place = {
         }
         if(this.secondTimer) clearInterval(this.secondTimer);
         this.secondTimer = null, this.unlockTime = null, this.fullUnlockTime = null;
-        document.title = `${this.getSiteName()}`;
+        document.title = `${this.originalTitle}`;
         this.changePlaceTimerVisibility(false);
     },
 
