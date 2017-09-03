@@ -5,7 +5,7 @@ const PasswordChangeController = require("../controllers/PasswordChangeControlle
 const GuidelineController = require("../controllers/GuidelineController");
 const TOSController = require("../controllers/TOSController");
 const AccountPageController = require("../controllers/AccountPageController");
-const SignOutController = require("../controllers/SignOutController");
+const AuthController = require("../controllers/AuthController");
 
 function PublicRouter(app) {
     let router = express.Router();
@@ -26,7 +26,7 @@ function PublicRouter(app) {
                 user: {
                     name: ""
                 }
-            }); // Send the username picker
+            });
         }
         if (req.user && req.user.passwordResetKey) {
             if (req.path == "/force-pw-reset" && req.method == "POST") return next(); // Allow the user to POST their new password
@@ -85,7 +85,7 @@ function PublicRouter(app) {
     router.get("/signup", function(req, res, next) {
         res.redirect("/#signup");
     });
-    router.get("/signout", [requireUser, SignOutController.getSignOut]);
+    router.get("/signout", [requireUser, AuthController.getSignOut]);
 
     router.get("/account", [requireUser, AccountPageController.getOwnAccount]);
     router.get("/user/:userID", AccountPageController.getAccountByID);

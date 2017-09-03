@@ -31,6 +31,10 @@
                                     if hasCommunityGuidelines
                                         a(href="/guidelines") Community Guidelines
                                     | .
+                    .checkbox
+                        label
+                            input(type="checkbox", name="keepSignedIn")
+                            span Keep me signed in
                     .send-section
                         button.btn.btn-popping(type="submit") Sign Up
                         include social-buttons
@@ -44,6 +48,10 @@
                     input.form-control#inputUsername(type="text", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalizae="off", spellcheck="false")
                     label.sr-only(for="inputPassword") Password
                     input.form-control#inputPassword(type="password", placeholder="Password", name="password", required)
+                    .checkbox
+                        label
+                            input(type="checkbox", name="keepSignedIn")
+                            span Keep me signed in
                     .send-section
                         button.btn.btn-popping(type="submit") Sign in
                         include social-buttons

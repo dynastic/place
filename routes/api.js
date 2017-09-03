@@ -10,8 +10,7 @@ const FeatureAvailabilityController = require("../controllers/FeatureAvailabilit
 const ChatController = require("../controllers/ChatController");
 const AdminActionsController = require("../controllers/AdminActionsController");
 const ModeratorUserController = require("../controllers/ModeratorUserController");
-const SignInController = require("../controllers/SignInController");
-const SignUpController = require("../controllers/SignUpController");
+const AuthController = require("../controllers/AuthController");
 const AccountPageController = require("../controllers/AccountPageController");
 const TOTPSetupController = require("../controllers/TOTPSetupController");
 const ChangelogController = require("../controllers/ChangelogController");
@@ -81,8 +80,8 @@ function APIRouter(app) {
         proxyDepth: app.config.trustProxyDepth
     });
 
-    router.post("/signin", SignInController.postSignIn);
-    router.post("/signup", signupRatelimit.prevent, SignUpController.postSignUp);
+    router.post("/signin", AuthController.postSignIn);
+    router.post("/signup", signupRatelimit.prevent, AuthController.postSignUp);
 
     router.post("/identify", JWTController.identifyAPIUser);
 
