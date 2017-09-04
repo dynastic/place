@@ -1,4 +1,5 @@
 const ActionLogger = require("../util/ActionLogger");
+const fs = require('fs');
 const passport = require("passport");
 const speakeasy = require("speakeasy");
 const absoluteURLRegex = new RegExp('^(?:[a-z]+:)?(//)?', 'i');
