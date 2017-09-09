@@ -8,6 +8,7 @@ var size;
 
 var SignInDialogController = DialogController($("#sign-in-dialog"));
 var ChangelogDialogController = DialogController($("#changelog-dialog"));
+var HelpDialogController = DialogController($("#help-dialog"));
 var BetaDialogController = DialogController($("#beta-dialog"));
 BetaDialogController.dialog.find("#signup").click(function() {
     placeAjax.post("/api/beta-signup", null, null).then(data => {
@@ -1062,6 +1063,7 @@ var place = {
     },
 
     pickColourUnderCursor: function() {
+        if(!this.canPlaceCustomColours) return;
         var cursor = this.getCanvasCursorPosition();
         var colour = this.canvasController.getPixelColour(cursor.x, cursor.y);
         $("#colour-picker").minicolors("value", "#" + colour);
@@ -1417,3 +1419,12 @@ if(place.isSignedIn()) {
         changelogController.getChangelogsForShow();
     });
 }
+
+$(document).ready(function() {
+    if(hashHandler.getHash()["beta"] != null) {
+        hashHandler.deleteHashKey("beta");
+        BetaDialogController.show();
+    }
+});
+
+$("#nav-help > a").click(() => HelpDialogController.show());

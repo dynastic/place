@@ -53,6 +53,10 @@ a different license, not a version of the Affero GPL, but Affero has
 released a new version of the Affero GPL which permits relicensing under
 this license.
 
+  This license has also been amended by Dynastic Development in order
+to provide a more version of the license more fair and respectful to
+contributors and their work.
+
   The precise terms and conditions for copying, distribution and
 modification follow.
 
@@ -659,3 +663,36 @@ specific requirements.
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 <http://www.gnu.org/licenses/>.
+
+               AMENDMENTS TO TERMS AND CONDITIONS
+
+  In addition to the following terms and conditions detailed above, there are
+a few key differences that has been amended, in order to be respectful to the
+contributors.
+
+  0. Commercial Use For Profit.
+
+  As with the original GNU Affero General Public License, you are allowed to
+make use of the Program for commercial use (in accordance with the conditions).
+However, with this revision of the license, you are EXPLICITLY PROHIBITED FROM
+USING THE PROGRAM TO GENERATE ANY PROFIT involving payment from users. You may
+run the software alongside ads, but MAY NOT RESTRICT THE FEATURES OF THE
+PROGRAM BASED ON WHETHER OR NOT A USER HAS PAID ANY AMOUNT, without express
+written consent from the copyright holder of the work.
+
+  1. Source Recognition.
+
+  “Link” refers to a hyperlink on a web page, which can be interacted with
+by users in order to take them to the specified web address.
+
+  To “publicly host“ the program is to make it accessible via the Internet
+to any number of users.
+
+  To “commercially host” the program is to make it accessible with the intent
+of any commercial gain.
+
+  Every publicly or commercially hosted copy of the program must include, in
+some place easily visible to users, a link back to the original hosted version
+of the program (accessible at https://canvas.place), and a link to the original
+source code repository (accessible via GitHub under Dynastic Development’s GitHub
+organization with the project name ‘place’).

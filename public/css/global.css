@@ -879,3 +879,9 @@ table.table.table-contained, td {
 #changelog-content .lead {
     margin-bottom: 5px;
 }
+
+@media(min-width: 768px) {
+    #nav-help > a {
+        padding-left: 0;
+    }
+}

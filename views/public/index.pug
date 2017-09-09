@@ -3,6 +3,7 @@ block dependencies
     - var css = ["https://cdn.jsdelivr.net/jquery.minicolors/2.1.2/jquery.minicolors.css", "/css/place.css"];
     - var pinnable = true;
     - var needsLegit = true;
+    - var needsHelp = true;
     - var pageDesc = "Work together to create something amazing. Join thousands of other users and see what happens when you share one huge canvas.";
 block content
     +getViewExtensions("main")
@@ -23,4 +24,5 @@ block content
                     #[small: a#changelog-opt-out(href="javascript:void(0)", data-dialog-dismiss=true) Don't show again]&nbsp;&nbsp;&nbsp;#[a.btn.btn-popping(data-dialog-dismiss=true) Close]
     unless user
         include views/auth-dialog
+    include views/help-dialog
     - var js = ["/socket.io/socket.io.js", "https://cdn.jsdelivr.net/interact.js/1.2.6/interact.min.js", "https://cdn.jsdelivr.net/jquery.minicolors/2.1.2/jquery.minicolors.min.js", "https://cdn.jsdelivr.net/clipboard.js/1.6.0/clipboard.min.js", "/js/build/popout.js", "/js/build/place.js", "https://cdn.rawgit.com/rmm5t/jquery-timeago/180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"];
