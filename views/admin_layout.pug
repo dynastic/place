@@ -1,6 +1,6 @@
 extends layout
-mixin renderNavItem(name, itemPath)
-    var isCurrentPage = itemPath == path;
+mixin renderAdminNavItem(name, itemPath)
+    - var isCurrentPage = itemPath == path;
     li(class=(isCurrentPage ? "active": ""))
         a(href=itemPath)
             .
@@ -21,12 +21,12 @@ block content
         .row
             .col-sm-3.col-md-2.sidebar
                 ul.nav.nav-sidebar
-                    +renderNavItem("Dashboard", "/admin/")
-                    +renderNavItem("Recent Actions", "/admin/actions")
-                    +renderNavItem("Moderator Log", "/admin/log")
+                    +renderAdminNavItem("Dashboard", "/admin/")
+                    +renderAdminNavItem("Recent Actions", "/admin/actions")
+                    +renderAdminNavItem("Moderator Log", "/admin/log")
                 ul.nav.nav-sidebar
-                    +renderNavItem("Users", "/admin/users")
-                    +renderNavItem("Reports", "/admin/reports")
-                    +renderNavItem("Pixels", "/admin/pixels")
+                    +renderAdminNavItem("Users", "/admin/users")
+                    +renderAdminNavItem("Reports", "/admin/reports")
+                    +renderAdminNavItem("Pixels", "/admin/pixels")
             .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
                 block adminContent
