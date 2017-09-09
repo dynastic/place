@@ -105,7 +105,7 @@ function DialogController(dialog) {
                         me.switchTab("2fa-auth");
                         return;
                     }
-                    if(tab == "sign-up") grecaptcha.reset();
+                    if(tab == "sign-up" && typeof grecaptcha != "undefined") grecaptcha.reset();
                     me.shake();
                     var error = "An unknown error occurred while attempting to authenticate you.";
                     if(err && err.message) error = err.message;
