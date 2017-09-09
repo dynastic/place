@@ -108,7 +108,7 @@ var notificationHandler = {
             let notif = new Notification(title, {
                 body: message
             });
-            notif.addEventListener('click', () => {
+            notif.addEventListener('click', (e) => {
                 // focus on window
                 parent.focus();
                 window.focus(); // fallback
