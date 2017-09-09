@@ -14,7 +14,7 @@ exports.postSignIn = (req, res, next) => {
             if(!req.body.totpToken) return res.status(403).json({success: false, error: {code: "totp_needed", message: "Two-factor authentication is enabled for this account. Please specify your two-factor authentication token."}});
             if(!speakeasy.totp.verify({ secret: user.totpSecret, encoding: 'base32', token: req.body.totpToken, window: 6 })) return res.status(403).json({success: false, error: {code: "invalid_totp", message: "We couldn't sign you in with that two-factor authentication token. Make sure you're entering the right code and it is updated."}});
         }
-        if(!!req.body.keepSignedIn) req.session.maxAge = 1000 * 60 * 60 * 24 * 7; // keep signed in for 7 days
+        if(req.body.keepSignedIn) req.session.maxAge = 1000 * 60 * 60 * 24 * 7; // keep signed in for 7 days
         req.login(user, function(err) {
             if (err) return res.status(500).json({success: true, error: {message: "An unknown error occurred."}});
             return res.json({success: true});
@@ -32,7 +32,7 @@ exports.postSignUp = (req, res, next) => {
     function doSignup() {
         User.register(req.body.username, req.body.password, req.place, function(user, error) {
             if(!user) return sendError(error);
-            if(!!req.body.keepSignedIn) req.session.maxAge = 1000 * 60 * 60 * 24 * 7; // keep signed in for 7 days
+            if(req.body.keepSignedIn) req.session.maxAge = 1000 * 60 * 60 * 24 * 7; // keep signed in for 7 days
             req.login(user, function(err) {
                 if (err) return sendError(null);
                 res.json({success: true});

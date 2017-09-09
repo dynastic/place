@@ -1,5 +1,3 @@
-const fs = require("fs");
-const path = require("path");
 const gulp = require("gulp");
 const uglify = require("gulp-uglify");
 const babel = require("gulp-babel");
