@@ -881,7 +881,7 @@ table.table.table-contained, td {
 }
 
 @media(min-width: 768px) {
-    #nav-help > a {
+    .signed-in #nav-help > a {
         padding-left: 0;
     }
 }
