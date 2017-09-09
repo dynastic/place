@@ -8,7 +8,8 @@ block dependencies
 - if(typeof navbarSupportsTopMode === "undefined") navbarSupportsTopMode = false;
 - if(typeof isPoppedOut === "undefined") isPoppedOut = false;
 - var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
-- var resourceVersion = "1"; // Increment this when you make a change to the HTML that absolutely requires CSS or JS refreshing
+- if(typeof needsHelp === "undefined") needsHelp = false;
+- var resourceVersion = "2"; // Increment this when you make a change to the HTML that absolutely requires CSS or JS refreshing
 - css = resources.css.concat(css);
 - var bodyClasses = ["fixed-navbar"];
 - if (user) bodyClasses.push("signed-in");
@@ -21,14 +22,13 @@ mixin renderBadge(badge, prefersShortText = false)
 mixin renderBadges(badges, prefersShortText = false)
   each badge in badges
     +renderBadge(badge, prefersShortText)
-mixin renderNavItem(name, itemPath, icon)
+mixin renderNavItem(name, itemPath, icon, showsName = true)
   - var isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
   li(id=`nav-${name.toLowerCase().replace(/[^0-9a-z ]/gi, '').replace(/ /g, "-")}`, class=(isCurrentPage ? "active" : ""))
     a(href=itemPath)
       if icon
         i.fa.fa-fw(class=`fa-${icon}`)
-      .
-        #{name}
+        span(class=showsName ? "" : "visible-xs-inline") #{name}
       if isCurrentPage
         span.sr-only (current)
 mixin getViewExtensions(name)
@@ -127,6 +127,8 @@ html(lang="en")
             else
               li#nav-auth-link
                 a.btn.btn-sm.btn-nav-auth-link(href=(path == "/" ? "javascript:void(0)" : `/#signup&redirectURL=${redirectURLPart}`), data-place-trigger="openAuthDialog") Get Started
+            if needsHelp
+              +renderNavItem("Help", "javascript:void(0)", "question-circle", false)
             +getViewExtensions("nav_user_right")
     main
       block content

@@ -1,0 +1,29 @@
+.dialog-ctn
+    .dialog-overlay
+    .dialog#help-dialog
+        .close &times;
+        .pages
+            .active(tab-name="help")
+                .heading.no-margin
+                    span.site #{config.siteName}
+                    h1 Get Help
+                    p.subhead Help using #{config.siteName}.
+                .content
+                    h3 Getting an account
+                    p You can sign in or create a #{config.siteName} account by clicking Get Started in the top navigation bar. Once you do this, you can enter your current account details or create a new one. We also allow authentication through various third-party services, if you would prefer that.
+                    h3 Placing pixels
+                    p Placing pixels is easy. Pan over to the area you want to place the pixel, zoom in, select your colour by clicking on it in the palette, and click where you want to place it.
+                    h3 Keyboard Controls
+                    p You can use the following keyboard controls on #{config.siteName}:
+                    ul
+                        li #[kbd G]: Toggle grid.
+                        li #[kbd Space]: Toggle zoom in/out.
+                        li #[kbd Esc]: Exit colour picker, exit dialog, deselect current colour.
+                        li #[kbd P]: Select the current colour under your mouse pointer #[em (donors only)].
+                        li #[kbd &#x25B2; / W]: Pan upward
+                        li #[kbd &#x25BC; / S]: Pan downward
+                        li #[kbd &#x25C0; / A]: Pan to the left
+                        li #[kbd &#x25B6; / D]: Pan to the right
+                    h3 Other topics
+                    p If you need help with anything else, please #[a(href="https://discord.gg/CgC8FTg") join our Discord here] so we can help you out.
+        .dialog-footer.align-end: a.btn.btn-popping(data-dialog-dismiss=true) Close
