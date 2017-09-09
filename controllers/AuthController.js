@@ -4,6 +4,8 @@ const passport = require("passport");
 const speakeasy = require("speakeasy");
 const absoluteURLRegex = new RegExp('^(?:[a-z]+:)?(//)?', 'i');
 
+const User = require('../models/user');
+
 exports.postSignIn = (req, res, next) => {
     require("../util/passport")(passport, req.place);
     if (req.user) return res.redirect("/");
