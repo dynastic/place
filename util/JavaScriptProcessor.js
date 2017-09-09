@@ -25,6 +25,8 @@ class JavaScriptProcessor {
 
         // Clean existing built JavaScript
         gulp.task("clean", () => del([this.paths.scripts.built]));
+        // Rerun the task when a file changes 
+        gulp.task("watch", () => gulp.watch(this.paths.scripts.src, ["scripts"]));
         // Process JavaScript
         gulp.task("scripts", (cb) => {
             this.app.logger.info('Babel', "Processing JavaScript…");
@@ -53,8 +55,7 @@ class JavaScriptProcessor {
     }
 
     watchJavaScript() {
-        // Rerun the task when a file changes 
-        gulp.task("watch", () => gulp.watch(this.paths.scripts.src, ["scripts"]));
+        gulp.start(["watch"]);
     }
 }
 
