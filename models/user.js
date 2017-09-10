@@ -207,7 +207,7 @@ UserSchema.statics.findByUsername = function(username, callback = null) {
 }
 
 UserSchema.statics.getPasswordError = function(password) {
-    return password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])$/) || password.length < 8 ? null : "That password cannot be used. Passwords are required to contain at least one digit, one uppercase letter, one lowercase letter, and be at least 8 characters in length.";
+    return password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])$/) && password.length >= 8 ? null : "That password cannot be used. Passwords are required to contain at least one digit, one uppercase letter, one lowercase letter, and be at least 8 characters in length.";
 }
 
 UserSchema.statics.register = function(username, password, app, callback, OAuthID, OAuthName) {
