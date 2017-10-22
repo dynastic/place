@@ -2196,6 +2196,14 @@ gulp-babel@^6.1.2:
     through2 "^2.0.0"
     vinyl-sourcemaps-apply "^0.2.0"
 
+gulp-changed@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/gulp-changed/-/gulp-changed-3.1.0.tgz#87cd1593a0bb4a5129dc2f229bece6d9488c272a"
+  dependencies:
+    gulp-util "^3.0.0"
+    pify "^2.3.0"
+    through2 "^2.0.0"
+
 gulp-sourcemaps@^2.6.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/gulp-sourcemaps/-/gulp-sourcemaps-2.6.0.tgz#7ccce899a8a3bfca1593a3348d0fbf41dd3f51e5"
@@ -3710,7 +3718,7 @@ performance-now@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-0.2.0.tgz#33ef30c5c77d4ea21c5a53869d91b56d8f2555e5"
 
-pify@^2.0.0:
+pify@^2.0.0, pify@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
 
