@@ -38,6 +38,9 @@
                     .send-section
                         button.btn.btn-popping(type="submit") Sign Up
                         include social-buttons
+                    if config.signUpBanner
+                        br
+                        div.alert.alert-success !{config.signUpBanner}
             div(tab-name="sign-in")
                 .heading
                     span.site #{config.siteName}
@@ -55,6 +58,9 @@
                     .send-section
                         button.btn.btn-popping(type="submit") Sign in
                         include social-buttons
+                    if config.signInBanner
+                        br
+                        div.alert.alert-success !{config.signInBanner}
             div.hides-switchers(tab-name="2fa-auth")
                 .heading
                     span.site #{config.siteName}
