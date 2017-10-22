@@ -373,7 +373,7 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
             info.userError = error;
             resolve(info);
         }
-        this.findById(userID).then((user) => {
+        var continueWithUser = (user) => {
             if (!user) return returnInfo("delete");
             if (!overrideDataAccess && user.banned) return returnInfo("ban");
             else if (!overrideDataAccess && user.deactivated) return returnInfo("deactivated");
@@ -385,7 +385,9 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
                 }
                 resolve(info);
             }).catch((err) => returnInfo("delete"));
-        }).catch((err) => {
+        }
+        if(!userID) return continueWithUser(null);
+        this.findById(userID).then(continueWithUser).catch((err) => {
             app.logger.capture("Error getting user info: " + err, { user: { _id: userID } });
             returnInfo("delete");
         });

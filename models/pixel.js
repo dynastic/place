@@ -25,7 +25,7 @@ var PixelSchema = new Schema({
     },
     editorID: {
         type: Schema.ObjectId,
-        required: true
+        required: false
     },
     lastModified: {
         type: Date,
