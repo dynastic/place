@@ -14,6 +14,11 @@ module.exports = {
     //"raven": "", 
     //"publicRaven": "", 
     // "bugsnag": "",
+    'maintenance': {
+        'allowSignups': true, 
+        'allowLogins': true,
+        'notice': undefined
+    },
     "cachet": {
         // Setup reporting error count as a metric to Cachet
         "apiKey": "",
