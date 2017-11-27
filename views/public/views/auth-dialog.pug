@@ -8,59 +8,71 @@
                     span.site #{config.siteName}
                     h1 Become a member
                     p.subhead Join the #{config.siteName} community today to start placing.
-                form.form-signin(action="/signup")
-                    label.sr-only(for="inputUsername") Username
-                    input.form-control#inputUsername(type="text", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalize="off", spellcheck="false")
-                    label.sr-only(for="inputPassword") Password
-                    input.form-control.form-merge-top#inputPassword(type="password", placeholder="Password", name="password", required)
-                    label.sr-only(for="inputPassword2") Password (again)
-                    input.form-control.form-merge-bottom#inputPassword2(type="password", placeholder="Password (again)", name="passwordverify", required)
-                    if captcha
-                        .
-                            !{renderCaptcha()}
-                    if hasTOS || hasCommunityGuidelines
+                if config.maintenance.allowSignups || !config.maintenance
+                    form.form-signin(action="/signup")
+                        label.sr-only(for="inputUsername") Username
+                        input.form-control#inputUsername(type="text", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalize="off", spellcheck="false")
+                        label.sr-only(for="inputPassword") Password
+                        input.form-control.form-merge-top#inputPassword(type="password", placeholder="Password", name="password", required)
+                        label.sr-only(for="inputPassword2") Password (again)
+                        input.form-control.form-merge-bottom#inputPassword2(type="password", placeholder="Password (again)", name="passwordverify", required)
+                        if captcha
+                            .
+                                !{renderCaptcha()}
+                        if hasTOS || hasCommunityGuidelines
+                            .checkbox
+                                label
+                                    input(type="checkbox", name="agreeToGuidelines")
+                                    span
+                                        | I agree to abide by the 
+                                        if hasTOS
+                                            a(href="/tos") Terms of Service
+                                        if hasTOS && hasCommunityGuidelines
+                                            |  and 
+                                        if hasCommunityGuidelines
+                                            a(href="/guidelines") Community Guidelines
+                                        | .
                         .checkbox
                             label
-                                input(type="checkbox", name="agreeToGuidelines")
-                                span
-                                    | I agree to abide by the 
-                                    if hasTOS
-                                        a(href="/tos") Terms of Service
-                                    if hasTOS && hasCommunityGuidelines
-                                        |  and 
-                                    if hasCommunityGuidelines
-                                        a(href="/guidelines") Community Guidelines
-                                    | .
-                    .checkbox
-                        label
-                            input(type="checkbox", name="keepSignedIn", checked)
-                            span Keep me signed in
-                    .send-section
-                        button.btn.btn-popping(type="submit") Sign Up
-                        include social-buttons
-                    if config.signUpBanner
-                        br
-                        div.alert.alert-success !{config.signUpBanner}
+                                input(type="checkbox", name="keepSignedIn", checked)
+                                span Keep me signed in
+                        .send-section
+                            button.btn.btn-popping(type="submit") Sign Up
+                            include social-buttons
+                else
+                    br
+                    div.alert.alert-danger
+                        h4 Signups for #{config.siteName} are currently disabled.
+                        if config.maintenance.notice
+                            p !{config.maintenance.notice}
+
             div(tab-name="sign-in")
                 .heading
                     span.site #{config.siteName}
                     h1 Welcome back
                     p.subhead Sign in to your account to continue placing and save your stats.
-                form.form-signin(action="/signin")
-                    label.sr-only(for="inputUsername") Username
-                    input.form-control#inputUsername(type="text", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalizae="off", spellcheck="false")
-                    label.sr-only(for="inputPassword") Password
-                    input.form-control#inputPassword(type="password", placeholder="Password", name="password", required)
-                    .checkbox
-                        label
-                            input#inputKeepSignIn(type="checkbox", name="keepSignedIn", checked)
-                            span Keep me signed in
-                    .send-section
-                        button.btn.btn-popping(type="submit") Sign in
-                        include social-buttons
-                    if config.signInBanner
+                    if config.maintenance.allowLogins || !config.maintenance
+                        form.form-signin(action="/signin")
+                            label.sr-only(for="inputUsername") Username
+                            input.form-control#inputUsername(type="text", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalizae="off", spellcheck="false")
+                            label.sr-only(for="inputPassword") Password
+                            input.form-control#inputPassword(type="password", placeholder="Password", name="password", required)
+                            .checkbox
+                                label
+                                    input#inputKeepSignIn(type="checkbox", name="keepSignedIn", checked)
+                                    span Keep me signed in
+                            .send-section
+                                button.btn.btn-popping(type="submit") Sign in
+                                include social-buttons
+                            if config.signInBanner
+                                br
+                                div.alert.alert-success !{config.signInBanner}
+                    else
                         br
-                        div.alert.alert-success !{config.signInBanner}
+                        div.alert.alert-danger
+                            h4 Signins to #{config.siteName} are currently disabled.
+                            if config.maintenance.notice
+                                p !{config.maintenance.notice}
             div.hides-switchers(tab-name="2fa-auth")
                 .heading
                     span.site #{config.siteName}
