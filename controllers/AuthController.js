@@ -13,7 +13,7 @@ exports.postSignIn = (req, res, next) => {
     if (!req.body.username || !req.body.password) return res.status(400).json({success: false, error: {message: "A username and password are required."}});
     passport.authenticate("local", function(err, user, info) {
         if (!user) return res.status(403).json({success: false, error: info.error || {message: "A username and password are required."}});
-        if (!user.admin && config.maintenance && !config.maintenance.allowSignins) return res.status(403).json({
+        if (!user.admin && config.maintenance && !config.maintenance.allowLogins) return res.status(403).json({
             success: false,
             error: {
                 message: 'Logins disabled. Please do not call this endpoint any futher.'
