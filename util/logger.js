@@ -63,7 +63,7 @@ if (config.bugsnag) {
     exports.bugnsnag = Bugsnag;
 }
 
-exports.capture = (error, extra) => {
+exports.capture = (error, extra = null) => {
     errors++;
 
     // extra is an optional param to give stuff context, like user's etc
@@ -71,7 +71,7 @@ exports.capture = (error, extra) => {
     if (exports.raven) exports.raven.captureException(error, extra);
     if (exports.bugsnag) exports.bugnsnag.notify(new Error(error), extra);
 
-    exports.error('ERROR', error);
+    exports.error('ERROR', error, extra);
 }
 
 if (config.cachet && config.cachet.site && config.cachet.apiKey && config.cachet.metricID) {
