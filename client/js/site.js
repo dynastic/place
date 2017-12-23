@@ -77,7 +77,7 @@ function DialogController(dialog) {
                 e.preventDefault();
                 var form = $(this);
                 var call = form.attr("action");
-                var tab = form.parent().attr("tab-name");
+                var tab = form.parent().parent().attr("tab-name");
                 var data = form.serialize();
                 if(form.data("submitting")) return;
                 var submitButton = form.find("input[type=submit], button[type=submit]");
@@ -98,7 +98,6 @@ function DialogController(dialog) {
                         window.location.reload();
                     }
                 }).catch((err) => {
-		    console.log(err, tab);
                     if(tab == "sign-in" && err && err.code == "totp_needed") {
                         $("#inputUsername2FA").val(form.find("#inputUsername").val());
                         $("#inputPassword2FA").val(form.find("#inputPassword").val());
