@@ -98,6 +98,7 @@ function DialogController(dialog) {
                         window.location.reload();
                     }
                 }).catch((err) => {
+		    console.log(err, tab);
                     if(tab == "sign-in" && err && err.code == "totp_needed") {
                         $("#inputUsername2FA").val(form.find("#inputUsername").val());
                         $("#inputPassword2FA").val(form.find("#inputPassword").val());
