@@ -76,7 +76,7 @@ function APIRouter(app) {
         failCallback: (req, res, next, nextValidRequestDate) => {
             res.status(429).json({success: false, error:{message: "You're doing that too fast."}});
         },
-        handleStoreError: (error) => app.reportError("Sign up rate limit store error: " + error),
+        handleStoreError: (error) => app.reportError("Sign up rate limit store error:", error),
         proxyDepth: app.config.trustProxyDepth
     });
 
@@ -162,7 +162,7 @@ function APIRouter(app) {
                 }
             })
         },
-        handleStoreError: (error) => app.reportError("Chat rate limit store error: " + error),
+        handleStoreError: (error) => app.reportError("Chat rate limit store error:", error),
         proxyDepth: app.config.trustProxyDepth
     });
 
@@ -196,27 +196,6 @@ function APIRouter(app) {
     router.route("/mod/user_notes").get(app.modMiddleware, ModeratorUserController.getAPIUserNotes).post(app.modMiddleware, ModeratorUserController.postAPIUserNotes)
     router.get("/mod/similar_users/:userID", app.modMiddleware, ModeratorUserController.getAPISimilarUsers);
     router.get("/mod/actions", app.modMiddleware, ModeratorUserController.getAPIActions);
-
-    // Debug APIs
-
-    if (app.config.debug) {
-        router.get("/trigger-error", function(req, res, next) {
-            app.reportError("Oh no! An error has happened!");
-            res.status(500).json({
-                success: false,
-                error: {
-                    message: "The server done fucked up.",
-                    code: "debug"
-                }
-            });
-        });
-        router.get("/trigger-error-report", function(req, res, next) {
-            app.errorTracker.handleErrorCheckingInterval();
-            res.json({
-                success: true
-            });
-        });
-    }
 
     return router;
 }
