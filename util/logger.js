@@ -63,6 +63,17 @@ if (config.bugsnag) {
     exports.bugnsnag = Bugsnag;
 }
 
+exports.capture = (error, extra) => {
+    errors++;
+
+    // extra is an optional param to give stuff context, like user's etc
+
+    if (exports.raven) exports.raven.captureException(error, extra);
+    if (exports.bugsnag) exports.bugnsnag.notify(new Error(error), extra);
+
+    exports.error('ERROR', error);
+}
+
 if (config.cachet && config.cachet.site && config.cachet.apiKey && config.cachet.metricID) {
     const Cachet = require("cachet-api");
     const cachet = new Cachet({
@@ -77,17 +88,6 @@ if (config.cachet && config.cachet.site && config.cachet.apiKey && config.cachet
         }).then((response) => {
             errors = 0;
             exports.info('CACHET', `Published error data (count: ${errors}) for last checking interval.`);
-        }).catch((err) => console.capture("Couldn't publish errors to cachet: " + err));
+        }).catch((err) => exports.capture("Couldn't publish errors to cachet", err));
     }, 1000 * 60);
-}
-
-exports.capture = (error, extra) => {
-    errors++;
-
-    // extra is an optional param to give stuff context, like user's etc
-
-    if (exports.raven) exports.raven.captureException(error, extra);
-    if (exports.bugsnag) exports.bugnsnag.notify(new Error(error), extra);
-
-    exports.error('ERROR', error);
 }
