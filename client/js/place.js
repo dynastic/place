@@ -149,7 +149,7 @@ var place = {
     notificationHandler: notificationHandler, hashHandler: hashHandler,
     messages: null,
     isOutdated: false, lastPixelUpdate: null,
-    colours: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
+    colours: null, pixelFlags: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
     cursorX: 0, cursorY: 0,
     templatesEnabled: false,
 
@@ -285,6 +285,7 @@ var place = {
         placeAjax.get("/api/feature-availability", null, null).then((data) => {
             this.hasTriedToFetchAvailability = true;
             this.colours = data.availability.colours;
+            this.pixelFlags = data.availability.flags;
             this.canPlaceCustomColours = data.availability.user && data.availability.user.canPlaceCustomColours;
             this.templatesEnabled = data.availability.user && data.availability.user.hasTemplatesExperiment
             this.layoutTemplates();
@@ -524,6 +525,16 @@ var place = {
                 this.colourPaletteOptionElements.push(elem[0]);
             });
             this.updateColourSelectorPosition();
+            if(this.pixelFlags && this.pixelFlags.length > 0) {
+                $("<div>").addClass("palette-separator").appendTo(contentContainer);
+                this.pixelFlags.forEach((flag, index) => {
+                    var elem = $("<div>").addClass("colour-option flag-option").css("background-image", `url(${flag.image})`).attr("data-flag", index).attr("data-flag-id", flag.id).attr("title", `${flag.title}:\n${flag.description}`).attr("alt", flag.title);
+                    if(flag.needsBorder) elem.addClass("is-white");
+                    elem.appendTo(contentContainer);
+                    this.colourPaletteOptionElements.push(elem[0]);
+                    console.log(flag);
+                });
+            }
         } else {
             overlay.text(this.hasTriedToFetchAvailability ? "An error occurred while loading colours. Retrying…" : "Loading…").show();
         }

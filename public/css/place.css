@@ -211,6 +211,7 @@ body {
 
 .colour-option {
     background: #fff linear-gradient(rgba(255,255,255,0.1), rgba(0,0,0,0.1));
+    background-position: center;
     width: 26px;
     border-radius: 5px;
     cursor: pointer;
