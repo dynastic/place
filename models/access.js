@@ -55,6 +55,17 @@ AccessSchema.statics.findIPsForUser = function(user) {
     });
 }
 
+AccessSchema.statics.getUniqueIPsAndUserAgentsForUser = async function(user) {
+    const accesses = await this.find({userID: user._id});
+    // The [...new Set(array)] is filtering all duplicate strings, and I found it was the most efficient.
+    const ipAddresses = [...new Set(accesses.map((access) => access.ipAddress))];
+    const userAgents = [...new Set(accesses.map((access) => access.userAgent))];
+    return {
+        ipAddresses,
+        userAgents,
+    };
+}
+
 AccessSchema.statics.findSimilarIPUserIDs = function(user) {
     return new Promise((resolve, reject) => {
         this.findIPsForUser(user).then((ipAddresses) => {

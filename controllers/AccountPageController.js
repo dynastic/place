@@ -14,8 +14,13 @@ exports.getAccount = (req, res, next) => {
     User.findByUsername(req.params.username).then((user) => {
         if(!user) return next();
         if((user.banned || user.deactivated) && !(req.user.moderator || req.user.admin)) return next();
-        user.getInfo(req.place).then((info) => {
-            return req.responseFactory.sendRenderedResponse("public/account", { profileUser: user, profileUserInfo: info, hasNewPassword: req.query.hasNewPassword });
+        user.getInfo(req.place).then(async (info) => {
+            if (req.user.admin) {
+                const accessData = await user.getUniqueIPsAndUserAgents();
+                user.ipAddresses = accessData.ipAddresses;
+                user.userAgents = accessData.userAgents;
+            }
+            return req.responseFactory.sendRenderedResponse("public/account", { profileUser: user, profileUserInfo: info, hasNewPassword: req.query.hasNewPassword});
         }).catch((err) => next());
     }).catch((err) => next());
 };
