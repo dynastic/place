@@ -198,6 +198,10 @@ UserSchema.methods.recordAccess = function(app, userAgent, ipAddress, key) {
     return Access.recordAccess(app, this.id, userAgent, ipAddress, key)
 }
 
+UserSchema.methods.getUniqueIPsAndUserAgents = function() {
+    return Access.getUniqueIPsAndUserAgentsForUser(this);
+}
+
 UserSchema.statics.findByUsername = function(username, callback = null) {
     return this.findOne({
         name: {

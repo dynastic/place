@@ -58,6 +58,17 @@ block content
                         . 
                             .
             //- Disable this section for OAuth users because they cannot deactivate or change passwords at this time.
+            if user && user.admin
+                hr
+                h1 Access Data
+                h4 IP Addresses
+                ul
+                    each ip in profileUser.ipAddresses
+                        li= ip
+                h4 User Agents
+                ul
+                    each ua in profileUser.userAgents
+                        li= ua
             if isSelf && !profileUser.isOauth
                 hr
                 h1 My account

@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 mongoose.promise = global.Promise;
 const recaptcha = require("express-recaptcha");
+const readline = require("readline").createInterface({input: process.stdin, output: process.stdout});
+const util = require("util");
 const PaintingManager = require("./util/PaintingManager");
 const HTTPServer = require("./util/HTTPServer");
 const WebsocketServer = require("./util/WebsocketServer");
@@ -130,3 +132,21 @@ app.recreateRoutes = () => {
     });
 }
 app.recreateRoutes();
+readline.on('line', i => {
+    try {
+        var output = eval(i)
+        output instanceof Promise
+        ? output.then(a => {
+            console.log('Promise Resolved')
+            console.log(util.inspect(a, {depth: 0}))
+        }).catch(e => {
+            console.log('Promise Rejected')
+            console.log(e.stack)
+        })
+        : output instanceof Object
+            ? console.log(util.inspect(output, {depth: 0}))
+            : console.log(output)
+    } catch (err) {
+        console.log(err.stack)
+    }
+})
