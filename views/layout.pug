@@ -17,6 +17,7 @@ block dependencies
 - var hasCommunityGuidelines = fs.existsSync("./config/community_guidelines.md");
 - var hasTOS = TOSManager.hasTOSSync();
 - var hasPP = TOSManager.hasPrivacyPolicySync();
+- const stripDuplicates = (arr = []) => { for (let i = 0; i < arr.length; i++) { if (arr.indexOf(arr[i]) !== i) arr.splice(i, 1); } return arr; }
 mixin renderBadge(badge, prefersShortText = false)
   span.label.badge-label(class=`label-${badge.style || "default"}`, title=badge.title) #{prefersShortText && badge.shortText ? badge.shortText : badge.text}
 mixin renderBadges(badges, prefersShortText = false)
@@ -67,7 +68,7 @@ html(lang="en")
     link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", rel="stylesheet")
     link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", rel="stylesheet")
     - css.unshift("/css/global.css")
-    each item in [...new Set(css)]
+    each item in stripDuplicates(css)
       link(href=item + "?v=" + resourceVersion, rel="stylesheet")
     +getViewExtensions("head")
     <!--[if lt IE 9]>
@@ -162,9 +163,9 @@ html(lang="en")
       script.
           Raven.config('#{config.publicRaven}').install();
     - js.unshift("/js/build/site.js");
-    each item in [...new Set(js)]
+    each item in stripDuplicates(js)
         script(src=item + "?v=" + resourceVersion)
-    each item in [...new Set(jsSnippets.concat(jsModSnippets))]
+    each item in stripDuplicates(jsSnippets.concat(jsModSnippets))
         script !{item}
     if typeof config.googleAnalyticsTrackingID !== "undefined" && config.googleAnalyticsTrackingID !== null && config.googleAnalyticsTrackingID != ""
         script.

@@ -23,6 +23,12 @@ var AccessSchema = new Schema({
     }
 });
 
+const stripDuplicates = (arr = []) => {
+    for (let i = 0; i < arr.length; i++) {
+        if (arr.indexOf(arr[i]) !== i) arr.splice(i, 1);
+    }
+}
+
 AccessSchema.methods.toInfo = function() {
     return {
         userID: this.userID,
@@ -57,9 +63,8 @@ AccessSchema.statics.findIPsForUser = function(user) {
 
 AccessSchema.statics.getUniqueIPsAndUserAgentsForUser = async function(user) {
     const accesses = await this.find({userID: user._id});
-    // The [...new Set(array)] is filtering all duplicate strings, and I found it was the most efficient.
-    const ipAddresses = [...new Set(accesses.map((access) => access.ipAddress))];
-    const userAgents = [...new Set(accesses.map((access) => access.userAgent))];
+    const ipAddresses = stripDuplicates(accesses.map((access) => access.ipAddress));
+    const userAgents = stripDuplicates(accesses.map((access) => access.userAgent));
     return {
         ipAddresses,
         userAgents,
@@ -71,7 +76,7 @@ AccessSchema.statics.findSimilarIPUserIDs = function(user) {
         this.findIPsForUser(user).then((ipAddresses) => {
             this.find({ ipAddress: { $in: ipAddresses }, userID: { $ne: user._id } }).then((accesses) => {
                 var userIDs = accesses.map((access) => String(access.userID));
-                resolve([...new Set(userIDs)]);
+                resolve(stripDuplicates((userIDs)));
             }).catch(reject);
         }).catch(reject);
     });
