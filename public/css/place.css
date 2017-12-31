@@ -68,15 +68,10 @@ body {
 
 #zoom-controller {
     transform-origin: center;
-    transform: scale(4, 4);
     z-index: 1;
     cursor: grab;
     cursor: -moz-grab;
     cursor: -webkit-grab;
-}
-
-.zoomed > #zoom-controller {
-    transform: scale(40, 40);
 }
 
 #zoom-controller.grabbing {
@@ -177,6 +172,10 @@ body {
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
     position: relative;
+}
+
+#palette.full-canvas {
+    display: none;
 }
 
 #palette-content-ctn {

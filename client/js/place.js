@@ -131,7 +131,12 @@ var place = {
         zoomTo: 0,
         zoomTime: 0,
         zoomHandle: null,
-        fastZoom: false
+        fastZoom: false,
+        initialZoomPoint: 4,
+        zoomedInPoint: 40,
+        snapPoints: [0, 4, 40, 80],
+        zoomScale: 4,
+        wasZoomedFullyOut: false
     },
     keys: {
         left: [37, 65],
@@ -213,6 +218,7 @@ var place = {
 
         window.onresize = () => this.handleResize();
         window.onhashchange = () => this.handleHashChange();
+        $(window).on("mousewheel", (e) => this.mousewheelMoved(e));
 
         this.zoomController = zoomController;
         this.cameraController = cameraController;
@@ -221,6 +227,8 @@ var place = {
 
         var spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
+        this.setZoomScale(this.zooming.zoomScale);
+
         $(this.coordinateElement).show();
         $(this.userCountElement).show();
 
@@ -400,10 +408,15 @@ var place = {
             if(app.zooming.zoomedIn && this.selectedColour === null) {
                 app.zoomFinished();
                 app.shouldShowPopover = false;
-                app.setZoomedIn(false);
+                app.setZoomScale(this.zooming.initialZoomPoint, true);
                 event.preventDefault();
             }
         });
+    },
+
+    mousewheelMoved: function(e) {
+        var delta = typeof e.originalEvent.wheelDeltaY !== "undefined" ? e.originalEvent.wheelDeltaY : e.originalEvent.wheelDelta;
+        this.setZoomScale(this.zooming.zoomScale + (delta / 100));
     },
 
     getCanvasCursorPosition: function(x = null, y = null) {
@@ -559,6 +572,7 @@ var place = {
         this.displayCtx.msImageSmoothingEnabled = false;
         this.displayCtx.imageSmoothingEnabled = false;
         this.updateDisplayCanvas();
+        if(this.zooming.wasZoomedFullyOut) this.setZoomScale(0);
         this.updateGrid();
         this.updateGridHint(this.lastX, this.lastY);
         this.updateColourSelectorPosition();
@@ -581,15 +595,6 @@ var place = {
         }
         elem.css({left: position});
     },
-
-    /*setFullMapViewScale: function() {
-        var scale = 1;
-        if(this.isViewingFullMap()) {
-            var canvasContainer = $(this.zoomController).parent();
-            var scale = Math.min(1, Math.min(canvasContainer.height() / size, canvasContainer.width() / size));
-        }
-        $(this.canvas).css({ "transform": `scale(${scale}, ${scale})` });
-    },*/
 
     setupDisplayCanvas: function(canvas) {
         this.displayCtx = canvas.getContext("2d");
@@ -616,7 +621,7 @@ var place = {
     },
 
     _getZoomMultiplier: function() {
-        return this.zooming.zoomedIn ? 40 : 4;
+        return this.zooming.zoomScale;
     },
 
     animateZoom: function(callback = null) {
@@ -624,7 +629,8 @@ var place = {
 
         var x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
         var y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
-        this.setCanvasPosition(x, y)
+        $(this.zoomController).css("transform", `scale(${this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime)})`);
+        this.setCanvasPosition(x, y);
 
         if (this.zooming.zoomTime >= 100) {
             this.zoomFinished();
@@ -638,9 +644,10 @@ var place = {
     },
 
     zoomFinished: function() {
+        this.zooming.zoomScale = this.zooming.zoomTo;
         this.zooming.zooming = false;
         this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
-        this.zooming.panToX = null, this.zooming.panToY = null;
+        this.zooming.panToX = null, this.zooming.panToY = null, this.zooming.zoomTo = null, this.zooming.zoomFrom = null;
         clearInterval(this.zooming.zoomHandle);
         var coord = this.getCoordinates();
         this.hashHandler.modifyHash(coord);
@@ -648,31 +655,48 @@ var place = {
         this.zooming.fastZoom = false;
     },
 
-    setZoomedIn: function(zoomedIn) {
-        var app = this;
+    setZoomScale: function(scale, animated = false) {
         if(this.zooming.zoomHandle !== null) return;
         this.zooming.panFromX = this.panX;
         this.zooming.panFromY = this.panY;
         if(this.zooming.panToX == null) this.zooming.panToX = this.panX;
         if(this.zooming.panToY == null) this.zooming.panToY = this.panY;
-        this.zooming.zoomFrom = this._getCurrentZoom()
-        this.zooming.zoomTime = 0
-        this.zooming.zooming = true
-        this.zooming.zoomedIn = zoomedIn;
-        this.zooming.zoomTo = this._getZoomMultiplier()
-        this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this, function() {
-            $(app.grid).removeClass("zooming");
-        }), 1);
-
-        if (zoomedIn) $(this.zoomController).parent().addClass("zoomed");
-        else $(this.zoomController).parent().removeClass("zoomed");
-        $(this.grid).addClass("zooming");
+        var newScale = this.normalizeZoomScale(scale);
+        if(animated) {
+            this.zooming.zoomTime = 0;
+            this.zooming.zoomFrom = this._getCurrentZoom();
+            this.zooming.zoomTo = newScale;
+            this.zooming.zooming = true;
+            this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this, () => $(this.grid).removeClass("zooming")), 1);
+            $(this.grid).addClass("zooming");
+        } else {
+            this.zooming.zoomScale = newScale;
+            $(this.zoomController).css("transform", `scale(${newScale})`);
+        }
+        this.zooming.zoomedIn = newScale >= this.zooming.zoomedInPoint;
+        if(!this.zooming.zoomedIn) $(this.pixelDataPopover).hide();
         this.updateDisplayCanvas();
+        this.updateGrid();
         this._adjustZoomButtonText();
     },
 
+    normalizeZoomScale: function(scale) {
+        var canvasContainer = $(this.zoomController).parent();
+        var minScale = Math.min(1, Math.min((canvasContainer.height() - $("#page-nav").height()) / size, canvasContainer.width() / size));
+        var newScale = Math.min(this.zooming.snapPoints[this.zooming.snapPoints.length - 1], Math.max(minScale, Math.max(this.zooming.snapPoints[0], scale)));
+        this.zooming.wasZoomedFullyOut = newScale <= minScale;
+        if (this.zooming.wasZoomedFullyOut && !$(this.colourPaletteElement).hasClass("full-canvas")) $(this.colourPaletteElement).addClass("full-canvas");
+        else if(!this.zooming.wasZoomedFullyOut && $(this.colourPaletteElement).hasClass("full-canvas")) $(this.colourPaletteElement).removeClass("full-canvas");
+        return newScale;
+    },
+
     toggleZoom: function() {
-        this.setZoomedIn(!this.zooming.zoomedIn);
+        if (this.zooming.zooming) return;
+        var scale = this.zooming.zoomScale;
+        if (scale < this.zooming.initialZoomPoint) this.setZoomScale(this.zooming.initialZoomPoint, true);
+        else if (scale < (this.zooming.initialZoomPoint + this.zooming.zoomedInPoint) / 2) this.setZoomScale(this.zooming.zoomedInPoint, true);
+        else if (scale <= this.zooming.zoomedInPoint) this.setZoomScale(this.zooming.initialZoomPoint, true);
+        else this.setZoomScale(this.zooming.zoomedInPoint, true);
     },
 
     _adjustZoomButtonText: function() {
@@ -765,8 +789,10 @@ var place = {
 
     updateGrid: function() {
         var zoom = this._getCurrentZoom();
+        var x = ($(this.cameraController).offset().left - (zoom / 2)) % zoom;
+        var y = ($(this.cameraController).offset().top - (zoom / 2)) % zoom;
         $(this.grid).css({
-            transform: `translate(${(($(this.cameraController).offset().left / zoom) - 0.5) * zoom % zoom}px, ${(($(this.cameraController).offset().top / zoom) - 0.5) * zoom % zoom}px)`,
+            transform: `translate(${x}px, ${y}px)`,
             backgroundSize: `${zoom}px ${zoom}px`
         })
     },
@@ -816,7 +842,7 @@ var place = {
     contextMenu: function(event) {
         event.preventDefault();
         if(this.selectedColour !== null) return this.deselectColour();
-        if(this.zooming.zoomedIn) this.setZoomedIn(false);
+        this.setZoomScale(this.zooming.initialZoomPoint, true);
     },
 
     getPixel: function(x, y, callback) {
@@ -948,7 +974,7 @@ var place = {
         this.zooming.panFromX = this.panX;
         this.zooming.panFromY = this.panY;
 
-        this.setZoomedIn(actuallyZoom ? true : this.zooming.zoomedIn); // this is lazy as fuck but so am i
+        this.setZoomScale(actuallyZoom && !this.zooming.zoomedIn ? 40 : this.zooming.zoomScale, true); // this is lazy as fuck but so am i
     },
 
     canvasClicked: function(x, y, event) {
