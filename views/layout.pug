@@ -3,6 +3,7 @@ block dependencies
 - if(typeof css === "undefined") css = [];
 - if(typeof pageTitle === "undefined") pageTitle = null;
 - if(typeof pageDesc === "undefined") pageDesc = null;
+- if(typeof overrideNavPath === "undefined") overrideNavPath = null;
 - if(typeof isAdmin === "undefined") isAdmin = false;
 - if(typeof pinnable === "undefined") pinnable = false;
 - if(typeof navbarSupportsTopMode === "undefined") navbarSupportsTopMode = false;
@@ -23,7 +24,7 @@ mixin renderBadges(badges, prefersShortText = false)
   each badge in badges
     +renderBadge(badge, prefersShortText)
 mixin renderNavItem(name, itemPath, icon, showsName = true)
-  - var isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
+  - var isCurrentPage = itemPath == (overrideNavPath || path) || (isAdmin && itemPath == "/admin");
   li(id=`nav-${name.toLowerCase().replace(/[^0-9a-z ]/gi, '').replace(/ /g, "-")}`, class=(isCurrentPage ? "active" : ""))
     a(href=itemPath)
       if icon
