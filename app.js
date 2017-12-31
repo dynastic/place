@@ -99,7 +99,8 @@ app.recreateServer = () => {
 }
 app.recreateServer();
 
-mongoose.connect(app.config.database);
+mongoose.connect(app.config.database, {useMongoClient: true});
+mongoose.Promise = global.Promise;
 
 // Process JS
 app.javascriptProcessor = new JavaScriptProcessor(app);
