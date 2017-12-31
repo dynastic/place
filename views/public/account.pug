@@ -1,6 +1,7 @@
 extends ../layout
 block dependencies
     - var isSelf = user ? user.id == profileUser.id : false;
+    - if (isSelf) var overrideNavPath = "/account";    
     - var pixel = profileUserInfo.latestPixel;
     - var boardImageCorrection = (1000 / config.boardSize) * 4;
     - var pageTitle = isSelf ? "Account Details" : `${profileUser.name}'s Profile`;
