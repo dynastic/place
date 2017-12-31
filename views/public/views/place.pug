@@ -16,7 +16,10 @@
                 .popout-control.control.btn.btn-default(data-tab-name="active-users"): i.fa.fa-users.fa-fw
             .control-btns
                 .control.btn.btn-success#grid-button
-                .control.btn.btn-primary#zoom-button
+                .btn-group(role="group", aria-label="Zoom")
+                    .control.btn.btn-primary#zoom-button
+                    .control.btn.btn-primary#zoom-slider-ctn: input#zoom-slider(data-slider-id='zoomSlider', type="text", data-slider-tooltip="hide")
+
         #colour-picker-popover-ctn
         #colour-picker-popover
             style#popover-styling
