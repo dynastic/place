@@ -13,7 +13,8 @@ var doneReading = false;
 let i = 0;
 let saved = 0;
 
-mongoose.connect(config.database).then(() => console.info('Connected to database'));
+mongoose.connect(config.database, {useMongoClient: true}).then(() => console.info('Connected to database'));
+mongoose.Promise = global.Promise;
 
 let cursor = Pixel.find().cursor();
 
