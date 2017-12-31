@@ -19,8 +19,7 @@ let cursor = Pixel.find().cursor();
 
 cursor.on('data', (pixel) => {
     i++;
-    let o = pixel;
-
+    
     pixel.xPos += 100
     pixel.yPos += 100
     
@@ -31,7 +30,6 @@ cursor.on('data', (pixel) => {
             console.log(`Updated ${i} pixels`);
             process.exit();
         }
-        console.log(`Updated pixel (${o.xPos}, ${o.yPos}) to (${pixel.xPos}, ${pixel.yPos})`);
     });
 });
 
