@@ -1475,3 +1475,35 @@ body .button-ctn, body #popout-container {
     image-rendering: optimize-contrast;         /* CSS3 Proposed       */
     -ms-interpolation-mode: nearest-neighbor;   /* IE8+                */
 }
+
+#zoom-slider-ctn {
+    pointer-events: none;
+}
+
+#zoom-slider-ctn > * {
+    pointer-events: all;
+}
+
+.slider {
+    margin-top: -2px;
+    width: 160px!important;
+}
+
+.slider-handle, .slider-tick {
+    margin-left: -3px!important;
+    width: 6px;
+    border-radius: 2px!important;
+    background: #fff;
+}
+
+.slider-tick {
+    opacity: 1;
+    width: 2px;
+    margin-left: -1px!important;
+}
+
+.slider-track {
+    height: 6px!important;
+    margin-top: -3px!important;
+    border-radius: 0!important;
+}

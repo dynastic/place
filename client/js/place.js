@@ -227,6 +227,7 @@ var place = {
 
         var spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
+        this.setupZoomSlider();
         this.setZoomScale(this.zooming.zoomScale);
 
         $(this.coordinateElement).show();
@@ -545,7 +546,6 @@ var place = {
                     if(flag.needsBorder) elem.addClass("is-white");
                     elem.appendTo(contentContainer);
                     this.colourPaletteOptionElements.push(elem[0]);
-                    console.log(flag);
                 });
             }
         } else {
@@ -629,7 +629,10 @@ var place = {
 
         var x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
         var y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
-        $(this.zoomController).css("transform", `scale(${this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime)})`);
+        var zoomScale = this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime);
+        $(this.zoomController).css("transform", `scale(${zoomScale})`);
+        $("#zoom-slider").attr('data-slider-value', zoomScale);
+        $("#zoom-slider").slider("refresh");
         this.setCanvasPosition(x, y);
 
         if (this.zooming.zoomTime >= 100) {
@@ -655,7 +658,22 @@ var place = {
         this.zooming.fastZoom = false;
     },
 
-    setZoomScale: function(scale, animated = false) {
+    setupZoomSlider: function() {
+        var minScale = this.getMinimumScale();
+        $('#zoom-slider').slider({
+            ticks: this.zooming.snapPoints.map((p) => Math.max(p, minScale)),
+            ticks_snap_bounds: 0.01,
+            step: 0.01,
+            min: minScale,
+            max: this.zooming.snapPoints[this.zooming.snapPoints.length - 1],
+            scale: 'logarithmic',
+            value: this.zooming.zoomScale,
+        }).on('change', (event) => {
+            this.setZoomScale(event.value.newValue, false, false);
+        });
+    },
+
+    setZoomScale: function(scale, animated = false, affectsSlider = true) {
         if(this.zooming.zoomHandle !== null) return;
         this.zooming.panFromX = this.panX;
         this.zooming.panFromY = this.panY;
@@ -672,6 +690,7 @@ var place = {
         } else {
             this.zooming.zoomScale = newScale;
             $(this.zoomController).css("transform", `scale(${newScale})`);
+            if(affectsSlider) $("#zoom-slider").slider('setValue', newScale, true);
         }
         this.zooming.zoomedIn = newScale >= this.zooming.zoomedInPoint;
         if(!this.zooming.zoomedIn) $(this.pixelDataPopover).hide();
@@ -680,9 +699,13 @@ var place = {
         this._adjustZoomButtonText();
     },
 
-    normalizeZoomScale: function(scale) {
+    getMinimumScale: function() {
         var canvasContainer = $(this.zoomController).parent();
-        var minScale = Math.min(1, Math.min((canvasContainer.height() - $("#page-nav").height()) / size, canvasContainer.width() / size));
+        return Math.min(1, Math.min((canvasContainer.height() - $("#page-nav").height()) / size, canvasContainer.width() / size));
+    },
+
+    normalizeZoomScale: function(scale) {
+        var minScale = this.getMinimumScale();
         var newScale = Math.min(this.zooming.snapPoints[this.zooming.snapPoints.length - 1], Math.max(minScale, Math.max(this.zooming.snapPoints[0], scale)));
         this.zooming.wasZoomedFullyOut = newScale <= minScale;
         if (this.zooming.wasZoomedFullyOut && !$(this.colourPaletteElement).hasClass("full-canvas")) $(this.colourPaletteElement).addClass("full-canvas");
