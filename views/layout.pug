@@ -167,9 +167,9 @@ html(lang="en")
         script(src=item + "?v=" + resourceVersion)
     each item in [...new Set(jsSnippets.concat(jsModSnippets))]
         script !{item}
-    if fs.existsSync("./views/legit.js") && !isAdmin && needsLegit
+    if fs.existsSync("./views/public/legit.js") && !isAdmin && needsLegit
         script
-            include legit.js 
+            include public/legit.js 
     if typeof config.googleAnalyticsTrackingID !== "undefined" && config.googleAnalyticsTrackingID !== null && config.googleAnalyticsTrackingID != ""
         script.
             (function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
