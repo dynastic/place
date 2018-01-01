@@ -159,7 +159,10 @@ var place = {
     templatesEnabled: false,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
+        // Setup sizes
         size = canvas.height;
+        $(cameraController).css({height: `${size}px`, width: `${size}px`});
+
         this.canvas = canvas; // moved around; hidden
         this.canvasController = canvasController;
         this.canvasController.init(canvas);
