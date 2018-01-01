@@ -62,8 +62,6 @@ body {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
     image-rendering: pixelated;
-    height: 1600px;
-    width: 1600px;
 }
 
 #zoom-controller {
@@ -90,8 +88,6 @@ body {
 
 #camera-controller {
     position: relative;
-    height: 1400px;
-    width: 1400px;
 }
 
 .button-ctn {
