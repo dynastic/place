@@ -13,9 +13,20 @@ var doneReading = false;
 let i = 0;
 let saved = 0;
 
-mongoose.connect(config.database).then(() => console.info('Connected to database'));
+mongoose.connect(config.database, {useMongoClient: true}).then(() => console.info('Connected to database'));
+mongoose.Promise = global.Promise;
 
 let cursor = Pixel.find().cursor();
+
+let count = 0;
+Pixel.count().then(c => {
+    count = c;
+    const printStatus = () => {
+        const rawPercentage = saved / count;
+        console.log(`Hey bitch we've updated ${rawPercentage * 100}% of the pixels`);
+    }
+    setInterval(() => printStatus(), 15000);
+});
 
 cursor.on('data', (pixel) => {
     i++;
