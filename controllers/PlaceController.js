@@ -4,8 +4,7 @@ const User = require("../models/user");
 
 exports.postAPIPixel = (req, res, next) => {
     if (fs.existsSync(path.join(__dirname, "../util/", "legit.js"))) {
-        const legit = require("../util/legit");
-        if (!legit.verify(req)) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
+        if (!req.pass) return res.status(403).json({ success: false, error: { message: "You cannot do that.", code: "unauthorized" } });
     }
     function paintWithUser(user) {
         if (!user.canPlace(req.place)) return res.status(429).json({ success: false, error: { message: "You cannot place yet.", code: "slow_down" } });
