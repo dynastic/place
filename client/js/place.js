@@ -1086,8 +1086,6 @@ var place = {
                 this.changePlacingModalVisibility(false);
                 this.placing = false;
             }).then((data) => {
-                $.confetti.restart();
-                setTimeout(() => $.confetti.stop(), 1500);
                 this.popoutController.loadActiveUsers();
                 this.setPixel(hex, x, y);
                 this.changeSelectorVisibility(false);
