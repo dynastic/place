@@ -21,7 +21,9 @@ BetaDialogController.dialog.find("#signup").click(function() {
 
 ChangelogDialogController.dialog.find("#changelog-opt-out").click(function() {
     placeAjax.delete("/api/changelog/missed");
-})
+});
+
+let pendingSocketReconnect = false;
 
 var canvasController = {
     isDisplayDirty: false,
@@ -461,17 +463,32 @@ var place = {
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
-    startSocketConnection() {
+    startSocketConnection(events = null) {
         const socket = new WebSocket(`ws${window.location.protocol === "https:" ? "s" : ""}://${window.location.host}`);
+
+        const deadSocketRenewalMS = 5000;
+        const renew = () => {
+            if (pendingSocketReconnect) {
+                return;
+            }
+            pendingSocketReconnect = true;
+            console.debug(`Attempting socket reconnection in ${deadSocketRenewalMS}ms`);
+            setTimeout(() => {
+                pendingSocketReconnect = false;
+                this.socket = this.startSocketConnection(events);
+            }, deadSocketRenewalMS);
+        }
 
         socket.onerror = (e) => {
             console.error("Socket error (will reload pixels on reconnect to socket): " + e);
             this.isOutdated = true;
+            renew();
         };
 
         socket.onclose = () => {
             console.warn("Socket disconnected from server, remembering to reload pixels on reconnect.")
-            this.isOutdated = true
+            this.isOutdated = true;
+            renew();
         };
 
         socket.onopen = () => {
@@ -489,7 +506,6 @@ var place = {
             }
         }
 
-        const events = {};
         socket.onmessage = (event) => {
             const rawData = event.data;
             const data = JSON.parse(rawData);
@@ -509,13 +525,16 @@ var place = {
             eventList.push(listener);
             events[event] = eventList;
         }
-
-        socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
-        socket.onJSON("tiles_placed", this.liveUpdateTiles.bind(this));
-        socket.onJSON("server_ready", () => this.getCanvasImage());
-        socket.onJSON("user_change", this.userCountChanged.bind(this));
-        socket.onJSON("admin_broadcast", this.adminBroadcastReceived.bind(this));
-        socket.onJSON("reload_client", () => window.location.reload());
+        
+        if (!events) {
+            events = {};
+            socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
+            socket.onJSON("tiles_placed", this.liveUpdateTiles.bind(this));
+            socket.onJSON("server_ready", () => this.getCanvasImage());
+            socket.onJSON("user_change", this.userCountChanged.bind(this));
+            socket.onJSON("admin_broadcast", this.adminBroadcastReceived.bind(this));
+            socket.onJSON("reload_client", () => window.location.reload());
+        }
 
         return socket;
     },
