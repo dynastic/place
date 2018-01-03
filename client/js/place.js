@@ -651,7 +651,7 @@ var place = {
     },
 
     animateZoom: function(callback = null) {
-        this.zooming.zoomTime += this.zooming.fastZoom ? 5 : 1
+        this.zooming.zoomTime += this.zooming.fastZoom ? 5 : 2;
 
         var x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
         var y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
@@ -675,6 +675,7 @@ var place = {
         $("#zoom-slider").slider('setValue', zoomScale, true);
         $(this.handElement).css({width: `${zoomScale}px`, height: `${zoomScale}px`, borderRadius: `${zoomScale / 8}px`});
         $(this.gridHint).css({width: `${zoomScale}px`, height: `${zoomScale}px`});
+        this.updateGridHint(this.lastX, this.lastY);
     },
 
     zoomFinished: function() {
@@ -716,8 +717,7 @@ var place = {
             this.zooming.zoomFrom = this._getCurrentZoom();
             this.zooming.zoomTo = newScale;
             this.zooming.zooming = true;
-            this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this, () => $(this.grid).removeClass("zooming")), 1);
-            $(this.grid).addClass("zooming");
+            this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this), 1);
         } else {
             this.zooming.zoomScale = newScale;
             this.updateUIWithZoomScale(newScale);
@@ -836,6 +836,7 @@ var place = {
             left: `${this.panX}px`
         })
         this.updateGrid();
+        if(this.lastX, this.lastY) this.updateGridHint(this.lastX, this.lastY);
         this.updateCoordinates();
         this.updateDisplayCanvas();
     },
@@ -844,10 +845,7 @@ var place = {
         var zoom = this._getCurrentZoom();
         var x = ($(this.cameraController).offset().left - (zoom / 2)) % zoom;
         var y = ($(this.cameraController).offset().top - (zoom / 2)) % zoom;
-        $(this.grid).css({
-            transform: `translate(${x}px, ${y}px)`,
-            backgroundSize: `${zoom}px ${zoom}px`
-        })
+        $(this.grid).css({transform: `translate(${x}px, ${y}px)`, backgroundSize: `${zoom}px ${zoom}px`});
     },
 
     toggleGrid: function() {
@@ -1001,6 +999,8 @@ var place = {
         $(this.zoomController).addClass("selected");
         // Show the grid hint (rectangle around where pixel will appear under cursor)
         $(this.gridHint).show();
+        // Update grid hint position, if possible
+        if(this.lastX && this.lastY) this.updateGridHint(this.lastX, this.lastY);
     },
 
     deselectColour: function(hideColourPicker = true) {
