@@ -697,7 +697,7 @@ var place = {
             $(this.zoomController).css("transform", `scale(${newScale})`);
             if(affectsSlider) $("#zoom-slider").slider('setValue', newScale, true);
         }
-        this.zooming.zoomedIn = newScale >= this.zooming.zoomedInPoint;
+        this.zooming.zoomedIn = newScale >= (this.zooming.initialZoomPoint + this.zooming.zoomedInPoint) / 2;
         if(!this.zooming.zoomedIn) $(this.pixelDataPopover).hide();
         this.updateDisplayCanvas();
         this.updateGrid();
