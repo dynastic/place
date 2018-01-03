@@ -326,7 +326,7 @@ body.signed-in #placing-modal.shown, body.signed-in #place-timer.shown {
     position: absolute;
     width: 110vw;
     height: 110vh;
-    background-size: 4px 4px;
+    background-size: 40px 40px;
     pointer-events: none;
     opacity: 0.5;
     background-image: linear-gradient(to right, #ccc 1px, transparent 1px), linear-gradient(to bottom, #ccc 1px, transparent 1px);
@@ -340,10 +340,6 @@ body.signed-in #placing-modal.shown, body.signed-in #place-timer.shown {
 
 #grid.show {
     display: block;
-}
-
-#grid.show.zooming {
-    display: none!important;
 }
 
 #pixel-data-ctn {
