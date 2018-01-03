@@ -419,6 +419,8 @@ var place = {
     },
 
     mousewheelMoved: function(e) {
+        if ($('.canvas-container:hover').length <= 0) return;
+        e.preventDefault();
         var delta = typeof e.originalEvent.wheelDeltaY !== "undefined" ? e.originalEvent.wheelDeltaY : e.originalEvent.wheelDelta;
         this.setZoomScale(this.zooming.zoomScale + (delta / 100));
     },
