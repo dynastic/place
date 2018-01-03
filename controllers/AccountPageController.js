@@ -20,7 +20,7 @@ exports.getAccount = (req, res, next) => {
                 user.ipAddresses = accessData.ipAddresses;
                 user.userAgents = accessData.userAgents;
             }
-            return req.responseFactory.sendRenderedResponse("public/account", { profileUser: user, profileUserInfo: info, hasNewPassword: req.query.hasNewPassword});
+            return req.responseFactory.sendRenderedResponse("public/account", { profileUser: user, profileUserInfo: info, hasNewPassword: req.query.hasNewPassword });
         }).catch((err) => next());
     }).catch((err) => next());
 };
