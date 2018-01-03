@@ -817,6 +817,7 @@ var place = {
             left: `${this.panX}px`
         })
         this.updateGrid();
+        if(this.lastX, this.lastY) this.updateGridHint(this.lastX, this.lastY);
         this.updateCoordinates();
         this.updateDisplayCanvas();
     },
@@ -982,6 +983,8 @@ var place = {
         $(this.zoomController).addClass("selected");
         // Show the grid hint (rectangle around where pixel will appear under cursor)
         $(this.gridHint).show();
+        // Update grid hint position, if possible
+        if(this.lastX && this.lastY) this.updateGridHint(this.lastX, this.lastY);
     },
 
     deselectColour: function(hideColourPicker = true) {
