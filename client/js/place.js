@@ -221,7 +221,7 @@ var place = {
 
         window.onresize = () => this.handleResize();
         window.onhashchange = () => this.handleHashChange();
-        $(window).on("mousewheel", (e) => this.mousewheelMoved(e));
+        $(window).on("wheel mousewheel", (e) => this.mousewheelMoved(e));
 
         this.zoomController = zoomController;
         this.cameraController = cameraController;
