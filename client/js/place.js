@@ -635,9 +635,7 @@ var place = {
 
         var x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
         var y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
-        var zoomScale = this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime);
-        $(this.zoomController).css("transform", `scale(${zoomScale})`);
-        $("#zoom-slider").slider('setValue', zoomScale, true);
+        this.updateUIWithZoomScale(this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime));
         this.setCanvasPosition(x, y);
 
         if (this.zooming.zoomTime >= 100) {
@@ -649,6 +647,13 @@ var place = {
             if(callback) callback();
             return
         }
+    },
+
+    updateUIWithZoomScale: function(zoomScale = null) {
+        if(zoomScale === null) zoomScale = this.zooming.zoomScale;
+        $(this.zoomController).css("transform", `scale(${zoomScale})`);
+        $("#zoom-slider").slider('setValue', zoomScale, true);
+        $(this.handElement).css({width: `${zoomScale}px`, height: `${zoomScale}px`, borderRadius: `${zoomScale / 8}px`});
     },
 
     zoomFinished: function() {
@@ -694,8 +699,7 @@ var place = {
             $(this.grid).addClass("zooming");
         } else {
             this.zooming.zoomScale = newScale;
-            $(this.zoomController).css("transform", `scale(${newScale})`);
-            if(affectsSlider) $("#zoom-slider").slider('setValue', newScale, true);
+            this.updateUIWithZoomScale(newScale);
         }
         this.zooming.zoomedIn = newScale >= (this.zooming.initialZoomPoint + this.zooming.zoomedInPoint) / 2;
         if(!this.zooming.zoomedIn) $(this.pixelDataPopover).hide();
@@ -966,9 +970,15 @@ var place = {
         this.deselectColour(hideColourPicker);
         this.selectedColour = colourID - 1;
         var elem = this.colourPaletteOptionElements[this.selectedColour];
+        // Create hand element
         this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
+        // Update zoom scale for hand element sizing
+        this.updateUIWithZoomScale();
+        // Select in colour palette
         $(elem).addClass("selected");
+        // Add selected class to zoom controller
         $(this.zoomController).addClass("selected");
+        // Show the grid hint (rectangle around where pixel will appear under cursor)
         $(this.gridHint).show();
     },
 
