@@ -1,7 +1,7 @@
 //
 //  Place.js
 //  -----------
-//  Written by AppleBetas and nullpixel. Inspired by Reddit's /r/place.
+//  Written by THE WHOLE DYNASTIC CREW. Inspired by Reddit's /r/place.
 //
 
 var size;
@@ -634,8 +634,7 @@ var place = {
         var y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
         var zoomScale = this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime);
         $(this.zoomController).css("transform", `scale(${zoomScale})`);
-        $("#zoom-slider").attr('data-slider-value', zoomScale);
-        $("#zoom-slider").slider("refresh");
+        $("#zoom-slider").slider('setValue', zoomScale, true);
         this.setCanvasPosition(x, y);
 
         if (this.zooming.zoomTime >= 100) {
