@@ -655,6 +655,7 @@ var place = {
         $("#zoom-slider").slider('setValue', zoomScale, true);
         $(this.handElement).css({width: `${zoomScale}px`, height: `${zoomScale}px`, borderRadius: `${zoomScale / 8}px`});
         $(this.gridHint).css({width: `${zoomScale}px`, height: `${zoomScale}px`});
+        this.updateGridHint(this.lastX, this.lastY);
     },
 
     zoomFinished: function() {
