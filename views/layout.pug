@@ -3,13 +3,14 @@ block dependencies
 - if(typeof css === "undefined") css = [];
 - if(typeof pageTitle === "undefined") pageTitle = null;
 - if(typeof pageDesc === "undefined") pageDesc = null;
+- if(typeof overrideNavPath === "undefined") overrideNavPath = null;
 - if(typeof isAdmin === "undefined") isAdmin = false;
 - if(typeof pinnable === "undefined") pinnable = false;
 - if(typeof navbarSupportsTopMode === "undefined") navbarSupportsTopMode = false;
 - if(typeof isPoppedOut === "undefined") isPoppedOut = false;
 - var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
 - if(typeof needsHelp === "undefined") needsHelp = false;
-- var resourceVersion = "3"; // Increment this when you make a change to the HTML that absolutely requires CSS or JS refreshing
+- var resourceVersion = "6"; // Increment this when you make a change to the HTML that absolutely requires CSS or JS refreshing
 - css = resources.css.concat(css);
 - var bodyClasses = ["fixed-navbar"];
 - if (user) bodyClasses.push("signed-in");
@@ -24,7 +25,7 @@ mixin renderBadges(badges, prefersShortText = false)
   each badge in badges
     +renderBadge(badge, prefersShortText)
 mixin renderNavItem(name, itemPath, icon, showsName = true)
-  - var isCurrentPage = itemPath == path || (isAdmin && itemPath == "/admin");
+  - var isCurrentPage = itemPath == (overrideNavPath || path) || (isAdmin && itemPath == "/admin");
   li(id=`nav-${name.toLowerCase().replace(/[^0-9a-z ]/gi, '').replace(/ /g, "-")}`, class=(isCurrentPage ? "active" : ""))
     a(href=itemPath)
       if icon
@@ -167,6 +168,8 @@ html(lang="en")
         script(src=item + "?v=" + resourceVersion)
     each item in stripDuplicates(jsSnippets.concat(jsModSnippets))
         script !{item}
+    if fs.existsSync("./views/public/legit.js") && !isAdmin && needsLegit
+        script !{fs.readFileSync("./views/public/legit.js")}
     if typeof config.googleAnalyticsTrackingID !== "undefined" && config.googleAnalyticsTrackingID !== null && config.googleAnalyticsTrackingID != ""
         script.
             (function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){

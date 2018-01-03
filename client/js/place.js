@@ -1,7 +1,7 @@
 //
 //  Place.js
 //  -----------
-//  Written by AppleBetas and nullpixel. Inspired by Reddit's /r/place.
+//  Written by THE WHOLE DYNASTIC CREW. Inspired by Reddit's /r/place.
 //
 
 var size;
@@ -131,7 +131,12 @@ var place = {
         zoomTo: 0,
         zoomTime: 0,
         zoomHandle: null,
-        fastZoom: false
+        fastZoom: false,
+        initialZoomPoint: 4,
+        zoomedInPoint: 40,
+        snapPoints: [0, 4, 40, 80],
+        zoomScale: 4,
+        wasZoomedFullyOut: false
     },
     keys: {
         left: [37, 65],
@@ -154,7 +159,10 @@ var place = {
     templatesEnabled: false,
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
+        // Setup sizes
         size = canvas.height;
+        $(cameraController).css({height: `${size}px`, width: `${size}px`});
+
         this.canvas = canvas; // moved around; hidden
         this.canvasController = canvasController;
         this.canvasController.init(canvas);
@@ -213,6 +221,7 @@ var place = {
 
         window.onresize = () => this.handleResize();
         window.onhashchange = () => this.handleHashChange();
+        $(window).on("wheel mousewheel", (e) => this.mousewheelMoved(e));
 
         this.zoomController = zoomController;
         this.cameraController = cameraController;
@@ -221,6 +230,9 @@ var place = {
 
         var spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
+        this.setupZoomSlider();
+        this.setZoomScale(this.zooming.zoomScale);
+
         $(this.coordinateElement).show();
         $(this.userCountElement).show();
 
@@ -400,10 +412,18 @@ var place = {
             if(app.zooming.zoomedIn && this.selectedColour === null) {
                 app.zoomFinished();
                 app.shouldShowPopover = false;
-                app.setZoomedIn(false);
+                app.setZoomScale(this.zooming.initialZoomPoint, true);
                 event.preventDefault();
             }
         });
+    },
+
+    mousewheelMoved: function(event) {
+        if ($('.canvas-container:hover').length <= 0) return;
+        var e = event.originalEvent;
+        e.preventDefault();
+        var delta = e.type == "wheel" ? e.deltaY : (typeof e.wheelDeltaY !== "undefined" ? e.wheelDeltaY : e.wheelDelta);
+        this.setZoomScale(this.zooming.zoomScale + (delta / 100));
     },
 
     getCanvasCursorPosition: function(x = null, y = null) {
@@ -532,7 +552,6 @@ var place = {
                     if(flag.needsBorder) elem.addClass("is-white");
                     elem.appendTo(contentContainer);
                     this.colourPaletteOptionElements.push(elem[0]);
-                    console.log(flag);
                 });
             }
         } else {
@@ -559,6 +578,7 @@ var place = {
         this.displayCtx.msImageSmoothingEnabled = false;
         this.displayCtx.imageSmoothingEnabled = false;
         this.updateDisplayCanvas();
+        if(this.zooming.wasZoomedFullyOut) this.setZoomScale(0);
         this.updateGrid();
         this.updateGridHint(this.lastX, this.lastY);
         this.updateColourSelectorPosition();
@@ -581,15 +601,6 @@ var place = {
         }
         elem.css({left: position});
     },
-
-    /*setFullMapViewScale: function() {
-        var scale = 1;
-        if(this.isViewingFullMap()) {
-            var canvasContainer = $(this.zoomController).parent();
-            var scale = Math.min(1, Math.min(canvasContainer.height() / size, canvasContainer.width() / size));
-        }
-        $(this.canvas).css({ "transform": `scale(${scale}, ${scale})` });
-    },*/
 
     setupDisplayCanvas: function(canvas) {
         this.displayCtx = canvas.getContext("2d");
@@ -616,15 +627,16 @@ var place = {
     },
 
     _getZoomMultiplier: function() {
-        return this.zooming.zoomedIn ? 40 : 4;
+        return this.zooming.zoomScale;
     },
 
     animateZoom: function(callback = null) {
-        this.zooming.zoomTime += this.zooming.fastZoom ? 5 : 1
+        this.zooming.zoomTime += this.zooming.fastZoom ? 5 : 2;
 
         var x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
         var y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
-        this.setCanvasPosition(x, y)
+        this.updateUIWithZoomScale(this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime));
+        this.setCanvasPosition(x, y);
 
         if (this.zooming.zoomTime >= 100) {
             this.zoomFinished();
@@ -637,10 +649,20 @@ var place = {
         }
     },
 
+    updateUIWithZoomScale: function(zoomScale = null) {
+        if(zoomScale === null) zoomScale = this.zooming.zoomScale;
+        $(this.zoomController).css("transform", `scale(${zoomScale})`);
+        $("#zoom-slider").slider('setValue', zoomScale, true);
+        $(this.handElement).css({width: `${zoomScale}px`, height: `${zoomScale}px`, borderRadius: `${zoomScale / 8}px`});
+        $(this.gridHint).css({width: `${zoomScale}px`, height: `${zoomScale}px`});
+        this.updateGridHint(this.lastX, this.lastY);
+    },
+
     zoomFinished: function() {
+        this.zooming.zoomScale = this.zooming.zoomTo;
         this.zooming.zooming = false;
         this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
-        this.zooming.panToX = null, this.zooming.panToY = null;
+        this.zooming.panToX = null, this.zooming.panToY = null, this.zooming.zoomTo = null, this.zooming.zoomFrom = null;
         clearInterval(this.zooming.zoomHandle);
         var coord = this.getCoordinates();
         this.hashHandler.modifyHash(coord);
@@ -648,31 +670,66 @@ var place = {
         this.zooming.fastZoom = false;
     },
 
-    setZoomedIn: function(zoomedIn) {
-        var app = this;
+    setupZoomSlider: function() {
+        var minScale = this.getMinimumScale();
+        $('#zoom-slider').slider({
+            ticks: this.zooming.snapPoints.map((p) => Math.max(p, minScale)),
+            ticks_snap_bounds: 0.01,
+            step: 0.01,
+            min: minScale,
+            max: this.zooming.snapPoints[this.zooming.snapPoints.length - 1],
+            scale: 'logarithmic',
+            value: this.zooming.zoomScale,
+        }).on('change', (event) => {
+            this.setZoomScale(event.value.newValue, false, false);
+        });
+    },
+
+    setZoomScale: function(scale, animated = false, affectsSlider = true) {
         if(this.zooming.zoomHandle !== null) return;
         this.zooming.panFromX = this.panX;
         this.zooming.panFromY = this.panY;
         if(this.zooming.panToX == null) this.zooming.panToX = this.panX;
         if(this.zooming.panToY == null) this.zooming.panToY = this.panY;
-        this.zooming.zoomFrom = this._getCurrentZoom()
-        this.zooming.zoomTime = 0
-        this.zooming.zooming = true
-        this.zooming.zoomedIn = zoomedIn;
-        this.zooming.zoomTo = this._getZoomMultiplier()
-        this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this, function() {
-            $(app.grid).removeClass("zooming");
-        }), 1);
-
-        if (zoomedIn) $(this.zoomController).parent().addClass("zoomed");
-        else $(this.zoomController).parent().removeClass("zoomed");
-        $(this.grid).addClass("zooming");
+        var newScale = this.normalizeZoomScale(scale);
+        if(animated) {
+            this.zooming.zoomTime = 0;
+            this.zooming.zoomFrom = this._getCurrentZoom();
+            this.zooming.zoomTo = newScale;
+            this.zooming.zooming = true;
+            this.zooming.zoomHandle = setInterval(this.animateZoom.bind(this), 1);
+        } else {
+            this.zooming.zoomScale = newScale;
+            this.updateUIWithZoomScale(newScale);
+        }
+        this.zooming.zoomedIn = newScale >= (this.zooming.initialZoomPoint + this.zooming.zoomedInPoint) / 2;
+        if(!this.zooming.zoomedIn) $(this.pixelDataPopover).hide();
         this.updateDisplayCanvas();
+        this.updateGrid();
         this._adjustZoomButtonText();
     },
 
+    getMinimumScale: function() {
+        var canvasContainer = $(this.zoomController).parent();
+        return Math.min(1, Math.min((canvasContainer.height() - $("#page-nav").height()) / size, canvasContainer.width() / size));
+    },
+
+    normalizeZoomScale: function(scale) {
+        var minScale = this.getMinimumScale();
+        var newScale = Math.min(this.zooming.snapPoints[this.zooming.snapPoints.length - 1], Math.max(minScale, Math.max(this.zooming.snapPoints[0], scale)));
+        this.zooming.wasZoomedFullyOut = newScale <= minScale;
+        if (this.zooming.wasZoomedFullyOut && !$(this.colourPaletteElement).hasClass("full-canvas")) $(this.colourPaletteElement).addClass("full-canvas");
+        else if(!this.zooming.wasZoomedFullyOut && $(this.colourPaletteElement).hasClass("full-canvas")) $(this.colourPaletteElement).removeClass("full-canvas");
+        return newScale;
+    },
+
     toggleZoom: function() {
-        this.setZoomedIn(!this.zooming.zoomedIn);
+        if (this.zooming.zooming) return;
+        var scale = this.zooming.zoomScale;
+        if (scale < this.zooming.initialZoomPoint) this.setZoomScale(this.zooming.initialZoomPoint, true);
+        else if (scale < (this.zooming.initialZoomPoint + this.zooming.zoomedInPoint) / 2) this.setZoomScale(this.zooming.zoomedInPoint, true);
+        else if (scale <= this.zooming.zoomedInPoint) this.setZoomScale(this.zooming.initialZoomPoint, true);
+        else this.setZoomScale(this.zooming.zoomedInPoint, true);
     },
 
     _adjustZoomButtonText: function() {
@@ -759,16 +816,16 @@ var place = {
             left: `${this.panX}px`
         })
         this.updateGrid();
+        if(this.lastX, this.lastY) this.updateGridHint(this.lastX, this.lastY);
         this.updateCoordinates();
         this.updateDisplayCanvas();
     },
 
     updateGrid: function() {
         var zoom = this._getCurrentZoom();
-        $(this.grid).css({
-            transform: `translate(${(($(this.cameraController).offset().left / zoom) - 0.5) * zoom % zoom}px, ${(($(this.cameraController).offset().top / zoom) - 0.5) * zoom % zoom}px)`,
-            backgroundSize: `${zoom}px ${zoom}px`
-        })
+        var x = ($(this.cameraController).offset().left - (zoom / 2)) % zoom;
+        var y = ($(this.cameraController).offset().top - (zoom / 2)) % zoom;
+        $(this.grid).css({transform: `translate(${x}px, ${y}px)`, backgroundSize: `${zoom}px ${zoom}px`});
     },
 
     toggleGrid: function() {
@@ -816,7 +873,7 @@ var place = {
     contextMenu: function(event) {
         event.preventDefault();
         if(this.selectedColour !== null) return this.deselectColour();
-        if(this.zooming.zoomedIn) this.setZoomedIn(false);
+        this.setZoomScale(this.zooming.initialZoomPoint, true);
     },
 
     getPixel: function(x, y, callback) {
@@ -912,10 +969,18 @@ var place = {
         this.deselectColour(hideColourPicker);
         this.selectedColour = colourID - 1;
         var elem = this.colourPaletteOptionElements[this.selectedColour];
+        // Create hand element
         this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
+        // Update zoom scale for hand element sizing
+        this.updateUIWithZoomScale();
+        // Select in colour palette
         $(elem).addClass("selected");
+        // Add selected class to zoom controller
         $(this.zoomController).addClass("selected");
+        // Show the grid hint (rectangle around where pixel will appear under cursor)
         $(this.gridHint).show();
+        // Update grid hint position, if possible
+        if(this.lastX && this.lastY) this.updateGridHint(this.lastX, this.lastY);
     },
 
     deselectColour: function(hideColourPicker = true) {
@@ -948,7 +1013,7 @@ var place = {
         this.zooming.panFromX = this.panX;
         this.zooming.panFromY = this.panY;
 
-        this.setZoomedIn(actuallyZoom ? true : this.zooming.zoomedIn); // this is lazy as fuck but so am i
+        this.setZoomScale(actuallyZoom && !this.zooming.zoomedIn ? 40 : this.zooming.zoomScale, true); // this is lazy as fuck but so am i
     },
 
     canvasClicked: function(x, y, event) {

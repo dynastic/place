@@ -129,6 +129,7 @@ var popoutController = {
             this.loadActiveUsers();
             this.addChatMessage(data);
         });
+        
         return socket;
     },
 
