@@ -107,7 +107,7 @@ function PaintingManager(app) {
         doPaint: function(colour, x, y, user) {
             var a = this;
             return new Promise((resolve, reject) => {
-                if(!this.hasImage) return reject({message: "Server not ready", code: "not_ready"});
+                if(!this.hasImage) return reject({message: "Our servers are currently getting ready. Please try again in a moment.", code: "not_ready"});
                 if(app.temporaryUserInfo.isUserPlacing(user)) return reject({message: "You cannot place more than one tile at once.", code: "attempted_overload"});
                 app.temporaryUserInfo.setUserPlacing(user, true);
                 // Add to DB:
