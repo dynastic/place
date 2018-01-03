@@ -11,7 +11,7 @@ function WebsocketServer(app, httpServer) {
             this.server.on("connection", (socket) => {
                 let hasRequestedFetch = false;
                 this.connectedClients++;
-                socket.onclose = () => this.connectedClients === 0 ? 0 : this.connectedClients--;
+                socket.onclose = () => this.connectedClients--;
                 socket.onmessage = (event) => {
                     const {data} = event;
                     if (data.r === "fetch_pixels") {
@@ -20,11 +20,10 @@ function WebsocketServer(app, httpServer) {
                         if (!ts || (ts < (currentTS - 60)) || (ts > currentTS)) {
                             return;
                         }
-
                         const selectorDate = new Date(ts * 1000);
                         Pixel.find({lastModified: {$gte: selectorDate}}).then((pixel) => {
                             const info = pixel.map((p) => p.getSocketInfo());
-                            socket.send({e: "tiles_placed", d: JSON.stringify({pixels: info})});
+                            this.send(socket, "tiles_placed", {pixels: info});
                         }).catch((err) => {
                             app.logger.capture("Error fetching pixel for websocket client: " + err);
                         });
@@ -33,20 +32,34 @@ function WebsocketServer(app, httpServer) {
             });
             setInterval(() => this.checkUserCount(), 1000);
             return this;
-        }
+        } 
 
         sendConnectedClientBroadcast() {
-            this.broadcastRaw("user_change", this.connectedClients);
+            this.broadcast("user_change", this.connectedClients);
         }
 
-        broadcast(name, payload = null) {
-            this.broadcastRaw(name, payload);
+        broadcast(name, payload = undefined) {
+            const broadcasts = [];
+            this.server.clients.forEach(client => broadcasts.push(this.send(client, name, payload)));
+            return Promise.all(broadcasts);
         }
 
-        broadcastRaw(name, payload = undefined) {
-            this.server.clients.forEach((client) => {
-                client.send(JSON.stringify({e: name, d: payload}));
+        send(socket, event, data) {
+            return new Promise((resolve, reject) => {
+                const payload = JSON.stringify({e: event, d: data});
+                socket.send(payload, (e) => e ? reject(e) : resolve());
             });
+        }
+
+        /**
+         * Creates a proper array
+         * 
+         * Do not use for iteration as that creates double-overhead with forEach and hurts scalability
+         */
+        get clients() {
+            const clients = [];
+            this.server.clients.forEach(c => clients.push(c));
+            return clients;
         }
 
         checkUserCount() {
