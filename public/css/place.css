@@ -317,13 +317,9 @@ body.signed-in #placing-modal.shown, body.signed-in #place-timer.shown {
     top: 0;
     left: 0;
     box-sizing: border-box;
-}
-
-.zoomed > #grid-hint {
-    height: 40px;
-    width: 40px;
-    display: none;
+    pointer-events: none;
     z-index: 1;
+    display: none;
 }
 
 #grid {
