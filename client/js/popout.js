@@ -108,27 +108,13 @@ var popoutController = {
     },
 
     startSocketConnection: function() {
-        var socket = this.place.socket;
+        var socket = place.socket || new WebSocket(`ws${window.location.protocol === "https:" ? "s" : ""}://${window.location.host}`);
 
-        socket.onJSON = function(event, listener) {
-            return this.on(event, (data) => listener(JSON.parse(data)));
-        }
-
-        socket.on("error", (e) => {
-            console.log("Socket error: " + e);
-            this.isOutdated = true;
-        });
-        socket.on("connect", () => {
-            console.log("Socket successfully connected (using main window socket)");
-            if(this.isOutdated) {
-                this.loadChatMessages();
-                this.isOutdated = false;
-            }
-        });
         socket.onJSON("new_message", (data) => {
             this.loadActiveUsers();
             this.addChatMessage(data);
         });
+
         return socket;
     },
 

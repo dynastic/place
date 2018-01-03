@@ -367,14 +367,14 @@ var place = {
     requestPixelsAfterDate: function(date) {
         if(!this.socket.connected) {
             this.neededPixelDate = date;
-            this.socket.once("connect", () => {
+            this.socket.onopen = () => {
                 this.requestPixelsAfterDate(this.neededPixelDate);
                 this.neededPixelDate = null;
-            });
+            }
             return;
         }
-        console.log("Requesting pixels after date " + date + "!");
-        this.socket.emit("fetch_pixels", date);
+        console.log("Requesting pixels after date " + date);
+        this.socket.send({r: "fetch_pixels", d: {ts: date}});
     },
 
     setupInteraction: function() {
@@ -461,22 +461,20 @@ var place = {
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
-    startSocketConnection: function() {
-        var socket = io();
+    startSocketConnection() {
+        const socket = new WebSocket(`ws${window.location.protocol === "https:" ? "s" : ""}://${window.location.host}`);
 
-        socket.onJSON = function(event, listener) {
-            return this.on(event, (data) => listener(JSON.parse(data)));
-        }
-
-        socket.on("error", (e) => {
+        socket.onerror = (e) => {
             console.error("Socket error (will reload pixels on reconnect to socket): " + e);
             this.isOutdated = true;
-        });
-        socket.on("disconnect", () => {
+        };
+
+        socket.onclose = () => {
             console.warn("Socket disconnected from server, remembering to reload pixels on reconnect.")
             this.isOutdated = true
-        });
-        socket.on("connect", () => {
+        };
+
+        socket.onopen = () => {
             console.log("Socket successfully connected");
             if(!this.isOutdated) return;
             if(Date.now() / 1000 - this.lastPixelUpdate > 60) {
@@ -489,14 +487,36 @@ var place = {
                 console.log("The last request was a minute or less ago, we can just get the changed pixels over websocket.")
                 this.requestPixelsAfterDate(this.lastPixelUpdate)
             }
-        });
+        }
+
+        const events = {};
+        socket.onmessage = (event) => {
+            const rawData = event.data;
+            const data = JSON.parse(rawData);
+            console.log(data);
+            const code = data.e;
+            if (code) {
+                if (events[code]) {
+                    events[code].forEach((middleware) => {
+                        middleware(data.d);
+                    });
+                }
+            }
+        }
+
+        socket["onJSON"] = (event = "", listener = () => null) => {
+            const eventList = events[event] ? Array.isArray(events[event]) ? events[event] : [] : [];
+            eventList.push(listener);
+            events[event] = eventList;
+        }
 
         socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
         socket.onJSON("tiles_placed", this.liveUpdateTiles.bind(this));
-        socket.on("server_ready", () => this.getCanvasImage());
-        socket.on("user_change", this.userCountChanged.bind(this));
+        socket.onJSON("server_ready", () => this.getCanvasImage());
+        socket.onJSON("user_change", this.userCountChanged.bind(this));
         socket.onJSON("admin_broadcast", this.adminBroadcastReceived.bind(this));
-        socket.on("reload_client", () => window.location.reload());
+        socket.onJSON("reload_client", () => window.location.reload());
+
         return socket;
     },
 
