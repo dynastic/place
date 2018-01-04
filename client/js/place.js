@@ -176,7 +176,6 @@ var place = {
     _stat: Date.now(),
     stat() {
         this._stat = Date.now();
-        console.debug("We've got a stat!");
         if (!this._socket) {
             this._socket = this.startSocketConnection();
         }
