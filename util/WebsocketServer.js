@@ -1,76 +1,80 @@
 const ws = require("uws");
 const Pixel = require("../models/pixel");
+const {SocketController} = require("./Sockets/SocketController");
 
 function WebsocketServer(app, httpServer) {
     app.logger.log('Websocket Server', "Attached to HTTP server.");
 
     class SocketServer {
-        setup() {
+
+        constructor() {
             this.server = new ws.Server({server: httpServer});
-            this.connectedClients = 0;
-            this.server.on("connection", (socket) => {
-                let hasRequestedFetch = false;
-                this.connectedClients++;
-                socket.onclose = () => this.connectedClients--;
-                socket.onmessage = (event) => {
-                    const {data} = event;
-                    if (data.r === "fetch_pixels") {
-                        const {ts} = data.d;
-                        const currentTS = Math.floor(Date.now() / 1000);
-                        if (!ts || (ts < (currentTS - 60)) || (ts > currentTS)) {
-                            return;
-                        }
-                        const selectorDate = new Date(ts * 1000);
-                        Pixel.find({lastModified: {$gte: selectorDate}}).then((pixel) => {
-                            const info = pixel.map((p) => p.getSocketInfo());
-                            this.send(socket, "tiles_placed", {pixels: info});
-                        }).catch((err) => {
-                            app.logger.capture("Error fetching pixel for websocket client: " + err);
-                        });
-                    }
-                }
-            });
             setInterval(() => this.checkUserCount(), 1000);
-            return this;
-        } 
 
-        sendConnectedClientBroadcast() {
-            this.broadcast("user_change", this.connectedClients);
-        }
+            this.socketController = new SocketController();
+            this.socketController.use((socket, next) => {
+                socket.on("fetch_pixels", data => {
+                    const {ts} = data;
+                    const currentTS = Math.floor(Date.now() / 1000);
+                    if (!ts || (ts < (currentTS - 60)) || (ts > currentTS)) {
+                        return;
+                    }
+                    const selectorDate = new Date(ts * 1000);
+                    Pixel.find({lastModified: {$gte: selectorDate}}).then((pixel) => {
+                        const info = pixel.map((p) => p.getSocketInfo());
+                        socket.dispatch("tiles_placed", {pixels: info});
+                    }).catch((err) => {
+                        app.logger.capture("Error fetching pixel for websocket client: " + err);
+                    });
+                });
+                socket.on("activity", () => socket.timeoutWarning = false);
+                next();
+            });
 
-        broadcast(name, payload = undefined) {
-            const broadcasts = [];
-            this.server.clients.forEach(client => broadcasts.push(this.send(client, name, payload)));
-            return Promise.all(broadcasts);
-        }
-
-        send(socket, event, data) {
-            return new Promise((resolve, reject) => {
-                const payload = JSON.stringify({e: event, d: data});
-                socket.send(payload, (e) => e ? reject(e) : resolve());
+            this.server.on("connection", socket => {
+                this.socketController.register(socket);
             });
         }
 
         /**
-         * Creates a proper array
+         * Broadcasts to all clients the new client count
          * 
-         * Do not use for iteration as that creates double-overhead with forEach and hurts scalability
+         * @param {number} connectedClients The number of clients to broadcast
          */
-        get clients() {
-            const clients = [];
-            this.server.clients.forEach(c => clients.push(c));
-            return clients;
+        sendConnectedClientBroadcast(connectedClients = this.socketController.connectedClients) {
+            this.broadcast("user_change", connectedClients);
         }
 
+        /**
+         * Broadcasts a payload to all connected clients
+         * 
+         * @param {string} name payload name
+         * @param {any} payload actual payload data
+         */
+        broadcast(name, payload = undefined) {
+            return this.socketController.dispatch(name, payload);
+        }
+
+        /**
+         * Checks the current user count against the last broadcasted and broadcasts the new count if it has changed
+         */
         checkUserCount() {
-            if (!this.lastConnectedClientBroadcastCount || (this.lastConnectedClientBroadcastCount != this.connectedClients)) {
-                this.lastConnectedClientBroadcastCount = this.connectedClients;
-                this.sendConnectedClientBroadcast();
+            const connectedClients = this.socketController.connectedClients;
+            if (this.lastConnectedClientBroadcastCount !== connectedClients) {
+                this.lastConnectedClientBroadcastCount = connectedClients;
+                this.sendConnectedClientBroadcast(connectedClients);
             }
+        }
+
+        /**
+         * Proxies to the socketController
+         */
+        get connectedClients() {
+            return this.socketController.connectedClients;
         }
     }
 
-    return new SocketServer().setup();
+    return new SocketServer();
 }
 
 WebsocketServer.prototype = Object.create(WebsocketServer.prototype);

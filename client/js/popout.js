@@ -107,13 +107,30 @@ var popoutController = {
         this.startSocketConnection();
     },
 
-    startSocketConnection: function() {
-        var socket = place.socket || new WebSocket(`ws${window.location.protocol === "https:" ? "s" : ""}://${window.location.host}`);
+    startSocketConnection: function(events = {}) {
+        /**
+         * @type {WebSocket}
+         */
+        let socket = place.socket;
+        if (!socket) {
+            socket = new WebSocket(`ws${window.location.protocol === "https:" ? "s" : ""}://${window.location.host}`);
+
+            socket.onopen = () => {
+                socket.send(JSON.stringify({r: "identify", d: {clientType: "popout"}}));
+            }
+
+            socket["onJSON"] = (event = "", listener = () => null) => {
+                const eventList = events[event] ? Array.isArray(events[event]) ? events[event] : [] : [];
+                eventList.push(listener);
+                events[event] = eventList;
+            }
+        }
 
         socket.onJSON("new_message", (data) => {
             this.loadActiveUsers();
             this.addChatMessage(data);
         });
+        socket.onJSON("activity_check", () => socket.send(JSON.stringify({r: "activity"})));
         return socket;
     },
 
