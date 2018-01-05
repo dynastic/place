@@ -507,7 +507,9 @@ var place = {
         };
 
         socket.onclose = (event) => {
-            console.warn("Socket disconnected from server, remembering to reload pixels on reconnect.")
+            console.warn("Socket disconnected from server, remembering to reload pixels on reconnect.");
+            console.debug("Socket close event");
+            console.debug(event);
             this.isOutdated = true;
             // Checks whether the socket was closed due to idling - If it was, do not reconnect.
             renew();
@@ -541,7 +543,8 @@ var place = {
         socket.onmessage = (event) => {
             const rawData = event.data;
             const data = JSON.parse(rawData);
-            console.log(data);
+            console.debug("Got data from the server");
+            console.debug(data);
             const code = data.e;
             if (code) {
                 if (events[code]) {
