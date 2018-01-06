@@ -139,7 +139,7 @@ html(lang="en")
 - if(typeof js === "undefined" || !js) js = [];
 - if(typeof jsSnippets === "undefined" || !jsSnippets) jsSnippets = [];
 - var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
-- if(userMod) { js.unshift("https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"); js.unshift("/js/build/mod_tools.js");}
+- if(userMod) { js.unshift("/js/bootbox.min.js"); js.unshift("/js/build/mod_tools.js");}
 - if(typeof jsModSnippets === "undefined" || !jsModSnippets || !userMod) jsModSnippets = [];
 - js = resources.js.concat(js);
     footer.footer
