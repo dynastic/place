@@ -113,12 +113,10 @@ var popoutController = {
          */
         const socket = place.socket || new PlaceSocket("popout");
 
-        if (!socket.isListening("new_message")) {
-            socket.on("new_message", (data) => {
-                this.loadActiveUsers();
-                this.addChatMessage(data);
-            });
-        }
+        socket.on("new_message", (data) => {
+            this.loadActiveUsers();
+            this.addChatMessage(data);
+        });
 
         return socket;
     },

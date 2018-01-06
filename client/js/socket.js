@@ -29,17 +29,6 @@ class PlaceSocket extends EventEmitter3 {
     }
 
     /**
-     * Returns whether there is an event handler registered for the given event
-     * 
-     * @param {string} event the event to look for
-     */
-    isListening(event) {
-        const hasArray = !!this._events[event];
-        const hasListener = hasArray && this._events[event].length > 0;
-        return hasArray && hasListener;
-    }
-
-    /**
      * Sends a request to the server
      * 
      * @param {string} request The request name

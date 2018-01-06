@@ -493,9 +493,6 @@ var place = {
         };
 
         Object.keys(events).forEach(eventName => {
-            if (this.socket.isListening(eventName)) {
-                return;
-            }
             this.socket.on(eventName, events[eventName]);
         });
     },
