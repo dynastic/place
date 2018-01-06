@@ -34,7 +34,7 @@ class JavaScriptProcessor {
             var t = gulp.src(this.paths.scripts.src);
             t = t.pipe(changed(this.paths.scripts.built))
             t = t.pipe(sourcemaps.init());
-            t = t.pipe(babel({ presets: ["es2015"] }));
+            t = t.pipe(babel({ presets: ["es2015", "es2016", "es2017"] }));
             t = t.on("error", swallowError);
             if(!this.app.config.debug) t = t.pipe(uglify());
             t = t.on("error", swallowError);

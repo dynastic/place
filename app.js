@@ -57,6 +57,10 @@ process.on("uncaughtException", (err) => {
     app.reportError(err);
 });
 
+process.on("unhandledRejection", (err) => {
+    app.reportError(err);
+});
+
 // Get image handler
 app.paintingManager = PaintingManager(app);
 app.logger.info('Startup', "Loading image from the database…");

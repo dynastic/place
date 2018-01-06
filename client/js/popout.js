@@ -104,32 +104,22 @@ var popoutController = {
         setInterval(function() { p.loadLeaderboard() }, 1000 * 60 * 3);
         setInterval(function() { p.loadActiveUsers() }, 90000);
 
-        this.startSocketConnection();
+        this.initializeSocketConnection();
     },
 
-    startSocketConnection: function() {
-        var socket = this.place.socket;
+    initializeSocketConnection() {
+        /**
+         * @type {PlaceSocket}
+         */
+        const socket = place.socket || new PlaceSocket("popout");
 
-        socket.onJSON = function(event, listener) {
-            return this.on(event, (data) => listener(JSON.parse(data)));
+        if (!socket.isListening("new_message")) {
+            socket.on("new_message", (data) => {
+                this.loadActiveUsers();
+                this.addChatMessage(data);
+            });
         }
 
-        socket.on("error", (e) => {
-            console.log("Socket error: " + e);
-            this.isOutdated = true;
-        });
-        socket.on("connect", () => {
-            console.log("Socket successfully connected (using main window socket)");
-            if(this.isOutdated) {
-                this.loadChatMessages();
-                this.isOutdated = false;
-            }
-        });
-        socket.onJSON("new_message", (data) => {
-            this.loadActiveUsers();
-            this.addChatMessage(data);
-        });
-        
         return socket;
     },
 
