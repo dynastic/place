@@ -4,7 +4,7 @@ const badRequest = (error) => ["bad_request", {success: false, error: error ? {m
 exports.PlaceSocket = class PlaceSocket extends EventEmitter {
     /**
      * @param {ws} socket The socket
-     * @param {{activityThresholdSeconds: number}} close The close function
+     * @param {{activityThresholdMilliseconds: number}} options the options object
      */
     constructor(socket, options) {
         super();
@@ -21,7 +21,12 @@ exports.PlaceSocket = class PlaceSocket extends EventEmitter {
         this.isClient = false;
         this.identified = false;
         
-        this.timeoutWarning = false;
+        this.shouldBeTimedOut = true;
+
+        this.timeoutStats = {
+            checkedForActivity: false,
+            warned: false,
+        }
 
         socket.onmessage = event => {
             let {data} = event;
@@ -53,7 +58,9 @@ exports.PlaceSocket = class PlaceSocket extends EventEmitter {
             this.emit(r, d);
         }
 
-        this.dispatch("hello", {options: {activityTimeout: options.activityThresholdSeconds}});
+        this.dispatch("hello", {options: {activityTimeout: options.activityThresholdMilliseconds}});
+
+        this.on("activity", () => this.resetTimeoutStats());
 
         socket.onerror = () => this._closeFunction();
         socket.onclose = () => this._closeFunction();
@@ -110,5 +117,13 @@ exports.PlaceSocket = class PlaceSocket extends EventEmitter {
      */
     stat() {
         this.lastMessage = Date.now();
+    }
+
+    /**
+     * Resets the timeout statistics
+     */
+    resetTimeoutStats() {
+        this.timeoutStats.checkedForActivity = false;
+        this.timeoutStats.warned = false;
     }
 }
