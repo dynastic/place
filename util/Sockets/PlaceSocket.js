@@ -1,5 +1,4 @@
 const {EventEmitter} = require("events");
-const ws = require("uws");
 const badRequest = (error) => ["bad_request", {success: false, error: error ? {message: error} : undefined}];
 exports.PlaceSocket = class PlaceSocket extends EventEmitter {
     /**
