@@ -71,10 +71,6 @@ var notificationHandler = {
     notificationsSupported: "Notification" in window, supportsNewNotificationAPI: false,
 
     setup: function() {
-        if(navigator.serviceWorker) {
-            navigator.serviceWorker.register("/js/build/sw.js");
-            this.supportsNewNotificationAPI = true;
-        }
     },
 
     canNotify: function() {

@@ -5,6 +5,9 @@ const sourcemaps = require('gulp-sourcemaps');
 const changed = require('gulp-changed');
 const del = require("del");
 
+const swPrecache = require("sw-precache");
+const path = require("path");
+
 class JavaScriptProcessor {
     constructor(app) {
         this.app = app;
@@ -24,7 +27,7 @@ class JavaScriptProcessor {
         // Clean existing built JavaScript
         gulp.task("clean", () => del([this.paths.scripts.built]));
         // Rerun the task when a file changes 
-        gulp.task("watch", () => gulp.watch(this.paths.scripts.src, ["scripts"]));
+        gulp.task("watch", () => gulp.watch(this.paths.scripts.src, ["scripts", 'generate-service-worker']));
         // Process JavaScript
         gulp.task("scripts", (cb) => {
             this.app.logger.info('Babel', "Processing JavaScript…");
@@ -40,12 +43,22 @@ class JavaScriptProcessor {
             t = t.on("end", () => this.app.logger.info('Babel', "Finished processing JavaScript."));
             return t;
         });
+        // Generate the caching service-worker
+        gulp.task('generate-service-worker', function(callback) {
+            const appDir = path.join(__dirname, '..', 'public');
+            console.log("generating shit");
+            swPrecache.write(path.join(appDir, 'sw.js'), {
+                staticFileGlobs: [appDir + '/**/*.{js,css,png,jpg,gif}'],
+                stripPrefix: appDir,
+                ignoreUrlParametersMatching: [/./]
+            }, callback);
+        });
         this.watchJavaScript()
         gulp.task("default", ["watch", "scripts"]);
     }
 
     processJavaScript() {
-        gulp.start(["scripts"]);
+        gulp.start(["scripts", "generate-service-worker"]);
     }
 
     cleanJavaScript() {
