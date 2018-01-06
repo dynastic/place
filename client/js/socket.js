@@ -1,8 +1,9 @@
-class PlaceSocket {
+class PlaceSocket extends EventEmitter3 {
     /**
      * @param {string} clientType the client type
      */
     constructor(clientType) {
+        super();
         /**
          * @type {WebSocket}
          */
@@ -22,49 +23,9 @@ class PlaceSocket {
             reconnecting: false,
             terminated: false,
         };
-        /**
-         * @type {{[key: string]: Array<(data?: any) => void>}}
-         */
-        this.events = {
-            close: [],
-            open: [],
-        }
         this.clientType = clientType;
-
         this.initializeSocket();
         this.loadEvents();
-    }
-
-    /**
-     * Triggers an event
-     * 
-     * @param {string} event the event to emit
-     * @param {any} data the data to pass to the handler
-     */
-    emit(event, data) {
-        if (!this.events[event]) {
-            return;
-        }
-        this.events[event].forEach(handler => {
-            try {
-                handler(data);
-            } catch (e) {
-                console.error("Couldn't execute event handler");
-            }
-        });
-    }
-
-    /**
-     * Registers an event handler
-     * 
-     * @param {string} event the event to register for
-     * @param {(data?: any) => void} handler the handler
-     */
-    on(event, handler) {
-        if (!this.events[event]) {
-            this.events[event] = [];
-        }
-        this.events[event].push(handler);
     }
 
     /**
@@ -73,8 +34,8 @@ class PlaceSocket {
      * @param {string} event the event to look for
      */
     isListening(event) {
-        const hasArray = !!this.events[event];
-        const hasListener = hasArray && this.events[event].length > 0;
+        const hasArray = !!this._events[event];
+        const hasListener = hasArray && this._events[event].length > 0;
         return hasArray && hasListener;
     }
 
@@ -99,7 +60,7 @@ class PlaceSocket {
 
         this.socket = new WebSocket(`ws${window.location.protocol === "https:" ? "s" : ""}://${window.location.host}`);
 
-        this.socket.onopen = () => {
+        this.socket.addEventListener("open", () => {
             this.state.reconnecting = false;
             this.state.idling = false;
             this.state.receivedTimeoutWarning = false;
@@ -114,7 +75,7 @@ class PlaceSocket {
                 this.state.queue = [];
             }
             this.emit("open");
-        }
+        });
 
         const handleClosed = () => {
             this.emit("close");
@@ -127,10 +88,10 @@ class PlaceSocket {
             }, this.options.renewalInterval);
         }
 
-        this.socket.onerror = handleClosed;
-        this.socket.onclose = handleClosed;
+        this.socket.addEventListener("error", handleClosed);
+        this.socket.addEventListener("close", handleClosed);
 
-        this.socket.onmessage = (event) => {
+        this.socket.addEventListener("message", (event) => {
             const rawData = event.data;
             let data;
             try {
@@ -146,7 +107,7 @@ class PlaceSocket {
             const eventName = data.e;
             const eventData = data.d;
             this.emit(eventName, eventData);
-        }
+        });
     }
 
     loadEvents() {
