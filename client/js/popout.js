@@ -104,33 +104,22 @@ var popoutController = {
         setInterval(function() { p.loadLeaderboard() }, 1000 * 60 * 3);
         setInterval(function() { p.loadActiveUsers() }, 90000);
 
-        this.startSocketConnection();
+        this.initializeSocketConnection();
     },
 
-    startSocketConnection: function(events = {}) {
+    initializeSocketConnection() {
         /**
-         * @type {WebSocket}
+         * @type {PlaceSocket}
          */
-        let socket = place.socket;
-        if (!socket) {
-            socket = new WebSocket(`ws${window.location.protocol === "https:" ? "s" : ""}://${window.location.host}`);
+        const socket = place.socket || new PlaceSocket("popout");
 
-            socket.onopen = () => {
-                socket.send(JSON.stringify({r: "identify", d: {clientType: "popout"}}));
-            }
-
-            socket["onJSON"] = (event = "", listener = () => null) => {
-                const eventList = events[event] ? Array.isArray(events[event]) ? events[event] : [] : [];
-                eventList.push(listener);
-                events[event] = eventList;
-            }
+        if (!socket.isListening("new_message")) {
+            socket.on("new_message", (data) => {
+                this.loadActiveUsers();
+                this.addChatMessage(data);
+            });
         }
 
-        socket.onJSON("new_message", (data) => {
-            this.loadActiveUsers();
-            this.addChatMessage(data);
-        });
-        socket.onJSON("activity_check", () => socket.send(JSON.stringify({r: "activity"})));
         return socket;
     },
 

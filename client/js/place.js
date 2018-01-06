@@ -23,8 +23,6 @@ ChangelogDialogController.dialog.find("#changelog-opt-out").click(function() {
     placeAjax.delete("/api/changelog/missed");
 });
 
-let pendingSocketReconnect = false;
-
 var canvasController = {
     isDisplayDirty: false,
 
@@ -147,11 +145,6 @@ var place = {
         down: [40, 83]
     },
     keyStates: {},
-    socket: null,
-    /**
-     * @type {Array<() => void>}
-     */
-    socketQueue: [],
     zoomButton: null,
     dragStart: null,
     placing: false, shouldShowPopover: false,
@@ -163,22 +156,12 @@ var place = {
     colours: null, pixelFlags: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
     cursorX: 0, cursorY: 0,
     templatesEnabled: false,
-    activityTimeout: 30,
     /**
-     * @type {WebSocket}
+     * @type {PlaceSocket}
      */
-    get socket() {
-        if (!this._socket) {
-            this._socket = this.startSocketConnection();
-        }
-        return this._socket;
-    },
-    _stat: Date.now(),
+    socket: new PlaceSocket("client"),
     stat() {
-        this._stat = Date.now();
-        if (!this._socket) {
-            this._socket = this.startSocketConnection();
-        }
+        this.socket.emit("stat");
     },
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
@@ -265,6 +248,8 @@ var place = {
         
         this.determineFeatureAvailability();
 
+        this.initializeSocketConnection();
+
         this.changeUserCount(null);
         this.loadUserCount().then((online) => {
             this.userCountChanged(online);
@@ -329,7 +314,7 @@ var place = {
             this.hasTriedToFetchAvailability = true;
             setTimeout(() => this.determineFeatureAvailability(), 2500);
             this.setupColours();
-        })
+        });
     },
 
     getCanvasImage: function() {
@@ -388,12 +373,8 @@ var place = {
 
     neededPixelDate: null,
     requestPixelsAfterDate(date) {
-        if(!this.socket.connected) {
-            this.socketQueue.push(() => this.requestPixelsAfterDate(date));
-            return;
-        }
         console.log("Requesting pixels after date " + date);
-        this.socket.send({r: "fetch_pixels", d: {ts: date}});
+        this.socket.send("fetch_pixels", {ts: date});
     },
 
     setupInteraction: function() {
@@ -483,48 +464,8 @@ var place = {
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
-    startSocketConnection(events = null) {
-        const socket = new WebSocket(`ws${window.location.protocol === "https:" ? "s" : ""}://${window.location.host}`);
-
-        const deadSocketRenewalMS = 5000;
-        let idling = false;
-        const renew = () => {
-            if (pendingSocketReconnect || idling) {
-                return;
-            }
-            pendingSocketReconnect = true;
-            console.debug(`Attempting socket reconnection in ${deadSocketRenewalMS}ms`);
-            setTimeout(() => {
-                pendingSocketReconnect = false;
-                this.startSocketConnection(events);
-            }, deadSocketRenewalMS);
-        }
-
-        socket.onerror = (e) => {
-            console.error("Socket error (will reload pixels on reconnect to socket): " + e);
-            this.isOutdated = true;
-            renew();
-        };
-
-        socket.onclose = (event) => {
-            console.warn("Socket disconnected from server, remembering to reload pixels on reconnect.")
-            this.isOutdated = true;
-            // Checks whether the socket was closed due to idling - If it was, do not reconnect.
-            renew();
-        };
-
-        socket.onopen = () => {
-            console.log("Socket successfully connected");
-            if (this.socketQueue && this.socketQueue.length > 0) {
-                try {
-                    this.socketQueue.forEach(queuedFunction => queuedFunction());
-                } catch (e) {
-                    console.error("Couldn't process socket queue");
-                    console.error(e);
-                }
-                this.socketQueue = [];
-            }
-            socket.send(JSON.stringify({r: "identify", d: {clientType: "client"}}));
+    initializeSocketConnection() {
+        this.socket.on("open", () => {
             if(!this.isOutdated) return;
             if(Date.now() / 1000 - this.lastPixelUpdate > 60) {
                 // 1 minute has passed
@@ -536,63 +477,34 @@ var place = {
                 console.log("The last request was a minute or less ago, we can just get the changed pixels over websocket.")
                 this.requestPixelsAfterDate(this.lastPixelUpdate)
             }
-        }
+        });
 
-        socket.onmessage = (event) => {
-            const rawData = event.data;
-            const data = JSON.parse(rawData);
-            console.log(data);
-            const code = data.e;
-            if (code) {
-                if (events[code]) {
-                    events[code].forEach((middleware) => {
-                        middleware(data.d);
-                    });
-                }
+        this.socket.on("close", () => {
+            this.isOutdated = true;
+        });
+
+        const events = {
+            tile_placed: this.liveUpdateTile.bind(this),
+            tiles_placed: this.liveUpdateTiles.bind(this),
+            server_ready: this.getCanvasImage.bind(this),
+            user_change: this.userCountChanged.bind(this),
+            admin_broadcast: this.adminBroadcastReceived.bind(this),
+            reload_client: () => window.location.reload(),
+        };
+
+        Object.keys(events).forEach(eventName => {
+            if (this.socket.isListening(eventName)) {
+                return;
             }
-        }
+            this.socket.on(eventName, events[eventName]);
+        });
+    },
 
-        socket["onJSON"] = (event = "", listener = () => null) => {
-            const eventList = events[event] ? Array.isArray(events[event]) ? events[event] : [] : [];
-            eventList.push(listener);
-            events[event] = eventList;
-        }
-        
-        if (!events) {
-            events = {};
-            socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
-            socket.onJSON("tiles_placed", this.liveUpdateTiles.bind(this));
-            socket.onJSON("server_ready", () => this.getCanvasImage());
-            socket.onJSON("user_change", this.userCountChanged.bind(this));
-            socket.onJSON("admin_broadcast", this.adminBroadcastReceived.bind(this));
-            socket.onJSON("reload_client", () => window.location.reload());
-            socket.onJSON("idle_timeout", () => {
-                this._socket = null;
-                idling = true;
-            });
-            socket.onJSON("activity_check", () => {
-                if (this._stat && typeof this._stat === "number") {
-                    /**
-                     * @type {number}
-                     */
-                    const stat = this._stat;
-                    const offset = Date.now() - (this.activityTimeout * 1000);
-                    if (stat > offset) {
-                        socket.send(JSON.stringify({r: "activity"}));
-                    }
-                }
-            });
-            socket.onJSON("hello", data => {
-                if (data.options && typeof data.options === "object") {
-                    const {activityTimeout} = data.options;
-                    if (activityTimeout && typeof activityTimeout === "number") {
-                        this.activityTimeout = activityTimeout;
-                    }
-                }
-            });
-        }
-
-        return this._socket = socket;
+    get isAFK() {
+        const stat = this._stat;
+        const offset = Date.now() - (this.activityTimeout * 1000);
+        const afk = !(stat > offset);
+        return afk;
     },
 
     getRandomSpawnPoint: function() {
