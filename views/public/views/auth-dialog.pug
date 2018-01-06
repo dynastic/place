@@ -8,14 +8,14 @@
                     span.site #{config.siteName}
                     h1 Become a member
                     p.subhead Join the #{config.siteName} community today to start placing.
-                if config.maintenance.allowSignups || !config.maintenance
+                if !config.maintenance || config.maintenance.allowSignups
                     form.form-signin(action="/signup")
-                        label.sr-only(for="inputUsername") Username
-                        input.form-control#inputUsername(type="text", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalize="off", spellcheck="false")
-                        label.sr-only(for="inputPassword") Password
-                        input.form-control.form-merge-top#inputPassword(type="password", placeholder="Password", name="password", required)
-                        label.sr-only(for="inputPassword2") Password (again)
-                        input.form-control.form-merge-bottom#inputPassword2(type="password", placeholder="Password (again)", name="passwordverify", required)
+                        label.sr-only(for="inputUsernameRegistration") Username
+                        input.form-control#inputUsernameRegistration(type="text", autocomplete="username", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalize="off", spellcheck="false")
+                        label.sr-only(for="inputPasswordRegistration") Password
+                        input.form-control.form-merge-top#inputPasswordRegistration(type="password", autocomplete="new-password", placeholder="Password", name="password", required)
+                        label.sr-only(for="inputPasswordRegistration2") Password (again)
+                        input.form-control.form-merge-bottom#inputPasswordRegistration2(type="password", autocomplete="new-password", placeholder="Password (again)", name="passwordverify", required)
                         if captcha
                             .
                                 !{renderCaptcha()}
@@ -54,9 +54,9 @@
                     if config.maintenance.allowLogins || !config.maintenance
                         form.form-signin(action="/signin")
                             label.sr-only(for="inputUsername") Username
-                            input.form-control#inputUsername(type="text", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalizae="off", spellcheck="false")
+                            input.form-control#inputUsername(type="text", autocomplete="username", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalizae="off", spellcheck="false")
                             label.sr-only(for="inputPassword") Password
-                            input.form-control#inputPassword(type="password", placeholder="Password", name="password", required)
+                            input.form-control#inputPassword(type="password", autocomplete="current-password", placeholder="Password", name="password", required)
                             .checkbox
                                 label
                                     input#inputKeepSignIn(type="checkbox", name="keepSignedIn", checked)

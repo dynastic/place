@@ -139,7 +139,7 @@ html(lang="en")
 - if(typeof js === "undefined" || !js) js = [];
 - if(typeof jsSnippets === "undefined" || !jsSnippets) jsSnippets = [];
 - var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
-- if(userMod) { js.unshift("/js/bootbox.min.js"); js.unshift("/js/build/mod_tools.js");}
+- if(userMod) { js.unshift("https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"); js.unshift("/js/build/mod_tools.js");}
 - if(typeof jsModSnippets === "undefined" || !jsModSnippets || !userMod) jsModSnippets = [];
 - js = resources.js.concat(js);
     footer.footer
@@ -158,11 +158,12 @@ html(lang="en")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
     script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", crossorigin="anonymous")
     script(src="https://cdn.polyfill.io/v2/polyfill.min.js")
+    // script(src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js", integrity="sha256-WRc/eG3R84AverJv0zmqxAmdwQxstUpqkiE+avJ3WSo=", crossorigin="anonymous")
     if typeof config.publicRaven !== "undefined" && config.publicRaven
       script(src="https://cdn.ravenjs.com/3.17.0/raven.min.js", crossorigin="anonymous")
       script.
           Raven.config('#{config.publicRaven}').install();
-    - js.unshift("/js/build/site.js");
+    - js.unshift("https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js", "/js/build/site.js");
     each item in [...new Set(js)]
         script(src=item + "?v=" + resourceVersion)
     each item in [...new Set(jsSnippets.concat(jsModSnippets))]
