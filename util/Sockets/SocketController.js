@@ -2,8 +2,9 @@ const ws = require("uws");
 const {PlaceSocket} = require("./PlaceSocket");
 
 let hardSocketLimit = 20;
-const socketTimeoutMinutes = 2.5;
-const activityThresholdSeconds = 30;
+const socketTimeoutMinutes = 5;
+const activityThresholdMilliseconds = 30000;
+const connectionCloseWarningSeconds = 10;
 
 const maxSocketLimit = {e: "max_sockets", d: {success: false, error: {message: "You have reached the maximum concurrent socket connections."}}};
 exports.SocketController = class SocketController {
@@ -29,6 +30,14 @@ exports.SocketController = class SocketController {
      */
     register(socket) {
         const placeSocket = new PlaceSocket(socket, this.options);
+
+        const socketList = this.sockets.get(placeSocket.ip);
+        if (socketList) {
+            if ((socketList.length + 1) >= hardSocketLimit) {
+                placeSocket.close("max_sockets");
+                return;
+            }
+        }
 
         const endingMiddleware = () => {
             if (!this.sockets.has(placeSocket.ip)) {
@@ -81,22 +90,30 @@ exports.SocketController = class SocketController {
         return new Promise((resolve, reject) => {
             const oldestAcceptableSocketTimestamp = this.oldestAcceptableSocketTimestamp;
             const sockets = this.__connectedClientSockets;
-            /**
-             * @type {Array<Promise<void>>}
-             */
-            const closePromises = [];
             for (let i = 0; i < sockets.length; i++) {
                 const socket = sockets[i];
-                if (socket.isClient && oldestAcceptableSocketTimestamp > socket.lastMessage) {
-                    if (socket.timeoutWarning) {
-                        closePromises.push(socket.close("idle_timeout", {message: "Please reconnect when you are ready to resume canvas.place"}));
-                    } else {
-                        closePromises.push(socket.dispatch("activity_check"));
-                        socket.timeoutWarning = true;
+                if (socket.isClient && socket.shouldBeTimedOut) {
+                    if (socket.lastMessage >= oldestAcceptableSocketTimestamp) {
+                        continue;
+                    }
+                    if (!socket.timeoutStats.checkedForActivity) {
+                        socket.dispatch("activity_check");
+                        socket.timeoutStats.checkedForActivity = true;
+                        continue;
+                    }
+                    if (!socket.timeoutStats.warned) {
+                        socket.dispatch("timeout_warning");
+                        socket.timeoutStats.warned = true;
+                        setTimeout(() => {
+                            if (!socket.timeoutStats.warned) {
+                                return;
+                            }
+                            socket.close("idle_timeout");
+                        }, connectionCloseWarningSeconds * 1000);
                     }
                 }
             }
-            Promise.all(closePromises).then(resolve);
+            resolve();
         });
     }
 
@@ -147,7 +164,7 @@ exports.SocketController = class SocketController {
         return {
             hardSocketLimit,
             socketTimeoutMinutes,
-            activityThresholdSeconds
+            activityThresholdMilliseconds
         };
     }
 
