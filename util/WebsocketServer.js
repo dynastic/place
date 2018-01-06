@@ -27,7 +27,6 @@ function WebsocketServer(app, httpServer) {
                         app.logger.capture("Error fetching pixel for websocket client: " + err);
                     });
                 });
-                socket.on("activity", () => socket.timeoutWarning = false);
                 next();
             });
 
