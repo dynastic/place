@@ -52,11 +52,6 @@ app.reportError = app.logger.capture;
 app.moduleManager = new ModuleManager(app);
 app.moduleManager.loadAll();
 
-process.on("uncaughtException", (err) => {
-    // Catch all uncaught exceptions and report them
-    app.reportError(err);
-});
-
 // Get image handler
 app.paintingManager = PaintingManager(app);
 app.logger.info('Startup', "Loading image from the database…");
