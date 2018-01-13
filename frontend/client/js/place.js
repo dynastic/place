@@ -198,7 +198,6 @@ var place = {
             if(e.target !== this) return;
             app.deselectColour();
         })
-        this.updatePlaceTimer();
 
         $("#palette-expando").click(this.handlePaletteExpandoClick);
 
@@ -890,57 +889,11 @@ var place = {
         return $("body").hasClass("signed-in");
     },
 
-    updatePlaceTimer: function() {
-        if(this.isSignedIn()) {
-            this.changePlaceTimerVisibility(true);
-            $(this.placeTimer).children("span").text("Loading…");
-            var a = this;
-            return placeAjax.get("/api/timer").then((data) => a.doTimer(data.timer)).catch((err) => this.changePlaceTimerVisibility(false));
-        }
-        this.changePlaceTimerVisibility(false);
-    },
-
-    doTimer: function(data) {
-        this.changePlaceTimerVisibility(true);
-        if(data.canPlace) return this.changePlaceTimerVisibility(false);
-        this.deselectColour();
-        this.unlockTime = (new Date().getTime() / 1000) + data.seconds;
-        this.fullUnlockTime = data.seconds;
-        this.secondTimer = setInterval(() => this.checkSecondsTimer(), 1000);
-        this.checkSecondsTimer();
-    },
-
     getSiteName: function() {
         return $("meta[name=place-site-name]").attr("content");
     },
 
-    checkSecondsTimer: function() {
-        function padLeft(str, pad, length) {
-            if (str.length > length) return str;
-            return (new Array(length + 1).join(pad) + str).slice(-length);
-        }
-        if(this.unlockTime && this.secondTimer && this.fullUnlockTime) {
-            var time = Math.round(this.unlockTime - new Date().getTime() / 1000);
-            if(time > 0) {
-                var minutes = ~~(time / 60), seconds = time - minutes * 60;
-                var formattedTime = `${minutes}:${padLeft(seconds.toString(), "0", 2)}`;
-                document.title = `[${formattedTime}] | ${this.originalTitle}`;
-                var shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
-                $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
-                return;
-            } else if(this.fullUnlockTime > 5) { // only notify if full countdown exceeds 5 seconds
-                this.notificationHandler.sendNotification(this.getSiteName(), "You may now place!");
-            }
-        }
-        if(this.secondTimer) clearInterval(this.secondTimer);
-        this.secondTimer = null, this.unlockTime = null, this.fullUnlockTime = null;
-        document.title = this.originalTitle;
-        this.changePlaceTimerVisibility(false);
-    },
-
     handleNotifyMeClick: function() {
-        if(!this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission()) return this.notificationHandler.requestPermission((success) => this.checkSecondsTimer());
-        this.checkSecondsTimer();
     },
 
     changeUserCount: function(newContent) {
@@ -956,12 +909,6 @@ var place = {
             notch.hide();
             text.text(num.toLocaleString());
         }
-    },
-
-    changePlaceTimerVisibility: function(visible) {
-        if(visible) $(this.placeTimer).addClass("shown");
-        else $(this.placeTimer).removeClass("shown");
-        this.changeSelectorVisibility(!visible);
     },
 
     changePlacingModalVisibility: function(visible) {
@@ -996,6 +943,8 @@ var place = {
         $(this.gridHint).hide();
     },
 
+    // this switches to "colour placing" mode on the canvas
+    // cursor has a colour block attached to it (handElement).
     changeSelectorVisibility: function(visible) {
         if(this.selectedColour == null) return;
         if(visible) {
@@ -1107,8 +1056,6 @@ var place = {
                 this.popoutController.loadActiveUsers();
                 this.setPixel(hex, x, y);
                 this.changeSelectorVisibility(false);
-                if(data.timer) this.doTimer(data.timer);
-                else this.updatePlaceTimer();
             }).catch(() => {});
         }
     },

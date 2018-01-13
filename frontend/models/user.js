@@ -293,24 +293,6 @@ UserSchema.methods.addPixel = function(colour, x, y, app, callback) {
     });
 }
 
-UserSchema.methods.getPlaceSecondsRemaining = function(app) {
-    if (this.admin) return 0;
-    if (this.lastPlace) {
-        let current = new Date().getTime();
-        let place = this.lastPlace.getTime();
-        // Seconds since last place
-        let diffSeconds = (current - place) / 1000;
-        // Seconds before can place again
-        let remainSeconds = Math.min(app.config.placeTimeout, Math.max(0, app.config.placeTimeout - diffSeconds));
-        return Math.ceil(remainSeconds);
-    }
-    return 0;
-}
-
-UserSchema.methods.canPlace = function(app) {
-    return this.getPlaceSecondsRemaining(app) <= 0;
-}
-
 UserSchema.methods.findSimilarIPUsers = function() {
     return new Promise((resolve, reject) => {
         Access.findSimilarIPUserIDs(this).then((userIDs) => {
