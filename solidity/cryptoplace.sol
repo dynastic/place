@@ -22,6 +22,10 @@ contract CryptoPlace {
         return grid[xy].owner;
     }
 
+    function getTile(uint16 xy) public view returns (uint24, address) {
+        return (getTileColor(xy), getTileOwner(xy));
+    }
+
     function paintTile(uint16 xy, uint24 c) public {
         grid[xy] = Tile({ color: c, owner: msg.sender });
         TileUpdated(xy, c);
