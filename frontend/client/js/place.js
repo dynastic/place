@@ -34,10 +34,15 @@ var canvasController = {
         this.ctx.webkitImageSmoothingEnabled = false;
         this.ctx.msImageSmoothingEnabled = false;
         this.ctx.imageSmoothingEnabled = false;
+        // Draw white image
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     },
 
     clearCanvas: function() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.isDisplayDirty = true;
     },
 
@@ -144,7 +149,7 @@ var place = {
     notificationHandler: notificationHandler, hashHandler: hashHandler,
     messages: null,
     isOutdated: false, lastPixelUpdate: null,
-    colours: null, pixelFlags: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
+    colours: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
     cursorX: 0, cursorY: 0,
     templatesEnabled: false,
     /**
@@ -234,11 +239,10 @@ var place = {
         $(this.coordinateElement).show();
         $(this.userCountElement).show();
 
-        this.getCanvasImage();
+        this.adjustLoadingScreen();
         
-        this.determineFeatureAvailability();
-
-        this.initializeSocketConnection();
+        this.colours = ['#FFFFFF', '#E4E4E4', '#888888', '#222222', '#FFA7D1', '#E50000', '#E59500', '#A06A42', '#E5D900', '#94E044', '#02BE01', '#00D3DD', '#0083C7', '#0000EA', '#CF6EE4', '#820080'];
+        this.setupColours();
 
         this.changeUserCount(null);
         this.loadUserCount().then((online) => {
@@ -286,75 +290,6 @@ var place = {
         if(colour.substring(0, 1) != "#") colour = "#" + colour;
         if(colour.length != 7 && (colour.length != 4 || premature)) return;
         $("#colour-picker").minicolors("value", colour);
-    },
-
-    determineFeatureAvailability: function() {
-        placeAjax.get("/api/feature-availability", null, null).then((data) => {
-            this.hasTriedToFetchAvailability = true;
-            this.colours = data.availability.colours;
-            this.pixelFlags = data.availability.flags;
-            this.canPlaceCustomColours = data.availability.user && data.availability.user.canPlaceCustomColours;
-            this.templatesEnabled = data.availability.user && data.availability.user.hasTemplatesExperiment
-            this.setupColours();
-        }).catch((err) => {
-            this.hasTriedToFetchAvailability = true;
-            setTimeout(() => this.determineFeatureAvailability(), 2500);
-            this.setupColours();
-        });
-    },
-
-    getCanvasImage: function() {
-        if(this.loadedImage) return;
-        var app = this;
-        this.adjustLoadingScreen("Loading…");;
-        this.loadImage().then((image) => {
-            app.adjustLoadingScreen();
-            app.canvasController.clearCanvas();
-            app.canvasController.drawImage(image);
-            app.updateDisplayCanvas();
-            app.displayCtx.imageSmoothingEnabled = false;
-            app.loadedImage = true;
-            app.lastPixelUpdate = Date.now() / 1000;
-        }).catch((err) => {
-            console.error("Error loading board image", err);
-            if(typeof err.status !== "undefined" && err.status === 503) {
-                app.adjustLoadingScreen("Waiting for server…");
-                console.log("Server wants us to await its instruction");
-                setTimeout(function() {
-                    app.getCanvasImage()
-                }, 15000);
-            } else {
-                app.adjustLoadingScreen("An error occurred. Please wait…");
-                setTimeout(function() {
-                    app.getCanvasImage()
-                }, 5000);
-            }
-        });
-    },
-
-    loadImage: function() {
-        var a = this;
-        return new Promise((resolve, reject) => {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "/api/board-image", true);
-            xhr.responseType = "blob";
-            xhr.onload = function(e) {
-                if(xhr.status == 200) {
-                    var url = URL.createObjectURL(this.response);
-                    var img = new Image();
-                    img.onload = function() {
-                        URL.revokeObjectURL(this.src);
-                        var lastImageUpdate = xhr.getResponseHeader("X-Place-Last-Update");
-                        if(lastImageUpdate) a.requestPixelsAfterDate(lastImageUpdate);
-                        resolve(img);
-                    };
-                    img.onerror = () => reject(xhr);
-                    img.src = url;
-                } else reject(xhr);
-            };
-            xhr.onerror = () => reject(xhr);
-            xhr.send();
-        });
     },
 
     neededPixelDate: null,
@@ -450,39 +385,6 @@ var place = {
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
-    initializeSocketConnection() {
-        this.socket.on("open", () => {
-            if(!this.isOutdated) return;
-            if(Date.now() / 1000 - this.lastPixelUpdate > 60) {
-                // 1 minute has passed
-                console.log("We'll need to get the entire board image because the last update was over a minute ago.");
-                this.loadedImage = false;
-                this.getCanvasImage();
-                this.isOutdated = false;
-            } else {
-                console.log("The last request was a minute or less ago, we can just get the changed pixels over websocket.")
-                this.requestPixelsAfterDate(this.lastPixelUpdate)
-            }
-        });
-
-        this.socket.on("close", () => {
-            this.isOutdated = true;
-        });
-
-        const events = {
-            tile_placed: this.liveUpdateTile.bind(this),
-            tiles_placed: this.liveUpdateTiles.bind(this),
-            server_ready: this.getCanvasImage.bind(this),
-            user_change: this.userCountChanged.bind(this),
-            admin_broadcast: this.adminBroadcastReceived.bind(this),
-            reload_client: () => window.location.reload(),
-        };
-
-        Object.keys(events).forEach(eventName => {
-            this.socket.on(eventName, events[eventName]);
-        });
-    },
-
     get isAFK() {
         const stat = this._stat;
         const offset = Date.now() - (this.activityTimeout * 1000);
@@ -535,15 +437,6 @@ var place = {
                 this.colourPaletteOptionElements.push(elem[0]);
             });
             this.updateColourSelectorPosition();
-            if(this.pixelFlags && this.pixelFlags.length > 0) {
-                $("<div>").addClass("palette-separator").appendTo(contentContainer);
-                this.pixelFlags.forEach((flag, index) => {
-                    var elem = $("<div>").addClass("colour-option flag-option").css("background-image", `url(${flag.image})`).attr("data-flag", index).attr("data-flag-id", flag.id).attr("title", `${flag.title}:\n${flag.description}`).attr("alt", flag.title);
-                    if(flag.needsBorder) elem.addClass("is-white");
-                    elem.appendTo(contentContainer);
-                    this.colourPaletteOptionElements.push(elem[0]);
-                });
-            }
         } else {
             overlay.text(this.hasTriedToFetchAvailability ? "An error occurred while loading colours. Retrying…" : "Loading…").show();
         }
