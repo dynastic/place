@@ -6,7 +6,7 @@ var dataStore = (function () {
   return {
     getPixel: function (x, y) { // 0 indexed
       if (_data[y * Y + x] === undefined) {
-        return "#FFFFFF";
+        return null;
       } else {
         return {
           pixel: {
