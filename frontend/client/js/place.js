@@ -55,15 +55,6 @@ var canvasController = {
         this.ctx.fillStyle = colour;
         this.ctx.fillRect(x, y, 1, 1);
         this.isDisplayDirty = true;
-    },
-
-    getPixelColour: function(x, y) {
-        var data = this.ctx.getImageData(x, y, 1, 1).data;
-        function componentToHex(c) {
-            var hex = c.toString(16);
-            return hex.length == 1 ? "0" + hex : hex;
-        }
-        return componentToHex(data[0]) + componentToHex(data[1]) + componentToHex(data[2]);
     }
 };
 
@@ -879,10 +870,8 @@ var place = {
         this.setZoomScale(this.zooming.initialZoomPoint, true);
     },
 
-    getPixel: function(x, y, callback) {
-        return placeAjax.get(`/api/pos-info`, {x: x, y: y}, "An error occurred while trying to retrieve data about that pixel.").then((data) => {
-            callback(null, data);
-        }).catch((err) => callback(err));
+    getPixel: function(x, y) {
+        return dataStore.getPixel(x, y);
     },
 
     isSignedIn: function() {
@@ -995,68 +984,40 @@ var place = {
 
         if(this.selectedColour === null) {
             this.zoomIntoPoint(x, y);
-            return this.getPixel(x, y, (err, data) => {
-                if(err || !data.pixel) return;
-                var popover = $(this.pixelDataPopover);
-                if(this.zooming.zooming) this.shouldShowPopover = true;
-                else popover.fadeIn(250);
-                var hasUser = !!data.pixel.user;
-                if(typeof data.pixel.userError === "undefined") data.pixel.userError = null;
-                popover.find("#pixel-data-username").text(hasUser ? data.pixel.user.username : this.getUserStateText(data.pixel.userError));
-                if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account");
-                else popover.find("#pixel-data-username").addClass("deleted-account");
-                popover.find("#pixel-data-time").text($.timeago(data.pixel.modified));
-                popover.find("#pixel-data-time").attr("datetime", data.pixel.modified);
-                popover.find("#pixel-data-time").attr("title", new Date(data.pixel.modified).toLocaleString());
-                popover.find("#pixel-data-x").text(x.toLocaleString());
-                popover.find("#pixel-data-y").text(y.toLocaleString());
-                popover.find("#pixel-colour-code").text(`#${data.pixel.colour.toUpperCase()}`);
-                popover.find("#pixel-colour-preview").css("background-color", `#${data.pixel.colour}`);
-                if(data.pixel.colour.toLowerCase() == "ffffff") popover.find("#pixel-colour-preview").addClass("is-white");
-                else popover.find("#pixel-colour-preview").removeClass("is-white");
-                popover.find("#pixel-use-colour-btn").attr("data-represented-colour", data.pixel.colour);
-                if(this.canPlaceCustomColours) popover.find(".pixel-colour").addClass("allow-use");
-                else popover.find(".pixel-colour").removeClass("allow-use");
-                popover.find(".rank-container > *").remove();
-                if(hasUser) {
-                    var userInfoCtn = popover.find(".user-info");
-                    userInfoCtn.show();
-                    userInfoCtn.find(".field").remove();
-                    getUserInfoTableItem("Total pixels placed", data.pixel.user.statistics.totalPlaces.toLocaleString()).appendTo(userInfoCtn);
-                    if(data.pixel.user.statistics.placesThisWeek !== null) getUserInfoTableItem("Pixels this week", data.pixel.user.statistics.placesThisWeek.toLocaleString()).appendTo(userInfoCtn);
-                    getUserInfoDateTableItem("Account created", data.pixel.user.creationDate).appendTo(userInfoCtn);
-                    var latestCtn = getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
-                    if(data.pixel.user.latestPixel && data.pixel.user.latestPixel.isLatest) {
-                        var latest = data.pixel.user.latestPixel;
-                        var element = $("<div>")
-                        if(data.pixel.point.x == latest.point.x && data.pixel.point.y == latest.point.y) $("<span>").addClass("secondary-info").text("(this pixel)").appendTo(element);
-                        else $("<a>").attr("href", "javascript:void(0)").text(`at (${latest.point.x.toLocaleString()}, ${latest.point.y.toLocaleString()})`).click(() => app.zoomIntoPoint(latest.point.x, latest.point.y, false)).appendTo(element);
-                        element.appendTo(latestCtn.find(".value"));
-                    }
-                    popover.find("#pixel-data-username").attr("href", `/@${data.pixel.user.username}`);
-                    var rankContainer = popover.find(".rank-container");
-                    data.pixel.user.badges.forEach((badge) => renderBadge(badge).appendTo(rankContainer));
-                    popover.find("#user-actions-dropdown-ctn").html(renderUserActionsDropdown(data.pixel.user));
-                } else {
-                    popover.find(".user-info, #pixel-badge, #pixel-user-state-badge").hide();
-                    popover.find("#user-actions-dropdown-ctn").html("");
-                    popover.find("#pixel-data-username").removeAttr("href");
-                }
-            });
+            var data = this.getPixel(x, y);
+            var popover = $(this.pixelDataPopover);
+            if(this.zooming.zooming) this.shouldShowPopover = true;
+            else popover.fadeIn(250);
+
+            // print address
+            popover.find("#pixel-data-username").text(data.pixel.user.address);
+
+            // print date
+            popover.find("#pixel-data-time").text($.timeago("2018-01-14T00:11:13.000Z"));
+            popover.find("#pixel-data-time").attr("datetime", "2018-01-14T00:11:13.000Z");
+            popover.find("#pixel-data-time").attr("title", new Date("2018-01-14T00:11:13.000Z").toLocaleString());
+            popover.find("#pixel-data-x").text(x.toLocaleString());
+            popover.find("#pixel-data-y").text(y.toLocaleString());
+
+            // print colour
+            popover.find("#pixel-colour-code").text(`${data.pixel.colour.toUpperCase()}`);
+            popover.find("#pixel-colour-preview").css("background-color", `${data.pixel.colour}`);
+            if(data.pixel.colour.toLowerCase() == "ffffff") popover.find("#pixel-colour-preview").addClass("is-white");
+            else popover.find("#pixel-colour-preview").removeClass("is-white");
+            popover.find("#pixel-use-colour-btn").attr("data-represented-colour", data.pixel.colour);
         }
         if(wasZoomedOut) return;
         if(this.selectedColour !== null && !this.placing) {
             this.changePlacingModalVisibility(true);
             var hex = this.getCurrentColourHex();
             this.placing = true;
-            placeAjax.post("/api/place", { x: x, y: y, hex: hex }, "An error occurred while trying to place your pixel.", () => {
-                this.changePlacingModalVisibility(false);
-                this.placing = false;
-            }).then((data) => {
-                this.popoutController.loadActiveUsers();
-                this.setPixel(hex, x, y);
-                this.changeSelectorVisibility(false);
-            }).catch(() => {});
+            dataStore.setPixel(x, y, hex);
+            this.changePlacingModalVisibility(false);
+            this.placing = false;
+            this.deselectColour();
+            this.setPixel(hex, x, y);
+            this.changeSelectorVisibility(false);
+            this.popoutController.loadActiveUsers();
         }
     },
 
@@ -1085,16 +1046,7 @@ var place = {
             this.toggleZoom();
         } else if(keycode == 27 && this.selectedColour !== null) { // Esc - Deselect colour
             this.deselectColour();
-        } else if(keycode == 80) { // P - pick colour under mouse cursor
-            this.pickColourUnderCursor();
         }
-    },
-
-    pickColourUnderCursor: function() {
-        if(!this.canPlaceCustomColours) return;
-        var cursor = this.getCanvasCursorPosition();
-        var colour = this.canvasController.getPixelColour(cursor.x, cursor.y);
-        $("#colour-picker").minicolors("value", "#" + colour);
     },
 
     adjustLoadingScreen: function(text = null) {
@@ -1103,12 +1055,6 @@ var place = {
         } else {
             $("#loading").fadeOut();
         }
-    },
-
-    getUserStateText: function(userState) {
-        if(userState == "ban") return "Banned user";
-        if(userState == "deactivated") return "Deactivated user";
-        return "Deleted account";
     },
 
     showAdminBroadcast: function(title, message, style, timeout = 0) {
