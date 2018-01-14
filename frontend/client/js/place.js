@@ -34,10 +34,15 @@ var canvasController = {
         this.ctx.webkitImageSmoothingEnabled = false;
         this.ctx.msImageSmoothingEnabled = false;
         this.ctx.imageSmoothingEnabled = false;
+        // Draw white image
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     },
 
     clearCanvas: function() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.isDisplayDirty = true;
     },
 
@@ -55,15 +60,6 @@ var canvasController = {
         this.ctx.fillStyle = colour;
         this.ctx.fillRect(x, y, 1, 1);
         this.isDisplayDirty = true;
-    },
-
-    getPixelColour: function(x, y) {
-        var data = this.ctx.getImageData(x, y, 1, 1).data;
-        function componentToHex(c) {
-            var hex = c.toString(16);
-            return hex.length == 1 ? "0" + hex : hex;
-        }
-        return componentToHex(data[0]) + componentToHex(data[1]) + componentToHex(data[2]);
     }
 };
 
@@ -153,7 +149,7 @@ var place = {
     notificationHandler: notificationHandler, hashHandler: hashHandler,
     messages: null,
     isOutdated: false, lastPixelUpdate: null,
-    colours: null, pixelFlags: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
+    colours: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
     cursorX: 0, cursorY: 0,
     templatesEnabled: false,
     /**
@@ -198,7 +194,6 @@ var place = {
             if(e.target !== this) return;
             app.deselectColour();
         })
-        this.updatePlaceTimer();
 
         $("#palette-expando").click(this.handlePaletteExpandoClick);
 
@@ -244,11 +239,10 @@ var place = {
         $(this.coordinateElement).show();
         $(this.userCountElement).show();
 
-        this.getCanvasImage();
+        this.adjustLoadingScreen();
         
-        this.determineFeatureAvailability();
-
-        this.initializeSocketConnection();
+        this.colours = ['#FFFFFF', '#E4E4E4', '#888888', '#222222', '#FFA7D1', '#E50000', '#E59500', '#A06A42', '#E5D900', '#94E044', '#02BE01', '#00D3DD', '#0083C7', '#0000EA', '#CF6EE4', '#820080'];
+        this.setupColours();
 
         this.changeUserCount(null);
         this.loadUserCount().then((online) => {
@@ -289,9 +283,6 @@ var place = {
 
         this.dismissBtn = $("<button>").attr("type", "button").addClass("close").attr("data-dismiss", "alert").attr("aria-label", "Close");
         $("<span>").attr("aria-hidden", "true").html("&times;").appendTo(this.dismissBtn);
-
-        this.loadWarps();
-        this.layoutTemplates();
     },
 
     handleColourTextChange: function(premature = false) {
@@ -299,76 +290,6 @@ var place = {
         if(colour.substring(0, 1) != "#") colour = "#" + colour;
         if(colour.length != 7 && (colour.length != 4 || premature)) return;
         $("#colour-picker").minicolors("value", colour);
-    },
-
-    determineFeatureAvailability: function() {
-        placeAjax.get("/api/feature-availability", null, null).then((data) => {
-            this.hasTriedToFetchAvailability = true;
-            this.colours = data.availability.colours;
-            this.pixelFlags = data.availability.flags;
-            this.canPlaceCustomColours = data.availability.user && data.availability.user.canPlaceCustomColours;
-            this.templatesEnabled = data.availability.user && data.availability.user.hasTemplatesExperiment
-            this.layoutTemplates();
-            this.setupColours();
-        }).catch((err) => {
-            this.hasTriedToFetchAvailability = true;
-            setTimeout(() => this.determineFeatureAvailability(), 2500);
-            this.setupColours();
-        });
-    },
-
-    getCanvasImage: function() {
-        if(this.loadedImage) return;
-        var app = this;
-        this.adjustLoadingScreen("Loading…");;
-        this.loadImage().then((image) => {
-            app.adjustLoadingScreen();
-            app.canvasController.clearCanvas();
-            app.canvasController.drawImage(image);
-            app.updateDisplayCanvas();
-            app.displayCtx.imageSmoothingEnabled = false;
-            app.loadedImage = true;
-            app.lastPixelUpdate = Date.now() / 1000;
-        }).catch((err) => {
-            console.error("Error loading board image", err);
-            if(typeof err.status !== "undefined" && err.status === 503) {
-                app.adjustLoadingScreen("Waiting for server…");
-                console.log("Server wants us to await its instruction");
-                setTimeout(function() {
-                    app.getCanvasImage()
-                }, 15000);
-            } else {
-                app.adjustLoadingScreen("An error occurred. Please wait…");
-                setTimeout(function() {
-                    app.getCanvasImage()
-                }, 5000);
-            }
-        });
-    },
-
-    loadImage: function() {
-        var a = this;
-        return new Promise((resolve, reject) => {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "/api/board-image", true);
-            xhr.responseType = "blob";
-            xhr.onload = function(e) {
-                if(xhr.status == 200) {
-                    var url = URL.createObjectURL(this.response);
-                    var img = new Image();
-                    img.onload = function() {
-                        URL.revokeObjectURL(this.src);
-                        var lastImageUpdate = xhr.getResponseHeader("X-Place-Last-Update");
-                        if(lastImageUpdate) a.requestPixelsAfterDate(lastImageUpdate);
-                        resolve(img);
-                    };
-                    img.onerror = () => reject(xhr);
-                    img.src = url;
-                } else reject(xhr);
-            };
-            xhr.onerror = () => reject(xhr);
-            xhr.send();
-        });
     },
 
     neededPixelDate: null,
@@ -464,39 +385,6 @@ var place = {
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
-    initializeSocketConnection() {
-        this.socket.on("open", () => {
-            if(!this.isOutdated) return;
-            if(Date.now() / 1000 - this.lastPixelUpdate > 60) {
-                // 1 minute has passed
-                console.log("We'll need to get the entire board image because the last update was over a minute ago.");
-                this.loadedImage = false;
-                this.getCanvasImage();
-                this.isOutdated = false;
-            } else {
-                console.log("The last request was a minute or less ago, we can just get the changed pixels over websocket.")
-                this.requestPixelsAfterDate(this.lastPixelUpdate)
-            }
-        });
-
-        this.socket.on("close", () => {
-            this.isOutdated = true;
-        });
-
-        const events = {
-            tile_placed: this.liveUpdateTile.bind(this),
-            tiles_placed: this.liveUpdateTiles.bind(this),
-            server_ready: this.getCanvasImage.bind(this),
-            user_change: this.userCountChanged.bind(this),
-            admin_broadcast: this.adminBroadcastReceived.bind(this),
-            reload_client: () => window.location.reload(),
-        };
-
-        Object.keys(events).forEach(eventName => {
-            this.socket.on(eventName, events[eventName]);
-        });
-    },
-
     get isAFK() {
         const stat = this._stat;
         const offset = Date.now() - (this.activityTimeout * 1000);
@@ -549,15 +437,6 @@ var place = {
                 this.colourPaletteOptionElements.push(elem[0]);
             });
             this.updateColourSelectorPosition();
-            if(this.pixelFlags && this.pixelFlags.length > 0) {
-                $("<div>").addClass("palette-separator").appendTo(contentContainer);
-                this.pixelFlags.forEach((flag, index) => {
-                    var elem = $("<div>").addClass("colour-option flag-option").css("background-image", `url(${flag.image})`).attr("data-flag", index).attr("data-flag-id", flag.id).attr("title", `${flag.title}:\n${flag.description}`).attr("alt", flag.title);
-                    if(flag.needsBorder) elem.addClass("is-white");
-                    elem.appendTo(contentContainer);
-                    this.colourPaletteOptionElements.push(elem[0]);
-                });
-            }
         } else {
             overlay.text(this.hasTriedToFetchAvailability ? "An error occurred while loading colours. Retrying…" : "Loading…").show();
         }
@@ -880,67 +759,19 @@ var place = {
         this.setZoomScale(this.zooming.initialZoomPoint, true);
     },
 
-    getPixel: function(x, y, callback) {
-        return placeAjax.get(`/api/pos-info`, {x: x, y: y}, "An error occurred while trying to retrieve data about that pixel.").then((data) => {
-            callback(null, data);
-        }).catch((err) => callback(err));
+    getPixel: function(x, y) {
+        return dataStore.getPixel(x, y);
     },
 
     isSignedIn: function() {
         return $("body").hasClass("signed-in");
     },
 
-    updatePlaceTimer: function() {
-        if(this.isSignedIn()) {
-            this.changePlaceTimerVisibility(true);
-            $(this.placeTimer).children("span").text("Loading…");
-            var a = this;
-            return placeAjax.get("/api/timer").then((data) => a.doTimer(data.timer)).catch((err) => this.changePlaceTimerVisibility(false));
-        }
-        this.changePlaceTimerVisibility(false);
-    },
-
-    doTimer: function(data) {
-        this.changePlaceTimerVisibility(true);
-        if(data.canPlace) return this.changePlaceTimerVisibility(false);
-        this.deselectColour();
-        this.unlockTime = (new Date().getTime() / 1000) + data.seconds;
-        this.fullUnlockTime = data.seconds;
-        this.secondTimer = setInterval(() => this.checkSecondsTimer(), 1000);
-        this.checkSecondsTimer();
-    },
-
     getSiteName: function() {
         return $("meta[name=place-site-name]").attr("content");
     },
 
-    checkSecondsTimer: function() {
-        function padLeft(str, pad, length) {
-            if (str.length > length) return str;
-            return (new Array(length + 1).join(pad) + str).slice(-length);
-        }
-        if(this.unlockTime && this.secondTimer && this.fullUnlockTime) {
-            var time = Math.round(this.unlockTime - new Date().getTime() / 1000);
-            if(time > 0) {
-                var minutes = ~~(time / 60), seconds = time - minutes * 60;
-                var formattedTime = `${minutes}:${padLeft(seconds.toString(), "0", 2)}`;
-                document.title = `[${formattedTime}] | ${this.originalTitle}`;
-                var shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
-                $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
-                return;
-            } else if(this.fullUnlockTime > 5) { // only notify if full countdown exceeds 5 seconds
-                this.notificationHandler.sendNotification(this.getSiteName(), "You may now place!");
-            }
-        }
-        if(this.secondTimer) clearInterval(this.secondTimer);
-        this.secondTimer = null, this.unlockTime = null, this.fullUnlockTime = null;
-        document.title = this.originalTitle;
-        this.changePlaceTimerVisibility(false);
-    },
-
     handleNotifyMeClick: function() {
-        if(!this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission()) return this.notificationHandler.requestPermission((success) => this.checkSecondsTimer());
-        this.checkSecondsTimer();
     },
 
     changeUserCount: function(newContent) {
@@ -956,12 +787,6 @@ var place = {
             notch.hide();
             text.text(num.toLocaleString());
         }
-    },
-
-    changePlaceTimerVisibility: function(visible) {
-        if(visible) $(this.placeTimer).addClass("shown");
-        else $(this.placeTimer).removeClass("shown");
-        this.changeSelectorVisibility(!visible);
     },
 
     changePlacingModalVisibility: function(visible) {
@@ -996,6 +821,8 @@ var place = {
         $(this.gridHint).hide();
     },
 
+    // this switches to "colour placing" mode on the canvas
+    // cursor has a colour block attached to it (handElement).
     changeSelectorVisibility: function(visible) {
         if(this.selectedColour == null) return;
         if(visible) {
@@ -1046,70 +873,42 @@ var place = {
 
         if(this.selectedColour === null) {
             this.zoomIntoPoint(x, y);
-            return this.getPixel(x, y, (err, data) => {
-                if(err || !data.pixel) return;
+            var data = this.getPixel(x, y);
+            if (data !== null) {
                 var popover = $(this.pixelDataPopover);
                 if(this.zooming.zooming) this.shouldShowPopover = true;
                 else popover.fadeIn(250);
-                var hasUser = !!data.pixel.user;
-                if(typeof data.pixel.userError === "undefined") data.pixel.userError = null;
-                popover.find("#pixel-data-username").text(hasUser ? data.pixel.user.username : this.getUserStateText(data.pixel.userError));
-                if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account");
-                else popover.find("#pixel-data-username").addClass("deleted-account");
-                popover.find("#pixel-data-time").text($.timeago(data.pixel.modified));
-                popover.find("#pixel-data-time").attr("datetime", data.pixel.modified);
-                popover.find("#pixel-data-time").attr("title", new Date(data.pixel.modified).toLocaleString());
+
+                // print address
+                popover.find("#pixel-data-username").text(data.pixel.user.address);
+
+                // print date
+                popover.find("#pixel-data-time").text($.timeago("2018-01-14T00:11:13.000Z"));
+                popover.find("#pixel-data-time").attr("datetime", "2018-01-14T00:11:13.000Z");
+                popover.find("#pixel-data-time").attr("title", new Date("2018-01-14T00:11:13.000Z").toLocaleString());
                 popover.find("#pixel-data-x").text(x.toLocaleString());
                 popover.find("#pixel-data-y").text(y.toLocaleString());
-                popover.find("#pixel-colour-code").text(`#${data.pixel.colour.toUpperCase()}`);
-                popover.find("#pixel-colour-preview").css("background-color", `#${data.pixel.colour}`);
+
+                // print colour
+                popover.find("#pixel-colour-code").text(`${data.pixel.colour.toUpperCase()}`);
+                popover.find("#pixel-colour-preview").css("background-color", `${data.pixel.colour}`);
                 if(data.pixel.colour.toLowerCase() == "ffffff") popover.find("#pixel-colour-preview").addClass("is-white");
                 else popover.find("#pixel-colour-preview").removeClass("is-white");
                 popover.find("#pixel-use-colour-btn").attr("data-represented-colour", data.pixel.colour);
-                if(this.canPlaceCustomColours) popover.find(".pixel-colour").addClass("allow-use");
-                else popover.find(".pixel-colour").removeClass("allow-use");
-                popover.find(".rank-container > *").remove();
-                if(hasUser) {
-                    var userInfoCtn = popover.find(".user-info");
-                    userInfoCtn.show();
-                    userInfoCtn.find(".field").remove();
-                    getUserInfoTableItem("Total pixels placed", data.pixel.user.statistics.totalPlaces.toLocaleString()).appendTo(userInfoCtn);
-                    if(data.pixel.user.statistics.placesThisWeek !== null) getUserInfoTableItem("Pixels this week", data.pixel.user.statistics.placesThisWeek.toLocaleString()).appendTo(userInfoCtn);
-                    getUserInfoDateTableItem("Account created", data.pixel.user.creationDate).appendTo(userInfoCtn);
-                    var latestCtn = getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
-                    if(data.pixel.user.latestPixel && data.pixel.user.latestPixel.isLatest) {
-                        var latest = data.pixel.user.latestPixel;
-                        var element = $("<div>")
-                        if(data.pixel.point.x == latest.point.x && data.pixel.point.y == latest.point.y) $("<span>").addClass("secondary-info").text("(this pixel)").appendTo(element);
-                        else $("<a>").attr("href", "javascript:void(0)").text(`at (${latest.point.x.toLocaleString()}, ${latest.point.y.toLocaleString()})`).click(() => app.zoomIntoPoint(latest.point.x, latest.point.y, false)).appendTo(element);
-                        element.appendTo(latestCtn.find(".value"));
-                    }
-                    popover.find("#pixel-data-username").attr("href", `/@${data.pixel.user.username}`);
-                    var rankContainer = popover.find(".rank-container");
-                    data.pixel.user.badges.forEach((badge) => renderBadge(badge).appendTo(rankContainer));
-                    popover.find("#user-actions-dropdown-ctn").html(renderUserActionsDropdown(data.pixel.user));
-                } else {
-                    popover.find(".user-info, #pixel-badge, #pixel-user-state-badge").hide();
-                    popover.find("#user-actions-dropdown-ctn").html("");
-                    popover.find("#pixel-data-username").removeAttr("href");
-                }
-            });
+            }
         }
         if(wasZoomedOut) return;
         if(this.selectedColour !== null && !this.placing) {
             this.changePlacingModalVisibility(true);
             var hex = this.getCurrentColourHex();
             this.placing = true;
-            placeAjax.post("/api/place", { x: x, y: y, hex: hex }, "An error occurred while trying to place your pixel.", () => {
-                this.changePlacingModalVisibility(false);
-                this.placing = false;
-            }).then((data) => {
-                this.popoutController.loadActiveUsers();
-                this.setPixel(hex, x, y);
-                this.changeSelectorVisibility(false);
-                if(data.timer) this.doTimer(data.timer);
-                else this.updatePlaceTimer();
-            }).catch(() => {});
+            dataStore.setPixel(x, y, hex);
+            this.changePlacingModalVisibility(false);
+            this.placing = false;
+            this.deselectColour();
+            this.setPixel(hex, x, y);
+            this.changeSelectorVisibility(false);
+            this.popoutController.loadActiveUsers();
         }
     },
 
@@ -1138,16 +937,7 @@ var place = {
             this.toggleZoom();
         } else if(keycode == 27 && this.selectedColour !== null) { // Esc - Deselect colour
             this.deselectColour();
-        } else if(keycode == 80) { // P - pick colour under mouse cursor
-            this.pickColourUnderCursor();
         }
-    },
-
-    pickColourUnderCursor: function() {
-        if(!this.canPlaceCustomColours) return;
-        var cursor = this.getCanvasCursorPosition();
-        var colour = this.canvasController.getPixelColour(cursor.x, cursor.y);
-        $("#colour-picker").minicolors("value", "#" + colour);
     },
 
     adjustLoadingScreen: function(text = null) {
@@ -1156,12 +946,6 @@ var place = {
         } else {
             $("#loading").fadeOut();
         }
-    },
-
-    getUserStateText: function(userState) {
-        if(userState == "ban") return "Banned user";
-        if(userState == "deactivated") return "Deactivated user";
-        return "Deleted account";
     },
 
     showAdminBroadcast: function(title, message, style, timeout = 0) {
@@ -1180,201 +964,6 @@ var place = {
             }
         });
     },
-
-    handlePaletteExpandoClick: function() {
-        var options = {duration: 150, queue: false};
-        var expand = $(this).toggleClass("expanded").hasClass("expanded");
-        if(expand) $("#menu-content-ctn").slideDown(options);
-        else $("#menu-content-ctn").slideUp(options).fadeOut(options);
-    },
-
-    loadWarps: function() {
-        if(!this.isSignedIn()) return;
-        placeAjax.get("/api/warps", null, null).then((response) => {
-            this.warps = response.warps;
-            this.layoutWarps();
-        }).catch((err) => {
-            console.error("Couldn't load warps: " + err);
-            this.warps = null;
-            this.layoutWarps();
-        });
-    },
-
-    layoutWarps: function() {
-        var app = this;
-        function getWarpInfo(title = null, detail = null, clickHandler = null, deleteClickHandler = null, add = false) {
-            var warpInfo = $("<div>").addClass("warp-info");
-            if(title) $("<span>").addClass("warp-title").text(title).appendTo(warpInfo);
-            if(detail) $("<span>").addClass("warp-coordinates").text(detail).appendTo(warpInfo);
-            if(add) warpInfo.addClass("add").attr("title", "Create a warp at the current position").append("<span class=\"warp-title\"><i class=\"fa fa-plus\"></i></span>");
-            else {
-                if(typeof deleteClickHandler === "function") $("<div>").addClass("warp-delete").attr("title", `Delete warp '${title}'`).html("<i class=\"fa fa-minus fa-fw\"></i>").click(deleteClickHandler.bind(app, warpInfo)).appendTo(warpInfo);
-                warpInfo.attr("title", `Warp to '${title}'`)
-            }
-            if(clickHandler) warpInfo.click(clickHandler.bind(app, warpInfo));
-            return warpInfo;
-        }
-        var warpsContainer = $("#warps-ctn");
-        if(!this.warps) return warpsContainer.text("Couldn't load warps.");
-        warpsContainer.html("");
-        var warpInfoContainer = $("<div>").addClass("menu-section-content").appendTo($("<div>").addClass("menu-section-content-ctn").appendTo(warpsContainer));
-        getWarpInfo(null, null, this.addNewWarpClicked, null, true).appendTo(warpInfoContainer);
-        if(this.warps.length > 0) {
-            this.warps.forEach((warp) => getWarpInfo(warp.name, `(${warp.location.x.toLocaleString()}, ${warp.location.y.toLocaleString()})`, () => this.zoomIntoPoint(warp.location.x, warp.location.y, false), this.deleteWarpClicked).attr("data-warp-id", warp.id).appendTo(warpInfoContainer));
-        } else {
-            warpInfoContainer.addClass("empty");
-            var explanation = $("<div>").addClass("warp-info explanation").appendTo(warpInfoContainer);
-            $("<span>").addClass("warp-title").text("Warps").appendTo(explanation);
-            $("<span>").addClass("warp-coordinates").text("Use warps to get around the canvas quickly. Save a position and warp to it later on.").appendTo(explanation);
-        }
-    },
-
-    addNewWarpClicked: function(elem, event, input = null) {
-        var warpTitle = window.prompt(`Enter a title for this warp (at current position):`, input || "");
-        if(!warpTitle || warpTitle.length <= 0) return;
-        var pos = this.getCoordinates();
-        placeAjax.post("/api/warps", {x: pos.x, y: pos.y, name: warpTitle}, "An unknown error occurred while attempting to create your warp.").then((response) => {
-            if(response.warp) this.warps.unshift(response.warp);
-            this.layoutWarps();
-        }).catch((err) => {
-            if(err.code == "validation") this.addNewWarpClicked(elem, event, warpTitle);
-        });
-    },
-
-    deleteWarpClicked: function(elem, event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if(elem.data("deleting") === true) return;
-        if(!window.confirm("Are you sure you want to delete this warp?")) return;
-        function setDeletingState(deleting) {
-            elem.data("deleting", deleting);
-            var icon = elem.find("i");
-            if(deleting) icon.addClass("fa-minus").removeClass("fa-spin fa-circle-o-notch");
-            else icon.removeClass("fa-minus").addClass("fa-spin fa-circle-o-notch");
-        }
-        setDeletingState(true);
-        var warpID = elem.attr("data-warp-id");
-        if(!warpID) return;
-        placeAjax.delete("/api/warps/" + warpID, null, "An unknown error occurred while attempting to delete the specified warp.", () => setDeletingState(false)).then((response) => {
-            var index = this.warps.map((w) => w.id).indexOf(warpID);
-            if(index >= 0) this.warps.splice(index, 1);
-            this.layoutWarps();
-        }).catch(() => {});
-    },
-
-    loadTemplates: function() {
-        var templateJSON = localStorage.getItem("templates");
-        if(!templateJSON) return this.templates = [];
-        this.templates = JSON.parse(templateJSON);
-    },
-
-    saveTemplates: function() {
-        localStorage.setItem("templates", JSON.stringify(this.templates || []));
-    },
-    
-    layoutTemplates: function() {
-        if(!this.templatesEnabled) return $("#templates-ctn").text("Coming Soon");
-        if(!this.templates) this.loadTemplates();
-        var templatesContainer = $("#templates-ctn");
-        var templateImgs = $("#template-images");
-        templatesContainer.html("");
-        templateImgs.html("");
-        var infoContainer = $("<div>").addClass("menu-section-content").appendTo($("<div>").addClass("menu-section-content-ctn").appendTo(templatesContainer));
-        $("<div>").addClass("warp-info template add").html("<span class=\"warp-title\"><i class=\"fa fa-plus\"></i></span>").click(this.addTemplateClicked.bind(this)).appendTo(infoContainer);
-        if(this.templates.length > 0) {
-            this.templates.forEach((template, index) => {
-                var templateCtn = $("<div>").addClass("warp-info template").attr("data-template-id", index).attr("title", "Jump to the position of this template").appendTo(infoContainer);
-                templateCtn.click(this.moveToTemplateClicked.bind(this, templateCtn));
-                $("<div>").addClass("warp-delete").attr("title", "Delete this template").html("<i class=\"fa fa-minus fa-fw\"></i>").click(this.deleteTemplateClicked.bind(this, templateCtn)).appendTo(templateCtn);
-                $("<div>").addClass("warp-jump-to").attr("title", "Move this template to your current position").html("<i class=\"fa fa-map-pin fa-fw\"></i>").click(this.moveTemplateHereClicked.bind(this, templateCtn)).appendTo(templateCtn);
-                $("<div>").addClass("warp-visibility").attr("title", "Change the opacity of this template").html("<i class=\"fa fa-eye fa-fw\"></i>").click(this.changeOpacityOfTemplateClicked.bind(this, templateCtn)).appendTo(templateCtn);
-                $("<div>").addClass("warp-scale").attr("title", "Change the scale of this template").html("<i class=\"fa fa-expand fa-fw\"></i>").click(this.changeScaleOfTemplateClicked.bind(this, templateCtn)).appendTo(templateCtn);
-                $("<div>").addClass("template-img").css("background-image", `url(${template.url})`).appendTo(templateCtn);
-                var scale = (template.scale || 1) / 4;
-                $("<img>").attr("src", template.url).css({top: template.pos.y, left: template.pos.x, transform: `scale(${scale}) translateZ(0) translate(-${50 / scale}%, -${50 / scale}%)`, opacity: template.opacity}).appendTo(templateImgs);
-            });
-        } else {
-            infoContainer.addClass("empty");
-            var explanation = $("<div>").addClass("warp-info template explanation").appendTo(infoContainer);
-            $("<span>").addClass("warp-title").text("Templates").appendTo(explanation);
-            $("<span>").addClass("warp-coordinates").text("Overlay an image on the canvas to use as a guide for your art.").appendTo(explanation);
-        }
-    },
-    
-    addTemplateClicked: function() {
-        var app = this;
-        $("<input>").attr("type", "file").attr("accept", ".png,.jpg,.gif,.jpeg,.webm,.apng,.svg").hide().on("change", function() {
-            this.remove();
-            if(!this.files || !this.files[0]) return;
-            var reader = new FileReader();
-            reader.onload = (event) => {
-                var dataURI = event.target.result;
-                app.templates.push({pos: app.getCoordinates(), url: dataURI, opacity: 0.5, scale: 1});
-                app.layoutTemplates();
-                app.saveTemplates();
-           };
-           reader.onerror = (event) => {
-               console.error("Error trying to read template image.", event);
-               alert("An error occurred while attempting to read your template image.")
-           };
-           reader.readAsDataURL(this.files[0]);
-        }).appendTo($("body")).click();
-    },
-    
-    deleteTemplateClicked: function(elem, event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if(!window.confirm("Are you sure you want to delete this template?")) return;
-        var index = $(elem).attr("data-template-id");
-        if(!index || index < 0) return;
-        this.templates.splice(index, 1);
-        this.layoutTemplates();
-        this.saveTemplates();
-    },
-    
-    moveTemplateHereClicked: function(elem, event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var index = $(elem).attr("data-template-id");
-        if(!index || index < 0) return;
-        this.templates[index].pos = this.getCoordinates();
-        this.layoutTemplates();
-        this.saveTemplates();
-    },
-    
-    changeOpacityOfTemplateClicked: function(elem, event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var index = $(elem).attr("data-template-id");
-        if(!index || index < 0) return;
-        var newOpacity = window.prompt("Enter the new desired opacity for this template (as a percentage):", (this.templates[index].opacity || 0.5) * 100);
-        if(!newOpacity) return;
-        if(newOpacity > 100 || newOpacity < 0) return window.alert("You must enter a value between 0 and 100.");
-        this.templates[index].opacity = newOpacity / 100;
-        this.layoutTemplates();
-        this.saveTemplates();
-    },
-    
-    changeScaleOfTemplateClicked: function(elem, event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var index = $(elem).attr("data-template-id");
-        if(!index || index < 0) return;
-        var newScale = window.prompt("Enter the new desired scale for this template (relative to 1):", this.templates[index].scale || 1);
-        if(!newScale) return;
-        this.templates[index].scale = newScale;
-        this.layoutTemplates();
-        this.saveTemplates();
-    },
-    
-    moveToTemplateClicked: function(elem, event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var index = $(elem).attr("data-template-id");
-        if(!index || index < 0) return;
-        var pos = this.templates[index].pos;
-        this.zoomIntoPoint(pos.x, pos.y, false);
-    }
 };
 
 place.start($("canvas#place-canvas-draw")[0], $("#zoom-controller")[0], $("#camera-controller")[0], $("canvas#place-canvas")[0], $("#palette")[0], $("#coordinates")[0], $("#user-count")[0], $("#grid-hint")[0], $("#pixel-data-ctn")[0], $("#grid")[0]);
