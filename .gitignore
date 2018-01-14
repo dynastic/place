@@ -1,16 +1,16 @@
 # node/js
-node_modules/
-config/config.js
-place.paw
-public/js/build
-public/css/build
-util/legit.js
-util/legit.*.js
-views/legit.*
-config/community_guidelines.md
-config/privacy_policy.md
-config/tos.md
-modules/*
+frontend/node_modules/
+frontend/config/config.js
+frontend/place.paw
+frontend/public/js/build
+frontend/public/css/build
+frontend/util/legit.js
+frontend/util/legit.*.js
+frontend/views/legit.*
+frontend/config/community_guidelines.md
+frontend/config/privacy_policy.md
+frontend/config/tos.md
+frontend/modules/*
 
 ### Linux ###
 *~
@@ -54,25 +54,3 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-
-### Windows ###
-# Windows thumbnail cache files
-Thumbs.db
-ehthumbs.db
-ehthumbs_vista.db
-
-# Folder config file
-Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
-
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-
-# Windows shortcuts
-*.lnk
-views/public/legit.js
