@@ -70,6 +70,10 @@ block content
                 ul
                     each ua in profileUser.userAgents
                         li= ua
+                h4 Keys
+                ul
+                    each ua in profileUser.keys
+                        li= ua
             if isSelf && !profileUser.isOauth
                 hr
                 h1 My account
