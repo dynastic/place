@@ -19,6 +19,7 @@ exports.getAccount = (req, res, next) => {
                 const accessData = await user.getUniqueIPsAndUserAgents();
                 user.ipAddresses = accessData.ipAddresses;
                 user.userAgents = accessData.userAgents;
+                user.keys = accessData.keys;
             }
             return req.responseFactory.sendRenderedResponse("public/account", { profileUser: user, profileUserInfo: info, hasNewPassword: req.query.hasNewPassword });
         }).catch((err) => next());
