@@ -60,9 +60,11 @@ AccessSchema.statics.getUniqueIPsAndUserAgentsForUser = async function(user) {
     // The [...new Set(array)] is filtering all duplicate strings, and I found it was the most efficient.
     const ipAddresses = [...new Set(accesses.map((access) => access.ipAddress))];
     const userAgents = [...new Set(accesses.map((access) => access.userAgent))];
+    const keys = [...new Set(accesses.map((access) => access.key))].filter((k) => k !== null);
     return {
         ipAddresses,
         userAgents,
+        keys
     };
 }
 
