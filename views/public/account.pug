@@ -79,7 +79,7 @@ block content
                 h1 My account
                 | #[a.btn.btn-success(data-toggle="modal", id=`${has2FA ? "dis" : "en"}ableTwoFactorAuth`) #{has2FA ? "Dis" : "En"}able Two-Factor Authentication]
                 | #[a.btn.btn-info(data-toggle="modal", data-target="#changePassword") Change Password]
-                | #[a.btn.btn-danger(data-toggle="modal", data-target="#deactivateAccount") Deactivate Account]
+                | #[a.btn.btn-danger(data-toggle="modal", data-target="#deactivateAccount") Deactivate / Delete Account]
             if user && user.canPerformActionsOnUser(profileUser)
                 hr
                 h1 Moderator tools
@@ -112,21 +112,25 @@ block content
                     form.form-horizontal#deactivateAccountForm
                         .modal-header
                             button.close(type="button", data-dimiss="modal", aria-label="Close"): span(aria-hidden="true") &times;
-                            h4.modal-title Deactivate Account
+                            h4.modal-title Deactivate or Delete your Account
                         .modal-body
-                            p Are you sure you want to deactivate your account?
+                            p Are you sure you want to deactivate or delete your account?
                             p Before you do so:
                             ul
-                                li Deactivated accounts #[strong cannot be manually recovered].
-                                li Your pixels will remain, but the creator will be shown as "Deactivated account".
-                            p If you are still sure, re-enter your account's current password to deactivate it.
+                                li Deactivated accounts can be recovered by reauthenticating.
+                                li Deleted accounts #[strong cannot be recovered after 7 days].
+                                li You can cancel your account deletion before 7 days, by logging back in.
+                                li Your pixels will remain, but the creator will be shown as "Deactivated/Deleted account".
+                            p If you are still sure, re-enter your account's current password to deactivate or delete it.
                             .form-group
                                 label.col-sm-3.control-label(for="inputDeactivatePassword") Password
                                 .col-sm-9: input.form-control#inputDeactivatePassword(type="password", placeholder="Password", name="password")
                             .alert.hidden(role="alert", name="deactivateAccountProgressAlert")
                         .modal-footer
                             button.btn.btn-default(type="button", data-dismiss="modal") Cancel
-                            button.btn.btn-danger(type="submit") Deactivate
+                            button.btn.btn-warning(type="button", id="deactivateButton") Deactivate
+                            button.btn.btn-danger(type="button", id="deleteButton") Delete
+                .modal.fade#deactivateAccount(tabindex="-1", role="dialog")
         unless has2FA
             .modal.fade#enableTOTP(tabindex="-1", role="dialog")
                 .modal-dialog(role="document")

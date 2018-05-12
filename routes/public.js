@@ -80,6 +80,11 @@ function PublicRouter(app) {
         req.responseFactory.sendRenderedResponse("public/deactivated");
     });
 
+    router.get("/deleted", function(req, res) {
+        if (req.user) return res.redirect("/");
+        req.responseFactory.sendRenderedResponse("public/deleted");
+    });
+
     router.get("/sitemap.xml", function(req, res, next) {
         if (typeof app.config.host === undefined) return next();
         req.responseFactory.sendRenderedResponse("public/sitemap.xml.pug", null, "text/xml");

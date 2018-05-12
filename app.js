@@ -14,6 +14,7 @@ const ModuleManager = require("./util/ModuleManager");
 const PixelNotificationManager = require("./util/PixelNotificationManager");
 const JavaScriptProcessor = require("./util/JavaScriptProcessor");
 const ChangelogManager = require("./util/ChangelogManager");
+const User = require("./models/user");
 
 var app = {};
 
@@ -95,6 +96,20 @@ app.recreateServer = () => {
 app.recreateServer();
 
 mongoose.connect(app.config.database);
+
+const handlePendingDeletions = () => {
+    setInterval(() => {
+        const now = new Date();
+        User.remove({ deletionDate: { $lte: now }}, function(err, result) {
+            if (err) { console.error(err); return }
+            if (result.n) app.logger.log('Deleter', `Deleted ${result.n} users.`);
+        });
+    }, 30 * Math.pow(10, 3));
+}
+
+mongoose.connection.once('connected', () => {
+    handlePendingDeletions();
+});
 
 // Process JS
 app.javascriptProcessor = new JavaScriptProcessor(app);
