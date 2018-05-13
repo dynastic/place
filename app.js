@@ -100,7 +100,7 @@ mongoose.connect(app.config.database);
 const handlePendingDeletions = () => {
     setInterval(() => {
         const now = new Date();
-        User.remove({ deletionDate: { $lte: now }}, function(err, result) {
+        User.remove({ deletionDate: { $lte: now } }, function(err, result) {
             if (err) { console.error(err); return }
             if (result.n) app.logger.log('Deleter', `Deleted ${result.n} users.`);
         });
