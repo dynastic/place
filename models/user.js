@@ -104,8 +104,7 @@ var UserSchema = new Schema({
     },
     deletionDate: {
         type: Date,
-        required: false,
-        defaut: null
+        required: false
     }
 });
 
@@ -189,10 +188,9 @@ Date.prototype.addDays = function(days) {
 }
 
 UserSchema.methods.markForDeletion = function() {
-    const deletionDate = Date().addDays(7);
     this.deactivated = true;
-    this.deletionDate = deletionDate;
-    this.save();
+    this.deletionDate = Date().addDays(7);
+    return this.save();
 }
 
 UserSchema.methods.isMarkedForDeletion = function() {
