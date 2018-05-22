@@ -42,6 +42,7 @@ html(lang="en")
     meta(http-equiv="X-UA-Compatible", content="IE=edge")
     meta(name="viewport", content="width=device-width, initial-scale=1, user-scalable=no")
     title !{pageTitle != null ? `${pageTitle} &middot; ` : ""}#{config.siteName}#{config.debug ? " (debug)" : ""}
+    // Icons and web app config
     link(rel="apple-touch-icon", href="/img/apple-touch-icon.png")
     link(rel="icon", type="image/png", sizes="16x16", href="/img/favicon-16x16.png?n=1")
     link(rel="icon", type="image/png", sizes="32x32", href="/img/favicon-32x32.png?n=1")
@@ -51,6 +52,7 @@ html(lang="en")
     if pinnable
       meta(name="apple-mobile-web-app-capable", content="yes")
       meta(name="apple-mobile-web-app-status-bar-style", content="default")
+    // OpenGraph + Twitter meta tags
     meta(property="og:title" content=(pageTitle || config.siteName))
     if pageTitle
       meta(property="og:site_name", content=config.siteName)
@@ -59,18 +61,22 @@ html(lang="en")
     meta(property="twitter:card", content="summary")
     meta(property="twitter:title", content=`${config.siteName}${pageTitle != null ? `: ${pageTitle}` : ""}`)
     meta(property="twitter:image", content="/img/apple-touch-icon.png")
-    meta(name="csrf-token" content=_csrf)
-    meta(name="place-site-name", content=config.siteName)
     if pageDesc
       meta(property="og:description", content=pageDesc)
       meta(property="twitter:description", content=pageDesc)
+    // Unrelated meta tags
+    meta(name="csrf-token" content=_csrf)
+    meta(name="place-site-name", content=config.siteName)
+    // Hard CSS
     link(href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700", rel="stylesheet")
     link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", rel="stylesheet")
     link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", rel="stylesheet")
+    // Provided CSS
     - css.unshift("/css/global.css")
     each item in [...new Set(css)]
       link(href=item + "?v=" + resourceVersion, rel="stylesheet")
     +getViewExtensions("head")
+    // Shivs
     <!--[if lt IE 9]>
       script(src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js")
       script(src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js")
@@ -132,6 +138,7 @@ html(lang="en")
               +renderNavItem("Help", "javascript:void(0)", "question-circle", false)
             +getViewExtensions("nav_user_right")
     main
+      // Content-insertion point
       block content
 - if(typeof isAdmin === "undefined") isAdmin = false;
 - if(typeof needsLegit === "undefined") needsLegit = false;
@@ -155,15 +162,16 @@ html(lang="en")
                     if hasPP
                         li: a(href="/privacy") Privacy Policy
         +getViewExtensions("footer")
+      
+    // Scripts
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
     script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", crossorigin="anonymous")
     script(src="https://cdn.polyfill.io/v2/polyfill.min.js")
-    // script(src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js", integrity="sha256-WRc/eG3R84AverJv0zmqxAmdwQxstUpqkiE+avJ3WSo=", crossorigin="anonymous")
     if typeof config.publicRaven !== "undefined" && config.publicRaven
       script(src="https://cdn.ravenjs.com/3.17.0/raven.min.js", crossorigin="anonymous")
       script.
           Raven.config('#{config.publicRaven}').install();
-    - js.unshift("https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js", "/js/build/site.js");
+    - js.unshift("https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js", "/js/cookies-eu-banner.js", "/js/build/site.js");
     each item in [...new Set(js)]
         script(src=item + "?v=" + resourceVersion)
     each item in [...new Set(jsSnippets.concat(jsModSnippets))]
