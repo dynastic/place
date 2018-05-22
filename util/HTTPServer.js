@@ -85,7 +85,7 @@ function HTTPServer(app) {
                 if (user && user.deactivated) {
                     user.deactivated = false;
                     user.deletionDate = null;
-                    await user.save();
+                    user.save();
                 }
             
                 if(user && user.loginError()) {
