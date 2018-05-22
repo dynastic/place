@@ -22,7 +22,7 @@ exports.getAccount = (req, res, next) => {
             }
             return req.responseFactory.sendRenderedResponse("public/account", { profileUser: user, profileUserInfo: info, hasNewPassword: req.query.hasNewPassword });
         });
-    })//.catch((err) => next());
+    }).catch((err) => next());
 };
 
 exports.getAPIAccount = (req, res, next) => {
