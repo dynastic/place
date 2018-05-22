@@ -93,7 +93,7 @@ function HTTPServer(app) {
                     return res.redirect("/#signin&loginerror=1&logintext=" + encodeURIComponent(user.loginError().message));
                 }
 
-                if(user) user.recordAccess(app, req.get("User-Agent"), req.get("X-Forwarded-For") || req.connection.remoteAddress, (typeof req.key !== "undefined" ? req.key : null));
+                if (user) user.recordAccess(app, req.get("User-Agent"), req.get("X-Forwarded-For") || req.connection.remoteAddress, (typeof req.key !== "undefined" ? req.key : null));
                 req.user = user;
                 next();
             }
