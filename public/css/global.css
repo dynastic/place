@@ -890,6 +890,7 @@ table.table.table-contained, td {
     position: fixed;
     bottom: 0;
     left: 0;
+    width: 100%;
     border-radius: 0 12px 0 0;
     background-color: #fff;
     padding: 20px;
@@ -897,6 +898,12 @@ table.table.table-contained, td {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     color: #999;
     z-index: 1001;
+}
+
+@media(max-width: 360px) {
+    #cookies-eu-banner {
+        border-radius: 0;
+    }
 }
 
 #cookies-eu-banner h4 {
