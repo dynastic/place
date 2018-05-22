@@ -487,4 +487,24 @@ UserSchema.plugin(dataTables, {
     totalKey: "recordsFiltered",
 });
 
+UserSchema.methods.getUserData = function() {
+    return new Promise((resolve, reject) => {
+        var user = this.toInfo();
+        Promise.all([
+            Access.find({ userID: this.id }),
+            Pixel.find({ editorID: this.id }),
+            require("./action").find({ $or: [ { performingUserID: this.id }, { moderatingUserID: this.id } ] }),
+            require("./warp").find({ userID: this.id }),
+            require("./chatMessage").find({ userID: this.id })
+        ]).then((result) => {
+            var accesses = result[0].map((a) => a.toInfo(false));
+            var pixels = result[1].map((p) => p.toInfo(false));
+            var actions = result[2].map((a) => a.toInfo(false));
+            var warps = result[3].map((w) => w.toInfo());
+            var chatMessages = result[4].map((m) => m.toInfo(false));
+            resolve({ user: user, accesses: accesses, pixels: pixels, actions: actions, warps: warps, chatMessages: chatMessages });
+        });
+    });
+}
+
 module.exports = DataModelManager.registerModel("User", UserSchema);

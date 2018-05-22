@@ -57,16 +57,17 @@ var PixelSchema = new Schema({
     }
 });
 
-PixelSchema.methods.toInfo = function() {
-    return {
+PixelSchema.methods.toInfo = function(userIDs = true) {
+    var info = {
         point: {
             x: this.xPos,
             y: this.yPos
         },
-        editorID: this.editorID,
         modified: this.lastModified,
         colour: this.getHexColour()
     };
+    if (userIDs) info.editorID = this.editorID;
+    return info;
 }
 
 PixelSchema.statics.addPixel = function(colour, x, y, userID, app, callback) {

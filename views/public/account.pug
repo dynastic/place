@@ -62,7 +62,7 @@ block content
             if user && user.admin
                 hr
                 h1 Access Data
-                h4 IP Addresses
+                h4 IP Addresses (hashed)
                 ul
                     each ip in profileUser.ipAddresses
                         li= ip
@@ -79,6 +79,7 @@ block content
                 h1 My account
                 | #[a.btn.btn-success(data-toggle="modal", id=`${has2FA ? "dis" : "en"}ableTwoFactorAuth`) #{has2FA ? "Dis" : "En"}able Two-Factor Authentication]
                 | #[a.btn.btn-info(data-toggle="modal", data-target="#changePassword") Change Password]
+                | #[a.btn.btn-warning(data-toggle="modal", data-target="#downloadAccount") Download Account Data]
                 | #[a.btn.btn-danger(data-toggle="modal", data-target="#deactivateAccount") Deactivate / Delete Account]
             if user && user.canPerformActionsOnUser(profileUser)
                 hr
@@ -130,7 +131,18 @@ block content
                             button.btn.btn-default(type="button", data-dismiss="modal") Cancel
                             button.btn.btn-warning(type="button", id="deactivateButton") Deactivate
                             button.btn.btn-danger(type="button", id="deleteButton") Delete
-                .modal.fade#deactivateAccount(tabindex="-1", role="dialog")
+        .modal.fade#downloadAccount(tabindex="-1", role="dialog")
+            .modal-dialog(role="document")
+                .modal-content
+                    .modal-header
+                        button.close(type="button", data-dimiss="modal", aria-label="Close"): span(aria-hidden="true") &times;
+                        h4.modal-title Download Account Data
+                    .modal-body
+                        p You may download all of the data that #{config.siteName} possesses on you.
+                        p You will be provided all of the data as one JSON file, containing any and all data relating to your usage of the site. The file may be large in size, and could take a while to process.
+                    .modal-footer
+                        button.btn.btn-default(type="button", data-dismiss="modal") Cancel
+                        a.btn.btn-warning(type="submit", href="/api/account-data") Download
         unless has2FA
             .modal.fade#enableTOTP(tabindex="-1", role="dialog")
                 .modal-dialog(role="document")

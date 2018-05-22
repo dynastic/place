@@ -15,6 +15,7 @@ const AccountPageController = require("../controllers/AccountPageController");
 const TOTPSetupController = require("../controllers/TOTPSetupController");
 const ChangelogController = require("../controllers/ChangelogController");
 const WarpController = require("../controllers/WarpController");
+const UserDownloadController = require("../controllers/UserDownloadController");
 
 function APIRouter(app) {
     let router = express.Router();
@@ -106,6 +107,21 @@ function APIRouter(app) {
     router.post("/place", requireUser, PlaceController.postAPIPixel);
 
     router.get("/timer", requireUser, PlaceController.getAPITimer);
+
+    const accountDataRatelimit = new Ratelimit(require("../util/RatelimitStore")(), {
+        freeRetries: 1, // 1 download per hour
+        attachResetToRequest: false,
+        refreshTimeoutOnRequest: false,
+        minWait: 60 * 60 * 1000, // 1 hour
+        maxWait: 3 * 60 * 60 * 1000, // 3 hour, 
+        failCallback: (req, res, next, nextValidRequestDate) => {
+            res.status(429).json({success: false, error:{message: "You're doing that too fast."}});
+        },
+        handleStoreError: (error) => app.reportError("Account data rate limit store error:", error),
+        proxyDepth: app.config.trustProxyDepth
+    });
+
+    router.get("/account-data", [requireUser, accountDataRatelimit.prevent], UserDownloadController.getAccountData);
 
     router.get("/online", function(req, res, next) {
         return res.json({

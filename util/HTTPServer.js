@@ -29,14 +29,20 @@ function HTTPServer(app) {
         directories.forEach((dir) => server.use(dir.root, dir.middleware));
         
         // Log to console
-        if (app.config.debug) server.use(morgan("dev"));
-        else {
-            const logStream = require("stream-file-archive")({
+        if (app.config.debug) {
+            // Log requests to console
+            server.use(morgan("dev"));
+
+            // Pretty-print JSON
+            server.set("json spaces", 4);
+        } else {
+            var logInfo = {};
+            if (fs.existsSync("/var/log/place")) logInfo.stream = require("stream-file-archive")({
                 path: "/var/log/place/access-%Y-%m-%d.log",  // Write logs rotated by the day
                 symlink: "/var/log/place/current.log",    // Maintain a symlink called current.log
                 compress: true                // Gzip old log files
             });
-            server.use(morgan("common", { stream: logStream }));
+            server.use(morgan("common", logInfo));
         }
 
         server.set("trust proxy", typeof app.config.trustProxyDepth === "number" ? app.config.trustProxyDepth : 0);
