@@ -20,6 +20,13 @@ function PublicRouter(app) {
         if (req.path == "/signout") return next(); // Allow the user to sign out
         if (req.user && !req.user.usernameSet && req.user.OAuthName) { // If the user has no username...
             if (req.path == "/pick-username" && req.method == "POST") return next(); // Allow the user to POST their new username
+            
+            const config = req.place.config;
+            if (config.maintenance && !config.maintenance.allowSignups) {
+                req.logout();
+                return res.redirect(403, "/");
+            }
+            
             return req.responseFactory.sendRenderedResponse("public/pick-username", {
                 captcha: req.place.enableCaptcha,
                 username: req.user.OAuthName.replace(/[^[a-zA-Z0-9-_]/g, "-").substring(0, 20),
@@ -71,6 +78,11 @@ function PublicRouter(app) {
     router.get("/deactivated", function(req, res) {
         if (req.user) return res.redirect("/");
         req.responseFactory.sendRenderedResponse("public/deactivated");
+    });
+
+    router.get("/deleted", function(req, res) {
+        if (req.user) return res.redirect("/");
+        req.responseFactory.sendRenderedResponse("public/deleted");
     });
 
     router.get("/sitemap.xml", function(req, res, next) {

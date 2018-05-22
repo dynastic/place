@@ -39,10 +39,9 @@ var ChatMessageSchema = new Schema({
     }
 });
 
-ChatMessageSchema.methods.toInfo = function() {
-    return {
+ChatMessageSchema.methods.toInfo = function(userIDs = true) {
+    var info = {
         id: this.id,
-        userID: this.userID,
         date: this.date,
         text: this.text,
         position: {
@@ -50,6 +49,8 @@ ChatMessageSchema.methods.toInfo = function() {
             y: this.yPos
         }
     };
+    if (userIDs) info.userID = this.userID;
+    return info;
 }
 
 ChatMessageSchema.methods.getInfo = function(overrideDataAccess = false) {

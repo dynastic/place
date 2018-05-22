@@ -885,3 +885,41 @@ table.table.table-contained, td {
         padding-left: 0;
     }
 }
+
+#cookies-eu-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 0 12px 0 0;
+    background-color: #fff;
+    padding: 20px;
+    max-width: 360px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    color: #999;
+    z-index: 1001;
+}
+
+@media(max-width: 360px) {
+    #cookies-eu-banner {
+        border-radius: 0;
+    }
+}
+
+#cookies-eu-banner h4 {
+    margin-top: 4px;
+    color: #777;
+}
+
+#cookies-eu-banner .btn {
+    margin: 8px auto 0;
+    display: inline-block;
+}
+
+@supports (backdrop-filter:none) or (-webkit-backdrop-filter:none) {
+    #cookies-eu-banner {
+        background: rgba(255,255,255,0.9)!important;
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+    }
+}

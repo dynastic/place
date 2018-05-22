@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 
 class DataModelManager {
-    constructor(app) {
-        this.app = app;
+    constructor() {
         this.registeredModels = new Map();
         this.registeredModules = new Set();
         this.modelStaticMethods = {};

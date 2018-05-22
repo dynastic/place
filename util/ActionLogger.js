@@ -28,6 +28,11 @@ var actions = {
         inlineDisplayName: "Deactivated their account",
         category: "account"
     },
+    delete: {
+        displayName: "Delete own account",
+        inlineDisplayName: "Marked their account for deletion",
+        category: "account"
+    },
     place: {
         displayName: "Place pixel",
         inlineDisplayName: "Placed a pixel",
@@ -91,6 +96,12 @@ var actions = {
         isPrivileged: true
     },
     // Administrative actions
+    deleteAccount: {
+        displayName: "Delete account",
+        inlineDisplayName: "Deleted",
+        category: "administrative",
+        isPrivileged: true
+    },
     giveModerator: {
         displayName: "Give moderator",
         inlineDisplayName: "Gave moderator to",

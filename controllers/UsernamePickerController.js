@@ -5,6 +5,14 @@ exports.postUsername = (req, res, next) => {
         return req.responseFactory.sendRenderedResponse("public/pick-username", { captcha: req.place.enableCaptcha, error: { message: errorMsg || "An unknown error occurred" }, username: req.body.username, user: {name: ""} });
     }
     if(req.user.usernameSet) res.redirect("/");
+    
+    // Check if we can actually do this
+    const config = req.place.config;
+    if (config.maintenance && !config.maintenance.allowSignups) {
+        req.logout();
+        return res.redirect(403, "/");
+    }
+    
     let user = req.user;
     user.name = req.body.username;
     function doPickUsername() {

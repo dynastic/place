@@ -21,7 +21,7 @@ BetaDialogController.dialog.find("#signup").click(function() {
 
 ChangelogDialogController.dialog.find("#changelog-opt-out").click(function() {
     placeAjax.delete("/api/changelog/missed");
-})
+});
 
 var canvasController = {
     isDisplayDirty: false,
@@ -145,7 +145,6 @@ var place = {
         down: [40, 83]
     },
     keyStates: {},
-    socket: null,
     zoomButton: null,
     dragStart: null,
     placing: false, shouldShowPopover: false,
@@ -157,6 +156,13 @@ var place = {
     colours: null, pixelFlags: null, canPlaceCustomColours: false, hasTriedToFetchAvailability: false, customColour: null,
     cursorX: 0, cursorY: 0,
     templatesEnabled: false,
+    /**
+     * @type {PlaceSocket}
+     */
+    socket: new PlaceSocket("client"),
+    stat() {
+        this.socket.emit("stat");
+    },
 
     start: function(canvas, zoomController, cameraController, displayCanvas, colourPaletteElement, coordinateElement, userCountElement, gridHint, pixelDataPopover, grid) {
         // Setup sizes
@@ -209,12 +215,14 @@ var place = {
             if(document.activeElement.tagName.toLowerCase() != "input") handleKeyEvents(e);
         }
         document.body.onkeydown = function(e) {
+            app.stat();
             if(document.activeElement.tagName.toLowerCase() != "input" && $(".dialog-ctn.show").length <= 0) {
                 handleKeyEvents(e);
                 app.handleKeyDown(e.keyCode || e.which);
             }
         };
         document.body.onmousemove = function(e) {
+            app.stat();
             app.cursorX = e.pageX;
             app.cursorY = e.pageY;
         };
@@ -240,12 +248,12 @@ var place = {
         
         this.determineFeatureAvailability();
 
+        this.initializeSocketConnection();
+
         this.changeUserCount(null);
         this.loadUserCount().then((online) => {
             this.userCountChanged(online);
         }).catch((err) => $(this.userCountElement).hide());
-
-        this.socket = this.startSocketConnection();
 
         this.popoutController = popoutController;
         this.popoutController.setup(this, $("#popout-container")[0]);
@@ -306,7 +314,7 @@ var place = {
             this.hasTriedToFetchAvailability = true;
             setTimeout(() => this.determineFeatureAvailability(), 2500);
             this.setupColours();
-        })
+        });
     },
 
     getCanvasImage: function() {
@@ -364,17 +372,9 @@ var place = {
     },
 
     neededPixelDate: null,
-    requestPixelsAfterDate: function(date) {
-        if(!this.socket.connected) {
-            this.neededPixelDate = date;
-            this.socket.once("connect", () => {
-                this.requestPixelsAfterDate(this.neededPixelDate);
-                this.neededPixelDate = null;
-            });
-            return;
-        }
-        console.log("Requesting pixels after date " + date + "!");
-        this.socket.emit("fetch_pixels", date);
+    requestPixelsAfterDate(date) {
+        console.log("Requesting pixels after date " + date);
+        this.socket.send("fetch_pixels", {ts: date});
     },
 
     setupInteraction: function() {
@@ -389,14 +389,17 @@ var place = {
             autoScroll: true,
             onstart: (event) => {
                 if(event.interaction.downEvent.button == 2) return event.preventDefault();
+                app.stat();
                 $(app.zoomController).addClass("grabbing");
                 $(":focus").blur();
             },
             onmove: (event) => {
-                app.moveCamera(event.dx, event.dy)
+                app.moveCamera(event.dx, event.dy);
+                app.stat();
             },
             onend: (event) => {
                 if(event.interaction.downEvent.button == 2) return event.preventDefault();
+                app.stat();
                 $(app.zoomController).removeClass("grabbing");
                 var coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
@@ -422,7 +425,7 @@ var place = {
         if ($('.canvas-container:hover').length <= 0) return;
         var e = event.originalEvent;
         e.preventDefault();
-        var delta = e.type == "wheel" ? e.deltaY : (typeof e.wheelDeltaY !== "undefined" ? e.wheelDeltaY : e.wheelDelta);
+        var delta = e.type == "wheel" ? -e.deltaY : (typeof e.wheelDeltaY !== "undefined" ? e.wheelDeltaY : e.wheelDelta);
         this.setZoomScale(this.zooming.zoomScale + (delta / 100));
     },
 
@@ -461,23 +464,8 @@ var place = {
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
-    startSocketConnection: function() {
-        var socket = io();
-
-        socket.onJSON = function(event, listener) {
-            return this.on(event, (data) => listener(JSON.parse(data)));
-        }
-
-        socket.on("error", (e) => {
-            console.error("Socket error (will reload pixels on reconnect to socket): " + e);
-            this.isOutdated = true;
-        });
-        socket.on("disconnect", () => {
-            console.warn("Socket disconnected from server, remembering to reload pixels on reconnect.")
-            this.isOutdated = true
-        });
-        socket.on("connect", () => {
-            console.log("Socket successfully connected");
+    initializeSocketConnection() {
+        this.socket.on("open", () => {
             if(!this.isOutdated) return;
             if(Date.now() / 1000 - this.lastPixelUpdate > 60) {
                 // 1 minute has passed
@@ -491,13 +479,29 @@ var place = {
             }
         });
 
-        socket.onJSON("tile_placed", this.liveUpdateTile.bind(this));
-        socket.onJSON("tiles_placed", this.liveUpdateTiles.bind(this));
-        socket.on("server_ready", () => this.getCanvasImage());
-        socket.on("user_change", this.userCountChanged.bind(this));
-        socket.onJSON("admin_broadcast", this.adminBroadcastReceived.bind(this));
-        socket.on("reload_client", () => window.location.reload());
-        return socket;
+        this.socket.on("close", () => {
+            this.isOutdated = true;
+        });
+
+        const events = {
+            tile_placed: this.liveUpdateTile.bind(this),
+            tiles_placed: this.liveUpdateTiles.bind(this),
+            server_ready: this.getCanvasImage.bind(this),
+            user_change: this.userCountChanged.bind(this),
+            admin_broadcast: this.adminBroadcastReceived.bind(this),
+            reload_client: () => window.location.reload(),
+        };
+
+        Object.keys(events).forEach(eventName => {
+            this.socket.on(eventName, events[eventName]);
+        });
+    },
+
+    get isAFK() {
+        const stat = this._stat;
+        const offset = Date.now() - (this.activityTimeout * 1000);
+        const afk = !(stat > offset);
+        return afk;
     },
 
     getRandomSpawnPoint: function() {
@@ -1018,6 +1022,7 @@ var place = {
 
     canvasClicked: function(x, y, event) {
         var app = this;
+        this.stat();
         function getUserInfoTableItem(title, value) {
             var ctn = $("<div>").addClass("field");
             $("<span>").addClass("title").text(title).appendTo(ctn);

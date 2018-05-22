@@ -16,6 +16,7 @@ const TOTPSetupController = require("../controllers/TOTPSetupController");
 const ChangelogController = require("../controllers/ChangelogController");
 const WarpController = require("../controllers/WarpController");
 const AchievementsController = require("../controllers/AchievementsController");
+const UserDownloadController = require("../controllers/UserDownloadController");
 
 function APIRouter(app) {
     let router = express.Router();
@@ -88,7 +89,9 @@ function APIRouter(app) {
 
     router.route("/user/totp-setup", requireUser).get([requireUser, TOTPSetupController.getTOTPSetup]).post([requireUser, TOTPSetupController.postTOTPSetup]).delete([requireUser, TOTPSetupController.deleteTOTPSetup]);
     router.post("/user/change-password", requireUser, PasswordChangeController.postSelfServePassword);
+
     router.post("/user/deactivate", requireUser, DeactivateAccountController.postAPIDeactivate);
+    router.delete("/user", requireUser, DeactivateAccountController.deleteAccount);
 
     router.get("/session", requireUser, function(req, res, next) {
         res.json({
@@ -105,6 +108,21 @@ function APIRouter(app) {
     router.post("/place", requireUser, PlaceController.postAPIPixel);
 
     router.get("/timer", requireUser, PlaceController.getAPITimer);
+
+    const accountDataRatelimit = new Ratelimit(require("../util/RatelimitStore")(), {
+        freeRetries: 1, // 1 download per hour
+        attachResetToRequest: false,
+        refreshTimeoutOnRequest: false,
+        minWait: 60 * 60 * 1000, // 1 hour
+        maxWait: 3 * 60 * 60 * 1000, // 3 hour, 
+        failCallback: (req, res, next, nextValidRequestDate) => {
+            res.status(429).json({success: false, error:{message: "You're doing that too fast."}});
+        },
+        handleStoreError: (error) => app.reportError("Account data rate limit store error:", error),
+        proxyDepth: app.config.trustProxyDepth
+    });
+
+    router.get("/account-data", [requireUser, accountDataRatelimit.prevent], UserDownloadController.getAccountData);
 
     router.get("/online", function(req, res, next) {
         return res.json({
@@ -185,12 +203,13 @@ function APIRouter(app) {
     router.get("/admin/refresh_clients", app.adminMiddleware, AdminActionsController.apiRefreshClients);
     router.get("/admin/reload_config", app.adminMiddleware, AdminActionsController.apiReloadConfig);
     router.post("/admin/broadcast", app.adminMiddleware, AdminActionsController.apiBroadcastAlert);
+    router.delete("/user/:userID", app.adminMiddleware, AdminActionsController.deleteUser);
 
     router.post("/admin/users", app.modMiddleware, ModeratorUserController.getAPIUsersTable);
     router.get("/admin/toggle_mod", app.adminMiddleware, ModeratorUserController.postAPIToggleModerator);
     router.get("/admin/disable_totp", app.adminMiddleware, ModeratorUserController.postAPIDisableTOTP);
     router.get("/admin/force_pw_reset", app.adminMiddleware, ModeratorUserController.postAPIForcePasswordReset);
-
+    
     // Mod APIs
 
     router.get("/mod/toggle_ban", app.modMiddleware, ModeratorUserController.postAPIToggleBan);

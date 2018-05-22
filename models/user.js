@@ -102,6 +102,10 @@ var UserSchema = new Schema({
         type: Boolean,
         required: false,
         default: false
+    },
+    deletionDate: {
+        type: Date,
+        required: false
     }
 });
 
@@ -149,6 +153,7 @@ UserSchema.methods.toInfo = function(app = null) {
         },
         banned: this.banned,
         deactivated: this.deactivated,
+        markedForDeletion: this.isMarkedForDeletion(),
         badges: this.getBadges(app)
     };
     if (app) {
@@ -180,12 +185,26 @@ UserSchema.methods.loginError = function() {
         message: "You are banned from using this service due to violations of the rules.",
         code: "banned"
     };
-    if (this.deactivated === true) return {
-        message: "Your account has been deactivated. Please contact the moderators via Discord to reactivate your account.",
-        code: "deactivated"
-    };
     return null;
 }
+
+// Helper
+Date.prototype.addDays = function(days) {
+    var dat = new Date(this.valueOf());
+    dat.setDate(dat.getDate() + days);
+    return dat;
+}
+
+UserSchema.methods.markForDeletion = function() {
+    this.deactivated = true;
+    this.deletionDate = Date().addDays(7);
+    return this.save();
+}
+
+UserSchema.methods.isMarkedForDeletion = function() {
+    return this.deletionDate != null
+}
+
 UserSchema.methods.setUserName = function(username, callback, usernameSet) {
     if (!UserSchema.statics.isValidUsername(username)) return callback({
         message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.",
@@ -388,6 +407,7 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
         var continueWithUser = (user) => {
             if (!user) return returnInfo("delete");
             if (!overrideDataAccess && user.banned) return returnInfo("ban");
+            else if (!overrideDataAccess && user.isMarkedForDeletion()) return returnInfo("deleted");
             else if (!overrideDataAccess && user.deactivated) return returnInfo("deactivated");
             user.getInfo(app, getPixelInfo).then((userInfo) => {
                 info.user = userInfo;
@@ -464,6 +484,7 @@ UserSchema.methods.getBadges = function(app) {
         if(rank) badges.push({ text: `Ranked #${rank.toLocaleString()}`, style: rank <= 5 ? "danger" : "info", isRanking: true, lowPriority: true, isLowRanking: rank > 25 });
     }
     if(this.banned) badges.push({ text: "Banned", style: "danger", title: "This user has been banned for breaking the rules." });
+    else if(this.isMarkedForDeletion()) badges.push({ text: "Deleted", style: "danger", title: "This user chose to delete their account." });
     else if(this.deactivated) badges.push({ text: "Deactivated", style: "danger", title: "This user chose to deactivate their account." });
     if(this.admin) badges.push({ text: "Admin", style: "warning", inlineBefore: true, title: "This user is an administrator." });
     else if(this.moderator) badges.push({ text: "Moderator", shortText: "Mod", style: "warning", inlineBefore: true, title: "This user is a moderator." });
@@ -473,5 +494,25 @@ UserSchema.methods.getBadges = function(app) {
 UserSchema.plugin(dataTables, {
     totalKey: "recordsFiltered",
 });
+
+UserSchema.methods.getUserData = function() {
+    return new Promise((resolve, reject) => {
+        var user = this.toInfo();
+        Promise.all([
+            Access.find({ userID: this.id }),
+            Pixel.find({ editorID: this.id }),
+            require("./action").find({ $or: [ { performingUserID: this.id }, { moderatingUserID: this.id } ] }),
+            require("./warp").find({ userID: this.id }),
+            require("./chatMessage").find({ userID: this.id })
+        ]).then((result) => {
+            var accesses = result[0].map((a) => a.toInfo(false));
+            var pixels = result[1].map((p) => p.toInfo(false));
+            var actions = result[2].map((a) => a.toInfo(false));
+            var warps = result[3].map((w) => w.toInfo());
+            var chatMessages = result[4].map((m) => m.toInfo(false));
+            resolve({ user: user, accesses: accesses, pixels: pixels, actions: actions, warps: warps, chatMessages: chatMessages });
+        });
+    });
+}
 
 module.exports = DataModelManager.registerModel("User", UserSchema);
