@@ -17,15 +17,18 @@ var ActionSchema = new Schema({
     moderatingUserID: Schema.ObjectId
 });
 
-ActionSchema.methods.toInfo = function() {
-    return {
+ActionSchema.methods.toInfo = function(userIDs = true) {
+    var info = {
         id: this.id,
         action: this.actionID,
-        performingUserID: this.performingUserID,
         info: this.info || [],
-        moderatingUserID: this.moderatingUserID,
         date: this.date
     };
+    if (userIDs) {
+        info.performingUserID = this.performingUserID;
+        info.moderatingUserID = this.moderatingUserID
+    }
+    return info
 }
 
 ActionSchema.methods.getInfo = function() {

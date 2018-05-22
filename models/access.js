@@ -29,13 +29,14 @@ var AccessSchema = new Schema({
     }
 });
 
-AccessSchema.methods.toInfo = function() {
-    return {
-        userID: this.userID,
+AccessSchema.methods.toInfo = function(userIDs = true) {
+    var info = {
         date: this.date,
         userAgent: this.userAgent,
         ipAddress: this.hashedIPAddress
     };
+    if (userIDs) info.userID = this.userID;
+    return info;
 }
 
 AccessSchema.statics.getHashedIPAddress = function(ipAddress) {
