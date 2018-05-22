@@ -88,7 +88,9 @@ function APIRouter(app) {
 
     router.route("/user/totp-setup", requireUser).get([requireUser, TOTPSetupController.getTOTPSetup]).post([requireUser, TOTPSetupController.postTOTPSetup]).delete([requireUser, TOTPSetupController.deleteTOTPSetup]);
     router.post("/user/change-password", requireUser, PasswordChangeController.postSelfServePassword);
+
     router.post("/user/deactivate", requireUser, DeactivateAccountController.postAPIDeactivate);
+    router.delete("/user", requireUser, DeactivateAccountController.deleteAccount);
 
     router.get("/session", requireUser, function(req, res, next) {
         res.json({
@@ -199,12 +201,13 @@ function APIRouter(app) {
     router.get("/admin/refresh_clients", app.adminMiddleware, AdminActionsController.apiRefreshClients);
     router.get("/admin/reload_config", app.adminMiddleware, AdminActionsController.apiReloadConfig);
     router.post("/admin/broadcast", app.adminMiddleware, AdminActionsController.apiBroadcastAlert);
+    router.delete("/user/:userID", app.adminMiddleware, AdminActionsController.deleteUser);
 
     router.post("/admin/users", app.modMiddleware, ModeratorUserController.getAPIUsersTable);
     router.get("/admin/toggle_mod", app.adminMiddleware, ModeratorUserController.postAPIToggleModerator);
     router.get("/admin/disable_totp", app.adminMiddleware, ModeratorUserController.postAPIDisableTOTP);
     router.get("/admin/force_pw_reset", app.adminMiddleware, ModeratorUserController.postAPIForcePasswordReset);
-
+    
     // Mod APIs
 
     router.get("/mod/toggle_ban", app.modMiddleware, ModeratorUserController.postAPIToggleBan);

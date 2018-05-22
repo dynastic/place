@@ -82,10 +82,17 @@ function HTTPServer(app) {
         server.use(passport.initialize());
         server.use((req, res, next) => {
             function authUser(user) {
+                if (user && user.deactivated) {
+                    user.deactivated = false;
+                    user.deletionDate = null;
+                    await user.save();
+                }
+            
                 if(user && user.loginError()) {
                     req.session.passport = null;
                     return res.redirect("/#signin&loginerror=1&logintext=" + encodeURIComponent(user.loginError().message));
                 }
+
                 if(user) user.recordAccess(app, req.get("User-Agent"), req.get("X-Forwarded-For") || req.connection.remoteAddress, (typeof req.key !== "undefined" ? req.key : null));
                 req.user = user;
                 next();

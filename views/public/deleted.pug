@@ -1,0 +1,8 @@
+extends ../layout
+block dependencies
+    - var pageTitle = "Account Deleted"
+block content
+    .container.norctn
+        h1 Account Deleted
+        p.text-muted Sorry to see you go! Your account is pending deletion and be removed in 7 days; to get your account back, just log back in before then. Thank you for using #{config.siteName}, we'll miss you! 
+        a(href="/") &laquo; Go to home page
