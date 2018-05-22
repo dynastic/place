@@ -1,4 +1,3 @@
-const ws = require("uws");
 const {PlaceSocket} = require("./PlaceSocket");
 
 let hardSocketLimit = 20;

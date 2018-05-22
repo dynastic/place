@@ -1,5 +1,3 @@
-const User = require("../models/user");
-
 exports.getAccountData = (req, res, next) => {
     req.user.getUserData().then((data) => {
         const filename = `${req.place.config.siteName} - ${req.user.name} data.json`;
