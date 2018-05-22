@@ -90,4 +90,10 @@ AccessSchema.statics.findSimilarIPUserIDs = function(user) {
     });
 }
 
+AccessSchema.methods.migrateIPAddress = function() {
+    this.hashedIPAddress = AccessSchema.statics.getHashedIPAddress(this.ipAddress);
+    this.ipAddress = null;
+    return this.save();
+}
+
 module.exports = DataModelManager.registerModel("Access", AccessSchema);
