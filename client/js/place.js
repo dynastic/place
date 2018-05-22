@@ -1160,7 +1160,6 @@ var place = {
 
     getUserStateText: function(userState) {
         if(userState == "ban") return "Banned user";
-        if(userState == "deleted") return "Deleted account";
         if(userState == "deactivated") return "Deactivated user";
         return "Deleted account";
     },
