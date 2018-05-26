@@ -43,6 +43,7 @@ if (config.raven) {
         release: childProcess.execSync('git rev-parse HEAD').toString().trim(),
         environment: config.debug ? 'development' : 'production' || 'production',
         parseUser: function(req) {
+            if (!req.user) return {}; 
             return {
                 username: req.user.username,
                 id: req.user._id
