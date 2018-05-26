@@ -43,7 +43,11 @@ AccessSchema.statics.getHashedIPAddress = function(ipAddress) {
     return crypto.createHash('sha256').update(ipAddress).digest('base64');
 }
 
-AccessSchema.statics.recordAccess = function(app, userID, userAgent, ipAddress, key) {
+AccessSchema.statics.recordAccess = function(req, userID) {
+    this.recordAccess(req.place, userID, req.get("User-Agent"), req.get("X-Forwarded-For") || req.connection.remoteAddress, (typeof req.key !== "undefined" ? req.key : null));
+}
+
+AccessSchema.statics.recordAccessInfo = function(app, userID, userAgent, ipAddress, key) {
     var ipHash = this.getHashedIPAddress(ipAddress);
     this.findOneAndUpdate({
         userID: userID,

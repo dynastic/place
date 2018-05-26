@@ -200,21 +200,23 @@ UserSchema.methods.isMarkedForDeletion = function() {
 UserSchema.methods.setUserName = function(username, callback, usernameSet) {
     if (!UserSchema.statics.isValidUsername(username)) return callback({
         message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.",
-        code: "username_taken"
+        code: "username_taken",
+        intCode: 400
     });
     this.name = username;
     this.usernameSet = true;
     this.save(function(err) {
         if (err) return callback({
             message: "That username already exists.",
-            code: "username_taken"
+            code: "username_taken",
+            intCode: 400
         });
         return callback();
     });
 }
 
-UserSchema.methods.recordAccess = function(app, userAgent, ipAddress, key) {
-    return Access.recordAccess(app, this.id, userAgent, ipAddress, key)
+UserSchema.methods.recordAccess = function(req) {
+    return Access.recordAccess(req, this.id);
 }
 
 UserSchema.methods.getUniqueIPsAndUserAgents = function() {
@@ -237,12 +239,14 @@ UserSchema.statics.getPasswordError = function(password) {
 UserSchema.statics.register = function(username, password, app, callback, OAuthID, OAuthName) {
     if (!OAuthID && !this.isValidUsername(username)) return callback(null, {
         message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.",
-        code: "username_taken"
+        code: "username_taken",
+        intCode: 400
     });
     var passwordError = this.getPasswordError(password);
     if(passwordError) return callback(null, {
         message: passwordError,
-        code: "password_validation"
+        code: "password_validation",
+        intCode: 400
     });
 
     var Schema = this;
@@ -272,7 +276,8 @@ UserSchema.statics.register = function(username, password, app, callback, OAuthI
         newUser.save(function(err) {
             if (err) return callback(null, {
                 message: "An account with that username already exists.",
-                code: "username_taken"
+                code: "username_taken",
+                intCode: 400
             });
             require("../util/ActionLogger").log(app, "signUp", newUser);
             return callback(newUser, null)
@@ -285,7 +290,8 @@ UserSchema.statics.register = function(username, password, app, callback, OAuthI
             if (!user) continueWithRegistration();
             else callback(null, {
                 message: "An account with that username already exists.",
-                code: "username_taken"
+                code: "username_taken",
+                intCode: 400
             });
         });
     }
