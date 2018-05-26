@@ -44,7 +44,7 @@ AccessSchema.statics.getHashedIPAddress = function(ipAddress) {
 }
 
 AccessSchema.statics.recordAccess = function(req, userID) {
-    this.recordAccess(req.place, userID, req.get("User-Agent"), req.get("X-Forwarded-For") || req.connection.remoteAddress, (typeof req.key !== "undefined" ? req.key : null));
+    this.recordAccessInfo(req.place, userID, req.get("User-Agent"), req.get("X-Forwarded-For") || req.connection.remoteAddress, (typeof req.key !== "undefined" ? req.key : null));
 }
 
 AccessSchema.statics.recordAccessInfo = function(app, userID, userAgent, ipAddress, key) {
