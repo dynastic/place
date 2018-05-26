@@ -16,7 +16,7 @@ exports.postSignIn = (req, res, next) => {
         if (!user.admin && config.maintenance && !config.maintenance.allowLogins) return res.status(403).json({
             success: false,
             error: {
-                message: 'Logins disabled. Please do not call this endpoint any futher.'
+                message: 'Login disabled. Please do not call this endpoint any futher.'
             }
         });
         if (user.twoFactorAuthEnabled()) {
@@ -36,19 +36,22 @@ exports.postSignUp = (req, res, next) => {
     if (config.maintenance && !config.maintenance.allowSignups) return res.status(403).json({
         success: false,
         error: {
-            message: 'Signups disabled. Please do not call this endpoint any futher.'
+            message: 'Registration disabled. Please do not call this endpoint any futher.'
         }
     });
     function sendError(error) {
-        res.json({success: false, error: error || {message: "An unknown error occurred", code: "unknown_error"}});
+        var status = error.intCode || 500;
+        if (typeof error.intCode !== "undefined") delete error.intCode;
+        res.status(status).json({success: false, error: error || {message: "An unknown error occurred", code: "unknown_error"}});
     }
     function sendValidationError(errorMsg) {
-        sendError({message: errorMsg, code: "validation"});
+        sendError({message: errorMsg, code: "validation", intCode: 400});
     }
     function doSignup() {
         User.register(req.body.username, req.body.password, req.place, function(user, error) {
-            if(!user) return sendError(error);
-            if(req.body.keepSignedIn) req.session.maxAge = 1000 * 60 * 60 * 24 * 7; // keep signed in for 7 days
+            if (!user) return sendError(error);
+            user.recordAccess(req);
+            if (req.body.keepSignedIn) req.session.maxAge = 1000 * 60 * 60 * 24 * 7; // keep signed in for 7 days
             req.login(user, function(err) {
                 if (err) return sendError(null);
                 res.json({success: true});
@@ -62,7 +65,7 @@ exports.postSignUp = (req, res, next) => {
         if (!req.body.agreeToGuidelines && exists) return sendValidationError("You must agree to the Terms of Service and community guidelines to use this service.");
         if(req.place.enableCaptcha) {
             req.place.recaptcha.verify(req, (error) => {
-                if(error) return sendValidationError("Please fill in the captcha properly.");
+                if (error) return sendValidationError("Please fill in the captcha properly.");
                 doSignup();
             });
         } else doSignup();
