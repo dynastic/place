@@ -77,7 +77,7 @@ function DialogController(dialog) {
                 e.preventDefault();
                 var form = $(this);
                 var call = form.attr("action");
-                var tab = form.parent().parent().attr("tab-name");
+                var tab = form.parent().attr("tab-name");
                 var data = form.serialize();
                 if(form.data("submitting")) return;
                 var submitButton = form.find("input[type=submit], button[type=submit]");
@@ -105,7 +105,7 @@ function DialogController(dialog) {
                         me.switchTab("2fa-auth");
                         return;
                     }
-                    if(tab == "sign-up" && typeof grecaptcha != "undefined") grecaptcha.reset();
+                    if(tab == "sign-up" && typeof grecaptcha !== "undefined") grecaptcha.reset();
                     me.shake();
                     var error = "An unknown error occurred while attempting to authenticate you.";
                     if(err && err.message) error = err.message;
