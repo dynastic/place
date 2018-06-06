@@ -180,16 +180,11 @@ UserSchema.methods.loginError = function() {
     return null;
 }
 
-// Helper
-Date.prototype.addDays = function(days) {
-    var dat = new Date(this.valueOf());
-    dat.setDate(dat.getDate() + days);
-    return dat;
-}
-
 UserSchema.methods.markForDeletion = function() {
     this.deactivated = true;
-    this.deletionDate = Date().addDays(7);
+    var date = new Date();
+    date.setDate(date.getDate() + 7);
+    this.deletionDate = date;
     return this.save();
 }
 
