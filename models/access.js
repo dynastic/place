@@ -89,7 +89,7 @@ AccessSchema.statics.findSimilarIPUserIDs = function(user) {
         this.findIPsForUser(user).then((ipAddresses) => {
             this.find({ hashedIPAddress: { $in: ipAddresses }, userID: { $ne: user._id } }).then((accesses) => {
                 var userIDs = accesses.map((access) => String(access.userID));
-                resolve([...new Set(userIDs)]);
+                resolve(stripDuplicates((userIDs)));
             }).catch(reject);
         }).catch(reject);
     });

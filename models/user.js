@@ -6,6 +6,7 @@ const Pixel = require("./pixel");
 const Access = require("./access");
 const dataTables = require("mongoose-datatables");
 const TOSManager = require("../util/TOSManager");
+const achievements = require("../config/achievements");
 
 var UserSchema = new Schema({
     name: {
@@ -123,6 +124,13 @@ UserSchema.pre("save", function(next) {
         return next();
     }
 });
+
+UserSchema.methods.getAchievements = function() {
+    return new Promise((resolve, reject) => {
+        const userAchievements = achievements.filter(achievement => achievement.meetsCriteria(this));
+        resolve(userAchievements);
+    });
+}
 
 UserSchema.methods.comparePassword = function(passwd, cb) {
     bcrypt.compare(passwd, this.password, function(err, isMatch) {

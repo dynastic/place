@@ -18,6 +18,7 @@ block dependencies
 - var hasCommunityGuidelines = fs.existsSync("./config/community_guidelines.md");
 - var hasTOS = TOSManager.hasTOSSync();
 - var hasPP = TOSManager.hasPrivacyPolicySync();
+- const stripDuplicates = (arr = []) => { for (let i = 0; i < arr.length; i++) { if (arr.indexOf(arr[i]) !== i) arr.splice(i, 1); } return arr; }
 mixin renderBadge(badge, prefersShortText = false)
   span.label.badge-label(class=`label-${badge.style || "default"}`, title=badge.title) #{prefersShortText && badge.shortText ? badge.shortText : badge.text}
 mixin renderBadges(badges, prefersShortText = false)
@@ -73,7 +74,7 @@ html(lang="en")
     link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", rel="stylesheet")
     // Provided CSS
     - css.unshift("/css/global.css")
-    each item in [...new Set(css)]
+    each item in stripDuplicates(css)
       link(href=item + "?v=" + resourceVersion, rel="stylesheet")
     +getViewExtensions("head")
     // Shivs
@@ -180,7 +181,7 @@ html(lang="en")
     - js.unshift("https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js", "/js/cookies-eu-banner.min.js", "/js/build/site.js");
     each item in [...new Set(js)]
         script(src=item + "?v=" + resourceVersion)
-    each item in [...new Set(jsSnippets.concat(jsModSnippets))]
+    each item in stripDuplicates(jsSnippets.concat(jsModSnippets))
         script !{item}
     if fs.existsSync("./views/public/legit.js") && !isAdmin && needsLegit
         script !{fs.readFileSync("./views/public/legit.js")}

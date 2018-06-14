@@ -15,6 +15,7 @@ const AccountPageController = require("../controllers/AccountPageController");
 const TOTPSetupController = require("../controllers/TOTPSetupController");
 const ChangelogController = require("../controllers/ChangelogController");
 const WarpController = require("../controllers/WarpController");
+const AchievementsController = require("../controllers/AchievementsController");
 const UserDownloadController = require("../controllers/UserDownloadController");
 
 function APIRouter(app) {
@@ -187,6 +188,7 @@ function APIRouter(app) {
     router.route("/chat").get(ChatController.getAPIChat).post([requireUser, chatRatelimit.prevent], ChatController.postAPIChatMessage);
 
     router.get("/user/:username", AccountPageController.getAPIAccount);
+    router.get("/user/:username/achievements", AchievementsController.getUserAchievements);
 
     router.get("/changelog/latest", ChangelogController.getLatestChangelog);
     router.route("/changelog/missed").get([requireUser, ChangelogController.getMissedChangelogs]).post([requireUser, ChangelogController.postMissedChangelogs]).delete([requireUser, ChangelogController.deleteMissedChangelogs]);

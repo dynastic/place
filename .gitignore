@@ -10,6 +10,7 @@ views/legit.*
 config/community_guidelines.md
 config/privacy_policy.md
 config/tos.md
+config/achievements.js
 modules/*
 
 ### Linux ###
