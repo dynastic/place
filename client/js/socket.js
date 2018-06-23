@@ -35,6 +35,7 @@ class PlaceSocket extends EventEmitter3 {
      * @param {any} payload The data
      */
     send(request, payload) {
+        console.log("Socket client wants to send request:", request, this.connected);
         if (!this.connected) {
             this.state.queue.push([request, payload]);
             return;
@@ -59,6 +60,7 @@ class PlaceSocket extends EventEmitter3 {
             if (this.state.queue.length > 0) {
                 for (let i = 0; i < this.state.queue.length; i++) {
                     const [request, payload] = this.state.queue[i];
+                    console.log("Re-sending packets from before disconnection:", request, this.connected);
                     this.send(request, payload);
                 }
                 this.state.queue = [];
