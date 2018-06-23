@@ -33,11 +33,12 @@ class PlaceSocket extends EventEmitter3 {
      * 
      * @param {string} request The request name
      * @param {any} payload The data
+     * @param {boolean} allowQueuing Whether or not the data should be added to the queue if the socket isn't connected
      */
-    send(request, payload) {
+    send(request, payload, allowQueuing = true) {
         console.log("Socket client wants to send request:", request, this.connected);
         if (!this.connected) {
-            this.state.queue.push([request, payload]);
+            if (allowQueuing) this.state.queue.push([request, payload]);
             return;
         }
         this.socket.send(JSON.stringify({r: request, d: payload}));
@@ -57,11 +58,11 @@ class PlaceSocket extends EventEmitter3 {
 
             this.send("identify", {clientType: this.clientType});
             // Processes any packets that failed to send while the socket was disconnected
-            if (this.state.queue.length > 0) {
+            if (this.state.queue.length > 0 && this.connected) {
                 for (let i = 0; i < this.state.queue.length; i++) {
                     const [request, payload] = this.state.queue[i];
                     console.log("Re-sending packets from before disconnection:", request, this.connected);
-                    this.send(request, payload);
+                    this.send(request, payload, false);
                 }
                 this.state.queue = [];
             }
