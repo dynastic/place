@@ -303,13 +303,13 @@ UserSchema.methods.addPixel = function(colour, x, y, app, callback) {
         if (changed) {
             user.lastPlace = new Date();
             user.placeCount++;
-        }
-        user.save(function(err) {
-            if (err) return callback(null, {
-                message: "An unknown error occurred while trying to place that pixel."
+            user.save((err) => {
+                if (err) return callback(null, {
+                    message: "An unknown error occurred while trying to place that pixel."
+                });
+                return callback(changed, null);
             });
-            return callback(changed, null);
-        })
+        } else callback(changed, null);
     });
 }
 

@@ -15,6 +15,8 @@ const PixelNotificationManager = require("./util/PixelNotificationManager");
 const JavaScriptProcessor = require("./util/JavaScriptProcessor");
 const ChangelogManager = require("./util/ChangelogManager");
 const User = require("./models/user");
+const fs = require("fs");
+const path = require("path");
 
 var app = {};
 
@@ -52,6 +54,10 @@ app.reportError = app.logger.capture;
 
 app.moduleManager = new ModuleManager(app);
 app.moduleManager.loadAll();
+
+// Create .place-data folder
+app.dataFolder = path.resolve(__dirname, ".place-data");
+if (!fs.existsSync(app.dataFolder)) fs.mkdirSync(app.dataFolder);
 
 // Get image handler
 app.paintingManager = PaintingManager(app);

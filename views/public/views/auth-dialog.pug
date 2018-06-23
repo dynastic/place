@@ -42,7 +42,7 @@
                 else
                     br
                     div.alert.alert-danger
-                        h4 Signups for #{config.siteName} are currently disabled.
+                        h4 Signing up for #{config.siteName} is currently disabled.
                         if config.maintenance.notice
                             p !{config.maintenance.notice}
 
@@ -51,28 +51,28 @@
                     span.site #{config.siteName}
                     h1 Welcome back
                     p.subhead Sign in to your account to continue placing and save your stats.
-                    if config.maintenance.allowLogins || !config.maintenance
-                        form.form-signin(action="/signin")
-                            label.sr-only(for="inputUsername") Username
-                            input.form-control#inputUsername(type="text", autocomplete="username", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalizae="off", spellcheck="false")
-                            label.sr-only(for="inputPassword") Password
-                            input.form-control#inputPassword(type="password", autocomplete="current-password", placeholder="Password", name="password", required)
-                            .checkbox
-                                label
-                                    input#inputKeepSignIn(type="checkbox", name="keepSignedIn", checked)
-                                    span Keep me signed in
-                            .send-section
-                                button.btn.btn-popping(type="submit") Sign in
-                                include social-buttons
-                            if config.signInBanner
-                                br
-                                div.alert.alert-success !{config.signInBanner}
-                    else
-                        br
-                        div.alert.alert-danger
-                            h4 Signins to #{config.siteName} are currently disabled.
-                            if config.maintenance.notice
-                                p !{config.maintenance.notice}
+                if config.maintenance.allowLogins || !config.maintenance
+                    form.form-signin(action="/signin")
+                        label.sr-only(for="inputUsername") Username
+                        input.form-control#inputUsername(type="text", autocomplete="username", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalize="off", spellcheck="false")
+                        label.sr-only(for="inputPassword") Password
+                        input.form-control#inputPassword(type="password", autocomplete="current-password", placeholder="Password", name="password", required)
+                        .checkbox
+                            label
+                                input#inputKeepSignIn(type="checkbox", name="keepSignedIn", checked)
+                                span Keep me signed in
+                        .send-section
+                            button.btn.btn-popping(type="submit") Sign in
+                            include social-buttons
+                        if config.signInBanner
+                            br
+                            div.alert.alert-success !{config.signInBanner}
+                else
+                    br
+                    div.alert.alert-danger
+                        h4 Signing in to #{config.siteName} is currently disabled.
+                        if config.maintenance.notice
+                            p !{config.maintenance.notice}
             div.hides-switchers(tab-name="2fa-auth")
                 .heading
                     span.site #{config.siteName}
@@ -83,7 +83,7 @@
                     input.form-control#inputPassword2FA(type="hidden", name="password")
                     input#inputKeepSignIn2FA(type="checkbox", name="keepSignedIn", checked, style="display: none;")
                     label.sr-only(for="inputTotpToken") Authentication Token
-                    input.form-control#inputTotpToken(maxlength="6", inputmode="numeric", pattern="[0-9]{6}", name="totpToken", placeholder="Authentication Token", required)
+                    input.form-control#inputTotpToken(maxlength="6", inputmode="numeric", pattern="[0-9]{6}", name="totpToken", placeholder="Authentication Token", required, autocorrect="off", autocapitalize="off", autocomplete="off", spellcheck="false")
                     .send-section
                         button.btn.btn-popping(type="submit") Continue
         .switchers

@@ -76,17 +76,21 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, app, callback) {
     if(isNaN(x) || isNaN(y)) return callback(null, { message: "Invalid positions provided." });
     // TODO: Get actual position below:
     if(x < 0 || y < 0 || x >= app.config.boardSize || y >= app.config.boardSize) return callback(null, { message: "Position is out of bounds." });
-    this.find({
+    this.findOne({
         xPos: x,
         yPos: y
-    }).then((pixels) => {
+    }, {
+        editorID: 1,
+        colourR: 1,
+        colourG: 1,
+        colourB: 1
+    }).then((pixel) => {
         // Find the pixel at this location
-        var pixel = pixels[0];
         var wasIdentical = colour.r == 255 && colour.g == 255 && colour.b == 255; // set to identical if pixel was white
-        if(pixel) { // we have data from the old pixel
+        if (pixel) { // we have data from the old pixel
             wasIdentical = pixel.editorID == userID && pixel.colourR == colour.r && pixel.colourG == colour.g && pixel.colourB == colour.b; // set to identical if colour matched old pixel
         }
-        if(!wasIdentical) { // if the pixel was changed
+        if (!wasIdentical) { // if the pixel was changed
             if(!pixel) { // if the spot was blank, create a new one
                 pixel = pn({
                     xPos: x,
@@ -140,4 +144,5 @@ PixelSchema.statics.getHexFromRGB = function(r, g, b) {
     return componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
+PixelSchema.index({xPos: 1, yPos: 1});
 module.exports = DataModelManager.registerModel("Pixel", PixelSchema);

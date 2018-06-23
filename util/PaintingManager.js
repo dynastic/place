@@ -1,9 +1,13 @@
 const lwip = require("pajk-lwip");
 const Pixel = require("../models/pixel");
 const ActionLogger = require("../util/ActionLogger");
+const fs = require("fs");
+const path = require("path");
 
 function PaintingManager(app) {
     const imageSize = app.config.boardSize;
+    const cachedImagePath = path.resolve(app.dataFolder, "cached-board-image.png");
+    const temporaryCachedImagePath = path.resolve(app.dataFolder, "cached-board-image.png.tmp");
     return {
         hasImage: false,
         imageHasChanged: false,
@@ -13,19 +17,49 @@ function PaintingManager(app) {
         lastPixelUpdate: null,
         firstGenerateAfterLoad: false,
         pixelsToPaint: [],
+        pixelsToPreserve: null,
+        isGenerating: false,
 
-        getBlankImage: function() {
+        getStartingImage: function() {
             return new Promise((resolve, reject) => {
-                lwip.create(imageSize, imageSize, "white", (err, image) => {
-                    if (err) return reject(err);
-                    resolve(image);
+                var resolveWithBlankImage = () => {
+                    // Resolve with blank image if cache cannot be loaded
+                    lwip.create(imageSize, imageSize, "white", (err, image) => {
+                        if (err) return reject(err);
+                        resolve({ image, canServe: false, skipImmediateCache: false });
+                    });
+                }
+                // Check if cached image exists
+                fs.exists(cachedImagePath, (exists) => {
+                    if (!exists) return resolveWithBlankImage();
+                    // Attempt to load cached image
+                    lwip.open(cachedImagePath, (err, image) => {
+                        if (err) return resolveWithBlankImage();
+                        if (image.width() != imageSize || image.height() != imageSize) return resolveWithBlankImage();
+                        resolve({ image, canServe: true, skipImmediateCache: true });
+                    })
                 });
             });
         },
 
         loadImageFromDatabase: function() {
+            var hasServed = false;
             return new Promise((resolve, reject) => {
-                this.getBlankImage().then((image) => {
+                var serveImage = async (image, skipImmediateCache = false) => {
+                    this.hasImage = true;
+                    this.image = image;
+                    this.imageBatch = this.image.batch();
+                    this.firstGenerateAfterLoad = true;
+                    await this.generateOutputImage(skipImmediateCache);
+                    if (!hasServed) resolve(image);
+                    hasServed = true;
+                }
+                this.getStartingImage().then(async ({image, canServe, skipImmediateCache}) => {
+                    if (canServe) {
+                        app.logger.info("Startup", `Got initially serveable image, serving...`);
+                        this.pixelsToPreserve = [];
+                        await serveImage(image, skipImmediateCache);
+                    }
                     let batch = image.batch();
                     Pixel.count({}).then((count) => {
                         var loaded = 0;
@@ -39,21 +73,20 @@ function PaintingManager(app) {
                             loaded++;
                         }).on("end", () => {
                             clearInterval(progressUpdater);
-                            app.logger.info("Startup", `Loaded total ${count.toLocaleString()} pixel${count == 1 ? "" : "s"} pixels from database. Generating image...`);
+                            app.logger.info("Startup", `Loaded total ${count.toLocaleString()} pixel${count == 1 ? "" : "s"} pixels from database. Applying to image...`);
+                            if (this.pixelsToPreserve) this.pixelsToPreserve.forEach((data) => batch.setPixel(data.x, data.y, data.colour));
                             batch.exec((err, image) => {
+                                this.pixelsToPreserve = null;
                                 if (err) return reject(err);
-                                this.hasImage = true;
-                                this.image = image;
-                                this.imageBatch = this.image.batch();
-                                this.firstGenerateAfterLoad = true;
-                                this.generateOutputImage();
-                                resolve(image);
+                                app.logger.info("Startup", `Applied pixels to image. Serving image...`);
+                                serveImage(image);
                             });
                         }).on("error", (err) => {
+                            this.pixelsToPreserve = null;
                             clearInterval(progressUpdater);
                             reject(err)
                         });
-                    }).catch((err) => reject(err));
+                    });
                 }).catch((err) => reject(err));
             });
         },
@@ -67,9 +100,11 @@ function PaintingManager(app) {
             })
         },
 
-        generateOutputImage: function() {
+        generateOutputImage: function(skipImmediateCache = false) {
             var a = this;
             return new Promise((resolve, reject) => {
+                if (a.isGenerating) return reject();
+                a.isGenerating = true;
                 this.waitingForImages.push((err, buffer) => {
                     if (err) return reject(err);
                     resolve(buffer);
@@ -83,10 +118,21 @@ function PaintingManager(app) {
                     this.pixelsToPaint = [];
                     this.imageBatch.toBuffer("png", { compression: "fast", transparency: false }, (err, buffer) => {
                         a.outputImage = buffer;
+                        a.isGenerating = false;
+                        if (!err && !skipImmediateCache) {
+                            fs.writeFile(temporaryCachedImagePath, buffer, (err) => {
+                                if (err) return app.logger.error("Painting Manager", "Couldn't save cached board image, got error:", err);
+                                if (fs.existsSync(cachedImagePath)) fs.unlinkSync(cachedImagePath);
+                                fs.rename(temporaryCachedImagePath, cachedImagePath, (err) => { 
+                                    if (err) return app.logger.error("Painting Manager", "Couldn't move cached board image into place, got error:", err)
+                                    app.logger.info("Painting Manager", "Saved cached board image successfully!");
+                                })
+                            });
+                        }
                         a.imageHasChanged = false;
                         a.waitingForImages.forEach((callback) => callback(err, buffer));
                         a.waitingForImages = [];
-                        if(a.firstGenerateAfterLoad) {
+                        if (a.firstGenerateAfterLoad) {
                             app.websocketServer.broadcast("server_ready");
                             a.firstGenerateAfterLoad = false;
                         }
@@ -107,14 +153,16 @@ function PaintingManager(app) {
         doPaint: function(colour, x, y, user) {
             var a = this;
             return new Promise((resolve, reject) => {
-                if(!this.hasImage) return reject({message: "Our servers are currently getting ready. Please try again in a moment.", code: "not_ready"});
-                if(app.temporaryUserInfo.isUserPlacing(user)) return reject({message: "You cannot place more than one tile at once.", code: "attempted_overload"});
+                if (!this.hasImage) return reject({message: "Our servers are currently getting ready. Please try again in a moment.", code: "not_ready"});
+                if (app.temporaryUserInfo.isUserPlacing(user)) return reject({message: "You cannot place more than one tile at once.", code: "attempted_overload"});
                 app.temporaryUserInfo.setUserPlacing(user, true);
                 // Add to DB:
                 user.addPixel(colour, x, y, app, (changed, err) => {
                     app.temporaryUserInfo.setUserPlacing(user, false);
-                    if(err) return reject(err);
-                    a.pixelsToPaint.push({x: x, y: y, colour: colour});
+                    if (err) return reject(err);
+                    const pixelData = {x: x, y: y, colour: colour};
+                    a.pixelsToPaint.push(pixelData);
+                    if (a.pixelsToPreserve) a.pixelsToPreserve.push(pixelData);
                     a.imageHasChanged = true;
                     // Send notice to all clients:
                     var info = {x: x, y: y, colour: Pixel.getHexFromRGB(colour.r, colour.g, colour.b)};
@@ -129,12 +177,10 @@ function PaintingManager(app) {
 
         startTimer: function() {
             setInterval(() => {
-                if(this.imageHasChanged) {
-                    app.logger.log('Painting Manager', "Starting board image update...");
-                    this.generateOutputImage();
-                } else {
-                    app.logger.log('Painting Manager', "Not updating board image, no changes since last update.");
-                }
+                if (this.pixelsToPreserve) return app.logger.log("Painting Manager", "Will not start board image update, as board image is still being completely loaded...");
+                if (!this.imageHasChanged) return app.logger.log("Painting Manager", "Not updating board image, no changes since last update.");
+                app.logger.log("Painting Manager", "Starting board image update...");
+                this.generateOutputImage();
             }, 30 * 1000);
         }
     };
