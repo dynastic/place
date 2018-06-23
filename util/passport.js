@@ -7,6 +7,7 @@ const JwtStrategy = require("passport-jwt").Strategy,
     TwitterStrategy = require("passport-twitter").Strategy,
     GithubStrategy = require("passport-github").Strategy,
     FacebookStrategy = require("passport-facebook").Strategy,
+    DynasticStrategy = require("dynastic-provider").DynasticStrategy,
     MicrosoftStrategy = require("passport-microsoft").Strategy;
 
 // Get user model
@@ -144,6 +145,20 @@ module.exports = function(passport, app) {
             },
             function(accessToken, refreshToken, profile, done) {
                 OAuthLogin("microsoft", profile.username, profile.id, done);
+            }));
+        }
+
+        if (config.oauth.dynastic.enabled) {
+            passport.use(new DynasticStrategy({
+                clientID: config.oauth.dynastic.clientID,
+                clientSecret: config.oauth.dynastic.clientSecret,
+                callbackURL: config.host + '/auth/dynastic/callback',
+                frontendBaseURL: 'https://accounts-staging.dynastic.co',
+                apiBaseURL: 'https://accounts-api-staging.dynastic.co',
+                scope: ['user']
+            },
+            function(accessToken, refreshToken, profile, done) {
+                OAuthLogin("dynastic", profile.name, profile.id, done);
             }));
         }
     }
