@@ -68,21 +68,34 @@ function APIRouter(app) {
 
     // Normal APIs
 
-    const signupRatelimit = new Ratelimit(require("../util/RatelimitStore")(), {
-        freeRetries: 3, // 3 signups per hour
+    const signUpRatelimit = new Ratelimit(require("../util/RatelimitStore")(), {
+        freeRetries: 3, // 3 sign ups per hour
         attachResetToRequest: false,
         refreshTimeoutOnRequest: false,
         minWait: 60 * 60 * 1000, // 1 hour
         maxWait: 60 * 60 * 1000, // 1 hour, 
         failCallback: (req, res, next, nextValidRequestDate) => {
-            res.status(429).json({success: false, error:{message: "You're doing that too fast."}});
+            res.status(429).json({success: false, error: {message: "You have exceeded the amount of accounts you can create."}});
         },
         handleStoreError: (error) => app.reportError("Sign up rate limit store error:", error),
         proxyDepth: app.config.trustProxyDepth
     });
 
-    router.post("/signin", AuthController.postSignIn);
-    router.post("/signup", signupRatelimit.prevent, AuthController.postSignUp);
+    const signInRatelimit = new Ratelimit(require("../util/RatelimitStore")(), {
+        freeRetries: 5, // 5 sign in attempts per 15-60 minutes
+        attachResetToRequest: false,
+        refreshTimeoutOnRequest: false,
+        minWait: 15 * 60 * 1000, // 15 minutes,
+        maxWait: 60 * 60 * 1000, // 1 hour, 
+        failCallback: (req, res, next, nextValidRequestDate) => {
+            res.status(429).json({success: false, error: {message: "You have exceeded the sign in attempt limit. Try again later."}});
+        },
+        handleStoreError: (error) => app.reportError("Sign in rate limit store error:", error),
+        proxyDepth: app.config.trustProxyDepth
+    });
+
+    router.post("/signin", signInRatelimit.prevent, AuthController.postSignIn);
+    router.post("/signup", signUpRatelimit.prevent, AuthController.postSignUp);
 
     router.post("/identify", JWTController.identifyAPIUser);
 
