@@ -44,7 +44,7 @@ function OAuthRouter(app) {
 
         if (app.config.oauth.dynastic.enabled) {
             router.get('/dynastic', passport.authenticate("dynastic"));
-            router.get("/dynastuc/callback", passport.authenticate("dynastic", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
+            router.get("/dynastic/callback", passport.authenticate("dynastic", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
         }
     }
 
