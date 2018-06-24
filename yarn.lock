@@ -1716,8 +1716,8 @@ duplexer2@^0.1.2, duplexer2@~0.1.0, duplexer2@~0.1.2:
     readable-stream "^2.0.2"
 
 "dynastic-provider@git+https://github.com:/dynastic/accounts-provider.git":
-  version "1.0.1"
-  resolved "git+https://github.com:/dynastic/accounts-provider.git#ba91415309bc86a94984f77f02d3291f59ed925e"
+  version "1.0.2"
+  resolved "git+https://github.com:/dynastic/accounts-provider.git#1478c6273a1701ad27a2b523ebef313d167f74e4"
   dependencies:
     axios "^0.18.0"
     passport-oauth2 "^1.4.0"
