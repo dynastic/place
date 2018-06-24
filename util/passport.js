@@ -155,7 +155,7 @@ module.exports = function(passport, app) {
                 callbackURL: config.host + '/auth/dynastic/callback',
                 frontendBaseURL: 'https://accounts-staging.dynastic.co',
                 apiBaseURL: 'https://accounts-api-staging.dynastic.co',
-                scope: ['user']
+                scope: ['profile']
             },
             function(accessToken, refreshToken, profile, done) {
                 OAuthLogin("dynastic", profile.name, profile.id, done);
