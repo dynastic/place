@@ -42,8 +42,8 @@ function OAuthRouter(app) {
             router.get("/microsoft/callback", passport.authenticate("microsoft", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
         }
 
-        if (app.config.oauth.dynastic.enabled) {
-            router.get('/dynastic', passport.authenticate("dynastic"));
+        if (app.config.oauth.dynastic && app.config.oauth.dynastic.enabled) {
+            router.get('/dynastic', passport.authenticate("dynastic", { state: "auth" }));
             router.get("/dynastic/callback", passport.authenticate("dynastic", { successRedirect: "/?signedin=1", failureRedirect: "/signup" }));
         }
     }

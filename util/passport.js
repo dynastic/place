@@ -148,13 +148,13 @@ module.exports = function(passport, app) {
             }));
         }
 
-        if (config.oauth.dynastic.enabled) {
+        if (config.oauth.dynastic && config.oauth.dynastic.enabled) {
             passport.use(new DynasticStrategy({
                 clientID: config.oauth.dynastic.clientID,
                 clientSecret: config.oauth.dynastic.clientSecret,
                 callbackURL: config.host + '/auth/dynastic/callback',
-                frontendBaseURL: 'https://accounts-staging.dynastic.co',
-                apiBaseURL: 'https://accounts-api-staging.dynastic.co',
+                frontendBaseURL: config.oauth.dynastic.frontendBaseURL,
+                apiBaseURL: config.oauth.dynastic.apiBaseURL,
                 scope: ['profile']
             },
             function(accessToken, refreshToken, profile, done) {
