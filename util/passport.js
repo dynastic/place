@@ -7,7 +7,7 @@ const JwtStrategy = require("passport-jwt").Strategy,
     TwitterStrategy = require("passport-twitter").Strategy,
     GithubStrategy = require("passport-github").Strategy,
     FacebookStrategy = require("passport-facebook").Strategy,
-    DynasticStrategy = require("dynastic-provider").DynasticStrategy,
+    DynasticStrategy = require("dynastic-provider").Strategy,
     MicrosoftStrategy = require("passport-microsoft").Strategy;
 
 // Get user model
