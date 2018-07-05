@@ -9,6 +9,11 @@
                     h1 Become a member
                     p.subhead Join the #{config.siteName} community today to start placing.
                 if !config.maintenance || config.maintenance.allowSignups
+                    if config.oauth.dynastic && config.oauth.dynastic.enabled
+                        h3 The best way to sign up
+                        p.text-muted Use a Dynastic Account to sign into canvas.place
+                        a.btn.btn-lg.btn-success(href="/auth/dynastic") Sign in with Dynastic Account
+                        hr
                     form.form-signin(action="/signup")
                         label.sr-only(for="inputUsernameRegistration") Username
                         input.form-control#inputUsernameRegistration(type="text", autocomplete="username", placeholder="Username", name="username", required, autofocus, autocorrect="off", autocapitalize="off", spellcheck="false")

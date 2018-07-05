@@ -687,6 +687,13 @@ body:not([data-user-is-mod=true]) .actions-ctn, body:not([data-user-is-admin=tru
     opacity: 0.7;
 }
 
+.btn.btn-oauth-dynastic {
+    background-color: #eee;
+    padding: 9px 12px;
+}
+.btn.btn-oauth-dynastic > img {
+    margin-top: -1px;
+}
 .btn.btn-oauth-reddit {
     background-color: #ff4500;
 }
