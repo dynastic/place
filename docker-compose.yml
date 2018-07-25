@@ -7,6 +7,11 @@ services:
       - "127.0.0.1:3000:3000"
     depends_on:
       - "db"
+    environment:
+      NODE_ENV: "production"
+      DATABASE: "mongodb://db/place"
+      PORT: 3000
+      ONLY_LISTEN_LOCAL: "false"
   db:
     image: mongo
     restart: always

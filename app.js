@@ -101,7 +101,7 @@ app.recreateServer = () => {
 }
 app.recreateServer();
 
-mongoose.connect(app.config.database);
+mongoose.connect(process.env.DATABASE || app.config.database);
 
 const handlePendingDeletions = () => {
     setInterval(() => {
@@ -131,7 +131,7 @@ app.stopServer = () => {
 
 app.restartServer = () => {
     app.stopServer();
-    app.server.listen(app.config.port, app.config.onlyListenLocal ? "127.0.0.1" : null, null, () => {
+    app.server.listen(process.env.PORT || app.config.port, (process.env.ONLY_LISTEN_LOCAL ? process.env.ONLY_LISTEN_LOCAL === true : app.config.onlyListenLocal) ? "127.0.0.1" : null, null, () => {
         app.logger.log('Startup', `Started Place server on port ${app.config.port}${app.config.onlyListenLocal ? " (only listening locally)" : ""}.`);
     });
 }
