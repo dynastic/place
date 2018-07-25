@@ -1,4 +1,5 @@
 FROM node:carbon
+LABEL maintainer="applebetas@dynastic.co"
 
 # Create app directory
 WORKDIR /usr/src/app
