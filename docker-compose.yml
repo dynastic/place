@@ -1,0 +1,18 @@
+version: "3"
+services:
+  api:
+    restart: always
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - "db"
+  db:
+    image: mongo
+    restart: always
+    volumes:
+      - mongo-volume:/data/db
+    expose:
+      - "27017"
+volumes:
+  mongo-volume:

@@ -4,10 +4,18 @@
   "description": "A open-source clone of Reddit's April Fools joke",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "node_modules/eslint/bin/eslint.js ."
   },
+  "homepage": "https://canvas.place/",
+  "repository": "github:dynastic/place",
   "author": "Dynastic Development",
+  "contributors": [
+    { "name": "AppleBetas", "email": "applebetas@dynastic.co", "url": "https://applebetas.co" },
+    { "name": "nullpixel", "email": "jamie@dynastic.co", "url": "https://nullpixel.uk" },
+    { "name": "Eric Rabil", "email": "eric@dynastic.co", "url": "https://ericrabil.com" }
+  ],
   "license": "AGPLv3",
   "devDependencies": {
     "babel-cli": "^6.26.0",
