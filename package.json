@@ -12,9 +12,21 @@
   "repository": "github:dynastic/place",
   "author": "Dynastic Development",
   "contributors": [
-    { "name": "AppleBetas", "email": "applebetas@dynastic.co", "url": "https://applebetas.co" },
-    { "name": "nullpixel", "email": "jamie@dynastic.co", "url": "https://nullpixel.uk" },
-    { "name": "Eric Rabil", "email": "eric@dynastic.co", "url": "https://ericrabil.com" }
+    {
+      "name": "AppleBetas",
+      "email": "applebetas@dynastic.co",
+      "url": "https://applebetas.co"
+    },
+    {
+      "name": "nullpixel",
+      "email": "jamie@dynastic.co",
+      "url": "https://nullpixel.uk"
+    },
+    {
+      "name": "Eric Rabil",
+      "email": "eric@dynastic.co",
+      "url": "https://ericrabil.com"
+    }
   ],
   "license": "AGPLv3",
   "devDependencies": {
@@ -46,13 +58,13 @@
     "gulp-sourcemaps": "^2.6.0",
     "gulp-uglify": "^2.1.2",
     "helmet": "^3.8.1",
+    "jimp": "^0.5.4",
     "jwt-simple": "^0.5.1",
     "marked": "^0.3.6",
     "md5": "^2.2.1",
     "mongoose": "^4.9.2",
     "mongoose-datatables": "github:applebetas/mongoose-datatables",
     "morgan": "^1.8.1",
-    "pajk-lwip": "0.2.0",
     "passport": "^0.3.2",
     "passport-discord": "^0.1.2",
     "passport-facebook": "^2.1.1",
