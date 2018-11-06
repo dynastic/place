@@ -21,7 +21,8 @@ These instructions will help you get a copy of the project up and running on you
 * Configure your Place server as you see fit by modifying the values
     * Set a strong secret in the secret field!
 * Run `yarn install` to install the dependencies
-* Finally, run `node app.js`
+* Run `node app.js`
+* Finally, visit http://127.0.0.1:3000
 
 ## Deployment
 
