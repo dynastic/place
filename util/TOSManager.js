@@ -6,6 +6,7 @@ const configPath = path.join(__dirname, "..", "config");
 const tosPath = path.join(configPath, "tos.md");
 const ppPath = path.join(configPath, "privacy_policy.md");
 
+// 应该是服务条款
 class TOSManager {
     constructor() {
         this.cachedTOSVersion = null;

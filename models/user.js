@@ -51,6 +51,7 @@ var UserSchema = new Schema({
         required: true,
         default: false
     },
+    // admin 应该就是是否管理员了
     moderator: {
         type: Boolean,
         required: true,

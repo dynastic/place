@@ -4,11 +4,11 @@ const User = require("../models/user");
 function AdminRouter(app) {
     let router = express.Router()
     
-    router.use(function(req, res, next) {
-        // Don't allow anything if user has forced pw reset or OAuth not configured
-        if(req.user && ((!req.user.usernameSet && req.user.OAuthName) || req.user.passwordResetKey)) res.redirect("/");
-        next(); // Otherwise, carry on...
-    });
+    // router.use(function(req, res, next) {
+    //     // Don't allow anything if user has forced pw reset or OAuth not configured
+    //     if(req.user && ((!req.user.usernameSet && req.user.OAuthName) || req.user.passwordResetKey)) res.redirect("/");
+    //     next(); // Otherwise, carry on...
+    // });
 
     router.get("/", app.modMiddleware, function(req, res) {
         req.responseFactory.sendRenderedResponse("admin/dashboard");

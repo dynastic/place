@@ -7,6 +7,8 @@ const TOSController = require("../controllers/TOSController");
 const AccountPageController = require("../controllers/AccountPageController");
 const AuthController = require("../controllers/AuthController");
 
+// 这里应该就是通用路由了，注册登录，隐私页面，用户协议等等
+// 碰到特定 url 就交给 controller 去处理
 function PublicRouter(app) {
     let router = express.Router();
 
@@ -63,6 +65,7 @@ function PublicRouter(app) {
     router.post("/pick-username", [requireUser, UsernamePickerController.postUsername]);
     router.post("/force-pw-reset", [requireUser, PasswordChangeController.postSelfServeForcedPassword]);
 
+    // 首页？
     router.get("/", function(req, res) {
         req.responseFactory.sendRenderedResponse("public/index", { captcha: req.place.enableCaptcha });
     });

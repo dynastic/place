@@ -15,6 +15,7 @@ const User = require("../models/user");
 const config = require("../config/config");
 const ActionLogger = require("../util/ActionLogger");
 
+// passport 是做身份验证的
 module.exports = function(passport, app) {
     var opts = {};
     opts.jwtFromRequest = ExtractJwt.fromAuthHeader();

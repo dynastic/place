@@ -14,14 +14,17 @@ const ModuleManager = require("./util/ModuleManager");
 const PixelNotificationManager = require("./util/PixelNotificationManager");
 const JavaScriptProcessor = require("./util/JavaScriptProcessor");
 const ChangelogManager = require("./util/ChangelogManager");
-const User = require("./models/user");
+const User = require("./models/user"); // 引入了一个 User model
 const fs = require("fs");
 const path = require("path");
+// 引入了一大堆文件和模块
 
 var app = {};
 
 app.logger = require('./util/logger');
+// 日志工具？
 
+// 载入配置
 app.loadConfig = (path = "./config/config") => {
     delete require.cache[require.resolve(path)];
     var oldConfig = app.config;
@@ -47,15 +50,17 @@ app.loadConfig();
 app.temporaryUserInfo = TemporaryUserInfo;
 app.responseFactory = (req, res) => new ResponseFactory(app, req, res);
 
-app.pixelNotificationManager = new PixelNotificationManager(app);
-app.changelogManager = new ChangelogManager(app);
+app.pixelNotificationManager = new PixelNotificationManager(app); // 通知管理
+app.changelogManager = new ChangelogManager(app); 
 
 app.reportError = app.logger.capture;
 
+// 模块管理？
 app.moduleManager = new ModuleManager(app);
 app.moduleManager.loadAll();
 
 // Create .place-data folder
+// 创建一个隐藏文件夹
 app.dataFolder = path.resolve(__dirname, ".place-data");
 if (!fs.existsSync(app.dataFolder)) fs.mkdirSync(app.dataFolder);
 
@@ -69,6 +74,7 @@ app.paintingManager.loadImageFromDatabase().then((image) => {
     app.logger.capture("Error while loading the image from database: " + err);
 });
 
+// 计分板管理？
 app.leaderboardManager = LeaderboardManager(app);
 app.userActivityController = UserActivityManager(app);
 
@@ -78,12 +84,14 @@ if(typeof app.config.recaptcha !== "undefined") {
         app.enableCaptcha = app.config.recaptcha.siteKey != "" && app.config.recaptcha.secretKey != "";
     }
 }
+// 如果启动了验证码
 if(app.enableCaptcha) {
     // Set up reCaptcha
     recaptcha.init(app.config.recaptcha.siteKey, app.config.recaptcha.secretKey);
     app.recaptcha = recaptcha;
 }
 
+// 后台管理中间层？
 app.adminMiddleware = (req, res, next) => {
     if(!req.user || !req.user.admin) return res.status(403).redirect("/?admindenied=1");
     next();
@@ -94,6 +102,7 @@ app.modMiddleware = (req, res, next) => {
     next();
 };
 
+// 重启服务器？
 app.recreateServer = () => {
     app.httpServer = new HTTPServer(app);
     app.server = app.httpServer.httpServer;
@@ -101,11 +110,14 @@ app.recreateServer = () => {
 }
 app.recreateServer();
 
+// 链接 mongodb 数据库
 mongoose.connect(process.env.DATABASE || app.config.database);
 
+// 删除用户？
 const handlePendingDeletions = () => {
     setInterval(() => {
         const now = new Date();
+        // 检查删除时间是否 < now
         User.remove({ deletionDate: { $lte: now } }, function(err, result) {
             if (err) { console.error(err); return }
             if (result.n) app.logger.log('Deleter', `Deleted ${result.n} users.`);
@@ -113,6 +125,7 @@ const handlePendingDeletions = () => {
     }, 30 * Math.pow(10, 3));
 }
 
+// 如果联机上了就看看不要删除用户？
 mongoose.connection.once('connected', () => {
     handlePendingDeletions();
 });
@@ -121,6 +134,7 @@ mongoose.connection.once('connected', () => {
 app.javascriptProcessor = new JavaScriptProcessor(app);
 app.javascriptProcessor.processJavaScript();
 
+// 停止服务器
 app.stopServer = () => {
     if(app.server.listening) {
         app.logger.log('Shutdown', "Closing server…")

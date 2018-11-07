@@ -8,7 +8,7 @@ block dependencies
 - if(typeof pinnable === "undefined") pinnable = false;
 - if(typeof navbarSupportsTopMode === "undefined") navbarSupportsTopMode = false;
 - if(typeof isPoppedOut === "undefined") isPoppedOut = false;
-- var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
+- var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false; // 是否管理员
 - if(typeof needsHelp === "undefined") needsHelp = false;
 - var resourceVersion = "10"; // Increment this when you make a change to the HTML that absolutely requires CSS or JS refreshing
 - css = resources.css.concat(css);
@@ -83,6 +83,7 @@ html(lang="en")
     <![endif]-->
   body(class=bodyClasses, data-user-is-mod=(userMod ? "true" : "false"), data-user-is-admin=(userAdmin ? "true" : "false"), data-user-id=(user ? user.id : ""))
     +getViewExtensions("body")
+    //- 顶部导航条（包括移动端下的响应式）
     nav#page-nav(class=`navbar navbar-default navbar-fixed-top${isAdmin ? " navbar-inverse" : ""}${navbarSupportsTopMode ? " supports-top" : ""}`)
       .container
         // Brand and toggle get grouped for better mobile display
@@ -92,8 +93,8 @@ html(lang="en")
             span.icon-bar
             span.icon-bar
             span.icon-bar
-          a.navbar-brand(href="https://www.dynastic.co", style="margin-right: -5px")
-            img(src="https://dynastic.co/img/nbicon.png", height="20")
+          //a.navbar-brand(href="https://www.dynastic.co", style="margin-right: -5px")
+            //- img(src="https://dynastic.co/img/nbicon.png", height="20")
           a.navbar-brand(href="/")
             | #{config.siteName}
             if config.debug
@@ -108,6 +109,7 @@ html(lang="en")
                 i.fa.fa-users.fa-fw
                 .
                   Community #[span.caret]
+              //- 第二个下拉菜单：Community
               ul.dropdown-menu
                 +renderNavItem("Official Subreddit", "https://www.reddit.com/r/place20", "reddit-alien")
                 +renderNavItem("Chat on Discord", "https://discord.gg/CgC8FTg", "comments")
@@ -142,7 +144,7 @@ html(lang="en")
       // Content-insertion point
       block content
     // EU Cookie Banner
-    #cookies-eu-banner(style="display: none;")
+    //- #cookies-eu-banner(style="display: none;")
       h4 Cookies on #{config.siteName}
       p By continuing your use of this service, you accept the use of cookies by Google Analytics to record generalized visit statistics.
         |  #[a#cookies-eu-more(href="/privacy", style=`display: ${hasPP ? "inline" : "none"}`) Learn more &raquo;]
