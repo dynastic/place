@@ -154,7 +154,7 @@ function PaintingManager(app) {
                 user.addPixel(colour, x, y, app, (changed, err) => {
                     app.temporaryUserInfo.setUserPlacing(user, false);
                     if (err) return reject(err);
-                    const pixelData = {x: x, y: y, colour: Jimp.rgbaToInt(colour.r, colour.g, colour.b, 255) };
+                    const pixelData = { x: x, y: y, colour: Jimp.rgbaToInt(colour.r, colour.g, colour.b, 255) };
                     a.pixelsToPaint.push(pixelData);
                     if (a.pixelsToPreserve) a.pixelsToPreserve.push(pixelData);
                     a.imageHasChanged = true;
