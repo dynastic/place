@@ -775,9 +775,7 @@ var place = {
     },
 
     moveCamera: function(deltaX, deltaY, softAllowBoundPush = true) {
-        var cam = $(this.cameraController);
         var zoomModifier = this._getCurrentZoom();
-        var coords = this.getCoordinates();
         var x = deltaX / zoomModifier, y = deltaY / zoomModifier;
         this.setCanvasPosition(x, y, true, softAllowBoundPush);
     },
