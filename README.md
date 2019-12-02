@@ -1,29 +1,34 @@
-![Dynastic Development](https://github.com/dynastic/assets/raw/master/images/brand.png)
-
 # Dynastic Place
 
-An open-source place alternative, made by [Dynastic Development](https://dynastic.co). Want to chat? Join our [Discord](https://discord.gg/CgC8FTg).
+An open-source [r/place](https://reddit.com/r/place) alternative, made by [Dynastic](https://dynastic.co). Want to chat? Join our [Discord server](https://discord.gg/dynastic).
+
+## The state of this project
+This project is no longer actively maintained and may not be the best choice for a public service. We welcome contributions and new maintainers, but it can unfortunately no longer be a priority for us. In general, it uses some misguided techniques from formerly-beginner developers and portions may be somewhat hard to maintain due to this (however, any help fixing that are super appreciated).
+
+It's been really cool to see people use this project, whether for their artful creations on [our copy, canvas.place](https://canvas.place), or to run their own special-purpose instances (for example, we heard of some Microsoft interns using it, which was pretty cool) and we're proud of the work everyone put into it.
+
+---
 
 ## Getting started
 
-These instructions will help you get a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will help you get an instance of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project in a production environment.
 
 ### Prerequisites
 
-* MongoDB
 * Node 8 or **higher**
-* Yarn
+* [MongoDB](https://www.mongodb.com) *(sorry)*
+* [Yarn package manager](https://www.yarnpkg.com)
 * An internet connection
 
 ### Installing
 
-* Copy config/config.example.js to config/config.js
-* Configure your Place server as you see fit by modifying the values
-    * Set a strong secret in the secret field!
-* Run `yarn install` to install the dependencies
-* Finally, run `node app.js`
+1. Copy `config/config.example.js` to `config/config.js`.
+2. Configure your Place server as you see fit by modifying the values
+   > **Important:** You must set a strong secret in the secret field to protect against cookie-spoofing attacks that could result in attacks on your site!
+3. Run `yarn install` to install the dependencies
+4. Finally, run `node app.js` to start the server.
 
-## Deployment
+### Production Deployment
 
 **Ensure `/var/log/place` exists, and the app can write to it.**
 
@@ -31,7 +36,7 @@ Please only host your own copy if you are willing to abide by the clearly define
 
 When deploying, it is recommended you use a daemon to keep the server alive. We use `pm2`, but any daemon utility, such as `forever`, should work.
 
-### Deploying with pm2
+#### Using pm2
 
 1. Get [pm2](http://pm2.keymetrics.io) installed **globally** by running `npm i -g pm2`.
 2. Once pm2 is installed, starting Place is as simple as running `pm2 start app.js --name=Place`.
@@ -40,9 +45,10 @@ You can manage your pm2 instances using `pm2 show Place`.
 
 You can instruct pm2 to save the currently running pm2 instances and start them at boot with `pm2 startup`.
 
-### Other notes
+#### Other notes
 
-It's recommended that you use a reverse proxy rather than running Place direcly on port 80. Below is our nginx configuration.
+It's recommended that you use a reverse proxy rather than running Place direcly on port 80. For this, we recommend Nginx. Below is our nginx configuration:
+
 ```nginx
 server {
         listen 80;
@@ -73,7 +79,7 @@ server {
 
 ## Contributing 
 
-Please make a [pull request](/https://github.com/dynastic/place/pulls). Before making a pull request, come and chat with us on [Discord](https://discord.gg/CgC8FTg) in #contributors.
+Please make a [pull request](/https://github.com/dynastic/place/pulls). Before making a pull request, come and chat with us on [Discord](https://discord.gg/dynastic) in #contributors.
 
 Ensure that all code lints successfully - we have CI that requires this.
 
@@ -83,11 +89,11 @@ Check our currently open issues for an idea on what to work on!
 
 ## Authors
 
-* [AppleBetas](https://applebetas.co) - Core Developer
-* [nullpixel](https://nullpixel.uk) - Core Developer
+* [Ayden Panhuyzen](https://ayden.dev) - Core Developer
+* [Jamie Bishop](https://twitter.com/jamiebishop123) - Core Developer
 * [Eric Rabil](https://twitter.com/ericrabil) - Core Developer
 
-Also see the list of [contributors](https://www.github.com/dynastic/place/contributors) who participated in this project and helped to make it as great as it is!
+Also see the list of [contributors](https://www.github.com/dynastic/place/contributors) who generously donated their time and skills to this project to to make it what it is.
 
 ## License
 
@@ -96,5 +102,5 @@ Dynastic Place is licensed under a [modified version of the APGL-3.0 license](ht
 ## Acknowledgments
 
 Thank you to:
-* Reddit for the original Place
-* The many subreddits and groups who we work with to make cool art!
+* Reddit, for the [original Place](https://reddit.com/r/place).
+* Our community for making it worthwhile.
