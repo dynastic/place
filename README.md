@@ -1,6 +1,6 @@
 # Dynastic Place
 
-An open-source [r/place](https://reddit.com/r/place) alternative, made by [Dynastic](https://dynastic.co). Want to chat? Join our [Discord server](https://discord.gg/dynastic).
+An open-source [r/place](https://reddit.com/r/place) alternative, made by [Dynastic](https://dynastic.co). Want to chat? Join our [Discord server](https://discord.gg/CgC8FTg).
 
 ## The state of this project
 This project is no longer actively maintained and may not be the best choice for a public service. We welcome contributions and new maintainers, but it can unfortunately no longer be a priority for us. In general, it uses some misguided techniques from formerly-beginner developers and portions may be somewhat hard to maintain due to this (however, any help fixing that are super appreciated).
@@ -79,7 +79,7 @@ server {
 
 ## Contributing 
 
-Please make a [pull request](/https://github.com/dynastic/place/pulls). Before making a pull request, come and chat with us on [Discord](https://discord.gg/dynastic) in #contributors.
+Please make a [pull request](/https://github.com/dynastic/place/pulls). Before making a pull request, come and chat with us on [Discord](https://discord.gg/CgC8FTg) in #contributors.
 
 Ensure that all code lints successfully - we have CI that requires this.
 
