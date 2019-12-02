@@ -62,7 +62,7 @@
     "jwt-simple": "^0.5.1",
     "marked": "^0.3.6",
     "md5": "^2.2.1",
-    "mongoose": "^4.9.2",
+    "mongoose": "^5.7.5",
     "mongoose-datatables": "github:applebetas/mongoose-datatables",
     "morgan": "^1.8.1",
     "passport": "^0.3.2",
