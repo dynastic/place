@@ -75,7 +75,7 @@ app.userActivityController = UserActivityManager(app);
 app.enableCaptcha = false;
 if(typeof app.config.recaptcha !== "undefined") {
     if(typeof app.config.recaptcha.siteKey !== "undefined" && typeof app.config.recaptcha.secretKey !== "undefined") {
-        app.enableCaptcha = app.config.recaptcha.siteKey != "" && app.config.recaptcha.secretKey != "";
+        app.enableCaptcha = app.config.recaptcha.siteKey !== "" && app.config.recaptcha.secretKey != "";
     }
 }
 if(app.enableCaptcha) {
