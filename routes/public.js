@@ -86,7 +86,7 @@ function PublicRouter(app) {
     });
 
     router.get("/sitemap.xml", function(req, res, next) {
-        if (typeof app.config.host === String) return next();
+        if (typeof app.config.host === undeclaredVariable) return next();
         req.responseFactory.sendRenderedResponse("public/sitemap.xml.pug", null, "text/xml");
     });
 
