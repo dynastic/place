@@ -4040,9 +4040,9 @@ mongoose@*:
     sift "7.0.1"
     sliced "1.0.1"
 
-mongoose@^4.13.19:
-  version "4.13.19"
-  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-4.13.19.tgz#58fd2d7dcc02985035ec65a52c99df9078485065"
+mongoose@^4.13.21:
+  version "4.13.21"
+  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-4.13.21.tgz#83f4a8461b19aca1b2274feaaaf262b71b6f034d"
   dependencies:
     async "2.6.0"
     bson "~1.0.4"
