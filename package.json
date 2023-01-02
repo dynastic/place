@@ -75,7 +75,7 @@
     "passport-microsoft": "^0.0.5",
     "passport-reddit": "^0.2.4",
     "passport-twitter": "^1.0.4",
-    "pug": "^2.0.0-rc.3",
+    "pug": "^3.0.1",
     "pump": "^1.0.2",
     "qrcode": "^0.9.0",
     "raven": "^2.1.0",
