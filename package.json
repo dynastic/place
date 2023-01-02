@@ -59,7 +59,7 @@
     "helmet": "^3.8.1",
     "jimp": "^0.5.4",
     "jwt-simple": "^0.5.1",
-    "marked": "^0.3.6",
+    "marked": "^4.0.10",
     "md5": "^2.2.1",
     "mongoose": "^4.13.21",
     "mongoose-datatables": "github:aydenp/mongoose-datatables",
