@@ -6923,10 +6923,10 @@ uuid@3.3.2, uuid@^3.3.2:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
   integrity sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==
 
-uws@^9.14.0:
-  version "9.148.0"
-  resolved "https://registry.yarnpkg.com/uws/-/uws-9.148.0.tgz#56aff36cb95f7594573daff2a21105ec4b764664"
-  integrity sha512-vWt+e8dOdwLM4neb1xIeZuQ7ZUN3l7n0qTKrOUtU1EZrV4BpmrSnsEL30d062/ocqRMGtLpwzVFsLKFgXomA9g==
+uws@^200.0.0:
+  version "200.0.0"
+  resolved "https://registry.yarnpkg.com/uws/-/uws-200.0.0.tgz#5f8a72b9b25c0aa98b0c48458f532c29bc0e4135"
+  integrity sha512-A2j/p+tJBHZ2MtRoMjVqXMzstpyiZkHcV+XzLQ021h63aqHt5P6l0QkR87L0OASvesjMG42Qo97uyEmPB98+3g==
 
 v8flags@^2.0.2, v8flags@^2.1.1:
   version "2.1.1"
