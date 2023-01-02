@@ -48,7 +48,7 @@
     "del": "^2.2.2",
     "dynastic-provider": "github:dynastic/accounts-provider",
     "express": "^4.17.3",
-    "express-brute-mongoose": "0.0.8",
+    "express-brute-mongoose": "1.1.0",
     "express-recaptcha": "^2.1.0",
     "fs-extra-promise": "^1.0.1",
     "gulp": "^3.9.1",
