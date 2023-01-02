@@ -5,7 +5,6 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "node_modules/eslint/bin/eslint.js ."
   },
   "homepage": "https://canvas.place/",
@@ -13,14 +12,14 @@
   "author": "Dynastic Development",
   "contributors": [
     {
-      "name": "AppleBetas",
-      "email": "applebetas@dynastic.co",
-      "url": "https://applebetas.co"
+      "name": "Ayden Panhuyzen",
+      "email": "ayden@dynastic.co",
+      "url": "https://ayden.dev"
     },
     {
-      "name": "nullpixel",
+      "name": "Jamie Bishop",
       "email": "jamie@dynastic.co",
-      "url": "https://nullpixel.uk"
+      "url": "https://jamiebi.shop"
     },
     {
       "name": "Eric Rabil",
@@ -28,7 +27,7 @@
       "url": "https://ericrabil.com"
     }
   ],
-  "license": "AGPLv3",
+  "license": "AGPL-3.0",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
@@ -40,14 +39,14 @@
     "eslint-plugin-standard": "^2.0.1"
   },
   "dependencies": {
-    "bcrypt": "^1.0.2",
+    "bcrypt": "^5.1.0",
     "body-parser": "^1.17.1",
     "browserify": "^14.1.0",
-    "cachet-api": "github:applebetas/cachet-api",
+    "cachet-api": "^1.0.8",
     "cookie-session": "^2.0.0-beta.1",
     "csurf": "^1.9.0",
     "del": "^2.2.2",
-    "dynastic-provider": "dynastic/accounts-provider.git",
+    "dynastic-provider": "github:dynastic/accounts-provider",
     "express": "^4.17.3",
     "express-brute-mongoose": "0.0.8",
     "express-recaptcha": "^2.1.0",
@@ -63,7 +62,7 @@
     "marked": "^0.3.6",
     "md5": "^2.2.1",
     "mongoose": "^4.13.21",
-    "mongoose-datatables": "github:applebetas/mongoose-datatables",
+    "mongoose-datatables": "github:aydenp/mongoose-datatables",
     "morgan": "^1.8.1",
     "passport": "^0.3.2",
     "passport-discord": "^0.1.2",
@@ -75,7 +74,7 @@
     "passport-microsoft": "^0.0.5",
     "passport-reddit": "^0.2.4",
     "passport-twitter": "^1.0.4",
-    "pug": "^2.0.0-rc.3",
+    "pug": "^3.0.0",
     "pump": "^1.0.2",
     "qrcode": "^0.9.0",
     "raven": "^2.1.0",
