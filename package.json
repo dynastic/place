@@ -57,7 +57,7 @@
     "gulp-sourcemaps": "^2.6.0",
     "gulp-uglify": "^2.1.2",
     "helmet": "^3.8.1",
-    "jimp": "^0.5.4",
+    "jimp": "^0.22.7",
     "jwt-simple": "^0.5.1",
     "marked": "^4.0.10",
     "md5": "^2.2.1",
