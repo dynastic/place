@@ -5,7 +5,7 @@ const fs = require("fs");
 const Action = require("../models/action");
 
 exports.getAPIUsersTable = (req, res, next) => {
-    let searchValue = req.body.search ? req.body.search.value || "" : "";
+    const searchValue = req.body.search ? req.body.search.value || "" : "";
     let sort = { creationDate: "desc" };
     if(req.body.order && req.body.order.length > 0 && req.body.columns) {
         if(req.body.columns.length > req.body.order[0].column || 1) {

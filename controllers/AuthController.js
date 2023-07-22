@@ -76,7 +76,7 @@ exports.getSignOut = (req, res, next) => {
     ActionLogger.log(req.place, "signOut", req.user);
     req.logout();
     req.session = null;
-    let redirectURL = typeof req.query.redirectURL !== "undefined" ? req.query.redirectURL : null;
+    const redirectURL = typeof req.query.redirectURL !== "undefined" ? req.query.redirectURL : null;
     let shouldUseRedirect = redirectURL && redirectURL != "/" && !absoluteURLRegex.test(redirectURL);
     return res.redirect(`/${(shouldUseRedirect ? redirectURL : "")}`);
 };

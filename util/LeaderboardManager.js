@@ -2,7 +2,7 @@ const Pixel = require("../models/pixel");
 const User = require("../models/user");
 
 function LeaderboardManager(app) {
-    let manager = {
+    const manager = {
         needsUpdating: true,
         topUsers: null, pixelCounts: null,
         waitingForUpdate: [],

@@ -16,7 +16,7 @@ class JavaScriptProcessor {
             }
         };
 
-        let swallowError = function(error) {
+        const swallowError = function(error) {
             app.reportError("Error while processing JavaScript: " + error);
             this.emit("end");
         }

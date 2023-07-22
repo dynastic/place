@@ -1,7 +1,7 @@
 const User = require("../models/user");
 
 function UserActivityManager(app) {
-    let controller = {
+    const controller = {
         userActivityTimes: {},
 
         update: function() {

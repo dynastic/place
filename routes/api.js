@@ -18,7 +18,7 @@ const WarpController = require("../controllers/WarpController");
 const UserDownloadController = require("../controllers/UserDownloadController");
 
 function APIRouter(app) {
-    let router = express.Router();
+    const router = express.Router();
 
     router.use(function(req, res, next) {
         res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");

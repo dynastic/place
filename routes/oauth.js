@@ -4,7 +4,7 @@ const OAuthController = require("../controllers/OAuthController");
 
 function OAuthRouter(app) {
     require("../util/passport")(passport, app);
-    let router = express.Router();
+    const router = express.Router();
 
     if(typeof app.config.oauth !== "undefined") {
         if (app.config.oauth.google.enabled) {

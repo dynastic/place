@@ -10,8 +10,8 @@ const fs = require("fs");
 const path = require("path");
 
 function HTTPServer(app) {
-    let server = express();
-    let httpServer = require("http").createServer(server);
+    const server = express();
+    const httpServer = require("http").createServer(server);
     
     // Setup for parameters and bodies
     server.use(bodyParser.urlencoded({extended: false}));
@@ -22,7 +22,7 @@ function HTTPServer(app) {
     // Set rendering engine
     server.set("view engine", "pug");
 
-    let setupRoutes = function(directories, modulesWithRoutes) {
+    const setupRoutes = function(directories, modulesWithRoutes) {
         // Use public folder for resources
         server.use(express.static("public"));
         // Register module public directories

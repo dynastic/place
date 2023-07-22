@@ -16,7 +16,7 @@ const config = require("../config/config");
 const ActionLogger = require("../util/ActionLogger");
 
 module.exports = function(passport, app) {
-    let opts = {};
+    const opts = {};
     opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
     opts.secretOrKey = config.secret;
     passport.use(new JwtStrategy(opts, function(jwt_payload, done) {

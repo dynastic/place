@@ -4,8 +4,8 @@ const ActionLogger = require("../util/ActionLogger");
 
 exports.getAPIStats = (req, res, next) => {
     let signups24h = null, pixelsPlaced24h = null, pixelsPerMin = null;
-    let dateBack24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
-    let dateBack20m = new Date(new Date().getTime() - (20 * 60 * 1000));
+    const dateBack24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
+    const dateBack20m = new Date(new Date().getTime() - (20 * 60 * 1000));
     function finish() {
         return res.json({ success: true, stats: { online: req.place.websocketServer.connectedClients, signups24h: signups24h, pixelsPlaced24h: pixelsPlaced24h, pixelsPerMin: pixelsPerMin } });
     }
