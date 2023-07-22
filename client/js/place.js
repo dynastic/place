@@ -4,12 +4,12 @@
 //  Written by THE WHOLE DYNASTIC CREW. Inspired by Reddit's /r/place.
 //
 
-var size;
+let size;
 
-var SignInDialogController = DialogController($("#sign-in-dialog"));
-var ChangelogDialogController = DialogController($("#changelog-dialog"));
-var HelpDialogController = DialogController($("#help-dialog"));
-var BetaDialogController = DialogController($("#beta-dialog"));
+let SignInDialogController = DialogController($("#sign-in-dialog"));
+let ChangelogDialogController = DialogController($("#changelog-dialog"));
+let HelpDialogController = DialogController($("#help-dialog"));
+let BetaDialogController = DialogController($("#beta-dialog"));
 BetaDialogController.dialog.find("#signup").click(function() {
     placeAjax.post("/api/beta-signup", null, null).then(data => {
         if (data.success) return BetaDialogController.hide();
@@ -23,7 +23,7 @@ ChangelogDialogController.dialog.find("#changelog-opt-out").click(function() {
     placeAjax.delete("/api/changelog/missed");
 });
 
-var canvasController = {
+let canvasController = {
     isDisplayDirty: false,
 
     init: function(canvas) {
@@ -58,16 +58,16 @@ var canvasController = {
     },
 
     getPixelColour: function(x, y) {
-        var data = this.ctx.getImageData(x, y, 1, 1).data;
+        let data = this.ctx.getImageData(x, y, 1, 1).data;
         function componentToHex(c) {
-            var hex = c.toString(16);
+            let hex = c.toString(16);
             return hex.length == 1 ? "0" + hex : hex;
         }
         return componentToHex(data[0]) + componentToHex(data[1]) + componentToHex(data[2]);
     }
 };
 
-var notificationHandler = {
+let notificationHandler = {
     notificationsSupported: "Notification" in window, supportsNewNotificationAPI: false,
 
     setup: function() {
@@ -96,7 +96,7 @@ var notificationHandler = {
 
     sendNotification: function(title, message, requesting = false) {
         if(!this.notificationsSupported) return;
-        var canSend = this.canNotify;
+        let canSend = this.canNotify;
         if(!canSend && !requesting) return;
         if(!canSend) {
             return this.requestPermission((granted) => {
@@ -121,7 +121,7 @@ var notificationHandler = {
     }
 }
 
-var place = {
+let place = {
     zooming: {
         zoomedIn: false,
         panFromX: 0, panFromY: 0,
@@ -189,9 +189,9 @@ var place = {
         this.placingOverlay = $(this.colourPaletteElement).find("#placing-modal");
         this.placeTimer = $(this.colourPaletteElement).find("#place-timer");
         $(this.placeTimer).on("click", "#notify-me", () => this.handleNotifyMeClick());
-        var app = this;
+        let app = this;
         $(this.colourPaletteElement).on("click", ".colour-option", function() {
-            var colourID = parseInt($(this).data("colour"));
+            let colourID = parseInt($(this).data("colour"));
             if(colourID) app.selectColour(colourID);
         });
         $(this.colourPaletteElement).click(function(e) {
@@ -202,12 +202,12 @@ var place = {
 
         $("#palette-expando").click(this.handlePaletteExpandoClick);
 
-        var controller = $(zoomController).parent()[0];
+        let controller = $(zoomController).parent()[0];
         canvas.onmousemove = (event) => this.handleMouseMove(event || window.event);
         canvas.addEventListener("contextmenu", (event) => this.contextMenu(event));
 
-        var handleKeyEvents = function(e) {
-            var kc = e.keyCode || e.which;
+        let handleKeyEvents = function(e) {
+            let kc = e.keyCode || e.which;
             app.keyStates[kc] = e.type == "keydown";
         }
 
@@ -236,7 +236,7 @@ var place = {
         this.setupDisplayCanvas(this.displayCanvas);
         this.setupInteraction();
 
-        var spawnPoint = this.getSpawnPoint();
+        let spawnPoint = this.getSpawnPoint();
         this.setCanvasPosition(spawnPoint.x, spawnPoint.y);
         this.setupZoomSlider();
         this.setZoomScale(this.zooming.zoomScale);
@@ -258,8 +258,8 @@ var place = {
         this.popoutController = popoutController;
         this.popoutController.setup(this, $("#popout-container")[0]);
         this.popoutController.popoutVisibilityController.visibilityChangeCallback = () => {
-            var start = new Date();
-            var interval = setInterval(function() {
+            let start = new Date();
+            let interval = setInterval(function() {
                 app.handleResize();
                 if((new Date() - start) > 250) clearInterval(interval);
             }, 1);
@@ -281,7 +281,7 @@ var place = {
         })
 
         $("#pixel-use-colour-btn").click(function() {
-            var colour = $(this).attr("data-represented-colour");
+            let colour = $(this).attr("data-represented-colour");
             $("#colour-picker").minicolors("value", "#" + colour);
         })
 
@@ -295,7 +295,7 @@ var place = {
     },
 
     handleColourTextChange: function(premature = false) {
-        var colour = $("#colour-picker-hex-value").val();
+        let colour = $("#colour-picker-hex-value").val();
         if(colour.substring(0, 1) != "#") colour = "#" + colour;
         if(colour.length != 7 && (colour.length != 4 || premature)) return;
         $("#colour-picker").minicolors("value", colour);
@@ -319,7 +319,7 @@ var place = {
 
     getCanvasImage: function() {
         if(this.loadedImage) return;
-        var app = this;
+        let app = this;
         this.adjustLoadingScreen("Loading…");;
         this.loadImage().then((image) => {
             app.adjustLoadingScreen();
@@ -347,18 +347,18 @@ var place = {
     },
 
     loadImage: function() {
-        var a = this;
+        let a = this;
         return new Promise((resolve, reject) => {
-            var xhr = new XMLHttpRequest();
+            let xhr = new XMLHttpRequest();
             xhr.open("GET", "/api/board-image", true);
             xhr.responseType = "blob";
             xhr.onload = function(e) {
                 if(xhr.status == 200) {
-                    var url = URL.createObjectURL(this.response);
-                    var img = new Image();
+                    let url = URL.createObjectURL(this.response);
+                    let img = new Image();
                     img.onload = function() {
                         URL.revokeObjectURL(this.src);
-                        var lastImageUpdate = xhr.getResponseHeader("X-Place-Last-Update");
+                        let lastImageUpdate = xhr.getResponseHeader("X-Place-Last-Update");
                         if(lastImageUpdate) a.requestPixelsAfterDate(lastImageUpdate);
                         resolve(img);
                     };
@@ -378,7 +378,7 @@ var place = {
     },
 
     setupInteraction: function() {
-        var app = this;
+        let app = this;
         interact(this.cameraController).draggable({
             inertia: true,
             restrict: {
@@ -401,13 +401,13 @@ var place = {
                 if(event.interaction.downEvent.button == 2) return event.preventDefault();
                 app.stat();
                 $(app.zoomController).removeClass("grabbing");
-                var coord = app.getCoordinates();
+                let coord = app.getCoordinates();
                 app.hashHandler.modifyHash(coord);
             }
         }).on("tap", (event) => {
             if(event.interaction.downEvent.button == 2) return event.preventDefault();
             if(!this.zooming.zooming) {
-                var cursor = app.getCanvasCursorPosition(event.pageX, event.pageY);
+                let cursor = app.getCanvasCursorPosition(event.pageX, event.pageY);
                 app.canvasClicked(cursor.x, cursor.y);
             }
             event.preventDefault();
@@ -423,14 +423,14 @@ var place = {
 
     mousewheelMoved: function(event) {
         if ($('.canvas-container:hover').length <= 0) return;
-        var e = event.originalEvent;
+        let e = event.originalEvent;
         e.preventDefault();
-        var delta = e.type == "wheel" ? -e.deltaY : (typeof e.wheelDeltaY !== "undefined" ? e.wheelDeltaY : e.wheelDelta);
+        let delta = e.type == "wheel" ? -e.deltaY : (typeof e.wheelDeltaY !== "undefined" ? e.wheelDeltaY : e.wheelDelta);
         this.setZoomScale(this.zooming.zoomScale + (delta / 100));
     },
 
     getCanvasCursorPosition: function(x = null, y = null) {
-        var zoom = this._getZoomMultiplier();
+        let zoom = this._getZoomMultiplier();
         return {x: Math.round(((x ? x : this.cursorX) - $(this.cameraController).offset().left) / zoom), y: Math.round(((y ? y : this.cursorY) - $(this.cameraController).offset().top) / zoom)};
     },
 
@@ -444,23 +444,23 @@ var place = {
     },
 
     getSpawnPoint: function() {
-        var point = this.getHashPoint();
+        let point = this.getHashPoint();
         if (point) return point;
         return this.getRandomSpawnPoint();
     },
 
     getHashPoint: function() {
-        var hash = this.hashHandler.getHash();
+        let hash = this.hashHandler.getHash();
         if(typeof hash.x !== "undefined" && typeof hash.y !== "undefined") {
-            var x = parseInt(hash.x), y = parseInt(hash.y);
-            var fixed = this.closestInsideCoordinates(x, y);
+            let x = parseInt(hash.x), y = parseInt(hash.y);
+            let fixed = this.closestInsideCoordinates(x, y);
             if(x !== null && y !== null && !isNaN(x) && !isNaN(y)) return {x: -fixed.x + (size / 2), y: -fixed.y + (size / 2)};
         }
         return null;
     },
 
     handleHashChange: function() {
-        var point = this.getHashPoint();
+        let point = this.getHashPoint();
         if (point) this.setCanvasPosition(point.x, point.y);
     },
 
@@ -530,9 +530,9 @@ var place = {
     },
 
     setupColours: function() {
-        var overlay = $("#availability-loading-modal");
+        let overlay = $("#availability-loading-modal");
         $(this.colourPaletteElement).find(".colour-option, .palette-separator").remove();
-        var contentContainer = $(this.colourPaletteElement).find("#palette-content-ctn");
+        let contentContainer = $(this.colourPaletteElement).find("#palette-content-ctn");
         this.colourPaletteOptionElements = [];
         if(this.colours) {
             overlay.hide();
@@ -540,11 +540,11 @@ var place = {
                 $("body").toggleClass("picker-showing");
                 if($("body").hasClass("picker-showing")) $("#colour-picker-hex-value").focus();
             }).append("<div class=\"colour-option transparent\"></div>").appendTo(contentContainer);
-            var elem = $("<div>").addClass("colour-option custom").attr("id", "customChosenColourOption").attr("data-colour", 1).hide().appendTo(contentContainer);
+            let elem = $("<div>").addClass("colour-option custom").attr("id", "customChosenColourOption").attr("data-colour", 1).hide().appendTo(contentContainer);
             this.colourPaletteOptionElements.push(elem[0]);
             if(this.canPlaceCustomColours) $("<div>").addClass("palette-separator").appendTo(contentContainer);
             this.colours.forEach((colour, index) => {
-                var elem = $("<div>").addClass("colour-option" + (colour.toLowerCase() == "#ffffff" ? " is-white" : "")).css("background-color", colour).attr("data-colour", index + 2);
+                let elem = $("<div>").addClass("colour-option" + (colour.toLowerCase() == "#ffffff" ? " is-white" : "")).css("background-color", colour).attr("data-colour", index + 2);
                 elem.appendTo(contentContainer);
                 this.colourPaletteOptionElements.push(elem[0]);
             });
@@ -552,7 +552,7 @@ var place = {
             if(this.pixelFlags && this.pixelFlags.length > 0) {
                 $("<div>").addClass("palette-separator").appendTo(contentContainer);
                 this.pixelFlags.forEach((flag, index) => {
-                    var elem = $("<div>").addClass("colour-option flag-option").css("background-image", `url(${flag.image})`).attr("data-flag", index).attr("data-flag-id", flag.id).attr("title", `${flag.title}:\n${flag.description}`).attr("alt", flag.title);
+                    let elem = $("<div>").addClass("colour-option flag-option").css("background-image", `url(${flag.image})`).attr("data-flag", index).attr("data-flag-id", flag.id).attr("title", `${flag.title}:\n${flag.description}`).attr("alt", flag.title);
                     if(flag.needsBorder) elem.addClass("is-white");
                     elem.appendTo(contentContainer);
                     this.colourPaletteOptionElements.push(elem[0]);
@@ -566,7 +566,7 @@ var place = {
     handleColourPaletteChange: function(newColour) {
         if(!this.canPlaceCustomColours) return;
         this.customColour = newColour;
-        var elem = $("#customChosenColourOption").show().css("background-color", newColour);
+        let elem = $("#customChosenColourOption").show().css("background-color", newColour);
         $("#colour-picker-hex-value").val(newColour.toUpperCase());
         if(newColour.toLowerCase() == "#ffffff") elem.addClass("is-white");
         else elem.removeClass("is-white");
@@ -574,7 +574,7 @@ var place = {
     },
 
     handleResize: function() {
-        var canvasContainer = $(this.zoomController).parent();
+        let canvasContainer = $(this.zoomController).parent();
         this.displayCanvas.height = canvasContainer.height();
         this.displayCanvas.width = canvasContainer.width();
         this.displayCtx.mozImageSmoothingEnabled = false;
@@ -589,13 +589,13 @@ var place = {
     },
 
     updateColourSelectorPosition: function() {
-        var elem = $("#colour-picker-popover"), button = $("#customColourChooserOption");
-        var position = 20;
+        let elem = $("#colour-picker-popover"), button = $("#customColourChooserOption");
+        let position = 20;
         if(button.length > 0) position = Math.max(20, button.offset().left - (elem.outerWidth() / 2) + (button.outerWidth() / 2));
         if(position <= 20) {
             elem.addClass("arrow-left");
             if(button.length > 0) {
-                var arrowOffset = button.offset().left - (button.outerWidth() / 2) - 10;
+                let arrowOffset = button.offset().left - (button.outerWidth() / 2) - 10;
                 $("#popover-styling").html(`#colour-picker-popover:after, #colour-picker-popover:before { left: ${arrowOffset}px!important; }`);
             }
             else $("#popover-styling").html("");
@@ -613,10 +613,10 @@ var place = {
     },
 
     updateDisplayCanvas: function() {
-        var dcanvas = this.displayCanvas;
+        let dcanvas = this.displayCanvas;
         this.displayCtx.clearRect(0, 0, dcanvas.width, dcanvas.height);
-        var zoom = this._getCurrentZoom();
-        var mod = size / 2;
+        let zoom = this._getCurrentZoom();
+        let mod = size / 2;
         this.displayCtx.drawImage(this.canvas, dcanvas.width / 2 + (this.panX - mod - 0.5) * zoom, dcanvas.height / 2 + (this.panY - mod - 0.5) * zoom, this.canvas.width * zoom, this.canvas.height * zoom);
     },
 
@@ -637,8 +637,8 @@ var place = {
     animateZoom: function(callback = null) {
         this.zooming.zoomTime += this.zooming.fastZoom ? 5 : 2;
 
-        var x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
-        var y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
+        let x = this._lerp(this.zooming.panFromX, this.zooming.panToX, this.zooming.zoomTime);
+        let y = this._lerp(this.zooming.panFromY, this.zooming.panToY, this.zooming.zoomTime);
         this.updateUIWithZoomScale(this._lerp(this.zooming.zoomFrom, this.zooming.zoomTo, this.zooming.zoomTime));
         this.setCanvasPosition(x, y);
 
@@ -668,14 +668,14 @@ var place = {
         this.setCanvasPosition(this.zooming.panToX, this.zooming.panToY);
         this.zooming.panToX = null, this.zooming.panToY = null, this.zooming.zoomTo = null, this.zooming.zoomFrom = null;
         clearInterval(this.zooming.zoomHandle);
-        var coord = this.getCoordinates();
+        let coord = this.getCoordinates();
         this.hashHandler.modifyHash(coord);
         this.zooming.zoomHandle = null;
         this.zooming.fastZoom = false;
     },
 
     setupZoomSlider: function() {
-        var minScale = this.getMinimumScale();
+        let minScale = this.getMinimumScale();
         $('#zoom-slider').slider({
             ticks: this.zooming.snapPoints.map((p) => Math.max(p, minScale)),
             ticks_snap_bounds: 0.01,
@@ -695,7 +695,7 @@ var place = {
         this.zooming.panFromY = this.panY;
         if(this.zooming.panToX == null) this.zooming.panToX = this.panX;
         if(this.zooming.panToY == null) this.zooming.panToY = this.panY;
-        var newScale = this.normalizeZoomScale(scale);
+        let newScale = this.normalizeZoomScale(scale);
         if(animated) {
             this.zooming.zoomTime = 0;
             this.zooming.zoomFrom = this._getCurrentZoom();
@@ -714,13 +714,13 @@ var place = {
     },
 
     getMinimumScale: function() {
-        var canvasContainer = $(this.zoomController).parent();
+        let canvasContainer = $(this.zoomController).parent();
         return Math.min(1, Math.min((canvasContainer.height() - $("#page-nav").height()) / size, canvasContainer.width() / size));
     },
 
     normalizeZoomScale: function(scale) {
-        var minScale = this.getMinimumScale();
-        var newScale = Math.min(this.zooming.snapPoints[this.zooming.snapPoints.length - 1], Math.max(minScale, Math.max(this.zooming.snapPoints[0], scale)));
+        let minScale = this.getMinimumScale();
+        let newScale = Math.min(this.zooming.snapPoints[this.zooming.snapPoints.length - 1], Math.max(minScale, Math.max(this.zooming.snapPoints[0], scale)));
         this.zooming.wasZoomedFullyOut = newScale <= minScale;
         if (this.zooming.wasZoomedFullyOut && !$(this.colourPaletteElement).hasClass("full-canvas")) $(this.colourPaletteElement).addClass("full-canvas");
         else if(!this.zooming.wasZoomedFullyOut && $(this.colourPaletteElement).hasClass("full-canvas")) $(this.colourPaletteElement).removeClass("full-canvas");
@@ -729,7 +729,7 @@ var place = {
 
     toggleZoom: function() {
         if (this.zooming.zooming) return;
-        var scale = this.zooming.zoomScale;
+        let scale = this.zooming.zoomScale;
         if (scale < this.zooming.initialZoomPoint) this.setZoomScale(this.zooming.initialZoomPoint, true);
         else if (scale < (this.zooming.initialZoomPoint + this.zooming.zoomedInPoint) / 2) this.setZoomScale(this.zooming.zoomedInPoint, true);
         else if (scale <= this.zooming.zoomedInPoint) this.setZoomScale(this.zooming.initialZoomPoint, true);
@@ -741,7 +741,7 @@ var place = {
     },
 
     _adjustGridButtonText: function() {
-        var gridShown = $(this.grid).hasClass("show");
+        let gridShown = $(this.grid).hasClass("show");
         if (this.gridButton) $(this.gridButton).html(`<i class="fa fa-fw fa-${gridShown ? "square" : "th"}"></i>`).attr("title", (gridShown ? "Hide Grid" : "Show Grid") + " (G)");
     },
 
@@ -759,8 +759,8 @@ var place = {
 
     setCoordinatesButton: function(btn) {
         if(Clipboard.isSupported()) {
-            var app = this;
-            var clipboard = new Clipboard(btn);
+            let app = this;
+            let clipboard = new Clipboard(btn);
             $(btn).addClass("clickable").tooltip({
                 title: "Copied to clipboard!",
                 trigger: "manual",
@@ -775,19 +775,19 @@ var place = {
     },
 
     moveCamera: function(deltaX, deltaY, softAllowBoundPush = true) {
-        var cam = $(this.cameraController);
-        var zoomModifier = this._getCurrentZoom();
-        var coords = this.getCoordinates();
-        var x = deltaX / zoomModifier, y = deltaY / zoomModifier;
+        let cam = $(this.cameraController);
+        let zoomModifier = this._getCurrentZoom();
+        let coords = this.getCoordinates();
+        let x = deltaX / zoomModifier, y = deltaY / zoomModifier;
         this.setCanvasPosition(x, y, true, softAllowBoundPush);
     },
 
     updateCoordinates: function() {
-        var coord = this.getCoordinates();
+        let coord = this.getCoordinates();
         if(coord != this.lastUpdatedCoordinates) {
-            var coordElem = $(this.coordinateElement);
+            let coordElem = $(this.coordinateElement);
             setTimeout(function() {
-                var spans = coordElem.find("span");
+                let spans = coordElem.find("span");
                 spans.first().text(coord.x.toLocaleString());
                 spans.last().text(coord.y.toLocaleString());
                 coordElem.attr("data-clipboard-text", `(${coord.x}, ${coord.y})`);
@@ -797,13 +797,13 @@ var place = {
     },
 
     isOutsideOfBounds: function(precise = false) {
-        var coord = this.getCoordinates();
-        var x = coord.x < 0 || coord.x >= size, y = coord.y >= size || coord.y < 0
+        let coord = this.getCoordinates();
+        let x = coord.x < 0 || coord.x >= size, y = coord.y >= size || coord.y < 0
         return precise ? { x: x, y: y } : x || y;
     },
 
     getCoordinates: function() {
-        var dcanvas = this.canvasController.canvas;
+        let dcanvas = this.canvasController.canvas;
         return {x: Math.floor(-this.panX) + dcanvas.width / 2, y: Math.floor(-this.panY) + dcanvas.height / 2};
     },
 
@@ -826,9 +826,9 @@ var place = {
     },
 
     updateGrid: function() {
-        var zoom = this._getCurrentZoom();
-        var x = ($(this.cameraController).offset().left - (zoom / 2)) % zoom;
-        var y = ($(this.cameraController).offset().top - (zoom / 2)) % zoom;
+        let zoom = this._getCurrentZoom();
+        let x = ($(this.cameraController).offset().left - (zoom / 2)) % zoom;
+        let y = ($(this.cameraController).offset().top - (zoom / 2)) % zoom;
         $(this.grid).css({transform: `translate(${x}px, ${y}px)`, backgroundSize: `${zoom}px ${zoom}px`});
     },
 
@@ -841,12 +841,12 @@ var place = {
         this.lastX = x;
         this.lastY = y;
         if(this.gridHint) {
-            var zoom = this._getCurrentZoom();
+            let zoom = this._getCurrentZoom();
             // Hover position in grid multiplied by zoom
-            var x = Math.round((this.lastX - $(this.cameraController).offset().left) / zoom), y = Math.round((this.lastY - $(this.cameraController).offset().top) / zoom);
-            var elem = $(this.gridHint);
-            var posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
-            var posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
+            let x = Math.round((this.lastX - $(this.cameraController).offset().left) / zoom), y = Math.round((this.lastY - $(this.cameraController).offset().top) / zoom);
+            let elem = $(this.gridHint);
+            let posX = x + ($(this.cameraController).offset().left / zoom) - 0.5;
+            let posY = y + ($(this.cameraController).offset().top / zoom) - 0.5;
             elem.css({
                 left: posX * zoom,
                 top: posY * zoom,
@@ -858,7 +858,7 @@ var place = {
         if(!this.placing) {
             this.updateGridHint(event.pageX, event.pageY);
             if(this.handElement) {
-                var elem = $(this.handElement);
+                let elem = $(this.handElement);
                 elem.css({
                     left: event.pageX - (elem.width() / 2),
                     top: event.pageY - (elem.height() / 2),
@@ -894,7 +894,7 @@ var place = {
         if(this.isSignedIn()) {
             this.changePlaceTimerVisibility(true);
             $(this.placeTimer).children("span").text("Loading…");
-            var a = this;
+            let a = this;
             return placeAjax.get("/api/timer").then((data) => a.doTimer(data.timer)).catch((err) => this.changePlaceTimerVisibility(false));
         }
         this.changePlaceTimerVisibility(false);
@@ -920,12 +920,12 @@ var place = {
             return (new Array(length + 1).join(pad) + str).slice(-length);
         }
         if(this.unlockTime && this.secondTimer && this.fullUnlockTime) {
-            var time = Math.round(this.unlockTime - new Date().getTime() / 1000);
+            let time = Math.round(this.unlockTime - new Date().getTime() / 1000);
             if(time > 0) {
-                var minutes = ~~(time / 60), seconds = time - minutes * 60;
-                var formattedTime = `${minutes}:${padLeft(seconds.toString(), "0", 2)}`;
+                let minutes = ~~(time / 60), seconds = time - minutes * 60;
+                let formattedTime = `${minutes}:${padLeft(seconds.toString(), "0", 2)}`;
                 document.title = `[${formattedTime}] | ${this.originalTitle}`;
-                var shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
+                let shouldShowNotifyButton = !this.notificationHandler.canNotify() && this.notificationHandler.isAbleToRequestPermission();
                 $(this.placeTimer).children("span").html("You may place again in <strong>" + formattedTime + "</strong>." + (shouldShowNotifyButton ? " <a href=\"#\" id=\"notify-me\">Notify me</a>." : ""));
                 return;
             } else if(this.fullUnlockTime > 5) { // only notify if full countdown exceeds 5 seconds
@@ -944,11 +944,11 @@ var place = {
     },
 
     changeUserCount: function(newContent) {
-        var elem = $(this.userCountElement);
+        let elem = $(this.userCountElement);
         elem.show();
-        var notch = elem.find(".loading");
-        var text = elem.find(".count");
-        var num = parseInt(newContent);
+        let notch = elem.find(".loading");
+        let text = elem.find(".count");
+        let num = parseInt(newContent);
         if(num === null || isNaN(num)) {
             notch.show();
             text.text("");
@@ -972,7 +972,7 @@ var place = {
     selectColour: function(colourID, hideColourPicker = true) {
         this.deselectColour(hideColourPicker);
         this.selectedColour = colourID - 1;
-        var elem = this.colourPaletteOptionElements[this.selectedColour];
+        let elem = this.colourPaletteOptionElements[this.selectedColour];
         // Create hand element
         this.handElement = $(elem).clone().addClass("hand").appendTo($(this.zoomController).parent())[0];
         // Update zoom scale for hand element sizing
@@ -999,7 +999,7 @@ var place = {
     changeSelectorVisibility: function(visible) {
         if(this.selectedColour == null) return;
         if(visible) {
-          var elem = this.colourPaletteOptionElements[this.selectedColour];
+          let elem = this.colourPaletteOptionElements[this.selectedColour];
           $(this.handElement).show();
           $(this.zoomController).addClass("selected");
           $(this.gridHint).show();
@@ -1021,16 +1021,16 @@ var place = {
     },
 
     canvasClicked: function(x, y, event) {
-        var app = this;
+        let app = this;
         this.stat();
         function getUserInfoTableItem(title, value) {
-            var ctn = $("<div>").addClass("field");
+            let ctn = $("<div>").addClass("field");
             $("<span>").addClass("title").text(title).appendTo(ctn);
             $(`<span>`).addClass("value").html(value).appendTo(ctn);
             return ctn;
         }
         function getUserInfoDateTableItem(title, date) {
-            var ctn = getUserInfoTableItem(title, "");
+            let ctn = getUserInfoTableItem(title, "");
             $("<time>").attr("datetime", date).attr("title", new Date(date).toLocaleString()).text($.timeago(date)).prependTo(ctn.find(".value"));
             return ctn;
         }
@@ -1041,17 +1041,17 @@ var place = {
         if (x < 0 || y < 0 || x > this.canvas.width - 1 || y > this.canvas.height - 1) return;
 
         // Make the user zoom in before placing pixel
-        var wasZoomedOut = !this.zooming.zoomedIn;
+        let wasZoomedOut = !this.zooming.zoomedIn;
         if(wasZoomedOut) this.zoomIntoPoint(x, y);
 
         if(this.selectedColour === null) {
             this.zoomIntoPoint(x, y);
             return this.getPixel(x, y, (err, data) => {
                 if(err || !data.pixel) return;
-                var popover = $(this.pixelDataPopover);
+                let popover = $(this.pixelDataPopover);
                 if(this.zooming.zooming) this.shouldShowPopover = true;
                 else popover.fadeIn(250);
-                var hasUser = !!data.pixel.user;
+                let hasUser = !!data.pixel.user;
                 if(typeof data.pixel.userError === "undefined") data.pixel.userError = null;
                 popover.find("#pixel-data-username").text(hasUser ? data.pixel.user.username : this.getUserStateText(data.pixel.userError));
                 if(hasUser) popover.find("#pixel-data-username").removeClass("deleted-account");
@@ -1070,22 +1070,22 @@ var place = {
                 else popover.find(".pixel-colour").removeClass("allow-use");
                 popover.find(".rank-container > *").remove();
                 if(hasUser) {
-                    var userInfoCtn = popover.find(".user-info");
+                    let userInfoCtn = popover.find(".user-info");
                     userInfoCtn.show();
                     userInfoCtn.find(".field").remove();
                     getUserInfoTableItem("Total pixels placed", data.pixel.user.statistics.totalPlaces.toLocaleString()).appendTo(userInfoCtn);
                     if(data.pixel.user.statistics.placesThisWeek !== null) getUserInfoTableItem("Pixels this week", data.pixel.user.statistics.placesThisWeek.toLocaleString()).appendTo(userInfoCtn);
                     getUserInfoDateTableItem("Account created", data.pixel.user.creationDate).appendTo(userInfoCtn);
-                    var latestCtn = getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
+                    let latestCtn = getUserInfoDateTableItem("Last placed", data.pixel.user.statistics.lastPlace).appendTo(userInfoCtn);
                     if(data.pixel.user.latestPixel && data.pixel.user.latestPixel.isLatest) {
-                        var latest = data.pixel.user.latestPixel;
-                        var element = $("<div>")
+                        let latest = data.pixel.user.latestPixel;
+                        let element = $("<div>")
                         if(data.pixel.point.x == latest.point.x && data.pixel.point.y == latest.point.y) $("<span>").addClass("secondary-info").text("(this pixel)").appendTo(element);
                         else $("<a>").attr("href", "javascript:void(0)").text(`at (${latest.point.x.toLocaleString()}, ${latest.point.y.toLocaleString()})`).click(() => app.zoomIntoPoint(latest.point.x, latest.point.y, false)).appendTo(element);
                         element.appendTo(latestCtn.find(".value"));
                     }
                     popover.find("#pixel-data-username").attr("href", `/@${data.pixel.user.username}`);
-                    var rankContainer = popover.find(".rank-container");
+                    let rankContainer = popover.find(".rank-container");
                     data.pixel.user.badges.forEach((badge) => renderBadge(badge).appendTo(rankContainer));
                     popover.find("#user-actions-dropdown-ctn").html(renderUserActionsDropdown(data.pixel.user));
                 } else {
@@ -1098,7 +1098,7 @@ var place = {
         if(wasZoomedOut) return;
         if(this.selectedColour !== null && !this.placing) {
             this.changePlacingModalVisibility(true);
-            var hex = this.getCurrentColourHex();
+            let hex = this.getCurrentColourHex();
             this.placing = true;
             placeAjax.post("/api/place", { x: x, y: y, hex: hex }, "An error occurred while trying to place your pixel.", () => {
                 this.changePlacingModalVisibility(false);
@@ -1124,7 +1124,7 @@ var place = {
     },
 
     doKeys: function() {
-        var keys = Object.keys(this.keys).filter((key) => this.keys[key].filter((keyCode) => this.keyStates[keyCode] === true).length > 0);
+        let keys = Object.keys(this.keys).filter((key) => this.keys[key].filter((keyCode) => this.keyStates[keyCode] === true).length > 0);
         if(keys.indexOf("up") > -1) this.moveCamera(0, 5, false);
         if(keys.indexOf("down") > -1) this.moveCamera(0, -5, false);
         if(keys.indexOf("left") > -1) this.moveCamera(5, 0, false);
@@ -1145,8 +1145,8 @@ var place = {
 
     pickColourUnderCursor: function() {
         if(!this.canPlaceCustomColours) return;
-        var cursor = this.getCanvasCursorPosition();
-        var colour = this.canvasController.getPixelColour(cursor.x, cursor.y);
+        let cursor = this.getCanvasCursorPosition();
+        let colour = this.canvasController.getPixelColour(cursor.x, cursor.y);
         $("#colour-picker").minicolors("value", "#" + colour);
     },
 
@@ -1165,9 +1165,9 @@ var place = {
     },
 
     showAdminBroadcast: function(title, message, style, timeout = 0) {
-        var alert = $("<div>").addClass("floating-alert admin-alert alert alert-block alert-dismissable").addClass("alert-" + style).hide().prependTo($("#floating-alert-ctn"));
+        let alert = $("<div>").addClass("floating-alert admin-alert alert alert-block alert-dismissable").addClass("alert-" + style).hide().prependTo($("#floating-alert-ctn"));
         this.dismissBtn.clone().appendTo(alert);
-        var text = $("<p>").text(message).appendTo(alert);
+        let text = $("<p>").text(message).appendTo(alert);
         if(title != null && title != "") {
             $("<span>").text(" ").prependTo(text);
             $("<strong>").text(title).prependTo(text);
@@ -1182,8 +1182,8 @@ var place = {
     },
 
     handlePaletteExpandoClick: function() {
-        var options = {duration: 150, queue: false};
-        var expand = $(this).toggleClass("expanded").hasClass("expanded");
+        let options = {duration: 150, queue: false};
+        let expand = $(this).toggleClass("expanded").hasClass("expanded");
         if(expand) $("#menu-content-ctn").slideDown(options);
         else $("#menu-content-ctn").slideUp(options).fadeOut(options);
     },
@@ -1201,9 +1201,9 @@ var place = {
     },
 
     layoutWarps: function() {
-        var app = this;
+        let app = this;
         function getWarpInfo(title = null, detail = null, clickHandler = null, deleteClickHandler = null, add = false) {
-            var warpInfo = $("<div>").addClass("warp-info");
+            let warpInfo = $("<div>").addClass("warp-info");
             if(title) $("<span>").addClass("warp-title").text(title).appendTo(warpInfo);
             if(detail) $("<span>").addClass("warp-coordinates").text(detail).appendTo(warpInfo);
             if(add) warpInfo.addClass("add").attr("title", "Create a warp at the current position").append("<span class=\"warp-title\"><i class=\"fa fa-plus\"></i></span>");
@@ -1214,25 +1214,25 @@ var place = {
             if(clickHandler) warpInfo.click(clickHandler.bind(app, warpInfo));
             return warpInfo;
         }
-        var warpsContainer = $("#warps-ctn");
+        let warpsContainer = $("#warps-ctn");
         if(!this.warps) return warpsContainer.text("Couldn't load warps.");
         warpsContainer.html("");
-        var warpInfoContainer = $("<div>").addClass("menu-section-content").appendTo($("<div>").addClass("menu-section-content-ctn").appendTo(warpsContainer));
+        let warpInfoContainer = $("<div>").addClass("menu-section-content").appendTo($("<div>").addClass("menu-section-content-ctn").appendTo(warpsContainer));
         getWarpInfo(null, null, this.addNewWarpClicked, null, true).appendTo(warpInfoContainer);
         if(this.warps.length > 0) {
             this.warps.forEach((warp) => getWarpInfo(warp.name, `(${warp.location.x.toLocaleString()}, ${warp.location.y.toLocaleString()})`, () => this.zoomIntoPoint(warp.location.x, warp.location.y, false), this.deleteWarpClicked).attr("data-warp-id", warp.id).appendTo(warpInfoContainer));
         } else {
             warpInfoContainer.addClass("empty");
-            var explanation = $("<div>").addClass("warp-info explanation").appendTo(warpInfoContainer);
+            let explanation = $("<div>").addClass("warp-info explanation").appendTo(warpInfoContainer);
             $("<span>").addClass("warp-title").text("Warps").appendTo(explanation);
             $("<span>").addClass("warp-coordinates").text("Use warps to get around the canvas quickly. Save a position and warp to it later on.").appendTo(explanation);
         }
     },
 
     addNewWarpClicked: function(elem, event, input = null) {
-        var warpTitle = window.prompt(`Enter a title for this warp (at current position):`, input || "");
+        let warpTitle = window.prompt(`Enter a title for this warp (at current position):`, input || "");
         if(!warpTitle || warpTitle.length <= 0) return;
-        var pos = this.getCoordinates();
+        let pos = this.getCoordinates();
         placeAjax.post("/api/warps", {x: pos.x, y: pos.y, name: warpTitle}, "An unknown error occurred while attempting to create your warp.").then((response) => {
             if(response.warp) this.warps.unshift(response.warp);
             this.layoutWarps();
@@ -1248,22 +1248,22 @@ var place = {
         if(!window.confirm("Are you sure you want to delete this warp?")) return;
         function setDeletingState(deleting) {
             elem.data("deleting", deleting);
-            var icon = elem.find("i");
+            let icon = elem.find("i");
             if(deleting) icon.addClass("fa-minus").removeClass("fa-spin fa-circle-o-notch");
             else icon.removeClass("fa-minus").addClass("fa-spin fa-circle-o-notch");
         }
         setDeletingState(true);
-        var warpID = elem.attr("data-warp-id");
+        let warpID = elem.attr("data-warp-id");
         if(!warpID) return;
         placeAjax.delete("/api/warps/" + warpID, null, "An unknown error occurred while attempting to delete the specified warp.", () => setDeletingState(false)).then((response) => {
-            var index = this.warps.map((w) => w.id).indexOf(warpID);
+            let index = this.warps.map((w) => w.id).indexOf(warpID);
             if(index >= 0) this.warps.splice(index, 1);
             this.layoutWarps();
         }).catch(() => {});
     },
 
     loadTemplates: function() {
-        var templateJSON = localStorage.getItem("templates");
+        let templateJSON = localStorage.getItem("templates");
         if(!templateJSON) return this.templates = [];
         this.templates = JSON.parse(templateJSON);
     },
@@ -1275,40 +1275,40 @@ var place = {
     layoutTemplates: function() {
         if(!this.templatesEnabled) return $("#templates-ctn").text("Coming Soon");
         if(!this.templates) this.loadTemplates();
-        var templatesContainer = $("#templates-ctn");
-        var templateImgs = $("#template-images");
+        let templatesContainer = $("#templates-ctn");
+        let templateImgs = $("#template-images");
         templatesContainer.html("");
         templateImgs.html("");
-        var infoContainer = $("<div>").addClass("menu-section-content").appendTo($("<div>").addClass("menu-section-content-ctn").appendTo(templatesContainer));
+        let infoContainer = $("<div>").addClass("menu-section-content").appendTo($("<div>").addClass("menu-section-content-ctn").appendTo(templatesContainer));
         $("<div>").addClass("warp-info template add").html("<span class=\"warp-title\"><i class=\"fa fa-plus\"></i></span>").click(this.addTemplateClicked.bind(this)).appendTo(infoContainer);
         if(this.templates.length > 0) {
             this.templates.forEach((template, index) => {
-                var templateCtn = $("<div>").addClass("warp-info template").attr("data-template-id", index).attr("title", "Jump to the position of this template").appendTo(infoContainer);
+                let templateCtn = $("<div>").addClass("warp-info template").attr("data-template-id", index).attr("title", "Jump to the position of this template").appendTo(infoContainer);
                 templateCtn.click(this.moveToTemplateClicked.bind(this, templateCtn));
                 $("<div>").addClass("warp-delete").attr("title", "Delete this template").html("<i class=\"fa fa-minus fa-fw\"></i>").click(this.deleteTemplateClicked.bind(this, templateCtn)).appendTo(templateCtn);
                 $("<div>").addClass("warp-jump-to").attr("title", "Move this template to your current position").html("<i class=\"fa fa-map-pin fa-fw\"></i>").click(this.moveTemplateHereClicked.bind(this, templateCtn)).appendTo(templateCtn);
                 $("<div>").addClass("warp-visibility").attr("title", "Change the opacity of this template").html("<i class=\"fa fa-eye fa-fw\"></i>").click(this.changeOpacityOfTemplateClicked.bind(this, templateCtn)).appendTo(templateCtn);
                 $("<div>").addClass("warp-scale").attr("title", "Change the scale of this template").html("<i class=\"fa fa-expand fa-fw\"></i>").click(this.changeScaleOfTemplateClicked.bind(this, templateCtn)).appendTo(templateCtn);
                 $("<div>").addClass("template-img").css("background-image", `url(${template.url})`).appendTo(templateCtn);
-                var scale = (template.scale || 1) / 4;
+                let scale = (template.scale || 1) / 4;
                 $("<img>").attr("src", template.url).css({top: template.pos.y, left: template.pos.x, transform: `scale(${scale}) translateZ(0) translate(-${50 / scale}%, -${50 / scale}%)`, opacity: template.opacity}).appendTo(templateImgs);
             });
         } else {
             infoContainer.addClass("empty");
-            var explanation = $("<div>").addClass("warp-info template explanation").appendTo(infoContainer);
+            let explanation = $("<div>").addClass("warp-info template explanation").appendTo(infoContainer);
             $("<span>").addClass("warp-title").text("Templates").appendTo(explanation);
             $("<span>").addClass("warp-coordinates").text("Overlay an image on the canvas to use as a guide for your art.").appendTo(explanation);
         }
     },
     
     addTemplateClicked: function() {
-        var app = this;
+        let app = this;
         $("<input>").attr("type", "file").attr("accept", ".png,.jpg,.gif,.jpeg,.webm,.apng,.svg").hide().on("change", function() {
             this.remove();
             if(!this.files || !this.files[0]) return;
-            var reader = new FileReader();
+            let reader = new FileReader();
             reader.onload = (event) => {
-                var dataURI = event.target.result;
+                let dataURI = event.target.result;
                 app.templates.push({pos: app.getCoordinates(), url: dataURI, opacity: 0.5, scale: 1});
                 app.layoutTemplates();
                 app.saveTemplates();
@@ -1325,7 +1325,7 @@ var place = {
         event.preventDefault();
         event.stopPropagation();
         if(!window.confirm("Are you sure you want to delete this template?")) return;
-        var index = $(elem).attr("data-template-id");
+        let index = $(elem).attr("data-template-id");
         if(!index || index < 0) return;
         this.templates.splice(index, 1);
         this.layoutTemplates();
@@ -1335,7 +1335,7 @@ var place = {
     moveTemplateHereClicked: function(elem, event) {
         event.preventDefault();
         event.stopPropagation();
-        var index = $(elem).attr("data-template-id");
+        let index = $(elem).attr("data-template-id");
         if(!index || index < 0) return;
         this.templates[index].pos = this.getCoordinates();
         this.layoutTemplates();
@@ -1345,9 +1345,9 @@ var place = {
     changeOpacityOfTemplateClicked: function(elem, event) {
         event.preventDefault();
         event.stopPropagation();
-        var index = $(elem).attr("data-template-id");
+        let index = $(elem).attr("data-template-id");
         if(!index || index < 0) return;
-        var newOpacity = window.prompt("Enter the new desired opacity for this template (as a percentage):", (this.templates[index].opacity || 0.5) * 100);
+        let newOpacity = window.prompt("Enter the new desired opacity for this template (as a percentage):", (this.templates[index].opacity || 0.5) * 100);
         if(!newOpacity) return;
         if(newOpacity > 100 || newOpacity < 0) return window.alert("You must enter a value between 0 and 100.");
         this.templates[index].opacity = newOpacity / 100;
@@ -1358,9 +1358,9 @@ var place = {
     changeScaleOfTemplateClicked: function(elem, event) {
         event.preventDefault();
         event.stopPropagation();
-        var index = $(elem).attr("data-template-id");
+        let index = $(elem).attr("data-template-id");
         if(!index || index < 0) return;
-        var newScale = window.prompt("Enter the new desired scale for this template (relative to 1):", this.templates[index].scale || 1);
+        let newScale = window.prompt("Enter the new desired scale for this template (relative to 1):", this.templates[index].scale || 1);
         if(!newScale) return;
         this.templates[index].scale = newScale;
         this.layoutTemplates();
@@ -1370,9 +1370,9 @@ var place = {
     moveToTemplateClicked: function(elem, event) {
         event.preventDefault();
         event.stopPropagation();
-        var index = $(elem).attr("data-template-id");
+        let index = $(elem).attr("data-template-id");
         if(!index || index < 0) return;
-        var pos = this.templates[index].pos;
+        let pos = this.templates[index].pos;
         this.zoomIntoPoint(pos.x, pos.y, false);
     }
 };
@@ -1392,8 +1392,8 @@ $("#user-count").click(function() {
     place.popoutController.popoutVisibilityController.changeTab("active-users");
 });
 
-var hash = hashHandler.getHash();
-var hashKeys = Object.keys(hash);
+let hash = hashHandler.getHash();
+let hashKeys = Object.keys(hash);
 if(hashKeys.indexOf("signin") > 0 || hashKeys.indexOf("logintext") > 0) {
     if(hashKeys.indexOf("logintext") > 0) {
         SignInDialogController.showErrorOnTab("sign-in", hash["logintext"])
@@ -1407,7 +1407,7 @@ if(hashKeys.indexOf("signin") > 0 || hashKeys.indexOf("logintext") > 0) {
 }
 
 $("*[data-place-trigger]").click(function() {
-    var trigger = $(this).data("place-trigger");
+    let trigger = $(this).data("place-trigger");
     if(trigger == "openSignInDialog") {
         SignInDialogController.show("sign-in");
     } else if(trigger == "openSignUpDialog") {
@@ -1418,14 +1418,14 @@ $("*[data-place-trigger]").click(function() {
 });
 
 if(place.isSignedIn()) {
-    var changelogController = {
+    let changelogController = {
         contentElement: $("#changelog-content"),
         changelogs: null, pagination: null,
         isLoadingChangelogs: false,
 
         setup: function() {
             $(document).on("keydown", (e) => {
-                var isLeft = e.keyCode == 37, isRight = e.keyCode == 39;
+                let isLeft = e.keyCode == 37, isRight = e.keyCode == 39;
                 if(ChangelogDialogController.isShowing() && (isLeft || isRight) && this.pagination) {
                     e.preventDefault();
                     if(this.pagination.next && isRight) this.requestChangelogPage(this.pagination.next);
@@ -1472,14 +1472,14 @@ if(place.isSignedIn()) {
             if(this.changelogs.length <= 0) return this.contentElement.addClass("needs-margin").text("There's no changelog to show.");
             this.contentElement.html("").removeClass("needs-margin");
             this.changelogs.forEach((changelog) => {
-                var element = $("<div>").addClass("changelog-info").attr("data-changelog-version", changelog.version).appendTo(this.contentElement);
+                let element = $("<div>").addClass("changelog-info").attr("data-changelog-version", changelog.version).appendTo(this.contentElement);
                 $("<p>").addClass("subhead extra-margin").text(this.getFormattedDate(changelog.date)).appendTo(element);
                 $("<p>").html(changelog.html).appendTo(element);
             });
             if(this.pagination) {
-                var paginationContainer = $("<ul>").addClass("pager").appendTo($("<nav>").attr("aria-label", "Changelog page navigation").appendTo(this.contentElement));
-                var previous = $("<a>").html("<span aria-hidden=\"true\">&larr;</span> Older").appendTo($("<li>").addClass("previous").appendTo(paginationContainer));
-                var next = $("<a>").html("Newer <span aria-hidden=\"true\">&rarr;</span>").appendTo($("<li>").addClass("next").appendTo(paginationContainer));
+                let paginationContainer = $("<ul>").addClass("pager").appendTo($("<nav>").attr("aria-label", "Changelog page navigation").appendTo(this.contentElement));
+                let previous = $("<a>").html("<span aria-hidden=\"true\">&larr;</span> Older").appendTo($("<li>").addClass("previous").appendTo(paginationContainer));
+                let next = $("<a>").html("Newer <span aria-hidden=\"true\">&rarr;</span>").appendTo($("<li>").addClass("next").appendTo(paginationContainer));
                 if(this.pagination.previous) previous.attr("href", "javascript:void(0)").click(() => this.requestChangelogPage(this.pagination.previous));
                 else previous.parent().addClass("disabled");
                 if(this.pagination.next) next.attr("href", "javascript:void(0)").click(() => this.requestChangelogPage(this.pagination.next));
@@ -1488,8 +1488,8 @@ if(place.isSignedIn()) {
         },
 
         getFormattedDate: function(dateStr) {
-            var date = new Date(dateStr);
-            var t = new Date(), y = new Date();
+            let date = new Date(dateStr);
+            let t = new Date(), y = new Date();
             y.setDate(y.getDate() - 1);
             if(date.toDateString() == (new Date()).toDateString()) return "Today";
             else if(date.toDateString() == y.toDateString()) return "Yesterday";

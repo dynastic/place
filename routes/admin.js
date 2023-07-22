@@ -2,7 +2,7 @@ const express = require("express");
 const User = require("../models/user");
 
 function AdminRouter(app) {
-    let router = express.Router()
+    const router = express.Router()
     
     router.use(function(req, res, next) {
         // Don't allow anything if user has forced pw reset or OAuth not configured

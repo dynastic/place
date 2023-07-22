@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 mongoose.promise = global.Promise;
 const recaptcha = require("express-recaptcha");
-const readline = require("readline").createInterface({input: process.stdin, output: process.stdout});
+const readline = require("readline").createInterface({ input: process.stdin, output: process.stdout });
 const util = require("util");
 const PaintingManager = require("./util/PaintingManager");
 const HTTPServer = require("./util/HTTPServer");
@@ -18,29 +18,73 @@ const User = require("./models/user");
 const fs = require("fs");
 const path = require("path");
 
-var app = {};
+const app = {};
 
 app.logger = require('./util/logger');
 
-app.loadConfig = (path = "./config/config") => {
+const loadNewConfig = (path) => {
     delete require.cache[require.resolve(path)];
-    var oldConfig = app.config;
     app.config = require(path);
-    app.colours = [... new Set((app.config.colours || ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"]).map((c) => c.toUpperCase()))];
-    if(!app.config.siteName) app.config.siteName = "Place";
-    if(!app.config.enableChangelogs) app.config.enableChangelogs = true;
-    if(!app.config.boardSize) app.config.boardSize = 1600; // default to 1600 if not specified in config
-    if(oldConfig && (oldConfig.secret != app.config.secret || oldConfig.database != app.config.database || oldConfig.boardSize != app.config.boardSize)) {
-        app.logger.log("Configuration", "We are stopping the Place server because the database URL, secret, and/or board image size has been changed, which will require restarting the entire server.");
+    app.colours = [
+        ...new Set(
+            (app.config.colours || [
+                "#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000",
+                "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD",
+                "#0083C7", "#0000EA", "#CF6EE4", "#820080"
+            ]).map((c) => c.toUpperCase())
+        ),
+    ]
+}
+
+const setDefaultValues = () => {
+    if (!app.config.siteName) {
+        app.config.siteName = "Place";
+    }
+    if (!app.config.enableChangelogs) {
+        app.config.enableChangelogs = true;
+    }
+    if (!app.config.boardSize) {
+        app.config.boardSize = 1600;
+    } // default to 1600 if not specified in config
+}
+const checkConfigChanges = (oldConfig) => {
+    const hasConfigChanged =
+        oldConfig &&
+        (oldConfig.secret !== app.config.secret ||
+            oldConfig.database !== app.config.database ||
+            oldConfig.boardSize !== app.config.boardSize);
+
+    if (hasConfigChanged) {
+        app.logger.log(
+            "Configuration",
+            "We are stopping the Place server because the database URL, secret, and/or board image size has been changed, which will require restarting the entire server."
+        );
         process.exit(0);
     }
-    if(oldConfig && (oldConfig.oauth != app.config.oauth)) {
+}
+
+const checkPortChanges = (oldConfig) => {
+    const hasPortChanges =
+        oldConfig &&
+        (oldConfig.port != app.config.port ||
+            oldConfig.onlyListenLocal != app.config.onlyListenLocal)
+    if (hasPortChanges) {
+        app.restartServer()
+    }
+}
+app.loadConfig = (path = "./config/config") => {
+    const oldConfig = app.config
+    loadNewConfig(path)
+    setDefaultValues()
+    checkConfigChanges(oldConfig)
+    checkPortChanges(oldConfig)
+
+    if (oldConfig && (oldConfig.oauth != app.config.oauth)) {
         app.stopServer();
         app.recreateServer();
         app.restartServer();
         app.recreateRoutes();
     }
-    if(oldConfig && (oldConfig.port != app.config.port || oldConfig.onlyListenLocal != app.config.onlyListenLocal)) app.restartServer();
 }
 app.loadConfig();
 
@@ -73,24 +117,24 @@ app.leaderboardManager = LeaderboardManager(app);
 app.userActivityController = UserActivityManager(app);
 
 app.enableCaptcha = false;
-if(typeof app.config.recaptcha !== "undefined") {
-    if(typeof app.config.recaptcha.siteKey !== "undefined" && typeof app.config.recaptcha.secretKey !== "undefined") {
+if (typeof app.config.recaptcha !== "undefined") {
+    if (typeof app.config.recaptcha.siteKey !== "undefined" && typeof app.config.recaptcha.secretKey !== "undefined") {
         app.enableCaptcha = app.config.recaptcha.siteKey != "" && app.config.recaptcha.secretKey != "";
     }
 }
-if(app.enableCaptcha) {
+if (app.enableCaptcha) {
     // Set up reCaptcha
     recaptcha.init(app.config.recaptcha.siteKey, app.config.recaptcha.secretKey);
     app.recaptcha = recaptcha;
 }
 
 app.adminMiddleware = (req, res, next) => {
-    if(!req.user || !req.user.admin) return res.status(403).redirect("/?admindenied=1");
+    if (!req.user || !req.user.admin) return res.status(403).redirect("/?admindenied=1");
     next();
 };
 
 app.modMiddleware = (req, res, next) => {
-    if(!req.user || !(req.user.admin || req.user.moderator)) return res.status(403).redirect("/?moddenied=1");
+    if (!req.user || !(req.user.admin || req.user.moderator)) return res.status(403).redirect("/?moddenied=1");
     next();
 };
 
@@ -106,7 +150,7 @@ mongoose.connect(process.env.DATABASE || app.config.database);
 const handlePendingDeletions = () => {
     setInterval(() => {
         const now = new Date();
-        User.remove({ deletionDate: { $lte: now } }, function(err, result) {
+        User.remove({ deletionDate: { $lte: now } }, function (err, result) {
             if (err) { console.error(err); return }
             if (result.n) app.logger.log('Deleter', `Deleted ${result.n} users.`);
         });
@@ -122,10 +166,10 @@ app.javascriptProcessor = new JavaScriptProcessor(app);
 app.javascriptProcessor.processJavaScript();
 
 app.stopServer = () => {
-    if(app.server.listening) {
+    if (app.server.listening) {
         app.logger.log('Shutdown', "Closing server…")
         app.server.close();
-        setImmediate(function() { app.server.emit("close"); });
+        setImmediate(function () { app.server.emit("close"); });
     }
 }
 
@@ -150,18 +194,18 @@ app.recreateRoutes = () => {
 app.recreateRoutes();
 readline.on('line', i => {
     try {
-        var output = eval(i)
+        const output = eval(i)
         output instanceof Promise
-        ? output.then(a => {
-            console.log('Promise Resolved')
-            console.log(util.inspect(a, {depth: 0}))
-        }).catch(e => {
-            console.log('Promise Rejected')
-            console.log(e.stack)
-        })
-        : output instanceof Object
-            ? console.log(util.inspect(output, {depth: 0}))
-            : console.log(output)
+            ? output.then(a => {
+                console.log('Promise Resolved')
+                console.log(util.inspect(a, { depth: 0 }))
+            }).catch(e => {
+                console.log('Promise Rejected')
+                console.log(e.stack)
+            })
+            : output instanceof Object
+                ? console.log(util.inspect(output, { depth: 0 }))
+                : console.log(output)
     } catch (err) {
         console.log(err.stack)
     }

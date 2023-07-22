@@ -5,8 +5,8 @@ const fs = require("fs");
 const Action = require("../models/action");
 
 exports.getAPIUsersTable = (req, res, next) => {
-    let searchValue = req.body.search ? req.body.search.value || "" : "";
-    var sort = { creationDate: "desc" };
+    const searchValue = req.body.search ? req.body.search.value || "" : "";
+    let sort = { creationDate: "desc" };
     if(req.body.order && req.body.order.length > 0 && req.body.columns) {
         if(req.body.columns.length > req.body.order[0].column || 1) {
             let colName = req.body.columns[req.body.order[0].column].data;
@@ -62,7 +62,7 @@ exports.postAPIToggleBan = (req, res, next) => {
     if(req.query.id == req.user.id) return res.status(400).json({success: false, error: {message: "You may not ban yourself.", code: "cant_modify_self"}});
     User.findById(req.query.id).then((user) => {
         if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
-        var info = null;
+        let info = null;
         if(!user.banned) {
             // We're trying to ban the user
             if(!req.query.reason || req.query.reason.length <= 3) return res.status(400).json({success: false, error: {message: "Make sure you have specified a ban reason that is over three characters in length.", code: "invalid_reason"}});
@@ -132,18 +132,18 @@ exports.getAPISimilarUsers = (req, res, next) => {
     User.findById(req.params.userID).then((user) => {
         if(!req.user.canPerformActionsOnUser(user)) return res.status(403).json({success: false, error: {message: "You may not perform actions on this user.", code: "access_denied_perms"}});
         user.findSimilarIPUsers().then((users) => {
-            var identifiedAccounts = users.map((user) => { return { user: user.toInfo(req.place), reasons: ["ip"] }; });
+            let identifiedAccounts = users.map((user) => { return { user: user.toInfo(req.place), reasons: ["ip"] }; });
             function respondIdentifiedAccounts() {
                 res.json({ success: true, target: user.toInfo(req.place), identifiedAccounts: identifiedAccounts })
             }
             if (fs.existsSync(path.join(__dirname, "../util/", "legit.js"))) {
                 const legit = require("../util/legit");
-                var currentUsernames = identifiedAccounts.map((i) => i.user.username);
+                let currentUsernames = identifiedAccounts.map((i) => i.user.username);
                 legit.findSimilarUsers(user).then((users) => {
-                    var reason = legit.similarityAspectName();
+                    let reason = legit.similarityAspectName();
                     users.forEach((user) => {
                         if(currentUsernames.includes(user.name)) {
-                            var i = currentUsernames.indexOf(user.name);
+                            let i = currentUsernames.indexOf(user.name);
                             identifiedAccounts[i].reasons.push(reason);
                         } else identifiedAccounts.push({ user: user.toInfo(req.place), reasons: [reason] });
                     });
@@ -158,13 +158,13 @@ exports.getAPISimilarUsers = (req, res, next) => {
 };
 
 exports.getAPIActions = (req, res, next) => {
-    var condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === "true") } };
+    let condition = { actionID: { $in: ActionLogger.actionIDsToRetrieve(req.query.modOnly === "true") } };
     if (req.query.lastID) condition._id = { $lt: req.query.lastID };
     else if (req.query.firstID) condition._id = { $gt: req.query.firstID };
     Action.find(condition, null, {sort: {_id: -1}}).limit(Math.min(250, req.query.limit || 25)).then((actions) => {
-        var lastID = null;
+        let lastID = null;
         if(actions.length > 1) lastID = actions[actions.length - 1]._id;
-        var promises = actions.map((a) => a.getInfo());
+        let promises = actions.map((a) => a.getInfo());
         Promise.all(promises).then((actions) => res.json({ success: true, actions: actions, lastID: lastID, actionTemplates: ActionLogger.getAllActionInfo() })).catch((err) => res.status(500).json({ success: false }))
     }).catch((err) => {
         req.place.reportError("An error occurred while trying to retrieve actions: " + err);

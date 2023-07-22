@@ -2,7 +2,7 @@ const Pixel = require("../models/pixel");
 const User = require("../models/user");
 
 function LeaderboardManager(app) {
-    var manager = {
+    const manager = {
         needsUpdating: true,
         topUsers: null, pixelCounts: null,
         waitingForUpdate: [],
@@ -10,16 +10,16 @@ function LeaderboardManager(app) {
         lastUpdated: null,
 
         update: function() {
-            var m = this;
+            let m = this;
             if(!this.needsUpdating) return;
             app.logger.log('Leaderboard', "Starting generation of leaderboard data…");
             this.isUpdating = true;
             this.needsUpdating = false;
-            var dateBackLastWeek = new Date(new Date().getTime() - (7 * 24 * 60 * 60 * 1000));
-            var pixelCounts = {};
+            let dateBackLastWeek = new Date(new Date().getTime() - (7 * 24 * 60 * 60 * 1000));
+            let pixelCounts = {};
             Pixel.find({lastModified: {$gt: dateBackLastWeek}}, {editorID: 1}).stream().on("data", (pixel) => {
                 if (!pixel.editorID) return;
-                var uid = pixel.editorID.toString();
+                let uid = pixel.editorID.toString();
                 if(!Object.keys(pixelCounts).includes(uid)) pixelCounts[uid] = 0;
                 pixelCounts[uid]++;
             }).on("end", () => {
@@ -53,14 +53,14 @@ function LeaderboardManager(app) {
             if(this.isUpdating) return this.waitingForUpdate.push(callback);
             if(!this.topUsers || !this.pixelCounts) return callback("No leaderboard data loaded", null);
             User.find({_id: { $in: this.topUsers }}).then((users) => {
-                var info = { leaderboard: users.sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map((u) => u.toInfo(app)), lastUpdated: this.lastUpdated };
+                let info = { leaderboard: users.sort((a, b) => this.pixelCounts[b._id] - this.pixelCounts[a._id]).map((u) => u.toInfo(app)), lastUpdated: this.lastUpdated };
                 callback(null, info);
             }).catch((err) => callback(err, null));
         },
 
         getUserRank: function(userID) {
             if(!this.topUsers) return null;
-            var index = this.topUsers.indexOf(userID);
+            let index = this.topUsers.indexOf(userID);
             return index >= 0 ? index + 1 : null;
         }
     };

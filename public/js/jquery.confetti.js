@@ -1,23 +1,23 @@
 (function($) {
   $.confetti = new function() {
     // globals
-    var canvas;
-    var ctx;
-    var W;
-    var H;
-    var mp = 150; //max particles
-    var particles = [];
-    var angle = 0;
-    var tiltAngle = 0;
-    var confettiActive = true;
-    var animationComplete = true;
-    var deactivationTimerHandler;
-    var reactivationTimerHandler;
-    var animationHandler;
+    let canvas;
+    let ctx;
+    let W;
+    let H;
+    let mp = 150; //max particles
+    let particles = [];
+    let angle = 0;
+    let tiltAngle = 0;
+    let confettiActive = true;
+    let animationComplete = true;
+    let deactivationTimerHandler;
+    let reactivationTimerHandler;
+    let animationHandler;
 
     // objects
 
-    var particleColors = {
+    let particleColors = {
         colorOptions: ["DodgerBlue", "OliveDrab", "Gold", "pink", "SlateBlue", "lightblue", "Violet", "PaleGreen", "SteelBlue", "SandyBrown", "Chocolate", "Crimson"],
         colorIndex: 0,
         colorIncrementer: 0,
@@ -91,8 +91,8 @@
         canvas.style.display = 'block';
         particles = [];
         animationComplete = false;
-        for (var i = 0; i < mp; i++) {
-            var particleColor = particleColors.getColor();
+        for (let i = 0; i < mp; i++) {
+            let particleColor = particleColors.getColor();
             particles.push(new confettiParticle(particleColor));
         }
         StartConfetti();
@@ -100,8 +100,8 @@
 
     function Draw() {
         ctx.clearRect(0, 0, W, H);
-        var results = [];
-        for (var i = 0; i < mp; i++) {
+        let results = [];
+        for (let i = 0; i < mp; i++) {
             (function (j) {
                 results.push(particles[j].draw());
             })(i);
@@ -117,12 +117,12 @@
 
 
     function Update() {
-        var remainingFlakes = 0;
-        var particle;
+        let remainingFlakes = 0;
+        let particle;
         angle += 0.01;
         tiltAngle += 0.1;
 
-        for (var i = 0; i < mp; i++) {
+        for (let i = 0; i < mp; i++) {
             particle = particles[i];
             if (animationComplete) return;
 

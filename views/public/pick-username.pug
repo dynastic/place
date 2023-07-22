@@ -1,7 +1,7 @@
 extends ../layout
 block dependencies
-    - var pageTitle = "Pick a Username";
-    - var css = ["/css/signin.css"];
+    - let pageTitle = "Pick a Username";
+    - let css = ["/css/signin.css"];
 block content
     - if (typeof username === "undefined") username = "";
     - if (typeof error === "undefined") error = null;

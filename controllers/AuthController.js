@@ -40,7 +40,7 @@ exports.postSignUp = (req, res, next) => {
         }
     });
     function sendError(error) {
-        var status = error.intCode || 500;
+        let status = error.intCode || 500;
         if (typeof error.intCode !== "undefined") delete error.intCode;
         res.status(status).json({success: false, error: error || {message: "An unknown error occurred", code: "unknown_error"}});
     }
@@ -76,7 +76,7 @@ exports.getSignOut = (req, res, next) => {
     ActionLogger.log(req.place, "signOut", req.user);
     req.logout();
     req.session = null;
-    var redirectURL = typeof req.query.redirectURL !== "undefined" ? req.query.redirectURL : null;
-    var shouldUseRedirect = redirectURL && redirectURL != "/" && !absoluteURLRegex.test(redirectURL);
+    const redirectURL = typeof req.query.redirectURL !== "undefined" ? req.query.redirectURL : null;
+    let shouldUseRedirect = redirectURL && redirectURL != "/" && !absoluteURLRegex.test(redirectURL);
     return res.redirect(`/${(shouldUseRedirect ? redirectURL : "")}`);
 };

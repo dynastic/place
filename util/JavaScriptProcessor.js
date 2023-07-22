@@ -16,7 +16,7 @@ class JavaScriptProcessor {
             }
         };
 
-        var swallowError = function(error) {
+        const swallowError = function(error) {
             app.reportError("Error while processing JavaScript: " + error);
             this.emit("end");
         }
@@ -28,7 +28,7 @@ class JavaScriptProcessor {
         // Process JavaScript
         gulp.task("scripts", (cb) => {
             this.app.logger.info('Babel', "Processing JavaScript…");
-            var t = gulp.src(this.paths.scripts.src);
+            let t = gulp.src(this.paths.scripts.src);
             t = t.pipe(changed(this.paths.scripts.built))
             t = t.pipe(sourcemaps.init());
             t = t.pipe(babel({ presets: ["es2015", "es2016", "es2017"] }));

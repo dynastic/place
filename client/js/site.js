@@ -2,19 +2,19 @@ $.ajaxSetup({
 	headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
 });
 
-var renderBadge = function(badge, prefersShortText = false) {
-	var badge = $("<span>").addClass(`label badge-label label-${badge.style || "default"}`).text(prefersShortText && badge.shortText ? badge.shortText : badge.text);
+let renderBadge = function(badge, prefersShortText = false) {
+	let badge = $("<span>").addClass(`label badge-label label-${badge.style || "default"}`).text(prefersShortText && badge.shortText ? badge.shortText : badge.text);
 	if(badge.title) badge.attr("title", badge.title);
 	return badge;
 }
 
-var hashHandler = {
+let hashHandler = {
     getHash: function() {
         return this.decodeHash(window.location.hash);
     },
 
     setHash: function(hash) {
-        var encodedHash = this.encodeHash(hash);
+        let encodedHash = this.encodeHash(hash);
         if("history" in window) window.history.replaceState(undefined, undefined, "#" + encodedHash);
         else location.replace("#" + encodedHash);
     },
@@ -24,9 +24,9 @@ var hashHandler = {
     },
 
     deleteHashKey: function(keys) {
-        var keysToUse = keys;
+        let keysToUse = keys;
         if(typeof keys == "string") keysToUse = [keys];
-        var hash = this.getHash();
+        let hash = this.getHash();
         keysToUse.forEach((key) => delete hash[key]);
         this.setHash(hash);
     },
@@ -34,11 +34,11 @@ var hashHandler = {
     decodeHash: function(hashString) {
         if(hashString.indexOf("#") === 0) hashString = hashString.substring(1);
         if (hashString.length <= 0) return {};
-        var hashArguments = hashString.split("&");
-        var decoded = {};
+        let hashArguments = hashString.split("&");
+        let decoded = {};
         hashArguments.forEach(function(hashArg) {
-            var parts = hashArg.split("=");
-            var key = parts[0], value = decodeURIComponent(parts[1]);
+            let parts = hashArg.split("=");
+            let key = parts[0], value = decodeURIComponent(parts[1]);
             if(key) decoded[key] = value;
         });
         return decoded;
@@ -56,12 +56,12 @@ function DialogController(dialog) {
         isAnimating: false,
 
         setup: function() {
-            var me = this;
+            let me = this;
             me.dialog.parent().find(".dialog .close, .dialog-overlay").click(function() {
                 me.hide();
             });
             me.dialog.find(".switchers > div").click(function() {
-                var id = $(this).attr("tab-name");
+                let id = $(this).attr("tab-name");
                 me.switchTab(id);
             });
             $(document).keydown(function(e) {
@@ -75,13 +75,13 @@ function DialogController(dialog) {
             })
             me.dialog.find("form.form-signin").submit(function(e) {
                 e.preventDefault();
-                var form = $(this);
-                var call = form.attr("action");
-                var tab = form.parent().attr("tab-name");
-                var data = form.serialize();
+                let form = $(this);
+                let call = form.attr("action");
+                let tab = form.parent().attr("tab-name");
+                let data = form.serialize();
                 if(form.data("submitting")) return;
-                var submitButton = form.find("input[type=submit], button[type=submit]");
-                var origSubmitButtonText = submitButton.text();
+                let submitButton = form.find("input[type=submit], button[type=submit]");
+                let origSubmitButtonText = submitButton.text();
                 submitButton.text("Loading").attr("disabled", "disabled");
                 form.data("submitting", true);
                 placeAjax.post("/api" + call, data, null, () => {
@@ -89,8 +89,8 @@ function DialogController(dialog) {
                     if(origSubmitButtonText) submitButton.text(origSubmitButtonText);
                     form.data("submitting", false);
                 }).then((data) => {
-                    var hash = hashHandler.getHash();
-                    var redirectURL = hash["redirectURL"];
+                    let hash = hashHandler.getHash();
+                    let redirectURL = hash["redirectURL"];
                     const absoluteURLRegex = new RegExp('^(?:[a-z]+:)?(//)?', 'i');
                     if(redirectURL && redirectURL != "/" && !absoluteURLRegex.test(redirectURL)) {
                         window.location.href = redirectURL;
@@ -107,7 +107,7 @@ function DialogController(dialog) {
                     }
                     if(tab == "sign-up" && typeof grecaptcha !== "undefined") grecaptcha.reset();
                     me.shake();
-                    var error = "An unknown error occurred while attempting to authenticate you.";
+                    let error = "An unknown error occurred while attempting to authenticate you.";
                     if(err && err.message) error = err.message;
                     me.showErrorOnTab(tab, error);
                 });
@@ -125,15 +125,15 @@ function DialogController(dialog) {
         },
 
         showErrorOnTab: function(tab, text = null) {
-            var tabContent = this.dialog.find(`.pages > div[tab-name=${tab}]`);
+            let tabContent = this.dialog.find(`.pages > div[tab-name=${tab}]`);
             if(text) {
                 // show error
-                var existing = tabContent.find(".tab-error");
+                let existing = tabContent.find(".tab-error");
                 if(existing.length > 0) {
                     existing.find("span").text(text);
                     return;
                 }
-                var alert = $("<div>").addClass("tab-error alert alert-danger").hide().appendTo(tabContent).fadeIn();
+                let alert = $("<div>").addClass("tab-error alert alert-danger").hide().appendTo(tabContent).fadeIn();
                 $("<strong>").text("Uh oh! ").appendTo(alert);
                 $("<span>").text(text).appendTo(alert);
             } else {
@@ -146,8 +146,8 @@ function DialogController(dialog) {
             this.dialog.find(`.pages > div:not([tab-name=${tab}]) .tab-error`).remove();
             this.currentTab = tab;
             this.isAnimating = true;
-            var hidesSwitchers = this.dialog.find(`.pages > div[tab-name=${tab}]`).hasClass("hides-switchers");
-            var applyClasses = () => {
+            let hidesSwitchers = this.dialog.find(`.pages > div[tab-name=${tab}]`).hasClass("hides-switchers");
+            let applyClasses = () => {
                 this.isAnimating = false;
                 this.dialog.find(".pages > div.active, .switchers > div.active").removeClass("active");
                 this.dialog.find(".switchers").removeClass("hidden");
@@ -156,7 +156,7 @@ function DialogController(dialog) {
             }
             if(animated) {
                 const animDuration = 250;
-                var toHide = $(`.pages > div.active, .switchers${hidesSwitchers ? "" : ` > div[tab-name=${tab}]`}`).animate({opacity: 0}, {duration: animDuration, queue: false}).slideUp({duration: animDuration, queue: false, complete: function() {
+                let toHide = $(`.pages > div.active, .switchers${hidesSwitchers ? "" : ` > div[tab-name=${tab}]`}`).animate({opacity: 0}, {duration: animDuration, queue: false}).slideUp({duration: animDuration, queue: false, complete: function() {
                     $(this).attr("style", "");
                     applyClasses();
                 }});
@@ -189,7 +189,7 @@ function DialogController(dialog) {
 }
 
 const defaultErrorMessage = "An unknown error occurred while trying to make that request.";
-var placeAjax = {
+let placeAjax = {
 	ajax: function(data, defaultErrorMessage = defaultErrorMessage, alwaysCallback = null) {
 		return new Promise((resolve, reject) => {
 			function handleError(response) {
@@ -228,7 +228,7 @@ var placeAjax = {
 if(("standalone" in window.navigator) && window.navigator.standalone){
 
 	// If you want to prevent remote links in standalone web apps opening Mobile Safari, change 'remotes' to true
-	var noddy, remotes = false;
+	let noddy, remotes = false;
 	
 	document.addEventListener("click", function(event) {
 		

@@ -12,13 +12,13 @@ class DataModelManager {
     }
 
     registerModel(name, prototype) {
-        var m = this;
+        let m = this;
         // Check if we've already initialized this model
-        var needsInitialization = !this.registeredModels.has(name);
+        let needsInitialization = !this.registeredModels.has(name);
         if(needsInitialization) {
             // Add original model static methods to our manager for later, and change them in the model to call the manager.
             Object.keys(prototype.statics).forEach((key) => {
-                var method = prototype.statics[key];
+                let method = prototype.statics[key];
                 this._registerMethodHandler(name, key, true, method);
                 prototype.statics[key] = function() {
                     return m._getMethodHandler(name, key, true).apply(this, Array.from(arguments))
@@ -27,16 +27,16 @@ class DataModelManager {
             prototype.options.strict = false;
         }
         if(this.modelFields[name]) prototype.add(this.modelFields[name]);
-        var model = mongoose.model(name, this.registeredModels.get(name) || prototype);
+        let model = mongoose.model(name, this.registeredModels.get(name) || prototype);
         if(needsInitialization) {
             // Add original model instance methods to our manager for later, and change them in the model to call the manager.
             Object.keys(prototype.methods).forEach((key) => {
-                var method = mongoose.models[name].prototype[key];
+                let method = mongoose.models[name].prototype[key];
                 this._registerMethodHandler(name, key, false, method);
                 this._setupMethodHandler(name, key, false);
             });
             // Add methods that we've declared in modules to the model.
-            var methodsToAdd = this.modelInstanceMethods[name];
+            let methodsToAdd = this.modelInstanceMethods[name];
             if(methodsToAdd) Object.keys(methodsToAdd).forEach((key) => {
                 this._setupMethodHandler(name, key, false);
             });
@@ -92,12 +92,12 @@ class DataModelManager {
     }
 
     _getMethodHandler(model, name, isStatic) {
-        var res = this._getList(isStatic)[model][name].slice();
+        let res = this._getList(isStatic)[model][name].slice();
         if (res.length <= 1) return res[0];
         res.reverse();
         return function() {
-            var args = Array.from(arguments);
-            var index = 1;
+            let args = Array.from(arguments);
+            let index = 1;
             args.push(() => {
                 if(!res[index]) return;
                 index++;

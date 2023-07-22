@@ -1,9 +1,9 @@
-var defaultBanReason = "";
-var actionTemplates = null;
+let defaultBanReason = "";
+let actionTemplates = null;
 
-var BroadcastDialogController = DialogController($("#broadcast-dialog"));
+let BroadcastDialogController = DialogController($("#broadcast-dialog"));
 
-var actions = {
+let actions = {
     user: {
         similar: {
             btnStyle: "default",
@@ -55,7 +55,7 @@ var actions = {
             adminOnly: true,
             getRequestData: function(elem) {
                 return new Promise((resolve, reject) => {
-                    var id = elem.parent().attr("data-user-id");
+                    let id = elem.parent().attr("data-user-id");
                     if(!id) id = elem.parent().parent().attr("data-user-id");
                     bootbox.prompt({
                         title: "Password Reset Key (for login)",
@@ -93,7 +93,7 @@ var actions = {
             btnStyle: "primary",
             getRequestData: function(elem) {
                 return new Promise((resolve, reject) => {
-                    var id = elem.parent().attr("data-user-id");
+                    let id = elem.parent().attr("data-user-id");
                     if(!id) id = elem.parent().parent().attr("data-user-id");
                     placeAjax.get("/api/mod/user_notes", {id: id}, null).then((res) => {
                         bootbox.prompt({
@@ -158,12 +158,12 @@ var actions = {
     }
 };
 
-var setActionDataOnElement = function(data, elem, action) {
-    var title = action.buttonText(data);
-    var shouldShow = true;
+let setActionDataOnElement = function(data, elem, action) {
+    let title = action.buttonText(data);
+    let shouldShow = true;
     if(typeof action["shouldShow"] === "function") shouldShow = action.shouldShow(data);
-    var isPressed = false;
-    var text = title;
+    let isPressed = false;
+    let text = title;
     if(typeof action.icon === "function") text = `<i class="fa fa-${action.icon(data)}"></i>`
     if(elem.hasClass("dropdown-action")) text = `<span class="text-${action.btnStyle}">${text}</span>`
     if(typeof action.isActive === "function") isPressed = action.isActive(data);
@@ -174,11 +174,11 @@ var setActionDataOnElement = function(data, elem, action) {
     elem.html(text);
 }
 
-var renderAction = function(actionName, data = {}, type = "user", dropdown = false) {
-    var action = actions[type][actionName];
-    var title = action.buttonText(data);
-    var dropdownItem = null;
-    var btn = $("<a>").attr("href", "javascript:void(0)").addClass(`${type}-action-btn ${dropdown ? "text" : "btn"}-${action.btnStyle} ${dropdown ? "dropdown" : "btn"}-action`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
+let renderAction = function(actionName, data = {}, type = "user", dropdown = false) {
+    let action = actions[type][actionName];
+    let title = action.buttonText(data);
+    let dropdownItem = null;
+    let btn = $("<a>").attr("href", "javascript:void(0)").addClass(`${type}-action-btn ${dropdown ? "text" : "btn"}-${action.btnStyle} ${dropdown ? "dropdown" : "btn"}-action`).attr("data-admin-only", action.adminOnly === true).attr(`data-${type}-action`, actionName);
     if(typeof action.getAttributes === "function") btn.attr(action.getAttributes(data));
     if(typeof action.type !== "undefined" && action.type == "link") btn.attr("href", action.getLinkURL(data)).removeClass(`${type}-action-btn`);
     setActionDataOnElement(data, btn, action);
@@ -191,53 +191,53 @@ var renderAction = function(actionName, data = {}, type = "user", dropdown = fal
     return dropdown ? dropdownItem : btn;
 }
 
-var actionIDs = Object.keys(actions.user);
+let actionIDs = Object.keys(actions.user);
 
-var canTouchUser = function(user) {
-    var currentUserID = $("body").data("user-id");
-    var currentIsAdmin = $("body").data("user-is-admin");
-    var currentIsMod = $("body").data("user-is-mod");
-    var canTouchUser = (currentIsMod && !(user.moderator || user.admin)) || (currentIsAdmin && !user.admin);
+let canTouchUser = function(user) {
+    let currentUserID = $("body").data("user-id");
+    let currentIsAdmin = $("body").data("user-is-admin");
+    let currentIsMod = $("body").data("user-is-mod");
+    let canTouchUser = (currentIsMod && !(user.moderator || user.admin)) || (currentIsAdmin && !user.admin);
     if(user._id) user.id = user._id;
     return currentUserID != user.id && canTouchUser;
 }
 
-var renderUserActions = function(user) {
+let renderUserActions = function(user) {
     if(!canTouchUser(user)) return "";
     if(user._id) user.id = user._id;
-    var actionCtn = $("<div>").addClass("actions-ctn").attr("data-user-id", user.id);
+    let actionCtn = $("<div>").addClass("actions-ctn").attr("data-user-id", user.id);
     actionIDs.forEach((a) => renderAction(a, user, "user").appendTo(actionCtn));
     return actionCtn[0].outerHTML;
 }
 
-var renderServerActions = function() {
-    var actionContainer = $("<div>").addClass("action-ctn");
+let renderServerActions = function() {
+    let actionContainer = $("<div>").addClass("action-ctn");
     Object.keys(actions.server).forEach((key) => renderAction(key, {}, "server").appendTo(actionContainer));
     return actionContainer[0].outerHTML;
 }
 
-var renderUserActionsDropdown = function(user) {
+let renderUserActionsDropdown = function(user) {
     if(!canTouchUser(user)) return "";
-    var dropdownCtn = $("<div>").addClass("dropdown dropdown-inline user-action-dropdown-ctn").attr("data-user-id", user.id);
-    var btn = $("<a>").addClass("dropdown-toggle").attr({type: "button", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": false}).html("<span class=\"caret\"></span>").appendTo(dropdownCtn);
-    var dropdownList = $("<ul>").addClass("dropdown-menu").attr("data-user-id", user.id).appendTo(dropdownCtn);
+    let dropdownCtn = $("<div>").addClass("dropdown dropdown-inline user-action-dropdown-ctn").attr("data-user-id", user.id);
+    let btn = $("<a>").addClass("dropdown-toggle").attr({type: "button", "data-toggle": "dropdown", "aria-haspopup": true, "aria-expanded": false}).html("<span class=\"caret\"></span>").appendTo(dropdownCtn);
+    let dropdownList = $("<ul>").addClass("dropdown-menu").attr("data-user-id", user.id).appendTo(dropdownCtn);
     actionIDs.forEach((a) => renderAction(a, user, "user", true).appendTo(dropdownList));
     return dropdownCtn[0].outerHTML;
 }
 
-var updateUserDropdowns = function(user) {
+let updateUserDropdowns = function(user) {
     $(`div.user-action-dropdown-ctn[data-user-id="${user.id}"]`).html($(renderUserActionsDropdown(user))[0].innerHTML);
 }
 
 $("body").on("click", ".user-action-btn", function() {
-    var userID = $(this).parent().data("user-id");
+    let userID = $(this).parent().data("user-id");
     if(!userID) userID = $(this).parent().parent().data("user-id");
-    var action = actions.user[$(this).data("user-action")];
-    var elem = $(this);
-    var method = "GET";
+    let action = actions.user[$(this).data("user-action")];
+    let elem = $(this);
+    let method = "GET";
     if(typeof action.method !== "undefined") method = action.method;
     function continueWithRequestData(data) {
-        var originalText = elem.html();
+        let originalText = elem.html();
         elem.addClass("disabled").html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
         placeAjax.ajax({
             url:`/api/${action.url}/?id=${userID}`,
@@ -258,15 +258,15 @@ $("body").on("click", ".user-action-btn", function() {
 });
 
 $("body").on("click", ".server-action-btn", function() {
-    var action = actions.server[$(this).data("server-action")];
-    var data = {};
+    let action = actions.server[$(this).data("server-action")];
+    let data = {};
     if(action.type == "event" && typeof action.onClick === "function") return action.onClick($(this));
     if(typeof action.getRequestData === "function") data = action.getRequestData($(this));
     if(!data) return;
-    var originalText = $(this).html();
+    let originalText = $(this).html();
     $(this).addClass("disabled");
     $(this).html(`<i class="fa fa-circle-o-notch fa-spin"></i> ${originalText}`);
-    var elem = $(this);
+    let elem = $(this);
     placeAjax.get(`/api/${action.url}/`, data, "Couldn't perform action.", () => {
         elem.removeClass("disabled");
         if(action.callbackModifiesText === false) elem.html(originalText);
@@ -278,7 +278,7 @@ $("body").on("click", ".server-action-btn", function() {
 
 $("#broadcastForm").submit(function(e) {
     e.preventDefault();
-    var submitBtn = $(this).find("button[type=submit]").text("Broadcasting...").attr("disabled", "disabled");
+    let submitBtn = $(this).find("button[type=submit]").text("Broadcasting...").attr("disabled", "disabled");
     placeAjax.post("/api/admin/broadcast", {
         title: $(this).find("#inputBroadcastTitle").val(),
         message: $(this).find("#inputBroadcastMessage").val(),
@@ -291,11 +291,11 @@ $("#broadcastForm").submit(function(e) {
 })
 
 function getRowForAction(action) {
-    var actionTemplate = actionTemplates[action.action];
-    var randomString = function(length) {
-        var text = "";
-        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        for(var i = 0; i < length; i++) {
+    let actionTemplate = actionTemplates[action.action];
+    let randomString = function(length) {
+        let text = "";
+        let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        for(let i = 0; i < length; i++) {
             text += possible.charAt(Math.floor(Math.random() * possible.length));
         }
         return text;
@@ -307,37 +307,37 @@ function getRowForAction(action) {
         return `<strong><a href="/@${user.username}">${user.username}</a> ${renderUserActionsDropdown(user)}</strong>`;
     }
 
-    var row = $("<div>").addClass("action").attr("data-action-id", action.id);
-    var username = "<strong>Deleted user</strong>";
-    var actionTxt = `<span class="action-str" title="${actionTemplate.displayName} - ${actionTemplate.category}">${actionTemplate.inlineDisplayName.toLowerCase()}</span>`;
+    let row = $("<div>").addClass("action").attr("data-action-id", action.id);
+    let username = "<strong>Deleted user</strong>";
+    let actionTxt = `<span class="action-str" title="${actionTemplate.displayName} - ${actionTemplate.category}">${actionTemplate.inlineDisplayName.toLowerCase()}</span>`;
     if(action.performingUser) username = renderUsernameText(action.performingUser);
-    var moreInfoCtn = null;
-    var sentenceEnd = "";
-    var otherLines = "";
+    let moreInfoCtn = null;
+    let sentenceEnd = "";
+    let otherLines = "";
     if(Object.keys(action.info).length > 0) {
         if(typeof actionTemplate.sentenceEndTextFormatting !== "undefined") sentenceEnd = parseActionTemplate(actionTemplate.sentenceEndTextFormatting, action);
         if(typeof actionTemplate.otherLinesTextFormatting !== "undefined") otherLines = "<br>" + parseActionTemplate(actionTemplate.otherLinesTextFormatting, action);
         if(typeof actionTemplate.hideInfo === "undefined" || !actionTemplate.hideInfo) {
-            var moreInfoCtn = $("<div>").addClass("info-collapse-ctn");
-            var id = `info-collapse-${randomString(16)}-${action.id}`;
-            var infoCtn = $("<div>").addClass("collapse info-collapse").attr("id", id).appendTo(moreInfoCtn);
-            var infoList = $("<samp>").appendTo(infoCtn);
+            let moreInfoCtn = $("<div>").addClass("info-collapse-ctn");
+            let id = `info-collapse-${randomString(16)}-${action.id}`;
+            let infoCtn = $("<div>").addClass("collapse info-collapse").attr("id", id).appendTo(moreInfoCtn);
+            let infoList = $("<samp>").appendTo(infoCtn);
             Object.keys(action.info).forEach((key) => {
-                var value = action.info[key];
+                let value = action.info[key];
                 if(typeof value !== "object") {
                     $("<strong>").text(key + ":").appendTo(infoList);
                     $("<span>").html(` ${value}<br>`).appendTo(infoList);
                 }
             })
-            var seeMoreLink = $("<a>").attr("role", "button").addClass("see-more-toggle").attr("data-toggle", "collapse").attr("href", `#${id}`).attr("aria-expanded", "false").attr("aria-controls", id).text("See more").appendTo(moreInfoCtn);
+            let seeMoreLink = $("<a>").attr("role", "button").addClass("see-more-toggle").attr("data-toggle", "collapse").attr("href", `#${id}`).attr("aria-expanded", "false").attr("aria-controls", id).text("See more").appendTo(moreInfoCtn);
             infoCtn.on("show.bs.collapse", () => seeMoreLink.text("See less")).on("hide.bs.collapse", () => seeMoreLink.text("See more"))
         }
     }
-    var text = `${username} ${actionTxt}${sentenceEnd}</span>.${otherLines}`;
+    let text = `${username} ${actionTxt}${sentenceEnd}</span>.${otherLines}`;
     if(typeof actionTemplate.requiresModerator !== "undefined" && actionTemplate.requiresModerator) {
-        var modUsername = "<strong>Deleted moderator</strong>"
+        let modUsername = "<strong>Deleted moderator</strong>"
         if(action.moderatingUser) modUsername = renderUsernameText(action.moderatingUser);
-        var text = `${modUsername} ${actionTxt} ${username}${sentenceEnd}</span>.${otherLines}`
+        let text = `${modUsername} ${actionTxt} ${username}${sentenceEnd}</span>.${otherLines}`
     }
     $("<p>").addClass("text").html(text).appendTo(row);
     if(moreInfoCtn) moreInfoCtn.appendTo(row);
@@ -356,9 +356,9 @@ function fetchActions(lastID, modOnly, limit, firstID, callback) {
 function addToContainerForResponse(container, data, lastID, modOnly, limit, allowsShowMore) {
     data.forEach((action) => getRowForAction(action).appendTo(container));
     if(allowsShowMore && lastID) {
-        var loading = false;
+        let loading = false;
         $("<a>").addClass("btn btn-popping btn-xs").text("Load more").appendTo(container).on("click", function() {
-            var btn = $(this);
+            let btn = $(this);
             if(!loading) {
                 loading = true;
                 btn.html("<i class=\"fa fa-spin fa-circle-o-notch\"></i> Loading…").addClass("disabled");
@@ -381,7 +381,7 @@ function loadRecentActionsIntoContainer(container, limit = null, modOnly = false
         if(!data) return $(container).text("Couldn't load mod actions");
         container.html("");
         addToContainerForResponse(container, data, lastID, modOnly, limit, allowsShowMore);
-        var refreshFirstID = data.length > 0 ? data[0].id : null;
+        let refreshFirstID = data.length > 0 ? data[0].id : null;
         setInterval(function() {
             fetchActions(null, modOnly, limit, refreshFirstID, function(data, lastID) {
                 if(data.length > 0) refreshFirstID = data[0].id;

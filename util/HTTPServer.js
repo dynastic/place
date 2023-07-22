@@ -10,8 +10,8 @@ const fs = require("fs");
 const path = require("path");
 
 function HTTPServer(app) {
-    var server = express();
-    var httpServer = require("http").createServer(server);
+    const server = express();
+    const httpServer = require("http").createServer(server);
     
     // Setup for parameters and bodies
     server.use(bodyParser.urlencoded({extended: false}));
@@ -22,7 +22,7 @@ function HTTPServer(app) {
     // Set rendering engine
     server.set("view engine", "pug");
 
-    var setupRoutes = function(directories, modulesWithRoutes) {
+    const setupRoutes = function(directories, modulesWithRoutes) {
         // Use public folder for resources
         server.use(express.static("public"));
         // Register module public directories
@@ -36,7 +36,7 @@ function HTTPServer(app) {
             // Pretty-print JSON
             server.set("json spaces", 4);
         } else {
-            var logInfo = {};
+            let logInfo = {};
             if (fs.existsSync("/var/log/place")) logInfo.stream = require("stream-file-archive")({
                 path: "/var/log/place/access-%Y-%m-%d.log",  // Write logs rotated by the day
                 symlink: "/var/log/place/current.log",    // Maintain a symlink called current.log

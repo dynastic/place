@@ -8,7 +8,7 @@ const AccountPageController = require("../controllers/AccountPageController");
 const AuthController = require("../controllers/AuthController");
 
 function PublicRouter(app) {
-    let router = express.Router();
+    const router = express.Router();
 
     const requireUser = (req, res, next) => {
         if (!req.user) return res.status(401).redirect("/#signin");

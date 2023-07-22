@@ -7,7 +7,7 @@ const Access = require("./access");
 const dataTables = require("mongoose-datatables");
 const TOSManager = require("../util/TOSManager");
 
-var UserSchema = new Schema({
+const UserSchema = new Schema({
     name: {
         type: String,
         unique: true,
@@ -108,12 +108,12 @@ var UserSchema = new Schema({
     }
 });
 
-UserSchema.pre("save", function(next) {
-    let user = this;
+UserSchema.pre("save", function (next) {
+    const user = this;
     if (this.isModified("password") || this.isNew) {
-        bcrypt.genSalt(10, function(err, salt) {
+        bcrypt.genSalt(10, function (err, salt) {
             if (err) return next(err);
-            bcrypt.hash(user.password, salt, function(err, hash) {
+            bcrypt.hash(user.password, salt, function (err, hash) {
                 if (err) return next(err);
                 user.password = hash;
                 next();
@@ -124,15 +124,15 @@ UserSchema.pre("save", function(next) {
     }
 });
 
-UserSchema.methods.comparePassword = function(passwd, cb) {
-    bcrypt.compare(passwd, this.password, function(err, isMatch) {
+UserSchema.methods.comparePassword = function (passwd, cb) {
+    bcrypt.compare(passwd, this.password, function (err, isMatch) {
         if (err) return cb(err);
         cb(null, isMatch);
     });
 }
 
-UserSchema.methods.toInfo = function(app = null) {
-    var info = {
+UserSchema.methods.toInfo = function (app = null) {
+    let info = {
         id: this.id,
         username: this.name,
         isOauth: this.isOauth || false,
@@ -158,9 +158,9 @@ UserSchema.methods.toInfo = function(app = null) {
     return info;
 }
 
-UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
+UserSchema.methods.getInfo = function (app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
-        var info = this.toInfo(app);
+        let info = this.toInfo(app);
         if (getPixelInfo) {
             this.getLatestAvailablePixel().then((pixel) => {
                 info.latestPixel = pixel;
@@ -172,7 +172,7 @@ UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
     });
 }
 
-UserSchema.methods.loginError = function() {
+UserSchema.methods.loginError = function () {
     if (this.banned === true) return {
         message: "You are banned from using this service due to violations of the rules.",
         code: "banned"
@@ -180,19 +180,19 @@ UserSchema.methods.loginError = function() {
     return null;
 }
 
-UserSchema.methods.markForDeletion = function() {
+UserSchema.methods.markForDeletion = function () {
     this.deactivated = true;
-    var date = new Date();
+    let date = new Date();
     date.setDate(date.getDate() + 7);
     this.deletionDate = date;
     return this.save();
 }
 
-UserSchema.methods.isMarkedForDeletion = function() {
+UserSchema.methods.isMarkedForDeletion = function () {
     return this.deletionDate != null
 }
 
-UserSchema.methods.setUserName = function(username, callback, usernameSet) {
+UserSchema.methods.setUserName = function (username, callback, usernameSet) {
     if (!UserSchema.statics.isValidUsername(username)) return callback({
         message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.",
         code: "username_taken",
@@ -200,7 +200,7 @@ UserSchema.methods.setUserName = function(username, callback, usernameSet) {
     });
     this.name = username;
     this.usernameSet = true;
-    this.save(function(err) {
+    this.save(function (err) {
         if (err) return callback({
             message: "That username already exists.",
             code: "username_taken",
@@ -210,15 +210,15 @@ UserSchema.methods.setUserName = function(username, callback, usernameSet) {
     });
 }
 
-UserSchema.methods.recordAccess = function(req) {
+UserSchema.methods.recordAccess = function (req) {
     return Access.recordAccess(req, this.id);
 }
 
-UserSchema.methods.getUniqueIPsAndUserAgents = function() {
+UserSchema.methods.getUniqueIPsAndUserAgents = function () {
     return Access.getUniqueIPsAndUserAgentsForUser(this);
 }
 
-UserSchema.statics.findByUsername = function(username, callback = null) {
+UserSchema.statics.findByUsername = function (username, callback = null) {
     return this.findOne({
         name: {
             $regex: new RegExp(["^", username.toLowerCase(), "$"].join(""), "i")
@@ -226,25 +226,25 @@ UserSchema.statics.findByUsername = function(username, callback = null) {
     }, callback)
 }
 
-UserSchema.statics.getPasswordError = function(password) {
+UserSchema.statics.getPasswordError = function (password) {
     return null; // temp fix signups, not good
     // return password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])$/) && password.length >= 8 ? null : "That password cannot be used. Passwords are required to contain at least one digit, one uppercase letter, one lowercase letter, and be at least 8 characters in length.";
 }
 
-UserSchema.statics.register = function(username, password, app, callback, OAuthID, OAuthName) {
+UserSchema.statics.register = function (username, password, app, callback, OAuthID, OAuthName) {
     if (!OAuthID && !this.isValidUsername(username)) return callback(null, {
         message: "That username cannot be used. Usernames must be 3-20 characters in length and may only consist of letters, numbers, underscores, and dashes.",
         code: "username_taken",
         intCode: 400
     });
-    var passwordError = this.getPasswordError(password);
-    if(passwordError) return callback(null, {
+    let passwordError = this.getPasswordError(password);
+    if (passwordError) return callback(null, {
         message: passwordError,
         code: "password_validation",
         intCode: 400
     });
 
-    var Schema = this;
+    let Schema = this;
 
     function continueWithRegistration() {
         // ghetto af boi
@@ -268,7 +268,7 @@ UserSchema.statics.register = function(username, password, app, callback, OAuthI
         });
 
         // Save the user
-        newUser.save(function(err) {
+        newUser.save(function (err) {
             if (err) return callback(null, {
                 message: "An account with that username already exists.",
                 code: "username_taken",
@@ -292,12 +292,12 @@ UserSchema.statics.register = function(username, password, app, callback, OAuthI
     }
 }
 
-UserSchema.statics.isValidUsername = function(username) {
+UserSchema.statics.isValidUsername = function (username) {
     return /^[a-zA-Z0-9-_]{3,20}$/.test(username);
 }
 
-UserSchema.methods.addPixel = function(colour, x, y, app, callback) {
-    var user = this;
+UserSchema.methods.addPixel = function (colour, x, y, app, callback) {
+    const user = this;
     Pixel.addPixel(colour, x, y, this.id, app, (changed, error) => {
         if (changed === null) return callback(null, error);
         if (changed) {
@@ -313,7 +313,7 @@ UserSchema.methods.addPixel = function(colour, x, y, app, callback) {
     });
 }
 
-UserSchema.methods.getPlaceSecondsRemaining = function(app) {
+UserSchema.methods.getPlaceSecondsRemaining = function (app) {
     if (this.admin) return 0;
     if (this.lastPlace) {
         let current = new Date().getTime();
@@ -327,11 +327,11 @@ UserSchema.methods.getPlaceSecondsRemaining = function(app) {
     return 0;
 }
 
-UserSchema.methods.canPlace = function(app) {
+UserSchema.methods.canPlace = function (app) {
     return this.getPlaceSecondsRemaining(app) <= 0;
 }
 
-UserSchema.methods.findSimilarIPUsers = function() {
+UserSchema.methods.findSimilarIPUsers = function () {
     return new Promise((resolve, reject) => {
         Access.findSimilarIPUserIDs(this).then((userIDs) => {
             this.model("User").find({
@@ -343,7 +343,7 @@ UserSchema.methods.findSimilarIPUsers = function() {
     });
 }
 
-UserSchema.methods.getLatestAvailablePixel = function() {
+UserSchema.methods.getLatestAvailablePixel = function () {
     return new Promise((resolve, reject) => {
         Pixel.findOne({
             editorID: this.id
@@ -351,26 +351,26 @@ UserSchema.methods.getLatestAvailablePixel = function() {
             sort: {
                 lastModified: -1
             }
-        }, function(err, pixel) {
+        }, function (err, pixel) {
             if (err || !pixel) return resolve(null);
-            var info = pixel.toInfo();
+            let info = pixel.toInfo();
             info.isLatest = pixel ? ~((pixel.lastModified - this.lastPlace) / 1000) <= 3 : false;
             resolve(info);
         });
     });
 }
 
-UserSchema.methods.canPerformActionsOnUser = function(user) {
-    var canTouchUser = (this.moderator && !(user.moderator || user.admin)) || (this.admin && !user.admin);
+UserSchema.methods.canPerformActionsOnUser = function (user) {
+    let canTouchUser = (this.moderator && !(user.moderator || user.admin)) || (this.admin && !user.admin);
     return this._id != user._id && canTouchUser;
 }
 
-UserSchema.methods.getUsernameInitials = function() {
+UserSchema.methods.getUsernameInitials = function () {
     function getInitials(string) {
-        var output = "";
-        var mustBeUppercase = false;
-        var lastCharacterUsed = false;
-        for (var i = 0; i < string.length; i++) {
+        let output = "";
+        let mustBeUppercase = false;
+        let lastCharacterUsed = false;
+        for (let i = 0; i < string.length; i++) {
             // Limit to three characters
             if (output.length >= 3) break;
             // Check if this character is uppercase, and add to string if so
@@ -390,28 +390,28 @@ UserSchema.methods.getUsernameInitials = function() {
     return getInitials(this.name);
 }
 
-UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false, app = null, getPixelInfo = true) {
+UserSchema.statics.getPubliclyAvailableUserInfo = function (userID, overrideDataAccess = false, app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
-        var info = {};
+        let info = {};
         function returnInfo(error) {
             info.userError = error;
             resolve(info);
         }
-        var continueWithUser = (user) => {
+        let continueWithUser = (user) => {
             if (!user) return returnInfo("delete");
             if (!overrideDataAccess && user.banned) return returnInfo("ban");
             else if (!overrideDataAccess && user.isMarkedForDeletion()) return returnInfo("deleted");
             else if (!overrideDataAccess && user.deactivated) return returnInfo("deactivated");
             user.getInfo(app, getPixelInfo).then((userInfo) => {
                 info.user = userInfo;
-                if(overrideDataAccess) {
+                if (overrideDataAccess) {
                     info.user.isOauth = user.isOauth;
                     info.user.hasTOTP = user.twoFactorAuthEnabled();
                 }
                 resolve(info);
             }).catch((err) => returnInfo("delete"));
         }
-        if(!userID) return continueWithUser(null);
+        if (!userID) return continueWithUser(null);
         this.findById(userID).then(continueWithUser).catch((err) => {
             app.logger.capture("Error getting user info: " + err, { user: { _id: userID } });
             returnInfo("delete");
@@ -419,11 +419,11 @@ UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataA
     });
 }
 
-UserSchema.methods.getMustAcceptTOS = function() {
+UserSchema.methods.getMustAcceptTOS = function () {
     return new Promise((resolve, reject) => {
         TOSManager.hasTOS().then((hasTOS) => {
-            if(!hasTOS) return resolve(false);
-            if(!this.lastAcceptedTOSRevision) return resolve(true);
+            if (!hasTOS) return resolve(false);
+            if (!this.lastAcceptedTOSRevision) return resolve(true);
             TOSManager.getCurrentTOSVersion().then((version) => {
                 resolve(this.lastAcceptedTOSRevision != version);
             }).catch((err) => reject(err));
@@ -431,14 +431,14 @@ UserSchema.methods.getMustAcceptTOS = function() {
     });
 }
 
-UserSchema.methods.twoFactorAuthEnabled = function() {
+UserSchema.methods.twoFactorAuthEnabled = function () {
     return this.totpSecret != null;
 }
 
-UserSchema.methods.updateTOSAcceptance = function() {
+UserSchema.methods.updateTOSAcceptance = function () {
     return new Promise((resolve, reject) => {
         TOSManager.hasTOS().then((hasTOS) => {
-            if(!hasTOS) {
+            if (!hasTOS) {
                 this.lastAcceptedTOSRevision = null;
                 resolve();
             }
@@ -450,37 +450,37 @@ UserSchema.methods.updateTOSAcceptance = function() {
     });
 }
 
-UserSchema.statics.isTOSAgreementCurrentlyRequired = function() {
+UserSchema.statics.isTOSAgreementCurrentlyRequired = function () {
     return TOSManager.hasTOS();
 }
 
-UserSchema.methods.canPlaceCustomColours = function() {
+UserSchema.methods.canPlaceCustomColours = function () {
     return this.admin || this.moderator;
 }
 
-UserSchema.methods.canPlaceColour = function(hex, app) {
-    if(this.canPlaceCustomColours()) return true;
+UserSchema.methods.canPlaceColour = function (hex, app) {
+    if (this.canPlaceCustomColours()) return true;
     return app.colours.includes(hex.toUpperCase());
 }
 
-UserSchema.methods.getFeatureAvailability = function() {
+UserSchema.methods.getFeatureAvailability = function () {
     return {
         canPlaceCustomColours: this.canPlaceCustomColours(),
         hasTemplatesExperiment: this.admin || this.tester || false
     };
 }
 
-UserSchema.methods.getBadges = function(app) {
-    var badges = [];
-    if(app) {
-        var rank = app.leaderboardManager.getUserRank(this.id);
-        if(rank) badges.push({ text: `Ranked #${rank.toLocaleString()}`, style: rank <= 5 ? "danger" : "info", isRanking: true, lowPriority: true, isLowRanking: rank > 25 });
+UserSchema.methods.getBadges = function (app) {
+    let badges = [];
+    if (app) {
+        const rank = app.leaderboardManager.getUserRank(this.id);
+        if (rank) badges.push({ text: `Ranked #${rank.toLocaleString()}`, style: rank <= 5 ? "danger" : "info", isRanking: true, lowPriority: true, isLowRanking: rank > 25 });
     }
-    if(this.banned) badges.push({ text: "Banned", style: "danger", title: "This user has been banned for breaking the rules." });
-    else if(this.isMarkedForDeletion()) badges.push({ text: "Deleted", style: "danger", title: "This user chose to delete their account." });
-    else if(this.deactivated) badges.push({ text: "Deactivated", style: "danger", title: "This user chose to deactivate their account." });
-    if(this.admin) badges.push({ text: "Admin", style: "warning", inlineBefore: true, title: "This user is an administrator." });
-    else if(this.moderator) badges.push({ text: "Moderator", shortText: "Mod", style: "warning", inlineBefore: true, title: "This user is a moderator." });
+    if (this.banned) badges.push({ text: "Banned", style: "danger", title: "This user has been banned for breaking the rules." });
+    else if (this.isMarkedForDeletion()) badges.push({ text: "Deleted", style: "danger", title: "This user chose to delete their account." });
+    else if (this.deactivated) badges.push({ text: "Deactivated", style: "danger", title: "This user chose to deactivate their account." });
+    if (this.admin) badges.push({ text: "Admin", style: "warning", inlineBefore: true, title: "This user is an administrator." });
+    else if (this.moderator) badges.push({ text: "Moderator", shortText: "Mod", style: "warning", inlineBefore: true, title: "This user is a moderator." });
     return badges;
 }
 
@@ -488,21 +488,21 @@ UserSchema.plugin(dataTables, {
     totalKey: "recordsFiltered",
 });
 
-UserSchema.methods.getUserData = function() {
+UserSchema.methods.getUserData = function () {
     return new Promise((resolve, reject) => {
-        var user = this.toInfo();
+        const user = this.toInfo();
         Promise.all([
             Access.find({ userID: this.id }),
             Pixel.find({ editorID: this.id }),
-            require("./action").find({ $or: [ { performingUserID: this.id }, { moderatingUserID: this.id } ] }),
+            require("./action").find({ $or: [{ performingUserID: this.id }, { moderatingUserID: this.id }] }),
             require("./warp").find({ userID: this.id }),
             require("./chatMessage").find({ userID: this.id })
         ]).then((result) => {
-            var accesses = result[0].map((a) => a.toInfo(false));
-            var pixels = result[1].map((p) => p.toInfo(false));
-            var actions = result[2].map((a) => a.toInfo(false));
-            var warps = result[3].map((w) => w.toInfo());
-            var chatMessages = result[4].map((m) => m.toInfo(false));
+            const accesses = result[0].map((a) => a.toInfo(false));
+            const pixels = result[1].map((p) => p.toInfo(false));
+            const actions = result[2].map((a) => a.toInfo(false));
+            const warps = result[3].map((w) => w.toInfo());
+            const chatMessages = result[4].map((m) => m.toInfo(false));
             resolve({ user: user, accesses: accesses, pixels: pixels, actions: actions, warps: warps, chatMessages: chatMessages });
         });
     });

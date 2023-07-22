@@ -1,6 +1,6 @@
 extends layout
 mixin renderAdminNavItem(name, itemPath)
-    - var isCurrentPage = itemPath == path;
+    - let isCurrentPage = itemPath == path;
     li(class=(isCurrentPage ? "active": ""))
         a(href=itemPath)
             .
@@ -11,11 +11,11 @@ block dependencies
     block adminDependencies
     - if (typeof pageTitle === "undefined") pageTitle = null;
     - if (typeof user === "undefined") user = null;
-    - var userAdmin = user ? user.admin : false;
-    - var pageTitle = !!pageTitle ? pageTitle + " &middot; Admin" : "Admin";
-    - var css = ["/css/dashboard.css", "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css"].concat(typeof css === "undefined" ? [] : css);
-    - var js = ["https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"].concat(typeof js === "undefined" ? [] : js);
-    - var isAdmin = true;
+    - let userAdmin = user ? user.admin : false;
+    - let pageTitle = !!pageTitle ? pageTitle + " &middot; Admin" : "Admin";
+    - let css = ["/css/dashboard.css", "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css"].concat(typeof css === "undefined" ? [] : css);
+    - let js = ["https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"].concat(typeof js === "undefined" ? [] : js);
+    - let isAdmin = true;
 block content
     .container-fluid
         .row

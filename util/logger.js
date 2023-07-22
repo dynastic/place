@@ -11,13 +11,13 @@ const methodColours = {
     error: "\x1b[31m" // red
 }
 
-var lastLogTime = null;
-var messagesSinceLastDatestamp = 0;
+let lastLogTime = null;
+let messagesSinceLastDatestamp = 0;
 
 for (const method of Object.keys(console)) {
     exports[method] = function log(topic, ...args) {
         // Datestamp calculation
-        var now = new Date();
+        let now = new Date();
         // show datestamp for every unique date or every 50 messages for legibility
         if (lastLogTime != null ? now.toDateString() !== lastLogTime.toDateString() : true || messagesSinceLastDatestamp > 50) {
             console.log(`--------- [ MESSAGES ON ${now.toLocaleDateString()} ] ---------`);

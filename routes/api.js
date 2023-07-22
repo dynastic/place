@@ -18,7 +18,7 @@ const WarpController = require("../controllers/WarpController");
 const UserDownloadController = require("../controllers/UserDownloadController");
 
 function APIRouter(app) {
-    let router = express.Router();
+    const router = express.Router();
 
     router.use(function(req, res, next) {
         res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
@@ -184,7 +184,7 @@ function APIRouter(app) {
         maxWait: 15 * 1000, // 15 seconds,
         lifetime: 25, // remember spam for max of 25 seconds
         failCallback: (req, res, next, nextValidRequestDate) => {
-            var seconds = Math.round((nextValidRequestDate - new Date()) / 1000);
+            let seconds = Math.round((nextValidRequestDate - new Date()) / 1000);
             return res.status(429).json({
                 success: false,
                 error: {

@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const User = require("./user");
 
-var ActionSchema = new Schema({
+const ActionSchema = new Schema({
     actionID: {
         type: String,
         required: true
@@ -17,8 +17,8 @@ var ActionSchema = new Schema({
     moderatingUserID: Schema.ObjectId
 });
 
-ActionSchema.methods.toInfo = function(userIDs = true) {
-    var info = {
+ActionSchema.methods.toInfo = function (userIDs = true) {
+    let info = {
         id: this.id,
         action: this.actionID,
         info: this.info || [],
@@ -31,17 +31,17 @@ ActionSchema.methods.toInfo = function(userIDs = true) {
     return info
 }
 
-ActionSchema.methods.getInfo = function() {
+ActionSchema.methods.getInfo = function () {
     return new Promise((resolve, reject) => {
-        var info = this.toInfo();
-        if(this.performingUserID) {
+        let info = this.toInfo();
+        if (this.performingUserID) {
             User.findById(this.performingUserID).then((user) => {
                 info.performingUser = user.toInfo();
-                if(this.moderatingUserID) User.findById(this.moderatingUserID).then((mod) => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
+                if (this.moderatingUserID) User.findById(this.moderatingUserID).then((mod) => { info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
                 else resolve(info);
             }).catch((err) => {
                 info.performingUser = null;
-                if(this.moderatingUserID) User.findById(this.moderatingUserID).then((mod) => {info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
+                if (this.moderatingUserID) User.findById(this.moderatingUserID).then((mod) => { info.moderatingUser = mod.toInfo(); resolve(info) }).catch(() => resolve(info));
                 else resolve(info);
             })
         } else {

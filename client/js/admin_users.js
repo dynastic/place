@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var table = $("#users").DataTable({
+    let table = $("#users").DataTable({
         processing: true,
         serverSide: true,
         aaSorting: [[2, "desc"]],
@@ -24,7 +24,7 @@ $(document).ready(function() {
         },
         serverParams: (data) => data.bChunkSearch = true
     }).columns().every( function () {
-        var that = this;
+        let that = this;
         $("input[type=search]", this.footer() ).attr("spellcheck", "false").attr("autocomplete", "off").attr("autocorrect", "off").attr("autocapitalize", "off").on( "keyup change", function () {
             if (that.search() !== this.value) {
                 that.search(this.value, true).draw();

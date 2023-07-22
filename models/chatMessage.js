@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const User = require("./user");
 
-var ChatMessageSchema = new Schema({
+const ChatMessageSchema = new Schema({
     userID: {
         type: Schema.ObjectId,
         required: true
@@ -39,8 +39,8 @@ var ChatMessageSchema = new Schema({
     }
 });
 
-ChatMessageSchema.methods.toInfo = function(userIDs = true) {
-    var info = {
+ChatMessageSchema.methods.toInfo = function (userIDs = true) {
+    let info = {
         id: this.id,
         date: this.date,
         text: this.text,
@@ -53,13 +53,13 @@ ChatMessageSchema.methods.toInfo = function(userIDs = true) {
     return info;
 }
 
-ChatMessageSchema.methods.getInfo = function(overrideDataAccess = false) {
+ChatMessageSchema.methods.getInfo = function (overrideDataAccess = false) {
     return new Promise((resolve, reject) => {
         User.getPubliclyAvailableUserInfo(this.userID, overrideDataAccess, null, false).then((userInfo) => resolve(Object.assign(this.toInfo(), userInfo))).catch((err) => reject(err));
     })
 }
 
-ChatMessageSchema.statics.createMessage = function(app, userID, text, xPos, yPos) {
+ChatMessageSchema.statics.createMessage = function (app, userID, text, xPos, yPos) {
     return this({
         userID: userID,
         date: Date(),
@@ -69,7 +69,7 @@ ChatMessageSchema.statics.createMessage = function(app, userID, text, xPos, yPos
     }).save();
 }
 
-ChatMessageSchema.statics.getLatestMessages = function(limit = 50) {
+ChatMessageSchema.statics.getLatestMessages = function (limit = 50) {
     return this.find({ deleted: { $ne: true } }).sort({ date: -1 }).limit(limit);
 }
 

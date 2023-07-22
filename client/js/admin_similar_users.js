@@ -1,6 +1,6 @@
 $(document).ready(function() {
     $(".timeago").timeago();
-    var getUserRow = function(user, relationString) {
+    let getUserRow = function(user, relationString) {
         return `<div class="user"> 
             <div class="user-info">
                 <a href="/@${user.username}" class="username">${user.username}</a>

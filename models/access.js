@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-var AccessSchema = new Schema({
+const AccessSchema = new Schema({
     userID: {
         type: Schema.ObjectId,
         required: true
@@ -29,8 +29,8 @@ var AccessSchema = new Schema({
     }
 });
 
-AccessSchema.methods.toInfo = function(userIDs = true) {
-    var info = {
+AccessSchema.methods.toInfo = function (userIDs = true) {
+    let info = {
         date: this.date,
         userAgent: this.userAgent,
         ipAddress: this.hashedIPAddress
@@ -39,16 +39,16 @@ AccessSchema.methods.toInfo = function(userIDs = true) {
     return info;
 }
 
-AccessSchema.statics.getHashedIPAddress = function(ipAddress) {
+AccessSchema.statics.getHashedIPAddress = function (ipAddress) {
     return crypto.createHash('sha256').update(ipAddress).digest('base64');
 }
 
-AccessSchema.statics.recordAccess = function(req, userID) {
+AccessSchema.statics.recordAccess = function (req, userID) {
     this.recordAccessInfo(req.place, userID, req.get("User-Agent"), req.get("X-Forwarded-For") || req.connection.remoteAddress, (typeof req.key !== "undefined" ? req.key : null));
 }
 
-AccessSchema.statics.recordAccessInfo = function(app, userID, userAgent, ipAddress, key) {
-    var ipHash = this.getHashedIPAddress(ipAddress);
+AccessSchema.statics.recordAccessInfo = function (app, userID, userAgent, ipAddress, key) {
+    let ipHash = this.getHashedIPAddress(ipAddress);
     this.findOneAndUpdate({
         userID: userID,
         userAgent: userAgent,
@@ -61,18 +61,18 @@ AccessSchema.statics.recordAccessInfo = function(app, userID, userAgent, ipAddre
         hashedIPAddress: ipHash,
         key: key
     }, { upsert: true }, (err, access) => {
-        if(err) app.reportError("Couldn't record access attempt: " + err);
+        if (err) app.reportError("Couldn't record access attempt: " + err);
     });
 }
 
-AccessSchema.statics.findIPsForUser = function(user) {
+AccessSchema.statics.findIPsForUser = function (user) {
     return new Promise((resolve, reject) => {
-        this.find({userID: user._id}).then((accesses) => resolve(accesses.map((access) => access.hashedIPAddress))).catch(reject);
+        this.find({ userID: user._id }).then((accesses) => resolve(accesses.map((access) => access.hashedIPAddress))).catch(reject);
     });
 }
 
-AccessSchema.statics.getUniqueIPsAndUserAgentsForUser = async function(user) {
-    const accesses = await this.find({userID: user._id});
+AccessSchema.statics.getUniqueIPsAndUserAgentsForUser = async function (user) {
+    const accesses = await this.find({ userID: user._id });
     // The [...new Set(array)] is filtering all duplicate strings, and I found it was the most efficient.
     const ipAddresses = [...new Set(accesses.map((access) => access.hashedIPAddress))];
     const userAgents = [...new Set(accesses.map((access) => access.userAgent))];
@@ -84,18 +84,18 @@ AccessSchema.statics.getUniqueIPsAndUserAgentsForUser = async function(user) {
     };
 }
 
-AccessSchema.statics.findSimilarIPUserIDs = function(user) {
+AccessSchema.statics.findSimilarIPUserIDs = function (user) {
     return new Promise((resolve, reject) => {
         this.findIPsForUser(user).then((ipAddresses) => {
             this.find({ hashedIPAddress: { $in: ipAddresses }, userID: { $ne: user._id } }).then((accesses) => {
-                var userIDs = accesses.map((access) => String(access.userID));
+                let userIDs = accesses.map((access) => String(access.userID));
                 resolve([...new Set(userIDs)]);
             }).catch(reject);
         }).catch(reject);
     });
 }
 
-AccessSchema.methods.migrateIPAddress = function() {
+AccessSchema.methods.migrateIPAddress = function () {
     this.hashedIPAddress = AccessSchema.statics.getHashedIPAddress(this.ipAddress);
     this.ipAddress = null;
     return this.save();
