@@ -1,5 +1,5 @@
 exports.getAvailability = (req, res, next) => {
-    var features = {
+    let features = {
         colours: req.place.colours,
         flags: req.place.config.pixelFlags || []
     }

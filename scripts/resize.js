@@ -9,7 +9,7 @@ console.log('PLEASE BACKUP YOUR DATABASE BEFORE RUNNING THIS TOOL');
 console.log('--------------------------------');
 
 // Flag variables
-var doneReading = false;
+let doneReading = false;
 let i = 0;
 let saved = 0;
 

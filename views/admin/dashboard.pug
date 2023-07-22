@@ -11,8 +11,8 @@ mixin renderDashboardStat(id, name, underName, moreInfo)
                 br
                 small #{moreInfo}
 block adminDependencies
-    - var js = ["/js/build/admin_dashboard.js", "https://cdn.jsdelivr.net/gh/rmm5t/jquery-timeago@180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"];
-    - var jsSnippets = [`loadRecentActionsIntoContainer($("#actions-ctn"), 10, false, false)`];
+    - let js = ["/js/build/admin_dashboard.js", "https://cdn.jsdelivr.net/gh/rmm5t/jquery-timeago@180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"];
+    - let jsSnippets = [`loadRecentActionsIntoContainer($("#actions-ctn"), 10, false, false)`];
 block adminContent
     h1.page-header Dashboard
     // Status Updates

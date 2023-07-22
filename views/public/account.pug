@@ -1,19 +1,19 @@
 extends ../layout
 block dependencies
-    - var isSelf = user ? user.id == profileUser.id : false;
-    - if (isSelf) var overrideNavPath = "/account";    
-    - var pixel = profileUserInfo.latestPixel;
-    - var boardImageCorrection = (1000 / config.boardSize) * 4;
-    - var pageTitle = isSelf ? "Account Details" : `${profileUser.name}'s Profile`;
-    - var pageDesc = isSelf ? `View information about your ${config.siteName} account.` : `View ${profileUser.name}'s profile on ${config.siteName}.`;
-    - var css = ["/css/dashboard.css", "/css/profile.css"];
-    - var navbarSupportsTopMode = !!profileUserInfo.latestPixel;
+    - let isSelf = user ? user.id == profileUser.id : false;
+    - if (isSelf) let overrideNavPath = "/account";    
+    - let pixel = profileUserInfo.latestPixel;
+    - let boardImageCorrection = (1000 / config.boardSize) * 4;
+    - let pageTitle = isSelf ? "Account Details" : `${profileUser.name}'s Profile`;
+    - let pageDesc = isSelf ? `View information about your ${config.siteName} account.` : `View ${profileUser.name}'s profile on ${config.siteName}.`;
+    - let css = ["/css/dashboard.css", "/css/profile.css"];
+    - let navbarSupportsTopMode = !!profileUserInfo.latestPixel;
     - js = ["/js/tooltip.js", "/js/build/account.js", "https://cdn.jsdelivr.net/gh/rmm5t/jquery-timeago@180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"];
     - jsModSnippets = [`  $(document).ready(function() {
     -    $("#profile-mod-tools-ctn").html(renderUserActions(${JSON.stringify(profileUser)}));
     -  });`];
 block content
-    - var has2FA = profileUser.twoFactorAuthEnabled();
+    - let has2FA = profileUser.twoFactorAuthEnabled();
     if pixel
         a(href=`/#x=${pixel.point.x}&y=${pixel.point.y}`)
             .profile-header(style=`background-position: calc(50% - ${(pixel.point.x - (config.boardSize / 2)) * boardImageCorrection}px) ${-(pixel.point.y * boardImageCorrection) + 175}px;`)
@@ -28,7 +28,7 @@ block content
                             #{profileUser.name}
                         +renderBadges(profileUser.getBadges(null))
                     .subdetails
-                        - var rank = profileUserInfo.statistics.leaderboardRank;
+                        - let rank = profileUserInfo.statistics.leaderboardRank;
                         if rank !== null
                             div
                                 span.value ##{profileUserInfo.statistics.leaderboardRank.toLocaleString()}

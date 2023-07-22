@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const User = require("./user");
 
-var ChatMessageSchema = new Schema({
+let ChatMessageSchema = new Schema({
     userID: {
         type: Schema.ObjectId,
         required: true
@@ -40,7 +40,7 @@ var ChatMessageSchema = new Schema({
 });
 
 ChatMessageSchema.methods.toInfo = function(userIDs = true) {
-    var info = {
+    let info = {
         id: this.id,
         date: this.date,
         text: this.text,

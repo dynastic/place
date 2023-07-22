@@ -2,11 +2,11 @@ const DataModelManager = require("../util/DataModelManager");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-var colourPieceValidator = function(c) {
+let colourPieceValidator = function(c) {
     return Number.isInteger(c) && c >= 0 && c <= 255;
 }
 
-var PixelSchema = new Schema({
+let PixelSchema = new Schema({
     xPos: {
         type: Number,
         required: true,
@@ -58,7 +58,7 @@ var PixelSchema = new Schema({
 });
 
 PixelSchema.methods.toInfo = function(userIDs = true) {
-    var info = {
+    let info = {
         point: {
             x: this.xPos,
             y: this.yPos
@@ -71,7 +71,7 @@ PixelSchema.methods.toInfo = function(userIDs = true) {
 }
 
 PixelSchema.statics.addPixel = function(colour, x, y, userID, app, callback) {
-    var pn = this;
+    let pn = this;
     x = parseInt(x), y = parseInt(y);
     if(isNaN(x) || isNaN(y)) return callback(null, { message: "Invalid positions provided." });
     // TODO: Get actual position below:
@@ -86,7 +86,7 @@ PixelSchema.statics.addPixel = function(colour, x, y, userID, app, callback) {
         colourB: 1
     }).then((pixel) => {
         // Find the pixel at this location
-        var wasIdentical = colour.r == 255 && colour.g == 255 && colour.b == 255; // set to identical if pixel was white
+        let wasIdentical = colour.r == 255 && colour.g == 255 && colour.b == 255; // set to identical if pixel was white
         if (pixel) { // we have data from the old pixel
             wasIdentical = pixel.editorID == userID && pixel.colourR == colour.r && pixel.colourG == colour.g && pixel.colourB == colour.b; // set to identical if colour matched old pixel
         }
@@ -138,7 +138,7 @@ PixelSchema.methods.getHexColour = function() {
 PixelSchema.statics.getHexFromRGB = function(r, g, b) {
     // Borrowed partly from: https://stackoverflow.com/a/5624139
     function componentToHex(c) {
-        var hex = c.toString(16);
+        let hex = c.toString(16);
         return hex.length == 1 ? "0" + hex : hex;
     }
     return componentToHex(r) + componentToHex(g) + componentToHex(b);

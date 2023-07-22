@@ -1,10 +1,10 @@
 extends ../layout
 block dependencies
-    - var css = ["https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/css/bootstrap-slider.min.css", "https://cdn.jsdelivr.net/jquery.minicolors/2.1.2/jquery.minicolors.css", "/css/place.css"];
-    - var pinnable = true;
-    - var needsLegit = true;
-    - var needsHelp = true;
-    - var pageDesc = "Work together to create something amazing. Join thousands of other users and see what happens when you share one huge canvas.";
+    - let css = ["https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/css/bootstrap-slider.min.css", "https://cdn.jsdelivr.net/jquery.minicolors/2.1.2/jquery.minicolors.css", "/css/place.css"];
+    - let pinnable = true;
+    - let needsLegit = true;
+    - let needsHelp = true;
+    - let pageDesc = "Work together to create something amazing. Join thousands of other users and see what happens when you share one huge canvas.";
 block content
     +getViewExtensions("main")
     include views/place
@@ -25,4 +25,4 @@ block content
     unless user
         include views/auth-dialog
     include views/help-dialog
-    - var js = ["https://cdn.jsdelivr.net/interact.js/1.2.6/interact.min.js", "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.min.js", "https://cdn.jsdelivr.net/jquery.minicolors/2.1.2/jquery.minicolors.min.js", "https://cdn.jsdelivr.net/clipboard.js/1.6.0/clipboard.min.js", "https://unpkg.com/eventemitter3@^4.0.0/umd/eventemitter3.min.js", "/js/build/socket.js", "/js/build/popout.js", "/js/build/place.js", "https://cdn.jsdelivr.net/gh/rmm5t/jquery-timeago@180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"];
+    - let js = ["https://cdn.jsdelivr.net/interact.js/1.2.6/interact.min.js", "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.min.js", "https://cdn.jsdelivr.net/jquery.minicolors/2.1.2/jquery.minicolors.min.js", "https://cdn.jsdelivr.net/clipboard.js/1.6.0/clipboard.min.js", "https://unpkg.com/eventemitter3@^4.0.0/umd/eventemitter3.min.js", "/js/build/socket.js", "/js/build/popout.js", "/js/build/place.js", "https://cdn.jsdelivr.net/gh/rmm5t/jquery-timeago@180864a9c544a49e43719b457250af216d5e4c3a/jquery.timeago.js"];

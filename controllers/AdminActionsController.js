@@ -3,7 +3,7 @@ const Pixel = require("../models/pixel");
 const ActionLogger = require("../util/ActionLogger");
 
 exports.getAPIStats = (req, res, next) => {
-    var signups24h = null, pixelsPlaced24h = null, pixelsPerMin = null;
+    let signups24h = null, pixelsPlaced24h = null, pixelsPerMin = null;
     let dateBack24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
     let dateBack20m = new Date(new Date().getTime() - (20 * 60 * 1000));
     function finish() {
@@ -44,9 +44,9 @@ exports.apiReloadConfig = (req, res, next) => {
 
 exports.apiBroadcastAlert = (req, res, next) => {
     if(!req.body.message || !req.body.timeout) return res.status(400).json({success: false});
-    var timeout = Number.parseInt(req.body.timeout);
+    let timeout = Number.parseInt(req.body.timeout);
     if(Number.isNaN(timeout)) return res.status(400).json({success: false});
-    var info = {
+    let info = {
         title: req.body.title,
         message: req.body.message,
         timeout: Math.max(0, timeout),

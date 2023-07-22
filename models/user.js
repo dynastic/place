@@ -7,7 +7,7 @@ const Access = require("./access");
 const dataTables = require("mongoose-datatables");
 const TOSManager = require("../util/TOSManager");
 
-var UserSchema = new Schema({
+let UserSchema = new Schema({
     name: {
         type: String,
         unique: true,
@@ -132,7 +132,7 @@ UserSchema.methods.comparePassword = function(passwd, cb) {
 }
 
 UserSchema.methods.toInfo = function(app = null) {
-    var info = {
+    let info = {
         id: this.id,
         username: this.name,
         isOauth: this.isOauth || false,
@@ -160,7 +160,7 @@ UserSchema.methods.toInfo = function(app = null) {
 
 UserSchema.methods.getInfo = function(app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
-        var info = this.toInfo(app);
+        let info = this.toInfo(app);
         if (getPixelInfo) {
             this.getLatestAvailablePixel().then((pixel) => {
                 info.latestPixel = pixel;
@@ -182,7 +182,7 @@ UserSchema.methods.loginError = function() {
 
 UserSchema.methods.markForDeletion = function() {
     this.deactivated = true;
-    var date = new Date();
+    let date = new Date();
     date.setDate(date.getDate() + 7);
     this.deletionDate = date;
     return this.save();
@@ -237,14 +237,14 @@ UserSchema.statics.register = function(username, password, app, callback, OAuthI
         code: "username_taken",
         intCode: 400
     });
-    var passwordError = this.getPasswordError(password);
+    let passwordError = this.getPasswordError(password);
     if(passwordError) return callback(null, {
         message: passwordError,
         code: "password_validation",
         intCode: 400
     });
 
-    var Schema = this;
+    let Schema = this;
 
     function continueWithRegistration() {
         // ghetto af boi
@@ -297,7 +297,7 @@ UserSchema.statics.isValidUsername = function(username) {
 }
 
 UserSchema.methods.addPixel = function(colour, x, y, app, callback) {
-    var user = this;
+    let user = this;
     Pixel.addPixel(colour, x, y, this.id, app, (changed, error) => {
         if (changed === null) return callback(null, error);
         if (changed) {
@@ -353,7 +353,7 @@ UserSchema.methods.getLatestAvailablePixel = function() {
             }
         }, function(err, pixel) {
             if (err || !pixel) return resolve(null);
-            var info = pixel.toInfo();
+            let info = pixel.toInfo();
             info.isLatest = pixel ? ~((pixel.lastModified - this.lastPlace) / 1000) <= 3 : false;
             resolve(info);
         });
@@ -361,16 +361,16 @@ UserSchema.methods.getLatestAvailablePixel = function() {
 }
 
 UserSchema.methods.canPerformActionsOnUser = function(user) {
-    var canTouchUser = (this.moderator && !(user.moderator || user.admin)) || (this.admin && !user.admin);
+    let canTouchUser = (this.moderator && !(user.moderator || user.admin)) || (this.admin && !user.admin);
     return this._id != user._id && canTouchUser;
 }
 
 UserSchema.methods.getUsernameInitials = function() {
     function getInitials(string) {
-        var output = "";
-        var mustBeUppercase = false;
-        var lastCharacterUsed = false;
-        for (var i = 0; i < string.length; i++) {
+        let output = "";
+        let mustBeUppercase = false;
+        let lastCharacterUsed = false;
+        for (let i = 0; i < string.length; i++) {
             // Limit to three characters
             if (output.length >= 3) break;
             // Check if this character is uppercase, and add to string if so
@@ -392,12 +392,12 @@ UserSchema.methods.getUsernameInitials = function() {
 
 UserSchema.statics.getPubliclyAvailableUserInfo = function(userID, overrideDataAccess = false, app = null, getPixelInfo = true) {
     return new Promise((resolve, reject) => {
-        var info = {};
+        let info = {};
         function returnInfo(error) {
             info.userError = error;
             resolve(info);
         }
-        var continueWithUser = (user) => {
+        let continueWithUser = (user) => {
             if (!user) return returnInfo("delete");
             if (!overrideDataAccess && user.banned) return returnInfo("ban");
             else if (!overrideDataAccess && user.isMarkedForDeletion()) return returnInfo("deleted");
@@ -471,9 +471,9 @@ UserSchema.methods.getFeatureAvailability = function() {
 }
 
 UserSchema.methods.getBadges = function(app) {
-    var badges = [];
+    let badges = [];
     if(app) {
-        var rank = app.leaderboardManager.getUserRank(this.id);
+        let rank = app.leaderboardManager.getUserRank(this.id);
         if(rank) badges.push({ text: `Ranked #${rank.toLocaleString()}`, style: rank <= 5 ? "danger" : "info", isRanking: true, lowPriority: true, isLowRanking: rank > 25 });
     }
     if(this.banned) badges.push({ text: "Banned", style: "danger", title: "This user has been banned for breaking the rules." });
@@ -490,7 +490,7 @@ UserSchema.plugin(dataTables, {
 
 UserSchema.methods.getUserData = function() {
     return new Promise((resolve, reject) => {
-        var user = this.toInfo();
+        let user = this.toInfo();
         Promise.all([
             Access.find({ userID: this.id }),
             Pixel.find({ editorID: this.id }),
@@ -498,11 +498,11 @@ UserSchema.methods.getUserData = function() {
             require("./warp").find({ userID: this.id }),
             require("./chatMessage").find({ userID: this.id })
         ]).then((result) => {
-            var accesses = result[0].map((a) => a.toInfo(false));
-            var pixels = result[1].map((p) => p.toInfo(false));
-            var actions = result[2].map((a) => a.toInfo(false));
-            var warps = result[3].map((w) => w.toInfo());
-            var chatMessages = result[4].map((m) => m.toInfo(false));
+            let accesses = result[0].map((a) => a.toInfo(false));
+            let pixels = result[1].map((p) => p.toInfo(false));
+            let actions = result[2].map((a) => a.toInfo(false));
+            let warps = result[3].map((w) => w.toInfo());
+            let chatMessages = result[4].map((m) => m.toInfo(false));
             resolve({ user: user, accesses: accesses, pixels: pixels, actions: actions, warps: warps, chatMessages: chatMessages });
         });
     });

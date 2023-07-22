@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const User = require("./user");
 
-var ActionSchema = new Schema({
+let ActionSchema = new Schema({
     actionID: {
         type: String,
         required: true
@@ -18,7 +18,7 @@ var ActionSchema = new Schema({
 });
 
 ActionSchema.methods.toInfo = function(userIDs = true) {
-    var info = {
+    let info = {
         id: this.id,
         action: this.actionID,
         info: this.info || [],
@@ -33,7 +33,7 @@ ActionSchema.methods.toInfo = function(userIDs = true) {
 
 ActionSchema.methods.getInfo = function() {
     return new Promise((resolve, reject) => {
-        var info = this.toInfo();
+        let info = this.toInfo();
         if(this.performingUserID) {
             User.findById(this.performingUserID).then((user) => {
                 info.performingUser = user.toInfo();

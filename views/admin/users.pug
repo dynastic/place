@@ -1,7 +1,7 @@
 extends ../admin_layout
 block adminDependencies
-    - var css = ["https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css"];
-    - var js = ["https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js", "https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js", "/js/build/admin_users.js"];
+    - let css = ["https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css"];
+    - let js = ["https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js", "https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js", "/js/build/admin_users.js"];
 block adminContent
     h1.page-header Users
     table.table#users

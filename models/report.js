@@ -2,7 +2,7 @@ const DataModelManager = require("../util/DataModelManager");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-var ReportSchema = new Schema({
+let ReportSchema = new Schema({
     offenderID: {
         type: String,
         required: true

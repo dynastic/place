@@ -2,7 +2,7 @@ const DataModelManager = require("../util/DataModelManager");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-var WarpSchema = new Schema({
+let WarpSchema = new Schema({
     xPos: {
         type: Number,
         required: true,
@@ -49,7 +49,7 @@ WarpSchema.statics.createWarp = function(x, y, name, userID, callback) {
     this.count({userID: userID, name: name}).then((count) => {
         if(count > 0) return callback(null, { message: "You already have a warp with that name.", code: "validation" });
 
-        var warp = this({
+        let warp = this({
             xPos: x,
             yPos: y,
             name: name,

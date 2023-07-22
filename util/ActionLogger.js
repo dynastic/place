@@ -1,7 +1,7 @@
 const Action = require("../models/action");
 
 // Below are the possible actions
-var actions = {
+const actions = {
     // Normal user actions
     signIn: {
         displayName: "Sign in",
@@ -136,7 +136,7 @@ var actions = {
     }
 };
 
-var actionLogger = {
+const actionLogger = {
     log: function(app, actionID, performingUser, moderatingUser = null, info = null) {
         Action({
             actionID: actionID,

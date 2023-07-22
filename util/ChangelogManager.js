@@ -12,16 +12,16 @@ class ChangelogManager {
     }
 
     _fetchChangelogs() {
-        if(this.app.config.enableChangelogs) {
+        if (this.app.config.enableChangelogs) {
             this.app.logger.info("Changelogs", `Starting load of changelogs…`);
             fs.readdir(changelogsPath, (err, files) => {
-                var changelogs = [];
-                if(err) return this.app.logger.error("Changelogs", "Couldn't load changelogs: " + err);
+                let changelogs = [];
+                if (err) return this.app.logger.error("Changelogs", "Couldn't load changelogs: " + err);
                 files.filter((name) => name.split(".").pop() == "json").forEach((name) => {
-                    var fullPath = path.join(changelogsPath, name);
-                    var changelogData = require(fullPath);
-                    if(changelogData["date"] && changelogData["text"]) {
-                        var version = {
+                    const fullPath = path.join(changelogsPath, name);
+                    const changelogData = require(fullPath);
+                    if (changelogData["date"] && changelogData["text"]) {
+                        const version = {
                             version: Number.parseInt(name),
                             html: marked(changelogData["text"]),
                             date: changelogData["date"]
@@ -44,7 +44,7 @@ class ChangelogManager {
     getChangelogs() {
         return this.changelogs;
     }
-    
+
     getChangelogCount() {
         return this.changelogs.length;
     }
@@ -60,25 +60,27 @@ class ChangelogManager {
     getChangelogVersions() {
         return this.getChangelogs().map((c) => c.version);
     }
-    
+
     getChangelog(version) {
         return this.getChangelogs().find((c) => c.version == version);
     }
-    
+
     getChangelogsSince(version) {
         return this.getChangelogs().filter((c) => c.version > version);
     }
-    
+
     getChangelogsBefore(version) {
         return this.getChangelogs().filter((c) => c.version < version);
     }
 
     getPaginationInfo(version, forceDisableNext = false) {
-        if(!version) return {};
-        var versions = this.getChangelogVersions();
-        var previous = versions.filter((c) => c < version)[0];
-        var next = forceDisableNext ? null : versions.filter((c) => c > version).slice(-1).pop();
-        return {next: next, previous: previous}
+        if (!version) {
+            return {};
+        }
+        const versions = this.getChangelogVersions();
+        const previous = versions.find((c) => c < version);
+        const next = forceDisableNext ? null : versions.find((c) => c > version);
+        return { next, previous };
     }
 }
 

@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-var AccessSchema = new Schema({
+let AccessSchema = new Schema({
     userID: {
         type: Schema.ObjectId,
         required: true
@@ -30,7 +30,7 @@ var AccessSchema = new Schema({
 });
 
 AccessSchema.methods.toInfo = function(userIDs = true) {
-    var info = {
+    let info = {
         date: this.date,
         userAgent: this.userAgent,
         ipAddress: this.hashedIPAddress
@@ -48,7 +48,7 @@ AccessSchema.statics.recordAccess = function(req, userID) {
 }
 
 AccessSchema.statics.recordAccessInfo = function(app, userID, userAgent, ipAddress, key) {
-    var ipHash = this.getHashedIPAddress(ipAddress);
+    let ipHash = this.getHashedIPAddress(ipAddress);
     this.findOneAndUpdate({
         userID: userID,
         userAgent: userAgent,
@@ -88,7 +88,7 @@ AccessSchema.statics.findSimilarIPUserIDs = function(user) {
     return new Promise((resolve, reject) => {
         this.findIPsForUser(user).then((ipAddresses) => {
             this.find({ hashedIPAddress: { $in: ipAddresses }, userID: { $ne: user._id } }).then((accesses) => {
-                var userIDs = accesses.map((access) => String(access.userID));
+                let userIDs = accesses.map((access) => String(access.userID));
                 resolve([...new Set(userIDs)]);
             }).catch(reject);
         }).catch(reject);

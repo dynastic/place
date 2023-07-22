@@ -37,9 +37,9 @@ function PaintingManager(app) {
         },
 
         loadImageFromDatabase: function() {
-            var hasServed = false;
+            let hasServed = false;
             return new Promise((resolve, reject) => {
-                var serveImage = async (image, skipImmediateCache = false) => {
+                let serveImage = async (image, skipImmediateCache = false) => {
                     this.hasImage = true;
                     this.image = image;
                     this.firstGenerateAfterLoad = true;
@@ -54,8 +54,8 @@ function PaintingManager(app) {
                         await serveImage(image, skipImmediateCache);
                     }
                     Pixel.count({}).then((count) => {
-                        var loaded = 0;
-                        var progressUpdater = setInterval(() => {
+                        let loaded = 0;
+                        let progressUpdater = setInterval(() => {
                             app.logger.info("Startup", `Loaded ${loaded.toLocaleString()} of ${count.toLocaleString()} pixel${count == 1 ? "" : "s"} (${Math.round(loaded / count * 100)}% complete)`);
                         }, 2500);
                         Pixel.find({}).stream().on("data", (pixel) => {
@@ -90,7 +90,7 @@ function PaintingManager(app) {
         },
 
         generateOutputImage: function(skipImmediateCache = false) {
-            var a = this;
+            let a = this;
             return new Promise((resolve, reject) => {
                 if (a.isGenerating) return reject();
                 a.isGenerating = true;
@@ -136,7 +136,7 @@ function PaintingManager(app) {
         },
 
         getColourRGB: function(hex) {
-            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ? {
                 r: parseInt(result[1], 16),
                 g: parseInt(result[2], 16),
@@ -145,7 +145,7 @@ function PaintingManager(app) {
         },
 
         doPaint: function(colour, x, y, user) {
-            var a = this;
+            let a = this;
             return new Promise((resolve, reject) => {
                 if (!this.hasImage) return reject({message: "Our servers are currently getting ready. Please try again in a moment.", code: "not_ready"});
                 if (app.temporaryUserInfo.isUserPlacing(user)) return reject({message: "You cannot place more than one tile at once.", code: "attempted_overload"});
@@ -159,7 +159,7 @@ function PaintingManager(app) {
                     if (a.pixelsToPreserve) a.pixelsToPreserve.push(pixelData);
                     a.imageHasChanged = true;
                     // Send notice to all clients:
-                    var info = {x: x, y: y, colour: Pixel.getHexFromRGB(colour.r, colour.g, colour.b)};
+                    let info = {x: x, y: y, colour: Pixel.getHexFromRGB(colour.r, colour.g, colour.b)};
                     app.pixelNotificationManager.pixelChanged(info);
                     ActionLogger.log(app, "place", user, null, info);
                     app.userActivityController.recordActivity(user);

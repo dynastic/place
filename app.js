@@ -18,13 +18,13 @@ const User = require("./models/user");
 const fs = require("fs");
 const path = require("path");
 
-var app = {};
+const app = {};
 
 app.logger = require('./util/logger');
 
 app.loadConfig = (path = "./config/config") => {
     delete require.cache[require.resolve(path)];
-    var oldConfig = app.config;
+    const oldConfig = app.config;
     app.config = require(path);
     app.colours = [... new Set((app.config.colours || ["#FFFFFF", "#E4E4E4", "#888888", "#222222", "#FFA7D1", "#E50000", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#820080"]).map((c) => c.toUpperCase()))];
     if(!app.config.siteName) app.config.siteName = "Place";
@@ -150,7 +150,7 @@ app.recreateRoutes = () => {
 app.recreateRoutes();
 readline.on('line', i => {
     try {
-        var output = eval(i)
+        const output = eval(i)
         output instanceof Promise
         ? output.then(a => {
             console.log('Promise Resolved')

@@ -3,8 +3,8 @@ const ActionLogger = require("../util/ActionLogger")
 
 exports.getAPIChat = (req, res, next) => {
     ChatMessage.getLatestMessages().then((messages) => {
-        var overrideDataAccess = req.user && (req.user.moderator || req.user.admin);
-        var promises = messages.reverse().map((m) => m.getInfo(overrideDataAccess));
+        let overrideDataAccess = req.user && (req.user.moderator || req.user.admin);
+        let promises = messages.reverse().map((m) => m.getInfo(overrideDataAccess));
         Promise.all(promises).then((messages) => {
             // Removed banned users' messages if we're not mod
             if(overrideDataAccess !== true) messages = messages.filter((m) => (!m.user || !m.user.banned) && (m.userError != "ban"));

@@ -8,23 +8,23 @@ block dependencies
 - if(typeof pinnable === "undefined") pinnable = false;
 - if(typeof navbarSupportsTopMode === "undefined") navbarSupportsTopMode = false;
 - if(typeof isPoppedOut === "undefined") isPoppedOut = false;
-- var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
+- let userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
 - if(typeof needsHelp === "undefined") needsHelp = false;
-- var resourceVersion = "10"; // Increment this when you make a change to the HTML that absolutely requires CSS or JS refreshing
+- let resourceVersion = "10"; // Increment this when you make a change to the HTML that absolutely requires CSS or JS refreshing
 - css = resources.css.concat(css);
-- var bodyClasses = ["fixed-navbar"];
+- let bodyClasses = ["fixed-navbar"];
 - if (user) bodyClasses.push("signed-in");
 - if (isPoppedOut) bodyClasses.push("is-popped-out");
-- var hasCommunityGuidelines = fs.existsSync("./config/community_guidelines.md");
-- var hasTOS = TOSManager.hasTOSSync();
-- var hasPP = TOSManager.hasPrivacyPolicySync();
+- let hasCommunityGuidelines = fs.existsSync("./config/community_guidelines.md");
+- let hasTOS = TOSManager.hasTOSSync();
+- let hasPP = TOSManager.hasPrivacyPolicySync();
 mixin renderBadge(badge, prefersShortText = false)
   span.label.badge-label(class=`label-${badge.style || "default"}`, title=badge.title) #{prefersShortText && badge.shortText ? badge.shortText : badge.text}
 mixin renderBadges(badges, prefersShortText = false)
   each badge in badges
     +renderBadge(badge, prefersShortText)
 mixin renderNavItem(name, itemPath, icon, showsName = true)
-  - var isCurrentPage = itemPath == (overrideNavPath || path) || (isAdmin && itemPath == "/admin");
+  - let isCurrentPage = itemPath == (overrideNavPath || path) || (isAdmin && itemPath == "/admin");
   li(id=`nav-${name.toLowerCase().replace(/[^0-9a-z ]/gi, '').replace(/ /g, "-")}`, class=(isCurrentPage ? "active" : ""))
     a(href=itemPath)
       if icon
@@ -152,7 +152,7 @@ html(lang="en")
 - if(typeof user === "undefined") user = null;
 - if(typeof js === "undefined" || !js) js = [];
 - if(typeof jsSnippets === "undefined" || !jsSnippets) jsSnippets = [];
-- var userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
+- let userAdmin = user ? user.admin : false, userMod = user ? user.moderator || userAdmin : false;
 - if(userMod) { js.unshift("/js/bootbox.min.js"); js.unshift("/js/build/mod_tools.js");}
 - if(typeof jsModSnippets === "undefined" || !jsModSnippets || !userMod) jsModSnippets = [];
 - js = resources.js.concat(js);
